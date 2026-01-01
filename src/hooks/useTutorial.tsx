@@ -1,0 +1,787 @@
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from './useAuth';
+
+interface TutorialStep {
+  id: string;
+  title: string;
+  description: string;
+  target: string; // CSS selector for the element to highlight
+  position: 'top' | 'bottom' | 'left' | 'right';
+  page: string; // Which page this step belongs to
+  order: number;
+  fallbackTarget?: string; // Fallback selector if primary doesn't exist
+}
+
+interface PageTutorialStatus {
+  [page: string]: boolean;
+}
+
+interface TutorialContextType {
+  isActive: boolean;
+  currentStep: TutorialStep | null;
+  currentStepIndex: number;
+  totalSteps: number;
+  startTutorial: () => void;
+  startPageTutorial: (page?: string) => void;
+  nextStep: () => void;
+  previousStep: () => void;
+  skipTutorial: () => void;
+  completeTutorial: () => void;
+  completePageTutorial: () => void;
+  isCompleted: boolean;
+  currentPage: string;
+  setCurrentPage: (page: string) => void;
+  hasCompletedPage: (page: string) => boolean;
+  tutorialMode: 'full' | 'page' | 'none';
+  availablePages: string[];
+  goToPage: (page: string) => void;
+}
+
+const TutorialContext = createContext<TutorialContextType | undefined>(undefined);
+
+export const useTutorial = () => {
+  const context = useContext(TutorialContext);
+  if (!context) {
+    throw new Error('useTutorial must be used within a TutorialProvider');
+  }
+  return context;
+};
+
+// Page configuration with routes
+const pageConfig: Record<string, string> = {
+  dashboard: '/',
+  chat: '/chat',
+  workflows: '/workflows',
+  agents: '/agents',
+  connections: '/connections',
+  payments: '/payments',
+  activity: '/activity',
+  settings: '/settings',
+  profile: '/profile',
+  mcptools: '/mcp-tools',
+};
+
+// Tutorial steps configuration - using more reliable CSS selectors
+const tutorialSteps: TutorialStep[] = [
+  // Dashboard steps (5 steps)
+  {
+    id: 'dashboard-welcome',
+    title: 'Welcome to Mini-Hub!',
+    description: 'Let\'s take a quick tour of your dashboard to get you started with your AI-powered automation platform.',
+    target: '.dashboard-header',
+    fallbackTarget: 'main h1',
+    position: 'bottom',
+    page: 'dashboard',
+    order: 1
+  },
+  {
+    id: 'dashboard-stats',
+    title: 'Quick Stats Overview',
+    description: 'View your key metrics at a glance - total connections, active workflows, AI agents, and monthly API usage.',
+    target: '.stats-overview',
+    fallbackTarget: '.grid.grid-cols-1',
+    position: 'bottom',
+    page: 'dashboard',
+    order: 2
+  },
+  {
+    id: 'dashboard-actions',
+    title: 'Quick Actions',
+    description: 'Access common tasks quickly - create new workflows, add connections, browse MCP tools, or manage agents.',
+    target: '.quick-actions',
+    fallbackTarget: '.grid.grid-cols-1.md\\:grid-cols-2',
+    position: 'top',
+    page: 'dashboard',
+    order: 3
+  },
+  {
+    id: 'dashboard-activity',
+    title: 'Recent Activity',
+    description: 'Monitor your latest workflow executions, tool usage, and system events in real-time.',
+    target: '.recent-activity',
+    fallbackTarget: '[class*="Recent"]',
+    position: 'right',
+    page: 'dashboard',
+    order: 4
+  },
+  
+  // Chat page steps (7 steps)
+  {
+    id: 'chat-sidebar',
+    title: 'Chat Sidebar',
+    description: 'Your chat sidebar contains AI provider selection, conversation history, and new chat button.',
+    target: '.chat-sidebar',
+    fallbackTarget: '[class*="sidebar"]',
+    position: 'right',
+    page: 'chat',
+    order: 5
+  },
+  {
+    id: 'chat-provider',
+    title: 'AI Provider Selection',
+    description: 'Select your AI provider (Ollama, OpenAI, Gemini, Claude, etc.). The green dot shows connection status.',
+    target: '.chat-provider-select',
+    fallbackTarget: 'select',
+    position: 'bottom',
+    page: 'chat',
+    order: 6
+  },
+  {
+    id: 'chat-conversations',
+    title: 'Conversation History',
+    description: 'Your chats are organized by time. Click to continue a conversation, hover for rename/delete options.',
+    target: '.chat-conversations-list',
+    fallbackTarget: '.overflow-y-auto',
+    position: 'right',
+    page: 'chat',
+    order: 7
+  },
+  {
+    id: 'chat-new-conversation',
+    title: 'New Conversation',
+    description: 'Start a fresh conversation. Previous chats are automatically saved and accessible from the history.',
+    target: '.chat-new-conversation',
+    fallbackTarget: 'button[class*="gradient"]',
+    position: 'top',
+    page: 'chat',
+    order: 8
+  },
+  {
+    id: 'chat-messages',
+    title: 'Messages Area',
+    description: 'Your conversation appears here. AI responses include tool execution results and structured data.',
+    target: '.chat-messages-area',
+    fallbackTarget: '.overflow-y-auto.p-8',
+    position: 'left',
+    page: 'chat',
+    order: 9
+  },
+  {
+    id: 'chat-input',
+    title: 'Message Input',
+    description: 'Type your message here. Use the microphone for voice input, or attach files with the paperclip icon.',
+    target: '.chat-input-container',
+    fallbackTarget: '.chat-input',
+    position: 'top',
+    page: 'chat',
+    order: 10
+  },
+  {
+    id: 'chat-send',
+    title: 'Send Message',
+    description: 'Click Send or press Enter. The AI can execute tools from your connections and return structured results.',
+    target: '.chat-send-btn',
+    fallbackTarget: 'button[class*="gradient"]',
+    position: 'left',
+    page: 'chat',
+    order: 11
+  },
+  
+  // Workflows page steps (6 steps)
+  {
+    id: 'workflows-intro',
+    title: 'Workflows Dashboard',
+    description: 'Create and manage automated workflows that chain tools and services together.',
+    target: '.workflows-header',
+    fallbackTarget: 'main h1',
+    position: 'bottom',
+    page: 'workflows',
+    order: 12
+  },
+  {
+    id: 'workflows-create',
+    title: 'Create New Workflow',
+    description: 'Build workflows manually or create them from successful chat conversations with the AI.',
+    target: '.workflow-builder',
+    fallbackTarget: 'button[class*="Create"]',
+    position: 'left',
+    page: 'workflows',
+    order: 13
+  },
+  {
+    id: 'workflows-tabs',
+    title: 'Workflows & Executions',
+    description: 'Switch between viewing your workflows and their execution history with these tabs.',
+    target: '.workflows-tabs',
+    fallbackTarget: '.bg-white.rounded-xl.shadow-sm.border',
+    position: 'bottom',
+    page: 'workflows',
+    order: 14
+  },
+  {
+    id: 'workflows-stats',
+    title: 'Workflow Statistics',
+    description: 'Track total workflows, active count, drafts, and completed executions at a glance.',
+    target: '.workflows-stats',
+    fallbackTarget: '.grid.grid-cols-1.md\\:grid-cols-4',
+    position: 'bottom',
+    page: 'workflows',
+    order: 15
+  },
+  {
+    id: 'workflows-filters',
+    title: 'Search & Filter',
+    description: 'Search workflows by name and filter by status. Toggle between grid and list views.',
+    target: '.bg-white.rounded-xl.shadow-sm.border.p-6.mb-6',
+    fallbackTarget: 'input[placeholder*="Search"]',
+    position: 'bottom',
+    page: 'workflows',
+    order: 16
+  },
+  {
+    id: 'workflows-actions',
+    title: 'Workflow Actions',
+    description: 'Execute workflows, view details, edit configurations, or delete. Use the Execute modal for input data.',
+    target: 'button[class*="Execute"]',
+    fallbackTarget: '[class*="execute"]',
+    position: 'left',
+    page: 'workflows',
+    order: 17
+  },
+  
+  // Agents page steps (5 steps)
+  {
+    id: 'agents-intro',
+    title: 'Autonomous Agents',
+    description: 'Create intelligent agents that execute workflows automatically based on schedules or triggers.',
+    target: '.agents-header',
+    fallbackTarget: 'main h1',
+    position: 'bottom',
+    page: 'agents',
+    order: 18
+  },
+  {
+    id: 'agents-create',
+    title: 'Create New Agent',
+    description: 'Build an agent from a workflow. Configure scheduling, notifications, and error handling.',
+    target: '.create-agent-btn',
+    fallbackTarget: 'button[class*="Create"]',
+    position: 'left',
+    page: 'agents',
+    order: 19
+  },
+  {
+    id: 'agents-stats',
+    title: 'Agent Statistics',
+    description: 'Monitor total agents, active count, paused agents, and completed executions.',
+    target: '.agents-stats',
+    fallbackTarget: '.grid.grid-cols-1.md\\:grid-cols-4',
+    position: 'bottom',
+    page: 'agents',
+    order: 20
+  },
+  {
+    id: 'agents-filters',
+    title: 'Search & Filter Agents',
+    description: 'Find agents by name and filter by status. Switch between grid and list views.',
+    target: '.agents-filters',
+    fallbackTarget: 'input[placeholder*="Search"]',
+    position: 'bottom',
+    page: 'agents',
+    order: 21
+  },
+  {
+    id: 'agents-actions',
+    title: 'Agent Controls',
+    description: 'Start, pause, or stop agents. View execution history and modify configurations.',
+    target: 'button[class*="Play"], button[class*="Pause"]',
+    fallbackTarget: '[class*="agent-card"]',
+    position: 'left',
+    page: 'agents',
+    order: 22
+  },
+  
+  // Connections page steps (5 steps)
+  {
+    id: 'connections-intro',
+    title: 'Connection Manager',
+    description: 'Connect and manage third-party services - Slack, HubSpot, Google Analytics, and more.',
+    target: '.connections-header',
+    fallbackTarget: 'main h1',
+    position: 'bottom',
+    page: 'connections',
+    order: 23
+  },
+  {
+    id: 'connections-add',
+    title: 'Add New Connection',
+    description: 'Click to connect a new service. Configure API keys, OAuth, or other authentication methods.',
+    target: '.add-connection-btn',
+    fallbackTarget: 'button[class*="gradient"]',
+    position: 'left',
+    page: 'connections',
+    order: 24
+  },
+  {
+    id: 'connections-stats',
+    title: 'Connection Status',
+    description: 'View total connections, active services, inactive, and any with errors.',
+    target: '.stats-overview',
+    fallbackTarget: '.grid.grid-cols-1.md\\:grid-cols-4',
+    position: 'bottom',
+    page: 'connections',
+    order: 25
+  },
+  {
+    id: 'connections-active',
+    title: 'Your Connections',
+    description: 'Manage existing connections - test connectivity, sync data, edit config, or disconnect.',
+    target: '.connection-cards',
+    fallbackTarget: '[class*="connection"]',
+    position: 'top',
+    page: 'connections',
+    order: 26
+  },
+  {
+    id: 'connections-platforms',
+    title: 'Available Platforms',
+    description: 'Browse all supported platforms and their features. Click Connect to add any service.',
+    target: '.available-platforms',
+    fallbackTarget: '.platforms-grid',
+    position: 'top',
+    page: 'connections',
+    order: 27
+  },
+  
+  // MCP Tools page steps (4 steps)
+  {
+    id: 'mcptools-intro',
+    title: 'MCP Tools',
+    description: 'Execute tools from your connected services using the Model Context Protocol.',
+    target: '.mcptools-header',
+    fallbackTarget: 'main h1',
+    position: 'bottom',
+    page: 'mcptools',
+    order: 28
+  },
+  {
+    id: 'mcptools-stats',
+    title: 'Tools Overview',
+    description: 'See how many tools are available, by category, and your usage statistics.',
+    target: '.mcptools-stats',
+    fallbackTarget: '.grid.grid-cols-1.md\\:grid-cols-2',
+    position: 'bottom',
+    page: 'mcptools',
+    order: 29
+  },
+  {
+    id: 'mcptools-filters',
+    title: 'Search & Categories',
+    description: 'Search tools by name and filter by category. Tools are dynamically generated from connections.',
+    target: '.mcptools-filters',
+    fallbackTarget: 'input[placeholder*="Search"]',
+    position: 'bottom',
+    page: 'mcptools',
+    order: 30
+  },
+  {
+    id: 'mcptools-list',
+    title: 'Execute Tools',
+    description: 'Click any tool card to execute it. Fill in parameters and see real-time streaming results.',
+    target: '.mcptools-list',
+    fallbackTarget: '.tool-card',
+    position: 'top',
+    page: 'mcptools',
+    order: 31
+  },
+  
+  // Payments page steps (4 steps)
+  {
+    id: 'payments-intro',
+    title: 'Payment Center',
+    description: 'Manage payments, subscriptions, and billing for your Mini-Hub account.',
+    target: '.payments-header',
+    fallbackTarget: 'main h1',
+    position: 'bottom',
+    page: 'payments',
+    order: 32
+  },
+  {
+    id: 'payments-actions',
+    title: 'Payment Methods',
+    description: 'Pay using M-Pesa mobile money or Stripe credit card. Click either button to start.',
+    target: '.payment-actions',
+    fallbackTarget: 'button[class*="M-Pesa"], button[class*="Stripe"]',
+    position: 'bottom',
+    page: 'payments',
+    order: 33
+  },
+  {
+    id: 'payments-stats',
+    title: 'Billing Overview',
+    description: 'Track total payments, pending transactions, and active subscriptions.',
+    target: '.payment-stats',
+    fallbackTarget: '.grid.grid-cols-1',
+    position: 'bottom',
+    page: 'payments',
+    order: 34
+  },
+  {
+    id: 'payments-history',
+    title: 'Transaction History',
+    description: 'View all past payments and subscriptions with status, amounts, and timestamps.',
+    target: '.payment-history',
+    fallbackTarget: '.grid.grid-cols-1.lg\\:grid-cols-2',
+    position: 'top',
+    page: 'payments',
+    order: 35
+  },
+  
+  // Activity page steps (4 steps)
+  {
+    id: 'activity-intro',
+    title: 'Activity Monitor',
+    description: 'Monitor system activity, track performance metrics, and review audit logs.',
+    target: '.activity-header',
+    fallbackTarget: 'main h1',
+    position: 'bottom',
+    page: 'activity',
+    order: 36
+  },
+  {
+    id: 'activity-metrics',
+    title: 'System Metrics',
+    description: 'Real-time performance - CPU usage, memory, active connections, and error rates.',
+    target: '.system-metrics',
+    fallbackTarget: '.grid.grid-cols-1.md\\:grid-cols-4',
+    position: 'bottom',
+    page: 'activity',
+    order: 37
+  },
+  {
+    id: 'activity-filters',
+    title: 'Filter Activity',
+    description: 'Search activities, filter by category, and select date ranges for detailed analysis.',
+    target: '.activity-filters',
+    fallbackTarget: 'input[placeholder*="Search"]',
+    position: 'bottom',
+    page: 'activity',
+    order: 38
+  },
+  {
+    id: 'activity-logs',
+    title: 'Activity Logs',
+    description: 'Detailed logs with timestamps, descriptions, categories, and status indicators.',
+    target: '.activity-list',
+    fallbackTarget: '.space-y-6',
+    position: 'top',
+    page: 'activity',
+    order: 39
+  },
+  
+  // Settings page steps (4 steps)
+  {
+    id: 'settings-intro',
+    title: 'Application Settings',
+    description: 'Configure notifications, API keys, dashboard layout, integrations, and security.',
+    target: '.settings-header',
+    fallbackTarget: 'main h1',
+    position: 'bottom',
+    page: 'settings',
+    order: 40
+  },
+  {
+    id: 'settings-categories',
+    title: 'Settings Navigation',
+    description: 'Click categories to switch sections - Notifications, API, Dashboard, Integrations, Security.',
+    target: '.settings-categories',
+    fallbackTarget: '.lg\\:col-span-1',
+    position: 'right',
+    page: 'settings',
+    order: 41
+  },
+  {
+    id: 'settings-content',
+    title: 'Settings Panel',
+    description: 'Configure options for the selected category. Toggle switches and fill in fields as needed.',
+    target: '.settings-content',
+    fallbackTarget: '.lg\\:col-span-2',
+    position: 'left',
+    page: 'settings',
+    order: 42
+  },
+  {
+    id: 'settings-save',
+    title: 'Save Changes',
+    description: 'Remember to save your changes! Click "Save Changes" in the header after modifications.',
+    target: '.settings-actions',
+    fallbackTarget: 'button[class*="Save"]',
+    position: 'bottom',
+    page: 'settings',
+    order: 43
+  },
+  
+  // Profile page steps (4 steps)
+  {
+    id: 'profile-intro',
+    title: 'Profile Settings',
+    description: 'Manage your account information, API access, and security settings.',
+    target: '.profile-header',
+    fallbackTarget: 'main h1',
+    position: 'bottom',
+    page: 'profile',
+    order: 44
+  },
+  {
+    id: 'profile-personal',
+    title: 'Personal Information',
+    description: 'Update your name and email address. Click Save Changes to apply updates.',
+    target: '.personal-info-section',
+    fallbackTarget: 'form',
+    position: 'bottom',
+    page: 'profile',
+    order: 45
+  },
+  {
+    id: 'profile-api',
+    title: 'API Key Management',
+    description: 'View, copy, or regenerate your API key. Keep it secure for external integrations.',
+    target: '.api-key-section',
+    fallbackTarget: '[class*="api"]',
+    position: 'bottom',
+    page: 'profile',
+    order: 46
+  },
+  {
+    id: 'profile-security',
+    title: 'Password Security',
+    description: 'Change your password here. Use a strong password with mixed characters.',
+    target: '.security-section',
+    fallbackTarget: '[class*="Password"]',
+    position: 'top',
+    page: 'profile',
+    order: 47
+  },
+];
+
+export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [isActive, setIsActive] = useState(false);
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [currentPage, setCurrentPage] = useState('dashboard');
+  const [tutorialMode, setTutorialMode] = useState<'full' | 'page' | 'none'>('none');
+  const [pageCompletionStatus, setPageCompletionStatus] = useState<PageTutorialStatus>({});
+
+  // Available pages for tutorial
+  const availablePages = Object.keys(pageConfig);
+
+  // Load completion status from localStorage
+  useEffect(() => {
+    const savedStatus = localStorage.getItem('tutorial_page_status');
+    if (savedStatus) {
+      try {
+        setPageCompletionStatus(JSON.parse(savedStatus));
+      } catch {
+        // Invalid JSON, ignore
+      }
+    }
+    
+    const completedFull = localStorage.getItem('tutorial_completed');
+    if (completedFull === 'true') {
+      setIsCompleted(true);
+    }
+  }, []);
+
+  // Save completion status to localStorage
+  const savePageStatus = useCallback((status: PageTutorialStatus) => {
+    setPageCompletionStatus(status);
+    localStorage.setItem('tutorial_page_status', JSON.stringify(status));
+  }, []);
+
+  // Update current page based on location
+  useEffect(() => {
+    const pathname = location.pathname;
+    let page = 'dashboard';
+    
+    Object.entries(pageConfig).forEach(([pageName, route]) => {
+      if (pathname === route || (route !== '/' && pathname.startsWith(route))) {
+        page = pageName;
+      }
+    });
+    
+    // Reset step index when page changes
+    if (page !== currentPage) {
+      setCurrentStepIndex(0);
+    }
+    
+    setCurrentPage(page);
+  }, [location.pathname, currentPage]);
+
+  // Check if tutorial should be shown for new users
+  useEffect(() => {
+    if (user && !isCompleted && !isActive) {
+      const hasSeenTutorial = localStorage.getItem('tutorial_completed');
+      if (!hasSeenTutorial) {
+        // Show tutorial for new users after a short delay
+        const timer = setTimeout(() => {
+          setIsActive(true);
+          setTutorialMode('page');
+        }, 2000);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [user, isCompleted, isActive]);
+
+  // Filter steps for current page
+  const currentPageSteps = tutorialSteps.filter(step => step.page === currentPage);
+  const currentStep = currentPageSteps[currentStepIndex] || null;
+  const totalSteps = currentPageSteps.length;
+
+  // Check if a page's tutorial has been completed
+  const hasCompletedPage = useCallback((page: string) => {
+    return pageCompletionStatus[page] === true;
+  }, [pageCompletionStatus]);
+
+  // Navigate to a different page
+  const goToPage = useCallback((page: string) => {
+    const route = pageConfig[page];
+    if (route) {
+      navigate(route);
+    }
+  }, [navigate]);
+
+  // Start full tutorial (all pages)
+  const startTutorial = useCallback(() => {
+    setIsActive(true);
+    setCurrentStepIndex(0);
+    setTutorialMode('full');
+    // Start from dashboard
+    if (currentPage !== 'dashboard') {
+      navigate('/');
+    }
+  }, [currentPage, navigate]);
+
+  // Start tutorial for current page only
+  const startPageTutorial = useCallback((page?: string) => {
+    if (page && page !== currentPage) {
+      navigate(pageConfig[page] || '/');
+    }
+    setIsActive(true);
+    setCurrentStepIndex(0);
+    setTutorialMode('page');
+  }, [currentPage, navigate]);
+
+  const nextStep = useCallback(() => {
+    if (currentStepIndex < currentPageSteps.length - 1) {
+      setCurrentStepIndex(prev => prev + 1);
+    } else if (tutorialMode === 'full') {
+      // Mark current page as complete
+      const newStatus = { ...pageCompletionStatus, [currentPage]: true };
+      savePageStatus(newStatus);
+      
+      // Find next page with tutorials
+      const currentOrder = currentPageSteps[currentStepIndex]?.order || 0;
+      const nextStepData = tutorialSteps.find(step => step.order > currentOrder);
+      
+      if (nextStepData && nextStepData.page !== currentPage) {
+        // Navigate to next page
+        const nextRoute = pageConfig[nextStepData.page];
+        if (nextRoute) {
+          setCurrentStepIndex(0);
+          navigate(nextRoute);
+        }
+      } else {
+        // No more pages, complete tutorial
+        setIsActive(false);
+        setTutorialMode('none');
+        localStorage.setItem('tutorial_completed', 'true');
+        setIsCompleted(true);
+        
+        // Mark all pages as complete
+        const allComplete: PageTutorialStatus = {};
+        availablePages.forEach(page => {
+          allComplete[page] = true;
+        });
+        savePageStatus(allComplete);
+      }
+    } else {
+      // Page tutorial mode - just complete this page
+      const newStatus = { ...pageCompletionStatus, [currentPage]: true };
+      savePageStatus(newStatus);
+      setIsActive(false);
+      setTutorialMode('none');
+    }
+  }, [currentStepIndex, currentPageSteps, currentPage, tutorialMode, pageCompletionStatus, savePageStatus, navigate, availablePages]);
+
+  const previousStep = useCallback(() => {
+    if (currentStepIndex > 0) {
+      setCurrentStepIndex(prev => prev - 1);
+    } else if (tutorialMode === 'full') {
+      // Find previous page with tutorials
+      const currentOrder = currentPageSteps[0]?.order || 0;
+      const prevSteps = tutorialSteps.filter(step => step.order < currentOrder);
+      
+      if (prevSteps.length > 0) {
+        const prevStep = prevSteps[prevSteps.length - 1];
+        const prevRoute = pageConfig[prevStep.page];
+        if (prevRoute) {
+          navigate(prevRoute);
+          // Set to last step of previous page
+          const prevPageSteps = tutorialSteps.filter(step => step.page === prevStep.page);
+          setCurrentStepIndex(prevPageSteps.length - 1);
+        }
+      }
+    }
+  }, [currentStepIndex, currentPageSteps, tutorialMode, navigate]);
+
+  const skipTutorial = useCallback(() => {
+    setIsActive(false);
+    setTutorialMode('none');
+    localStorage.setItem('tutorial_completed', 'true');
+    setIsCompleted(true);
+  }, []);
+
+  const completeTutorial = useCallback(() => {
+    setIsActive(false);
+    setTutorialMode('none');
+    localStorage.setItem('tutorial_completed', 'true');
+    setIsCompleted(true);
+    
+    // Mark all pages as complete
+    const allComplete: PageTutorialStatus = {};
+    availablePages.forEach(page => {
+      allComplete[page] = true;
+    });
+    savePageStatus(allComplete);
+  }, [availablePages, savePageStatus]);
+
+  const completePageTutorial = useCallback(() => {
+    // Mark current page as complete
+    const newStatus = { ...pageCompletionStatus, [currentPage]: true };
+    savePageStatus(newStatus);
+    
+    setIsActive(false);
+    setTutorialMode('none');
+  }, [currentPage, pageCompletionStatus, savePageStatus]);
+
+  const value: TutorialContextType = {
+    isActive,
+    currentStep,
+    currentStepIndex,
+    totalSteps,
+    startTutorial,
+    startPageTutorial,
+    nextStep,
+    previousStep,
+    skipTutorial,
+    completeTutorial,
+    completePageTutorial,
+    isCompleted,
+    currentPage,
+    setCurrentPage,
+    hasCompletedPage,
+    tutorialMode,
+    availablePages,
+    goToPage,
+  };
+
+  return (
+    <TutorialContext.Provider value={value}>
+      {children}
+    </TutorialContext.Provider>
+  );
+};

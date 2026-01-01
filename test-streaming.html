@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streaming Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .output {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 3px;
+            margin: 10px 0;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 3px;
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+        .status {
+            color: #666;
+            font-style: italic;
+        }
+        .error {
+            color: #dc3545;
+        }
+        .success {
+            color: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <h1>Streaming Test</h1>
+    
+    <div class="test-section">
+        <h2>Simple Streaming Test</h2>
+        <input type="text" id="messageInput" placeholder="Enter your message" value="Hello, how are you?">
+        <button onclick="testSimpleStreaming()">Test Simple Streaming</button>
+        <div id="simpleOutput" class="output"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Tool Call Streaming Test</h2>
+        <input type="text" id="toolMessageInput" placeholder="Enter tool request" value="Create a new Slack channel called 'test-channel'">
+        <button onclick="testToolStreaming()">Test Tool Streaming</button>
+        <div id="toolOutput" class="output"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Connection Test</h2>
+        <button onclick="testConnection()">Test Backend Connection</button>
+        <div id="connectionOutput" class="output"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+        const CONVERSATION_ID = 1; // Assuming conversation exists
+
+        function log(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'status';
+            element.innerHTML += `[${timestamp}] <span class="${className}">${message}</span>\n`;
+            element.scrollTop = element.scrollHeight;
+        }
+
+        async function testConnection() {
+            const output = document.getElementById('connectionOutput');
+            output.innerHTML = '';
+            
+            try {
+                log('connectionOutput', 'Testing connection to backend...');
+                
+                const response = await fetch(`${API_BASE}/chat/ollama/status`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    log('connectionOutput', `✅ Backend is running: ${JSON.stringify(data, null, 2)}`, 'success');
+                } else {
+                    log('connectionOutput', `❌ Backend error: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                log('connectionOutput', `❌ Connection failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testSimpleStreaming() {
+            const output = document.getElementById('simpleOutput');
+            const message = document.getElementById('messageInput').value;
+            output.innerHTML = '';
+            
+            try {
+                log('simpleOutput', `Starting simple streaming test with message: "${message}"`);
+                
+                const response = await fetch(`${API_BASE}/chat/conversations/${CONVERSATION_ID}/messages/stream`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        content: message,
+                        provider: 'ollama'
+                    }),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                log('simpleOutput', '✅ Streaming started successfully', 'success');
+                
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop() || '';
+
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            try {
+                                const data = JSON.parse(line.slice(6));
+                                log('simpleOutput', `📡 Received: ${JSON.stringify(data)}`);
+                                
+                                switch (data.type) {
+                                    case 'chunk':
+                                        log('simpleOutput', `📄 Content: ${data.content}`, 'success');
+                                        break;
+                                    case 'status':
+                                        log('simpleOutput', `🔄 Status: ${data.message}`, 'status');
+                                        break;
+                                    case 'error':
+                                        log('simpleOutput', `❌ Error: ${data.content || data.error}`, 'error');
+                                        break;
+                                    case 'complete':
+                                        log('simpleOutput', `✅ Complete: ${JSON.stringify(data)}`, 'success');
+                                        break;
+                                }
+                            } catch (e) {
+                                log('simpleOutput', `⚠️ JSON parse error: ${e.message}`, 'error');
+                            }
+                        }
+                    }
+                }
+                
+                log('simpleOutput', '✅ Streaming completed', 'success');
+                
+            } catch (error) {
+                log('simpleOutput', `❌ Streaming error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testToolStreaming() {
+            const output = document.getElementById('toolOutput');
+            const message = document.getElementById('toolMessageInput').value;
+            output.innerHTML = '';
+            
+            try {
+                log('toolOutput', `Starting tool streaming test with message: "${message}"`);
+                
+                const response = await fetch(`${API_BASE}/chat/conversations/${CONVERSATION_ID}/messages/stream`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        content: message,
+                        provider: 'ollama'
+                    }),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                log('toolOutput', '✅ Tool streaming started successfully', 'success');
+                
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop() || '';
+
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            try {
+                                const data = JSON.parse(line.slice(6));
+                                log('toolOutput', `📡 Received: ${JSON.stringify(data)}`);
+                                
+                                switch (data.type) {
+                                    case 'chunk':
+                                        log('toolOutput', `📄 Content: ${data.content}`, 'success');
+                                        break;
+                                    case 'status':
+                                        log('toolOutput', `🔄 Status: ${data.message}`, 'status');
+                                        break;
+                                    case 'error':
+                                        log('toolOutput', `❌ Error: ${data.content || data.error}`, 'error');
+                                        break;
+                                    case 'complete':
+                                        log('toolOutput', `✅ Complete: ${JSON.stringify(data)}`, 'success');
+                                        break;
+                                }
+                            } catch (e) {
+                                log('toolOutput', `⚠️ JSON parse error: ${e.message}`, 'error');
+                            }
+                        }
+                    }
+                }
+                
+                log('toolOutput', '✅ Tool streaming completed', 'success');
+                
+            } catch (error) {
+                log('toolOutput', `❌ Tool streaming error: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-test connection on page load
+        window.onload = function() {
+            testConnection();
+        };
+    </script>
+</body>
+</html> 
