@@ -24,7 +24,6 @@ interface MenuItem {
 
 const FloatingActionMenu: React.FC = () => {
   const { user } = useAuth();
-  const location = useLocation();
   const { 
     startTutorial, 
     startPageTutorial, 
