@@ -8,9 +8,9 @@ name: Frontend CI/CD
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, release, staging, develop]
   pull_request:
-    branches: [main]
+    branches: [main, release, staging]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -18,7 +18,7 @@ concurrency:
 
 permissions:
   actions: read
-  contents: read
+  contents: write
   pull-requests: write
 
 env:
@@ -93,7 +93,7 @@ jobs:
   deploy-staging:
     name: 🚀 Deploy Staging Preview
     needs: [build]
-    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/staging' && github.event_name == 'push'
     uses: arrotech-solutions/arrotech-solutions-actions/.github/workflows/cd-deploy.yml@main
     with:
       platform: "vercel"
@@ -115,6 +115,76 @@ jobs:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
 
   # ===========================================================================
+  # Stage 5: Create Release (on release branch)
+  # ===========================================================================
+
+  create-release:
+    name: 📦 Create Release
+    needs: [build]
+    if: github.ref == 'refs/heads/release' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get version from package.json
+        id: version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "📌 Version: $VERSION"
+
+      - name: Check if tag exists
+        id: check_tag
+        run: |
+          if git rev-parse "v${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "⚠️ Tag v${{ steps.version.outputs.version }} already exists"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "✅ Tag v${{ steps.version.outputs.version }} will be created"
+          fi
+
+      - name: Generate Changelog
+        id: changelog
+        if: steps.check_tag.outputs.exists == 'false'
+        run: |
+          # Get commits since last tag
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          
+          if [ -n "$LAST_TAG" ]; then
+            COMMITS=$(git log ${LAST_TAG}..HEAD --pretty=format:"- %s (%h)" --no-merges)
+          else
+            COMMITS=$(git log --pretty=format:"- %s (%h)" --no-merges -20)
+          fi
+          
+          # Create changelog
+          echo "## What's Changed" > RELEASE_NOTES.md
+          echo "" >> RELEASE_NOTES.md
+          echo "$COMMITS" >> RELEASE_NOTES.md
+          echo "" >> RELEASE_NOTES.md
+          echo "**Full Changelog**: https://github.com/${{ github.repository }}/compare/${LAST_TAG}...v${{ steps.version.outputs.version }}" >> RELEASE_NOTES.md
+          
+          cat RELEASE_NOTES.md
+
+      - name: Create GitHub Release
+        if: steps.check_tag.outputs.exists == 'false'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Release v${{ steps.version.outputs.version }}
+          body_path: RELEASE_NOTES.md
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ===========================================================================
   # PR Checks
   # ===========================================================================
 
@@ -125,4 +195,31 @@ jobs:
     with:
       require-conventional-commits: true
       require-tests: false  # Frontend tests are optional for now
+
+  # ===========================================================================
+  # Notify on completion
+  # ===========================================================================
+
+  notify:
+    name: 📢 Notify
+    needs: [deploy-staging, deploy-production, create-release]
+    if: always() && (needs.deploy-staging.result == 'success' || needs.deploy-production.result == 'success' || needs.create-release.result == 'success')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Summary
+        run: |
+          echo "## 🎉 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ needs.deploy-staging.result }}" == "success" ]; then
+            echo "✅ **Staging**: Deployed to preview URL" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ "${{ needs.deploy-production.result }}" == "success" ]; then
+            echo "✅ **Production**: Deployed to production URL" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ "${{ needs.create-release.result }}" == "success" ]; then
+            echo "✅ **Release**: GitHub Release created" >> $GITHUB_STEP_SUMMARY
+          fi
 
