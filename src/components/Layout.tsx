@@ -26,6 +26,7 @@ import {
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import AIAssistant from './AIAssistant';
 import NotificationsDropdown from './NotificationsDropdown';
 
 interface LayoutProps {
@@ -498,6 +499,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           {children}
         </main>
       </div>
+
+      {/* AI Assistant - Available on all pages */}
+      <AIAssistant />
     </div>
   );
 };
