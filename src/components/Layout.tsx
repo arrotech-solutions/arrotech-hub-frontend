@@ -26,7 +26,7 @@ import {
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import AIAssistant from './AIAssistant';
+import FloatingActionMenu from './FloatingActionMenu';
 import NotificationsDropdown from './NotificationsDropdown';
 
 interface LayoutProps {
@@ -500,8 +500,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </main>
       </div>
 
-      {/* AI Assistant - Available on all pages */}
-      <AIAssistant />
+      {/* Floating Action Menu - Help, AI Assistant, Tutorial */}
+      <FloatingActionMenu />
     </div>
   );
 };
