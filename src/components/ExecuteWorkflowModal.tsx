@@ -35,7 +35,7 @@ const ExecuteWorkflowModal: React.FC<ExecuteWorkflowModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [showSteps, setShowSteps] = useState(false);
 
-  // Extract input fields from workflow variables and step parameters
+  // Extract input fields from workflow step parameters
   const getInputFields = () => {
     const fields: Array<{
       name: string;
@@ -43,9 +43,11 @@ const ExecuteWorkflowModal: React.FC<ExecuteWorkflowModalProps> = ({
       required: boolean;
       default: any;
       description?: string;
+      stepNumber?: number;
+      toolName?: string;
     }> = [];
 
-    // Get fields from workflow variables
+    // Get fields from workflow variables (for parameterized workflows)
     if (workflow.variables) {
       Object.entries(workflow.variables).forEach(([key, config]: [string, any]) => {
         fields.push({
@@ -58,7 +60,40 @@ const ExecuteWorkflowModal: React.FC<ExecuteWorkflowModalProps> = ({
       });
     }
 
-    // If no variables defined, extract from step parameters that use {{input.xxx}}
+    // Extract from step parameters directly
+    if (workflow.steps) {
+      workflow.steps.forEach((step, index) => {
+        if (step.tool_parameters && Object.keys(step.tool_parameters).length > 0) {
+          Object.entries(step.tool_parameters).forEach(([paramName, paramValue]) => {
+            // Skip if it's using a variable reference {{input.xxx}}
+            if (typeof paramValue === 'string' && paramValue.includes('{{input.')) {
+              return;
+            }
+
+            // Create a unique field name that includes step info
+            const fieldName = `step_${step.step_number || index + 1}_${paramName}`;
+            const displayName = paramName.replace(/_/g, ' ');
+
+            // Determine type from value
+            let fieldType = 'string';
+            if (typeof paramValue === 'boolean') fieldType = 'boolean';
+            else if (typeof paramValue === 'number') fieldType = 'number';
+
+            fields.push({
+              name: fieldName,
+              type: fieldType,
+              required: false,
+              default: paramValue,
+              description: `${step.tool_name} - ${displayName}`,
+              stepNumber: step.step_number || index + 1,
+              toolName: step.tool_name,
+            });
+          });
+        }
+      });
+    }
+
+    // If still no fields, check for {{input.xxx}} patterns
     if (fields.length === 0 && workflow.steps) {
       const inputParams = new Set<string>();
       workflow.steps.forEach(step => {
@@ -139,11 +174,11 @@ const ExecuteWorkflowModal: React.FC<ExecuteWorkflowModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
-      <div 
+      <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
       />
-      
+
       {/* Modal */}
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-hidden">
         {/* Header */}
@@ -172,7 +207,7 @@ const ExecuteWorkflowModal: React.FC<ExecuteWorkflowModalProps> = ({
             <div className="flex items-center space-x-2 text-sm text-gray-600">
               <Info className="w-4 h-4" />
               <span>
-                {inputFields.length > 0 
+                {inputFields.length > 0
                   ? `${inputFields.length} input parameter${inputFields.length !== 1 ? 's' : ''} required`
                   : 'No input parameters required'}
               </span>
@@ -180,22 +215,20 @@ const ExecuteWorkflowModal: React.FC<ExecuteWorkflowModalProps> = ({
             <div className="flex items-center bg-gray-100 rounded-lg p-1">
               <button
                 onClick={() => setInputMode('simple')}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-                  inputMode === 'simple'
+                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${inputMode === 'simple'
                     ? 'bg-white text-gray-900 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
-                }`}
+                  }`}
               >
                 <FormInput className="w-4 h-4" />
                 <span>Simple</span>
               </button>
               <button
                 onClick={() => setInputMode('advanced')}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-                  inputMode === 'advanced'
+                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${inputMode === 'advanced'
                     ? 'bg-white text-gray-900 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
-                }`}
+                  }`}
               >
                 <Code className="w-4 h-4" />
                 <span>Advanced</span>
@@ -276,11 +309,10 @@ const ExecuteWorkflowModal: React.FC<ExecuteWorkflowModalProps> = ({
               <textarea
                 value={jsonInput}
                 onChange={(e) => handleJsonChange(e.target.value)}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent font-mono text-sm ${
-                  jsonError 
-                    ? 'border-red-300 bg-red-50 focus:ring-red-500' 
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent font-mono text-sm ${jsonError
+                    ? 'border-red-300 bg-red-50 focus:ring-red-500'
                     : 'border-gray-300 focus:ring-blue-500'
-                }`}
+                  }`}
                 rows={8}
                 placeholder="{}"
                 spellCheck={false}
@@ -309,7 +341,7 @@ const ExecuteWorkflowModal: React.FC<ExecuteWorkflowModalProps> = ({
                 <ChevronDown className="w-4 h-4 text-gray-500" />
               )}
             </button>
-            
+
             {showSteps && workflow.steps && (
               <div className="mt-3 space-y-2">
                 {workflow.steps.map((step, index) => (

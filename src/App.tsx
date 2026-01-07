@@ -14,9 +14,8 @@ import ForgotPassword from './pages/ForgotPassword';
 import Login from './pages/Login';
 import Marketplace from './pages/Marketplace';
 import CreatorProfile from './pages/CreatorProfile';
-import Templates from './pages/Templates';
 import Favorites from './pages/Favorites';
-import MCPTools from './pages/MCPTools';
+import MpesaAgent from './pages/MpesaAgent';
 import Payments from './pages/Payments';
 import Profile from './pages/Profile';
 import Register from './pages/Register';
@@ -133,15 +132,10 @@ const AppRoutes: React.FC = () => {
         }
       />
 
+      {/* Redirect old MCP Tools route to Workflows */}
       <Route
         path="/mcp-tools"
-        element={
-          <ProtectedRoute>
-            <Layout>
-              <MCPTools />
-            </Layout>
-          </ProtectedRoute>
-        }
+        element={<Navigate to="/workflows" replace />}
       />
 
       <Route
@@ -167,6 +161,17 @@ const AppRoutes: React.FC = () => {
       />
 
       <Route
+        path="/agents/mpesa"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <MpesaAgent />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
         path="/marketplace"
         element={
           <ProtectedRoute>
@@ -179,13 +184,7 @@ const AppRoutes: React.FC = () => {
 
       <Route
         path="/templates"
-        element={
-          <ProtectedRoute>
-            <Layout>
-              <Templates />
-            </Layout>
-          </ProtectedRoute>
-        }
+        element={<Navigate to="/workflows" replace />}
       />
 
       <Route

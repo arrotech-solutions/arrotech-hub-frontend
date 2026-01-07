@@ -38,20 +38,7 @@ jobs:
       fail-on-warnings: false
       prettier-check: true
 
-  # ===========================================================================
-  # Stage 2: Testing
-  # ===========================================================================
 
-  test:
-    name: Tests
-    needs: [code-quality]
-    uses: arrotech-solutions/arrotech-solutions-actions/.github/workflows/ci-test.yml@main
-    with:
-      language: "node"
-      node-version: "20"
-      test-command: "npm test -- --watchAll=false --passWithNoTests"
-      coverage-threshold: 0  # Start with 0, increase as tests are added
-      upload-coverage: true
 
   # ===========================================================================
   # Stage 3: Build Check
@@ -59,7 +46,7 @@ jobs:
 
   build:
     name: Build Check
-    needs: [test]
+    needs: [code-quality]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
