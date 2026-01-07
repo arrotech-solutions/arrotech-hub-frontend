@@ -1,7 +1,7 @@
 import {
   Activity,
   Award,
-  BookOpen,
+
   Bot,
   ChevronDown,
   ChevronRight,

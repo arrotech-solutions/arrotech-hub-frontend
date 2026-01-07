@@ -127,7 +127,7 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
     const [loadingTools, setLoadingTools] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState<string>('All');
-    const [expandedCategories, setExpandedCategories] = useState<string[]>(['All']);
+
 
     // Workflow steps
     const [workflowSteps, setWorkflowSteps] = useState<WorkflowStep[]>([]);
@@ -330,13 +330,7 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
         }
     };
 
-    const toggleCategoryExpanded = (category: string) => {
-        setExpandedCategories(prev =>
-            prev.includes(category)
-                ? prev.filter(c => c !== category)
-                : [...prev, category]
-        );
-    };
+
 
     const renderInputField = (name: string, schema: any, tool: MCPTool | ToolInfo) => {
         const fieldType = schema.type || 'string';
@@ -435,10 +429,10 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                                 <div className={`flex items-center space-x-2 ${index <= currentStep ? 'text-purple-600' : 'text-gray-400'
                                     }`}>
                                     <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${index < currentStep
-                                            ? 'bg-purple-600 text-white'
-                                            : index === currentStep
-                                                ? 'bg-purple-100 text-purple-600 border-2 border-purple-600'
-                                                : 'bg-gray-100 text-gray-400'
+                                        ? 'bg-purple-600 text-white'
+                                        : index === currentStep
+                                            ? 'bg-purple-100 text-purple-600 border-2 border-purple-600'
+                                            : 'bg-gray-100 text-gray-400'
                                         }`}>
                                         {index < currentStep ? <CheckCircle className="w-4 h-4" /> : index + 1}
                                     </div>
@@ -509,8 +503,8 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                                             key={trigger.value}
                                             onClick={() => setTriggerType(trigger.value as TriggerType)}
                                             className={`flex items-center space-x-3 p-4 border rounded-lg transition-all ${triggerType === trigger.value
-                                                    ? 'border-purple-500 bg-purple-50'
-                                                    : 'border-gray-200 hover:border-gray-300'
+                                                ? 'border-purple-500 bg-purple-50'
+                                                : 'border-gray-200 hover:border-gray-300'
                                                 }`}
                                         >
                                             <div className={`p-2 rounded-lg ${triggerType === trigger.value ? 'bg-purple-100' : 'bg-gray-100'
@@ -579,8 +573,8 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                                             key={cat}
                                             onClick={() => setSelectedCategory(cat)}
                                             className={`flex items-center space-x-1 px-3 py-1.5 rounded-full text-sm font-medium transition-all ${selectedCategory === cat
-                                                    ? 'bg-purple-600 text-white'
-                                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                ? 'bg-purple-600 text-white'
+                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                                 }`}
                                         >
                                             {cat !== 'All' && getCategoryIcon(cat)}
