@@ -3,7 +3,6 @@ import {
     Send,
     Mic,
     Paperclip,
-    Smile,
     Loader2,
     Zap,
     Command
