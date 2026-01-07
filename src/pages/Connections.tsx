@@ -1,9 +1,8 @@
 import {
-  Activity,
-  AlertCircle,
   AlertTriangle,
   BarChart3,
   CheckCircle,
+  ChevronDown,
   Clock,
   Database,
   Edit,
@@ -12,16 +11,17 @@ import {
   Grid,
   List,
   MessageCircle,
-  MoreVertical,
   Pause,
   Plus,
   RefreshCw,
   Search,
   Settings,
+  Shield,
+  Sparkles,
   TestTube,
   Trash2,
   Users,
-  XCircle,
+  X,
   Zap
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
@@ -31,7 +31,7 @@ import apiService from '../services/api';
 import { Connection, ConnectionCreate, ConnectionPlatform, PlatformCapability } from '../types';
 
 const Connections: React.FC = () => {
-  useAuth();
+  const { user } = useAuth();
   const [connections, setConnections] = useState<Connection[]>([]);
   const [platforms, setPlatforms] = useState<ConnectionPlatform[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,10 +42,11 @@ const Connections: React.FC = () => {
     name: '',
     config: {}
   });
-  const [jsonErrors, setJsonErrors] = useState<{[key: string]: string}>({});
+  const [jsonErrors, setJsonErrors] = useState<{ [key: string]: string }>({});
   const [testingConnection, setTestingConnection] = useState<number | null>(null);
   const [syncingConnection, setSyncingConnection] = useState<number | null>(null);
   const [oauthInProgress, setOauthInProgress] = useState<number | null>(null);
+  const [editingConnection, setEditingConnection] = useState<Connection | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -118,12 +119,12 @@ const Connections: React.FC = () => {
     try {
       const response = await apiService.getAvailablePlatforms();
       console.log('[DEBUG] Raw platform response:', response);
-      
+
       // The API service already handles the data extraction
       const platformsData = response.data || [];
       console.log('[DEBUG] Extracted platforms data:', platformsData);
       console.log('[DEBUG] Loaded platforms:', platformsData.map(p => p.id));
-      
+
       setPlatforms(platformsData);
     } catch (error) {
       console.error('Error fetching platforms:', error);
@@ -138,30 +139,65 @@ const Connections: React.FC = () => {
     // Check if there are any JSON errors
     const hasJsonErrors = Object.values(jsonErrors).some(error => error !== '');
     if (hasJsonErrors) {
-      toast.error('Please fix JSON formatting errors before creating the connection');
+      toast.error('Please fix JSON formatting errors before preserving the connection');
       return;
     }
 
-    console.log('[DEBUG] Frontend sending connection data:');
-    console.log('[DEBUG] Platform:', formData.platform);
-    console.log('[DEBUG] Name:', formData.name);
-    console.log('[DEBUG] Config keys:', Object.keys(formData.config));
-    console.log('[DEBUG] Full config:', JSON.stringify(formData.config, null, 2));
-    console.log('[DEBUG] Full payload:', JSON.stringify(formData, null, 2));
-
     try {
-      await apiService.createConnection(formData);
-      toast.success('Connection created successfully');
+      if (editingConnection) {
+        await apiService.updateConnection(editingConnection.id, {
+          name: formData.name,
+          config: formData.config,
+          status: editingConnection.status
+        });
+        toast.success('Connection updated successfully');
+      } else {
+        await apiService.createConnection(formData);
+        toast.success('Connection created successfully');
+      }
+
       setShowCreateModal(false);
+      setEditingConnection(null);
       setFormData({ platform: '', name: '', config: {} });
       setJsonErrors({});
       fetchConnections();
     } catch (error: any) {
-      console.error('Error creating connection:', error);
-      console.error('Error details:', error?.response?.data);
-      const errorMessage = error?.response?.data?.detail || error?.message || 'Unknown error occurred';
-      toast.error(`Failed to create connection: ${errorMessage}`);
+      console.error('Error preserving connection:', error);
+
+      let errorMessage = 'Unknown error occurred';
+      if (error?.response?.data?.detail) {
+        const detail = error.response.data.detail;
+        if (typeof detail === 'string') {
+          errorMessage = detail;
+        } else if (Array.isArray(detail)) {
+          errorMessage = detail.map((d: any) => d.msg || d.message || JSON.stringify(d)).join(', ');
+        } else if (typeof detail === 'object') {
+          errorMessage = detail.message || detail.error || JSON.stringify(detail);
+        }
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+
+      toast.error(`Failed to preserve connection: ${errorMessage}`);
     }
+  };
+
+  const handleEditConnection = (connection: Connection) => {
+    const platform = platforms.find(p => p.id === connection.platform);
+    if (!platform) {
+      toast.error('Platform details not found');
+      return;
+    }
+
+    setEditingConnection(connection);
+    setSelectedPlatform(platform);
+    setFormData({
+      platform: connection.platform,
+      name: connection.name,
+      config: connection.config || {}
+    });
+    setJsonErrors({});
+    setShowCreateModal(true);
   };
 
   const handleDeleteConnection = async (id: number) => {
@@ -180,12 +216,12 @@ const Connections: React.FC = () => {
   const handleTestConnection = async (id: number) => {
     try {
       setTestingConnection(id);
-      
+
       const response = await apiService.testConnection(id);
       console.log('[DEBUG] Test connection response:', response);
-      
+
       const responseData = response.data as any;
-      
+
       // Standard connection test handling
       if (response.data.status === 'active' || responseData?.test_result?.success) {
         toast.success('Connection test successful');
@@ -210,8 +246,19 @@ const Connections: React.FC = () => {
   const handleSyncConnection = async (id: number) => {
     try {
       setSyncingConnection(id);
+
+      const connection = connections.find(c => c.id === id);
+      if (!connection) {
+        toast.error('Connection not found');
+        return;
+      }
+
       // Use updateConnection to mark as syncing, then refresh
-      await apiService.updateConnection(id, { status: 'syncing' });
+      await apiService.updateConnection(id, {
+        name: connection.name,
+        config: connection.config,
+        status: 'syncing'
+      });
       toast.success('Connection sync initiated');
       fetchConnections();
     } catch (error) {
@@ -222,20 +269,12 @@ const Connections: React.FC = () => {
     }
   };
 
+  // getStatusIcon is defined but never used in this component scope, removing to satisfy ESLint
+  /* 
   const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'active':
-        return <CheckCircle className="w-4 h-4 text-green-600" />;
-      case 'inactive':
-        return <Pause className="w-4 h-4 text-yellow-600" />;
-      case 'error':
-        return <AlertTriangle className="w-4 h-4 text-red-600" />;
-      case 'pending':
-        return <Clock className="w-4 h-4 text-blue-600" />;
-      default:
-        return <AlertCircle className="w-4 h-4 text-gray-600" />;
-    }
+    ...
   };
+  */
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -268,6 +307,11 @@ const Connections: React.FC = () => {
       zoom: <MessageCircle className="w-5 h-5" />,
       teams: <Users className="w-5 h-5" />,
       salesforce: <Database className="w-5 h-5" />,
+      hr_hub: <Users className="w-5 h-5" />,
+      logistics_hub: <Globe className="w-5 h-5" />,
+      lead_intelligence: <Zap className="w-5 h-5" />,
+      context_intelligence: <Shield className="w-5 h-5" />,
+      mpesa: <Zap className="w-5 h-5" />,
       default: <Settings className="w-5 h-5" />
     };
     return iconMap[platformId] || iconMap.default;
@@ -289,6 +333,11 @@ const Connections: React.FC = () => {
       zoom: 'bg-blue-100 text-blue-800',
       teams: 'bg-purple-100 text-purple-800',
       salesforce: 'bg-blue-100 text-blue-800',
+      hr_hub: 'bg-indigo-100 text-indigo-800',
+      logistics_hub: 'bg-emerald-100 text-emerald-800',
+      lead_intelligence: 'bg-amber-100 text-amber-800',
+      context_intelligence: 'bg-cyan-100 text-cyan-800',
+      mpesa: 'bg-green-100 text-green-800',
       default: 'bg-gray-100 text-gray-800'
     };
     return colorMap[platformId] || colorMap.default;
@@ -492,27 +541,27 @@ const Connections: React.FC = () => {
           const jsonError = jsonErrors[name] || '';
           const objectValue = formData.config[name] && typeof formData.config[name] === 'object' ? formData.config[name] : {};
           const objectEntries = Object.entries(objectValue);
-          
+
           return (
             <div key={name} className={`space-y-3 ${colSpanClass}`}>
               <label className="block text-sm font-medium text-gray-700">
                 {schema.title || name}
                 {isRequired && <span className="text-red-500 ml-1">*</span>}
               </label>
-              
+
               {/* Simple Mode: Key-Value Pairs */}
               <div className="bg-gray-50 rounded-lg p-4 space-y-3">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium text-gray-600">
-                    {isMcpRemote && name === 'headers' ? 'HTTP Headers' : 
-                     isMcpRemote && name === 'env' ? 'Environment Variables' : 
-                     'Configuration Entries'}
+                    {isMcpRemote && name === 'headers' ? 'HTTP Headers' :
+                      isMcpRemote && name === 'env' ? 'Environment Variables' :
+                        'Configuration Entries'}
                   </span>
                   <span className="text-xs text-gray-500">
                     {objectEntries.length} {objectEntries.length === 1 ? 'entry' : 'entries'}
                   </span>
                 </div>
-                
+
                 {objectEntries.length > 0 ? (
                   <div className="space-y-2">
                     {objectEntries.map(([key, val], idx) => (
@@ -546,10 +595,10 @@ const Connections: React.FC = () => {
                             delete newObj[key];
                             setFormData({ ...formData, config: { ...formData.config, [name]: newObj } });
                           }}
-                          className="p-2 text-red-500 hover:bg-red-50 rounded-md transition-colors"
+                          className="p-2 text-red-500 hover:bg-red-50 rounded-md transition-all"
                           title="Remove entry"
                         >
-                          <XCircle className="w-4 h-4" />
+                          <X className="w-4 h-4" />
                         </button>
                       </div>
                     ))}
@@ -560,13 +609,13 @@ const Connections: React.FC = () => {
                     <p className="text-xs mt-1">Click "Add Entry" to add key-value pairs</p>
                   </div>
                 )}
-                
+
                 <button
                   type="button"
                   onClick={() => {
-                    const newKey = isMcpRemote && name === 'headers' ? 'X-Custom-Header' : 
-                                   isMcpRemote && name === 'env' ? 'MY_VARIABLE' : 
-                                   `key${objectEntries.length + 1}`;
+                    const newKey = isMcpRemote && name === 'headers' ? 'X-Custom-Header' :
+                      isMcpRemote && name === 'env' ? 'MY_VARIABLE' :
+                        `key${objectEntries.length + 1}`;
                     setFormData({ ...formData, config: { ...formData.config, [name]: { ...objectValue, [newKey]: '' } } });
                   }}
                   className="flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-700 transition-colors"
@@ -575,7 +624,7 @@ const Connections: React.FC = () => {
                   <span>Add Entry</span>
                 </button>
               </div>
-              
+
               {/* Hints for specific fields */}
               {isMcpRemote && name === 'headers' && (
                 <p className="text-xs text-gray-500">💡 Common headers: Authorization, Content-Type, X-API-Key</p>
@@ -586,7 +635,7 @@ const Connections: React.FC = () => {
               {schema.description && (
                 <p className="text-xs text-gray-500">{schema.description}</p>
               )}
-              
+
               {/* Advanced Mode Toggle for developers */}
               <details className="mt-2">
                 <summary className="text-xs text-gray-500 cursor-pointer hover:text-gray-700">
@@ -606,9 +655,8 @@ const Connections: React.FC = () => {
                         setJsonErrors({ ...jsonErrors, [name]: 'Invalid JSON format' });
                       }
                     }}
-                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm resize-y min-h-[100px] max-h-[300px] overflow-auto whitespace-pre-wrap ${
-                      jsonError ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                    }`}
+                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm resize-y min-h-[100px] max-h-[300px] overflow-auto whitespace-pre-wrap ${jsonError ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                      }`}
                     rows={4}
                   />
                   {jsonError && (
@@ -714,124 +762,109 @@ const Connections: React.FC = () => {
   const filteredConnections = getFilteredConnections();
 
   const renderConnectionCard = (connection: Connection) => (
-    <div key={connection.id} className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-200 hover:border-blue-300 group">
-      <div className="p-6">
+    <div key={connection.id} className="group relative bg-white rounded-2xl border border-gray-200/60 shadow-sm hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 hover:-translate-y-1.5 overflow-hidden">
+      <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-blue-500 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+      <div className="p-7">
         {/* Header */}
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
-              {getPlatformIcon(connection.platform)}
+        <div className="flex items-start justify-between mb-5">
+          <div className="flex items-center space-x-4">
+            <div className="relative">
+              <div className="absolute inset-0 bg-blue-500 blur-lg opacity-0 group-hover:opacity-20 transition-opacity duration-500"></div>
+              <div className="relative p-3 bg-gradient-to-br from-blue-500/10 to-purple-600/10 rounded-2xl border border-blue-100 group-hover:border-blue-200 transition-colors">
+                <div className="text-blue-600">
+                  {getPlatformIcon(connection.platform)}
+                </div>
+              </div>
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+              <h3 className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors tracking-tight">
                 {connection.name}
               </h3>
-              <p className="text-sm text-gray-500">Platform: {connection.platform}</p>
+              <div className="flex items-center space-x-2 mt-0.5">
+                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Platform</span>
+                <span className="text-xs font-bold text-gray-900 capitalize">{connection.platform.replace('_', ' ')}</span>
+              </div>
             </div>
           </div>
-          <div className={`px-3 py-1 rounded-full text-xs font-medium flex items-center space-x-1 border ${getStatusColor(connection.status)}`}>
-            {getStatusIcon(connection.status)}
-            <span className="capitalize">{connection.status}</span>
+          <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center space-x-1.5 border ${getStatusColor(connection.status)}`}>
+            <div className={`w-1.5 h-1.5 rounded-full ${connection.status === 'active' ? 'bg-green-500 animate-pulse' : 'bg-current opacity-50'}`}></div>
+            <span>{connection.status}</span>
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
-          <div className="flex items-center space-x-4">
-            <span className="flex items-center space-x-1">
-              <Activity className="w-3 h-3" />
-              <span>Last sync: {connection.last_sync ? new Date(connection.last_sync).toLocaleDateString() : 'Never'}</span>
-            </span>
-            <span className="flex items-center space-x-1">
-              <Clock className="w-3 h-3" />
-              <span>Created: {new Date(connection.created_at).toLocaleDateString()}</span>
-            </span>
+        {/* Stats Row */}
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Last Sync</p>
+            <div className="flex items-center space-x-1">
+              <RefreshCw className="w-3 h-3 text-blue-500" />
+              <span className="text-xs font-bold text-gray-900">{connection.last_sync ? new Date(connection.last_sync).toLocaleDateString() : 'Never'}</span>
+            </div>
+          </div>
+          <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Created</p>
+            <div className="flex items-center space-x-1">
+              <Clock className="w-3 h-3 text-purple-500" />
+              <span className="text-xs font-bold text-gray-900">{new Date(connection.created_at).toLocaleDateString()}</span>
+            </div>
           </div>
         </div>
 
         {/* Error Message */}
         {connection.error_message && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+          <div className="bg-red-50/50 border border-red-100 rounded-xl p-3 mb-6">
             <div className="flex items-center space-x-2">
-              <AlertTriangle className="w-4 h-4 text-red-600" />
-              <span className="text-sm text-red-700">{connection.error_message}</span>
+              <AlertTriangle className="w-4 h-4 text-red-500" />
+              <span className="text-[11px] font-medium text-red-600 line-clamp-1">{connection.error_message}</span>
             </div>
           </div>
         )}
 
         {/* Actions */}
-        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-          <div className="flex space-x-2">
-            <button
-              onClick={() => handleTestConnection(connection.id)}
-              disabled={testingConnection === connection.id || oauthInProgress === connection.id}
-              className={`flex items-center space-x-1 px-3 py-1.5 text-xs rounded-lg transition-all duration-200 shadow-sm ${
-                oauthInProgress === connection.id 
-                  ? 'bg-gradient-to-r from-green-600 to-green-700 text-white'
-                  : 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800'
-              } disabled:bg-gray-300 disabled:cursor-not-allowed`}
-            >
-              {testingConnection === connection.id ? (
-                <>
-                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
-                  <span>Testing...</span>
-                </>
-              ) : oauthInProgress === connection.id ? (
-                <>
-                  <div className="animate-pulse">🔐</div>
-                  <span>OAuth...</span>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      clearOauthState(connection.id);
-                    }}
-                    className="ml-1 text-white hover:text-red-200 transition-colors"
-                    title="Clear OAuth state"
-                  >
-                    ×
-                  </button>
-                </>
-              ) : (
-                <>
-                  <TestTube className="w-3 h-3" />
-                  <span>Test</span>
-                </>
-              )}
-            </button>
+        <div className="grid grid-cols-2 gap-3 pt-6 border-t border-gray-100">
+          <button
+            onClick={() => handleTestConnection(connection.id)}
+            disabled={testingConnection === connection.id || oauthInProgress === connection.id}
+            className="flex items-center justify-center space-x-2 py-3 bg-gray-900 text-white rounded-xl hover:bg-black hover:shadow-lg transition-all duration-300 font-bold text-xs disabled:opacity-50"
+          >
+            {testingConnection === connection.id ? (
+              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <TestTube className="w-3.5 h-3.5" />
+            )}
+            <span>{testingConnection === connection.id ? 'Testing...' : 'Test'}</span>
+          </button>
+
+          <div className="flex space-x-1">
             <button
               onClick={() => handleSyncConnection(connection.id)}
               disabled={syncingConnection === connection.id}
-              className="flex items-center space-x-1 px-3 py-1.5 text-xs bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all duration-200 shadow-sm"
+              className="flex-1 flex items-center justify-center p-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors disabled:opacity-50"
+              title="Sync Now"
             >
-              {syncingConnection === connection.id ? (
-                <>
-                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
-                  <span>Syncing...</span>
-                </>
-              ) : (
-                <>
-                  <RefreshCw className="w-3 h-3" />
-                  <span>Sync</span>
-                </>
-              )}
+              <RefreshCw className={`w-4 h-4 ${syncingConnection === connection.id ? 'animate-spin' : ''}`} />
             </button>
-          </div>
-          <div className="flex space-x-1">
             <button
-              onClick={() => {/* Handle edit */ }}
-              className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors rounded"
+              onClick={() => handleEditConnection(connection)}
+              className="flex-1 flex items-center justify-center p-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
+              title="Edit Connection"
             >
               <Edit className="w-4 h-4" />
             </button>
-            <button
-              onClick={() => handleDeleteConnection(connection.id)}
-              className="p-1.5 text-gray-400 hover:text-red-600 transition-colors rounded"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
-            <button className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors rounded">
-              <MoreVertical className="w-4 h-4" />
-            </button>
+            <div className="relative group/more flex-1">
+              <button
+                className="w-full h-full flex items-center justify-center p-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
+              >
+                <Settings className="w-4 h-4" />
+              </button>
+              <div className="absolute bottom-full right-0 mb-2 w-32 bg-white rounded-xl shadow-2xl border border-gray-100 py-1 hidden group-hover/more:block z-10">
+                <button onClick={() => handleDeleteConnection(connection.id)} className="w-full text-left px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-50">Delete</button>
+                {oauthInProgress === connection.id && (
+                  <button onClick={() => clearOauthState(connection.id)} className="w-full text-left px-4 py-2 text-xs font-bold text-amber-600 hover:bg-amber-50">Clear OAuth</button>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -839,106 +872,55 @@ const Connections: React.FC = () => {
   );
 
   const renderConnectionList = (connection: Connection) => (
-    <div key={connection.id} className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 hover:border-blue-300 group">
-      <div className="p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
-              {getPlatformIcon(connection.platform)}
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center space-x-3 mb-1">
-                <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
-                  {connection.name}
-                </h3>
-                <span className="text-sm text-gray-500">Platform: {connection.platform}</span>
-              </div>
-              <div className="flex items-center space-x-4 text-xs text-gray-500">
-                <span className="flex items-center space-x-1">
-                  <Activity className="w-3 h-3" />
-                  <span>Last sync: {connection.last_sync ? new Date(connection.last_sync).toLocaleDateString() : 'Never'}</span>
-                </span>
-                <span className="flex items-center space-x-1">
-                  <Clock className="w-3 h-3" />
-                  <span>Created: {new Date(connection.created_at).toLocaleDateString()}</span>
-                </span>
-              </div>
-              {connection.error_message && (
-                <div className="flex items-center space-x-2 mt-2">
-                  <AlertTriangle className="w-3 h-3 text-red-600" />
-                  <span className="text-xs text-red-600">{connection.error_message}</span>
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="flex items-center space-x-4">
-            <div className={`px-3 py-1 rounded-full text-xs font-medium flex items-center space-x-1 border ${getStatusColor(connection.status)}`}>
-              {getStatusIcon(connection.status)}
-              <span className="capitalize">{connection.status}</span>
-            </div>
-            <div className="flex space-x-2">
-              <button
-                onClick={() => handleTestConnection(connection.id)}
-                disabled={testingConnection === connection.id || oauthInProgress === connection.id}
-                className={`flex items-center space-x-1 px-3 py-1.5 text-xs rounded-lg transition-all duration-200 shadow-sm ${
-                  oauthInProgress === connection.id 
-                    ? 'bg-gradient-to-r from-green-600 to-green-700 text-white'
-                    : 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800'
-                } disabled:bg-gray-300 disabled:cursor-not-allowed`}
-              >
-                {testingConnection === connection.id ? (
-                  <>
-                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
-                    <span>Testing...</span>
-                  </>
-                ) : oauthInProgress === connection.id ? (
-                  <>
-                    <div className="animate-pulse">🔐</div>
-                    <span>OAuth...</span>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        clearOauthState(connection.id);
-                      }}
-                      className="ml-1 text-white hover:text-red-200 transition-colors"
-                      title="Clear OAuth state"
-                    >
-                      ×
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <TestTube className="w-3 h-3" />
-                    <span>Test</span>
-                  </>
-                )}
-              </button>
-              <button
-                onClick={() => handleSyncConnection(connection.id)}
-                disabled={syncingConnection === connection.id}
-                className="flex items-center space-x-1 px-3 py-1.5 text-xs bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all duration-200 shadow-sm"
-              >
-                {syncingConnection === connection.id ? (
-                  <>
-                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
-                    <span>Syncing...</span>
-                  </>
-                ) : (
-                  <>
-                    <RefreshCw className="w-3 h-3" />
-                    <span>Sync</span>
-                  </>
-                )}
-              </button>
-              <button
-                onClick={() => handleDeleteConnection(connection.id)}
-                className="p-1.5 text-gray-400 hover:text-red-600 transition-colors rounded"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
+    <div key={connection.id} className="group bg-white rounded-2xl border border-gray-200/60 shadow-sm hover:shadow-lg transition-all duration-300 hover:border-blue-200 flex items-center p-5 space-x-6 relative overflow-hidden">
+      <div className="absolute left-0 top-0 w-1 h-full bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+
+      <div className="hidden sm:flex items-center justify-center w-14 h-14 bg-gradient-to-br from-blue-500/10 to-purple-600/10 rounded-2xl border border-blue-100 text-blue-600">
+        {getPlatformIcon(connection.platform)}
+      </div>
+
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center flex-wrap gap-2 mb-1.5">
+          <h3 className="text-base font-bold text-gray-900 group-hover:text-blue-600 transition-colors truncate">
+            {connection.name}
+          </h3>
+          <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-lg font-black uppercase">{connection.platform}</span>
+          <div className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${getStatusColor(connection.status)}`}>
+            {connection.status}
           </div>
         </div>
+        <div className="flex items-center flex-wrap gap-4 text-[10px] font-black uppercase tracking-widest text-gray-400">
+          <span className="flex items-center space-x-1">
+            <RefreshCw className="w-3 h-3 text-blue-500" />
+            <span>Last sync: {connection.last_sync ? new Date(connection.last_sync).toLocaleDateString() : 'Never'}</span>
+          </span>
+          <span className="flex items-center space-x-1">
+            <Clock className="w-3 h-3 text-purple-500" />
+            <span>Created {new Date(connection.created_at).toLocaleDateString()}</span>
+          </span>
+        </div>
+      </div>
+
+      <div className="flex items-center space-x-3">
+        <button
+          onClick={() => handleTestConnection(connection.id)}
+          className="flex items-center space-x-2 px-5 py-2.5 bg-gray-900 text-white rounded-xl hover:bg-black transition-all duration-300 font-bold text-xs"
+        >
+          <TestTube className="w-3 h-3" />
+          <span className="hidden sm:inline">Test</span>
+        </button>
+        <button
+          onClick={() => handleEditConnection(connection)}
+          className="p-2.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
+        >
+          <Edit className="w-5 h-5" />
+        </button>
+        <button
+          onClick={() => handleDeleteConnection(connection.id)}
+          className="p-2.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
+        >
+          <Trash2 className="w-5 h-5" />
+        </button>
       </div>
     </div>
   );
@@ -961,88 +943,102 @@ const Connections: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
       <div className="max-w-7xl mx-auto p-6">
-        {/* Header */}
-        <div className="connections-header mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                Connections
-              </h1>
-              <p className="text-gray-600">
-                Manage your third-party service integrations
-              </p>
+        {/* Header with Mesh Gradient */}
+        <div className="relative overflow-hidden bg-white rounded-3xl border border-gray-200 shadow-sm mb-8">
+          <div className="absolute top-0 right-0 -mt-20 -mr-20 w-80 h-80 bg-blue-400/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-64 h-64 bg-purple-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+
+          <div className="relative px-8 py-10">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+              <div className="text-center sm:text-left w-full sm:w-auto">
+                <div className="flex items-center justify-center sm:justify-start space-x-2 mb-2">
+                  <div className="p-1.5 bg-blue-100 rounded-lg">
+                    <Sparkles className="w-4 h-4 text-blue-600" />
+                  </div>
+                  <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">Integration Hub</span>
+                </div>
+                <h1 className="text-4xl font-black text-gray-900 mb-2 tracking-tight">
+                  Connect your <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Ecosystem</span>
+                </h1>
+                <p className="text-gray-500 max-w-md font-medium">
+                  {user?.name?.split(' ')[0] || 'User'}, manage your third-party integrations and supercharge your workflows.
+                </p>
+              </div>
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="group relative flex items-center space-x-3 px-8 py-4 bg-gray-900 text-white rounded-2xl hover:shadow-[0_20px_40px_rgba(0,0,0,0.2)] transition-all duration-300 transform hover:-translate-y-1 overflow-hidden"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <Plus className="relative w-5 h-5 transition-transform group-hover:rotate-90" />
+                <span className="relative font-bold">Add Connection</span>
+              </button>
             </div>
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="add-connection-btn flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-lg transform hover:scale-105 transition-all duration-200"
-            >
-              <Plus className="w-5 h-5" />
-              <span>Add Connection</span>
-            </button>
           </div>
         </div>
 
-        {/* Stats Overview */}
-        <div className="stats-overview grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        {/* Stats Overview - Glassmorphism */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
           {statsData.map((stat, index) => (
             <div
               key={index}
-              className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200/50"
+              className="group relative p-6 bg-white/40 backdrop-blur-md rounded-2xl border border-white/60 shadow-sm hover:shadow-xl hover:shadow-blue-500/5 transition-all duration-500 hover:-translate-y-1 overflow-hidden"
             >
-              <div className="flex items-center justify-between">
+              <div className={`absolute top-0 right-0 w-24 h-24 -mt-8 -mr-8 rounded-full blur-2xl opacity-10 group-hover:opacity-20 transition-opacity ${stat.color}`}></div>
+              <div className="relative flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">{stat.label}</p>
-                  <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-                  <p className={`text-sm ${stat.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {stat.change >= 0 ? '+' : ''}{stat.change}% from last month
-                  </p>
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{stat.label}</p>
+                  <div className="flex items-baseline space-x-2">
+                    <h4 className="text-2xl font-black text-gray-900 tracking-tight">{stat.value}</h4>
+                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${stat.change >= 0 ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                      {stat.change >= 0 ? '↑' : '↓'}{Math.abs(stat.change)}%
+                    </span>
+                  </div>
                 </div>
-                <div className={`p-3 rounded-xl ${stat.color}`}>
-                  <stat.icon className="w-6 h-6 text-white" />
+                <div className={`p-3 rounded-2xl shadow-lg shadow-current/10 ${stat.color} text-white`}>
+                  <stat.icon className="w-6 h-6" />
                 </div>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Filters and Search */}
-        <div className="connection-filters mb-6">
-          <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+        {/* Filters and Search - Integrated Design */}
+        <div className="mb-10 p-6 bg-white/40 backdrop-blur-md rounded-2xl border border-white/60 shadow-sm">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
+            <div className="flex flex-col sm:flex-row items-center space-x-0 sm:space-x-4 space-y-4 sm:space-y-0 flex-1 w-full">
+              <div className="relative flex-1 w-full max-w-none lg:max-w-md group">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 group-focus-within:text-blue-500 transition-colors" />
                 <input
                   type="text"
-                  placeholder="Search connections..."
+                  placeholder="Search connections by name or platform..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-12 pr-4 py-3.5 bg-white border border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all placeholder:text-gray-400 font-medium"
                 />
               </div>
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="all">All Status</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-                <option value="error">Error</option>
-                <option value="pending">Pending</option>
-              </select>
+              <div className="flex items-center space-x-3 w-full sm:w-auto">
+                <select
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value)}
+                  className="flex-1 sm:flex-none px-6 py-3.5 bg-white border border-gray-200 rounded-2xl font-bold text-sm appearance-none cursor-pointer hover:border-blue-200 transition-all focus:ring-4 focus:ring-blue-500/10 outline-none"
+                >
+                  <option value="all">Everywhere</option>
+                  <option value="active">Active Only</option>
+                  <option value="inactive">Inactive Only</option>
+                  <option value="error">With Errors</option>
+                </select>
+              </div>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center p-1 bg-gray-100/50 backdrop-blur-sm rounded-xl border border-gray-200/50">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-blue-100 text-blue-600' : 'text-gray-400 hover:text-gray-600'
-                  }`}
+                className={`p-2.5 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white text-blue-600 shadow-md' : 'text-gray-400 hover:text-gray-600'}`}
               >
                 <Grid className="w-5 h-5" />
               </button>
               <button
                 onClick={() => setViewMode('list')}
-                className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-blue-100 text-blue-600' : 'text-gray-400 hover:text-gray-600'
-                  }`}
+                className={`p-2.5 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white text-blue-600 shadow-md' : 'text-gray-400 hover:text-gray-600'}`}
               >
                 <List className="w-5 h-5" />
               </button>
@@ -1069,139 +1065,167 @@ const Connections: React.FC = () => {
           </div>
         )}
 
-        {/* Available Platforms */}
-        <div className="available-platforms mt-12">
-          <h2 className="available-platforms-title text-xl font-semibold text-gray-900 mb-6">Available Platforms</h2>
-        <div className="platforms-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {platforms.map((platform) => {
-            const isExpanded = expandedPlatforms.has(platform.id);
-            const hasExpandableContent = 
-              platform.features.length > 6 || 
-              (platform.capabilities && platform.capabilities.length > 3);
+        {/* Available Platforms - App Store Style */}
+        <div className="mt-20">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-2xl font-black text-gray-900 tracking-tight">Available Platforms</h2>
+              <p className="text-gray-500 font-medium">Explore and connect new services to your workspace</p>
+            </div>
+            <div className="px-4 py-2 bg-blue-50 text-blue-600 rounded-xl text-xs font-black uppercase tracking-widest border border-blue-100">
+              {platforms.length} Platforms available
+            </div>
+          </div>
 
-            return (
-              <div key={platform.id} className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-200 hover:border-blue-300 group flex flex-col h-full">
-                <div className="p-6 flex flex-col flex-1">
-                  {/* Header */}
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center space-x-3 min-w-0 flex-1">
-                      <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex-shrink-0">
-                        {getPlatformIcon(platform.id)}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {platforms.map((platform) => {
+              const isExpanded = expandedPlatforms.has(platform.id);
+              const hasExpandableContent =
+                platform.features.length > 6 ||
+                (platform.capabilities && platform.capabilities.length > 3);
+
+              return (
+                <div key={platform.id} className="group flex flex-col bg-white rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 hover:-translate-y-2 overflow-hidden">
+                  <div className="p-8 flex-1">
+                    {/* Platform Header */}
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="relative">
+                        <div className="absolute inset-0 bg-blue-500 blur-lg opacity-0 group-hover:opacity-20 transition-opacity"></div>
+                        <div className="relative p-4 bg-gradient-to-br from-gray-50 to-gray-100 group-hover:from-blue-500 group-hover:to-purple-600 rounded-2xl border border-gray-200 group-hover:border-transparent transition-all duration-500">
+                          <div className="text-gray-700 group-hover:text-white transition-colors">
+                            {getPlatformIcon(platform.id)}
+                          </div>
+                        </div>
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors truncate">{platform.name}</h3>
-                        <p className="text-sm text-gray-600 line-clamp-2">{platform.description}</p>
-                      </div>
-                    </div>
-                    <div className={`px-2 py-1 rounded-full text-xs font-medium flex-shrink-0 ml-2 ${getPlatformColor(platform.id)}`}>
-                      {platform.id}
-                    </div>
-                  </div>
-
-                  {/* Content Area - Flexible */}
-                  <div className="flex-1 space-y-4">
-                    {/* Features */}
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-900 mb-2">Features:</h4>
-                      {renderPlatformFeatures(platform.features, platform.id, isExpanded)}
+                      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${getPlatformColor(platform.id)}`}>
+                        {platform.id}
+                      </span>
                     </div>
 
-                    {/* Capabilities */}
-                    {platform.capabilities && platform.capabilities.length > 0 && (
+                    <h3 className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors mb-2 tracking-tight">
+                      {platform.name}
+                    </h3>
+                    <p className="text-gray-500 text-sm mb-6 leading-relaxed line-clamp-2 font-medium italic">
+                      "{platform.description}"
+                    </p>
+
+                    <div className="space-y-6">
+                      {/* Features */}
                       <div>
-                        <h4 className="text-sm font-medium text-gray-900 mb-2">Capabilities:</h4>
-                        {renderPlatformCapabilities(platform.capabilities, platform.id, isExpanded)}
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Core Features</p>
+                        {renderPlatformFeatures(platform.features, platform.id, isExpanded)}
                       </div>
-                    )}
+
+                      {/* Capabilities */}
+                      {platform.capabilities && platform.capabilities.length > 0 && (
+                        <div>
+                          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Enterprise Capabilities</p>
+                          {renderPlatformCapabilities(platform.capabilities, platform.id, isExpanded)}
+                        </div>
+                      )}
+                    </div>
                   </div>
 
-                  {/* Actions Area - Always at bottom */}
-                  <div className="mt-4 space-y-3">
-                    {/* Show More/Less Button */}
-                    {hasExpandableContent && (
-                      <button
-                        onClick={() => togglePlatformExpansion(platform.id)}
-                        className="w-full flex items-center justify-center space-x-2 px-3 py-2 text-sm text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition-all duration-200"
-                      >
-                        {isExpanded ? (
-                          <>
-                            <span>Show Less</span>
-                            <AlertTriangle className="w-3 h-3 rotate-180" />
-                          </>
-                        ) : (
-                          <>
-                            <span>Show More</span>
-                            <AlertTriangle className="w-3 h-3" />
-                          </>
-                        )}
-                      </button>
-                    )}
+                  {/* Platform Footer */}
+                  <div className="p-8 pt-0 mt-auto">
+                    <div className="flex flex-col space-y-3">
+                      {hasExpandableContent && (
+                        <button
+                          onClick={() => togglePlatformExpansion(platform.id)}
+                          className="w-full py-3 text-xs font-bold text-gray-500 hover:text-blue-600 transition-colors flex items-center justify-center space-x-2"
+                        >
+                          <span>{isExpanded ? 'Show Less' : 'Explore Details'}</span>
+                          <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
+                        </button>
+                      )}
 
-                    {/* Connect Button */}
-                    <button
-                      onClick={() => openCreateModal(platform)}
-                      className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-sm"
-                    >
-                      <Plus className="w-4 h-4" />
-                      <span>Connect {platform.name}</span>
-                    </button>
+                      <button
+                        onClick={() => openCreateModal(platform)}
+                        className="w-full py-4 bg-gray-900 text-white rounded-2xl font-bold text-sm hover:bg-black hover:shadow-xl transition-all active:scale-95 flex items-center justify-center space-x-2"
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>Connect {platform.name}</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
         </div>
       </div>
 
-      {/* Create Connection Modal */}
+      {/* Create/Edit Connection Modal - Premium Glassmorphism */}
       {showCreateModal && selectedPlatform && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center p-4 sm:p-6 z-50 overflow-y-auto">
-          <div className={`bg-white rounded-xl max-w-md w-full mx-4 my-8 max-h-[85vh] overflow-y-auto`}>
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
-                    <Plus className="w-5 h-5 text-white" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-hidden">
+          <div
+            className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm transition-opacity duration-500"
+            onClick={() => {
+              setShowCreateModal(false);
+              setEditingConnection(null);
+              setJsonErrors({});
+            }}
+          ></div>
+
+          <div className="relative w-full max-w-xl bg-white/90 backdrop-blur-2xl rounded-[2.5rem] border border-white shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+            {/* Modal Header */}
+            <div className={`relative px-8 py-10 bg-gradient-to-br from-gray-50 to-white border-b border-gray-100`}>
+              <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl"></div>
+
+              <div className="flex items-start justify-between relative">
+                <div className="flex items-center space-x-5">
+                  <div className="p-4 bg-gray-900 text-white rounded-2xl shadow-xl shadow-gray-900/20">
+                    {editingConnection ? <Edit className="w-6 h-6" /> : <Plus className="w-6 h-6" />}
                   </div>
-                  <h2 className="text-xl font-semibold text-gray-900">
-                    Connect {selectedPlatform.name}
-                  </h2>
+                  <div>
+                    <h2 className="text-2xl font-black text-gray-900 tracking-tight">
+                      {editingConnection ? 'Edit Connection' : 'New Integration'}
+                    </h2>
+                    <div className="flex items-center space-x-2 mt-1">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Platform</span>
+                      <span className="text-xs font-bold text-blue-600 px-2 py-0.5 bg-blue-50 rounded-lg">{selectedPlatform.name}</span>
+                    </div>
+                  </div>
                 </div>
                 <button
                   onClick={() => {
                     setShowCreateModal(false);
+                    setEditingConnection(null);
                     setJsonErrors({});
                   }}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  className="p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-all"
                 >
-                  <XCircle className="w-6 h-6" />
+                  <X className="w-6 h-6" />
                 </button>
               </div>
-              <p className="text-gray-600 mt-2">{selectedPlatform.description}</p>
             </div>
 
-            <div className="p-6">
-              <div className="space-y-4">
+            {/* Modal Body */}
+            <div className="px-8 py-8 max-h-[60vh] overflow-y-auto custom-scrollbar">
+              <div className="space-y-8">
                 {renderConfigFields(selectedPlatform)}
+              </div>
+            </div>
 
-                <div className="flex space-x-3 pt-4">
-                  <button
-                    onClick={handleCreateConnection}
-                    className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
-                  >
-                    Create Connection
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowCreateModal(false);
-                      setJsonErrors({});
-                    }}
-                    className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </div>
+            {/* Modal Footer */}
+            <div className="px-8 py-8 bg-gray-50/50 border-t border-gray-100">
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={() => {
+                    setShowCreateModal(false);
+                    setEditingConnection(null);
+                    setJsonErrors({});
+                  }}
+                  className="flex-1 py-4 text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors"
+                >
+                  Discard Changes
+                </button>
+                <button
+                  onClick={handleCreateConnection}
+                  className="flex-[2] py-4 bg-gray-900 text-white rounded-2xl font-bold text-sm hover:bg-black hover:shadow-xl transition-all active:scale-[0.98] shadow-lg shadow-gray-900/10"
+                >
+                  {editingConnection ? 'Update Connection' : 'Launch Connection'}
+                </button>
               </div>
             </div>
           </div>

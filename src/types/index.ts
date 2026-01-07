@@ -1777,3 +1777,47 @@ export interface UserPreferences {
   default_visibility: string;
 }
 
+// M-Pesa Agent Types
+export interface MpesaAgentConfig {
+  alert_channel_id: string | null;
+  alert_enabled: boolean;
+  auto_match_enabled: boolean;
+  match_threshold: number;
+  notification_preferences?: Record<string, any>;
+}
+
+export interface MpesaPayment {
+  id: number;
+  transaction_id: string;
+  amount: number;
+  phone_number: string;
+  reference: string | null;
+  description: string | null;
+  transaction_time: string;
+  status: 'pending' | 'matched' | 'unmatched' | 'verified';
+  matched_invoice_id: number | null;
+  match_confidence: number | null;
+  channel: string | null;
+  created_at: string;
+  updated_at: string | null;
+}
+
+export interface MpesaPaymentSummary {
+  total_amount: number;
+  total_count: number;
+  matched_count: number;
+  unmatched_count: number;
+  pending_count: number;
+  period: {
+    start: string;
+    end: string;
+  };
+}
+
+export interface MpesaPaymentListResponse {
+  payments: MpesaPayment[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+

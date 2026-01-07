@@ -2,7 +2,7 @@
  * Tests for Workflows page component.
  */
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, act } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 
 // Mock all API calls to prevent actual requests
@@ -50,12 +50,19 @@ describe('Workflows Page', () => {
     localStorage.clear();
   });
 
-  it('renders without crashing', () => {
-    expect(() => renderWithProviders(<Workflows />)).not.toThrow();
+  it('renders without crashing', async () => {
+    await act(async () => {
+      renderWithProviders(<Workflows />);
+    });
   });
 
-  it('mounts successfully', () => {
-    const { container } = renderWithProviders(<Workflows />);
-    expect(container).toBeInTheDocument();
+  it('mounts successfully', async () => {
+    let container: HTMLElement;
+    await act(async () => {
+      const rendered = renderWithProviders(<Workflows />);
+      container = rendered.container;
+    });
+    expect(container!).toBeInTheDocument();
   });
 });
+
