@@ -14,6 +14,7 @@ import {
   Bot,
   Loader2,
   AlertCircle,
+  Search,
 } from 'lucide-react';
 import apiService from '../services/api';
 import { ExtractedToolCall, Workflow } from '../types';
@@ -42,7 +43,7 @@ const WorkflowBuilderModal: React.FC<WorkflowBuilderModalProps> = ({
   const [selectedSteps, setSelectedSteps] = useState<string[]>([]);
   const [parameterizeFields, setParameterizeFields] = useState<string[]>([]);
   const [availableFields, setAvailableFields] = useState<string[]>([]);
-  
+
   // UI state
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,6 +51,7 @@ const WorkflowBuilderModal: React.FC<WorkflowBuilderModalProps> = ({
   const [createdWorkflow, setCreatedWorkflow] = useState<Workflow | null>(null);
   const [expandedSteps, setExpandedSteps] = useState<string[]>([]);
   const [activeStep, setActiveStep] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Initialize on open
   useEffect(() => {
@@ -59,29 +61,30 @@ const WorkflowBuilderModal: React.FC<WorkflowBuilderModalProps> = ({
         .filter(tc => tc.success !== false)
         .map(tc => tc.id);
       setSelectedSteps(successfulCalls);
-      
+
       // Extract all available fields from arguments
       const fields = new Set<string>();
       toolCalls.forEach(tc => {
         Object.keys(tc.arguments || {}).forEach(key => fields.add(key));
       });
       setAvailableFields(Array.from(fields));
-      
+
       // Generate default workflow name
       const toolNames = Array.from(new Set(toolCalls.map(tc => tc.tool_name)));
       setWorkflowName(`${toolNames.slice(0, 2).join(' + ')} Workflow`);
-      
+
       // Reset state
       setActiveStep(0);
       setError(null);
       setSuccess(false);
       setCreatedWorkflow(null);
+      setSearchQuery(''); // Reset search query on open
     }
   }, [open, toolCalls]);
 
   const handleStepToggle = (stepId: string) => {
-    setSelectedSteps(prev => 
-      prev.includes(stepId) 
+    setSelectedSteps(prev =>
+      prev.includes(stepId)
         ? prev.filter(id => id !== stepId)
         : [...prev, stepId]
     );
@@ -147,9 +150,9 @@ const WorkflowBuilderModal: React.FC<WorkflowBuilderModalProps> = ({
 
     try {
       const steps = buildWorkflowSteps();
-      
+
       console.log('[WorkflowBuilder] Creating workflow with steps:', steps);
-      
+
       const response = await apiService.createWorkflowFromSteps({
         workflow_name: workflowName,
         description: description || `Created from conversation #${conversationId}`,
@@ -170,10 +173,10 @@ const WorkflowBuilderModal: React.FC<WorkflowBuilderModalProps> = ({
         setCreatedWorkflow(response.data);
         onWorkflowCreated?.(response.data);
       } else {
-        console.error('[WorkflowBuilder] Response failed check:', { 
-          success: response.success, 
+        console.error('[WorkflowBuilder] Response failed check:', {
+          success: response.success,
           hasData: !!response.data,
-          error: response.error 
+          error: response.error
         });
         setError(response.error || 'Failed to create workflow');
       }
@@ -201,16 +204,37 @@ const WorkflowBuilderModal: React.FC<WorkflowBuilderModalProps> = ({
     }
   };
 
+  // Filter tool calls based on search query
+  const filteredToolCalls = React.useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+
+    // If no search query, return all tools
+    if (!query) {
+      return toolCalls;
+    }
+
+    // Filter tools that match the search query
+    return toolCalls.filter(tc => {
+      const toolNameMatch = tc.tool_name.toLowerCase().includes(query);
+      const argsMatch = JSON.stringify(tc.arguments || {}).toLowerCase().includes(query);
+      return toolNameMatch || argsMatch;
+    });
+  }, [toolCalls, searchQuery]);
+
+  const handleSelectAllFiltered = () => {
+    setSelectedSteps(filteredToolCalls.map(tc => tc.id));
+  };
+
   if (!open) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
-      <div 
+      <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
       />
-      
+
       {/* Modal */}
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden">
         {/* Header */}
@@ -282,24 +306,21 @@ const WorkflowBuilderModal: React.FC<WorkflowBuilderModalProps> = ({
               <div className="flex items-center justify-center space-x-4">
                 {['Select Steps', 'Configure', 'Review'].map((step, index) => (
                   <div key={step} className="flex items-center">
-                    <div className={`flex items-center space-x-2 ${
-                      index <= activeStep ? 'text-purple-600' : 'text-gray-400'
-                    }`}>
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                        index < activeStep 
-                          ? 'bg-purple-600 text-white' 
-                          : index === activeStep 
-                            ? 'bg-purple-100 text-purple-600 border-2 border-purple-600'
-                            : 'bg-gray-100 text-gray-400'
+                    <div className={`flex items-center space-x-2 ${index <= activeStep ? 'text-purple-600' : 'text-gray-400'
                       }`}>
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${index < activeStep
+                        ? 'bg-purple-600 text-white'
+                        : index === activeStep
+                          ? 'bg-purple-100 text-purple-600 border-2 border-purple-600'
+                          : 'bg-gray-100 text-gray-400'
+                        }`}>
                         {index < activeStep ? <CheckCircle className="w-4 h-4" /> : index + 1}
                       </div>
                       <span className="text-sm font-medium">{step}</span>
                     </div>
                     {index < 2 && (
-                      <div className={`w-12 h-0.5 mx-2 ${
-                        index < activeStep ? 'bg-purple-600' : 'bg-gray-200'
-                      }`} />
+                      <div className={`w-12 h-0.5 mx-2 ${index < activeStep ? 'bg-purple-600' : 'bg-gray-200'
+                        }`} />
                     )}
                   </div>
                 ))}
@@ -314,61 +335,98 @@ const WorkflowBuilderModal: React.FC<WorkflowBuilderModalProps> = ({
                   <p className="text-sm text-gray-600">
                     Choose which tool executions should be part of your workflow.
                   </p>
-                  
+
+                  {/* Search Input */}
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search tool executions..."
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                    />
+                  </div>
+
+                  {/* Select All / Deselect All Buttons */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleSelectAllFiltered}
+                      className="px-3 py-1.5 text-sm font-medium text-purple-600 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors border border-purple-200"
+                    >
+                      Select All
+                    </button>
+                    <button
+                      onClick={() => setSelectedSteps([])}
+                      className="px-3 py-1.5 text-sm font-medium text-gray-600 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200"
+                    >
+                      Deselect All
+                    </button>
+                    <span className="text-sm text-gray-500 ml-auto">
+                      {selectedSteps.length} of {filteredToolCalls.length} selected
+                    </span>
+                  </div>
+
                   <div className="space-y-2 max-h-64 overflow-y-auto">
-                    {toolCalls.map((tc) => (
-                      <div
-                        key={tc.id}
-                        className={`border rounded-lg transition-all ${
-                          selectedSteps.includes(tc.id)
+                    {filteredToolCalls.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        <p className="text-sm">No tools match "{searchQuery}"</p>
+                        <p className="text-xs mt-1">Try a different search term</p>
+                      </div>
+                    ) : (
+                      filteredToolCalls.map((tc) => (
+                        <div
+                          key={tc.id}
+                          className={`border rounded-lg transition-all ${selectedSteps.includes(tc.id)
                             ? 'border-purple-300 bg-purple-50'
                             : 'border-gray-200 bg-white'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between p-3">
-                          <div className="flex items-center space-x-3">
-                            <input
-                              type="checkbox"
-                              checked={selectedSteps.includes(tc.id)}
-                              onChange={() => handleStepToggle(tc.id)}
-                              className="w-4 h-4 text-purple-600 rounded border-gray-300 focus:ring-purple-500"
-                            />
-                            <div>
-                              <div className="flex items-center space-x-2">
-                                <span className="font-medium text-gray-900">
-                                  {tc.tool_name}
-                                </span>
-                                {tc.success ? (
-                                  <CheckCircle className="w-4 h-4 text-green-500" />
-                                ) : (
-                                  <XCircle className="w-4 h-4 text-red-500" />
-                                )}
+                            }`}
+                        >
+                          <div className="flex items-center justify-between p-3">
+                            <div className="flex items-center space-x-3">
+                              <input
+                                type="checkbox"
+                                checked={selectedSteps.includes(tc.id)}
+                                onChange={() => handleStepToggle(tc.id)}
+                                className="w-4 h-4 text-purple-600 rounded border-gray-300 focus:ring-purple-500"
+                              />
+                              <div>
+                                <div className="flex items-center space-x-2">
+                                  <span className="font-medium text-gray-900">
+                                    {tc.tool_name}
+                                  </span>
+                                  {tc.success ? (
+                                    <CheckCircle className="w-4 h-4 text-green-500" />
+                                  ) : (
+                                    <XCircle className="w-4 h-4 text-red-500" />
+                                  )}
+                                </div>
+                                <p className="text-xs text-gray-500">
+                                  {Object.keys(tc.arguments || {}).length} argument(s)
+                                </p>
                               </div>
-                              <p className="text-xs text-gray-500">
-                                {Object.keys(tc.arguments || {}).length} argument(s)
-                              </p>
                             </div>
+                            <button
+                              onClick={() => handleExpandToggle(tc.id)}
+                              className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+                            >
+                              {expandedSteps.includes(tc.id)
+                                ? <ChevronUp className="w-4 h-4 text-gray-500" />
+                                : <ChevronDown className="w-4 h-4 text-gray-500" />
+                              }
+                            </button>
                           </div>
-                          <button
-                            onClick={() => handleExpandToggle(tc.id)}
-                            className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
-                          >
-                            {expandedSteps.includes(tc.id) 
-                              ? <ChevronUp className="w-4 h-4 text-gray-500" />
-                              : <ChevronDown className="w-4 h-4 text-gray-500" />
-                            }
-                          </button>
+
+                          {expandedSteps.includes(tc.id) && (
+                            <div className="px-3 pb-3 pt-1 border-t border-gray-100">
+                              <pre className="text-xs bg-gray-100 p-2 rounded overflow-x-auto">
+                                {JSON.stringify(tc.arguments, null, 2)}
+                              </pre>
+                            </div>
+                          )}
                         </div>
-                        
-                        {expandedSteps.includes(tc.id) && (
-                          <div className="px-3 pb-3 pt-1 border-t border-gray-100">
-                            <pre className="text-xs bg-gray-100 p-2 rounded overflow-x-auto">
-                              {JSON.stringify(tc.arguments, null, 2)}
-                            </pre>
-                          </div>
-                        )}
-                      </div>
-                    ))}
+                      ))
+                    )}
                   </div>
                 </div>
               )}
@@ -379,7 +437,7 @@ const WorkflowBuilderModal: React.FC<WorkflowBuilderModalProps> = ({
                   <h3 className="text-lg font-semibold text-gray-900">
                     Configure Workflow
                   </h3>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Workflow Name *
@@ -420,15 +478,13 @@ const WorkflowBuilderModal: React.FC<WorkflowBuilderModalProps> = ({
                         <button
                           key={trigger.value}
                           onClick={() => setTriggerType(trigger.value as typeof triggerType)}
-                          className={`flex items-center space-x-3 p-3 border rounded-lg transition-all ${
-                            triggerType === trigger.value
-                              ? 'border-purple-500 bg-purple-50'
-                              : 'border-gray-200 hover:border-gray-300'
-                          }`}
+                          className={`flex items-center space-x-3 p-3 border rounded-lg transition-all ${triggerType === trigger.value
+                            ? 'border-purple-500 bg-purple-50'
+                            : 'border-gray-200 hover:border-gray-300'
+                            }`}
                         >
-                          <div className={`p-2 rounded-lg ${
-                            triggerType === trigger.value ? 'bg-purple-100' : 'bg-gray-100'
-                          }`}>
+                          <div className={`p-2 rounded-lg ${triggerType === trigger.value ? 'bg-purple-100' : 'bg-gray-100'
+                            }`}>
                             {getTriggerIcon(trigger.value)}
                           </div>
                           <div className="text-left">
@@ -451,7 +507,7 @@ const WorkflowBuilderModal: React.FC<WorkflowBuilderModalProps> = ({
                             Make These Values Customizable
                           </label>
                           <p className="text-xs text-gray-600 mt-1">
-                            Select which values you want to change each time you run this workflow. 
+                            Select which values you want to change each time you run this workflow.
                             For example, if you select "email", you can send to different emails each time.
                           </p>
                         </div>
@@ -461,11 +517,10 @@ const WorkflowBuilderModal: React.FC<WorkflowBuilderModalProps> = ({
                           <button
                             key={field}
                             onClick={() => handleFieldToggle(field)}
-                            className={`flex items-center space-x-1.5 px-3 py-1.5 text-sm rounded-full transition-all ${
-                              parameterizeFields.includes(field)
-                                ? 'bg-blue-600 text-white'
-                                : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
-                            }`}
+                            className={`flex items-center space-x-1.5 px-3 py-1.5 text-sm rounded-full transition-all ${parameterizeFields.includes(field)
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
+                              }`}
                           >
                             <span>{parameterizeFields.includes(field) ? '✓' : '○'}</span>
                             <span>{field.replace(/_/g, ' ')}</span>
@@ -488,7 +543,7 @@ const WorkflowBuilderModal: React.FC<WorkflowBuilderModalProps> = ({
                   <h3 className="text-lg font-semibold text-gray-900">
                     Review Workflow
                   </h3>
-                  
+
                   <div className="bg-gray-50 rounded-lg p-4 space-y-3">
                     <div className="flex justify-between">
                       <span className="text-gray-600">Name</span>
@@ -547,7 +602,7 @@ const WorkflowBuilderModal: React.FC<WorkflowBuilderModalProps> = ({
             >
               {activeStep === 0 ? 'Cancel' : 'Back'}
             </button>
-            
+
             {activeStep < 2 ? (
               <button
                 onClick={() => setActiveStep(activeStep + 1)}

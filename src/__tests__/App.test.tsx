@@ -2,7 +2,7 @@
  * Tests for App component.
  */
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, act } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 
 // Mock all API calls to prevent actual requests
@@ -41,13 +41,18 @@ describe('App Component', () => {
     localStorage.clear();
   });
 
-  it('renders without crashing', () => {
-    const { container } = renderApp();
-    expect(container).toBeInTheDocument();
+  it('renders without crashing', async () => {
+    await act(async () => {
+      renderApp();
+    });
   });
 
-  it('mounts successfully', () => {
-    const { container } = renderApp();
-    expect(container.firstChild).toBeTruthy();
+  it('mounts successfully', async () => {
+    let container: HTMLElement;
+    await act(async () => {
+      const rendered = renderApp();
+      container = rendered.container;
+    });
+    expect(container!.firstChild).toBeTruthy();
   });
 });

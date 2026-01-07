@@ -1,27 +1,27 @@
 import {
-    Activity,
-    Award,
-    BookOpen,
-    Bot,
-    ChevronDown,
-    ChevronRight,
-    CreditCard,
-    Crown,
-    Database,
-    Globe,
-    Heart,
-    Home,
-    LogOut,
-    Menu,
-    MessageCircle,
-    Search,
-    Settings,
-    ShoppingBag,
-    Sparkles,
-    User,
-    Workflow,
-    X,
-    Zap
+  Activity,
+  Award,
+
+  Bot,
+  ChevronDown,
+  ChevronRight,
+  CreditCard,
+  Crown,
+  Database,
+  Globe,
+  Heart,
+  Home,
+  LogOut,
+  Menu,
+  MessageCircle,
+  Search,
+  Settings,
+  ShoppingBag,
+  Sparkles,
+  User,
+  Workflow,
+  X,
+  Zap
 } from 'lucide-react';
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -42,46 +42,46 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [userDropdownOpen, setUserDropdownOpen] = React.useState(false);
 
   const navigation = [
-    { 
-      name: 'Dashboard', 
-      href: '/dashboard', 
+    {
+      name: 'Dashboard',
+      href: '/dashboard',
       icon: Home,
       description: 'Overview and analytics',
       badge: null
     },
-    { 
-      name: 'Chat', 
-      href: '/chat', 
+    {
+      name: 'Chat',
+      href: '/chat',
       icon: MessageCircle,
       description: 'AI-powered conversations',
       badge: null
     },
-    { 
-      name: 'Workflows', 
-      href: '/workflows', 
+    {
+      name: 'Workflows',
+      href: '/workflows',
       icon: Workflow,
       description: 'Automated processes',
       badge: 'New'
     },
-    { 
-      name: 'Agents', 
-      href: '/agents', 
+    {
+      name: 'Agents',
+      href: '/agents',
       icon: Bot,
       description: 'AI agents management',
       badge: null
     },
-    { 
-      name: 'Marketplace', 
-      href: '/marketplace', 
-      icon: ShoppingBag,
-      description: 'Share and discover workflows',
+    {
+      name: 'M-Pesa Agent',
+      href: '/agents/mpesa',
+      icon: CreditCard,
+      description: 'Payment reconciliation',
       badge: 'New'
     },
     {
-      name: 'Templates',
-      href: '/templates',
-      icon: BookOpen,
-      description: 'Pre-built workflow templates',
+      name: 'Marketplace',
+      href: '/marketplace',
+      icon: ShoppingBag,
+      description: 'Share and discover workflows',
       badge: 'New'
     },
     {
@@ -98,37 +98,30 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       description: 'Manage your creator profile',
       badge: null
     },
-    { 
-      name: 'MCP Tools', 
-      href: '/mcp-tools', 
-      icon: Sparkles,
-      description: 'Execute tools from all connections',
-      badge: null
-    },
-    { 
-      name: 'Connections', 
-      href: '/connections', 
+    {
+      name: 'Connections',
+      href: '/connections',
       icon: Database,
       description: 'External integrations',
       badge: null
     },
-    { 
-      name: 'Payments', 
-      href: '/payments', 
+    {
+      name: 'Payments',
+      href: '/payments',
       icon: CreditCard,
       description: 'Billing and subscriptions',
       badge: null
     },
-    { 
-      name: 'Activity', 
-      href: '/activity', 
+    {
+      name: 'Activity',
+      href: '/activity',
       icon: Activity,
       description: 'System monitoring',
       badge: null
     },
-    { 
-      name: 'Settings', 
-      href: '/settings', 
+    {
+      name: 'Settings',
+      href: '/settings',
       icon: Settings,
       description: 'Account configuration',
       badge: null
@@ -202,14 +195,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <p className="text-xs text-gray-500">AI-Powered Platform</p>
               </div>
             </div>
-            <button 
+            <button
               onClick={() => setSidebarOpen(false)}
               className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
             >
               <X className="w-5 h-5 text-gray-600" />
             </button>
           </div>
-          
+
           {/* User Profile Section */}
           <div className="flex-shrink-0 p-6 border-b border-gray-200/50">
             <div className="flex items-center space-x-3">
@@ -239,11 +232,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`group flex items-center px-4 py-3 rounded-xl transition-all duration-200 ${
-                    isActive
-                      ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
-                      : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                  }`}
+                  className={`group flex items-center px-4 py-3 rounded-xl transition-all duration-200 ${isActive
+                    ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
+                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                    }`}
                   onClick={() => setSidebarOpen(false)}
                 >
                   <Icon className={`w-5 h-5 mr-3 ${isActive ? 'text-white' : 'text-gray-500 group-hover:text-gray-700'}`} />
@@ -279,9 +271,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </div>
 
       {/* Desktop sidebar */}
-      <div className={`sidebar hidden lg:fixed lg:inset-y-0 lg:flex lg:flex-col transition-all duration-300 ${
-        collapsed ? 'lg:w-24' : 'lg:w-80'
-      }`}>
+      <div className={`sidebar hidden lg:fixed lg:inset-y-0 lg:flex lg:flex-col transition-all duration-300 ${collapsed ? 'lg:w-24' : 'lg:w-80'
+        }`}>
         <div className="flex flex-col h-full bg-white/95 backdrop-blur-xl shadow-xl border-r border-gray-200/50">
           {/* Header */}
           <div className="flex-shrink-0 flex items-center justify-between p-6 border-b border-gray-200/50">
@@ -305,14 +296,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             )}
             <button
               onClick={() => setCollapsed(!collapsed)}
-              className={`p-2 rounded-lg hover:bg-gray-100 transition-all duration-200 ${
-                collapsed ? 'bg-blue-50 hover:bg-blue-100' : 'hover:bg-gray-100'
-              }`}
+              className={`p-2 rounded-lg hover:bg-gray-100 transition-all duration-200 ${collapsed ? 'bg-blue-50 hover:bg-blue-100' : 'hover:bg-gray-100'
+                }`}
               title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             >
-              <ChevronRight className={`w-5 h-5 text-gray-600 transition-transform duration-200 ${
-                collapsed ? 'rotate-180 text-blue-600' : ''
-              }`} />
+              <ChevronRight className={`w-5 h-5 text-gray-600 transition-transform duration-200 ${collapsed ? 'rotate-180 text-blue-600' : ''
+                }`} />
             </button>
           </div>
 
@@ -348,11 +337,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`group flex items-center px-4 py-3 rounded-xl transition-all duration-200 ${
-                    isActive
-                      ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
-                      : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                  }`}
+                  className={`group flex items-center px-4 py-3 rounded-xl transition-all duration-200 ${isActive
+                    ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
+                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                    }`}
                   title={collapsed ? item.name : undefined}
                 >
                   <div className="relative">
@@ -385,9 +373,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <div className="flex-shrink-0 p-6 border-t border-gray-200/50">
             <button
               onClick={handleLogout}
-              className={`flex items-center space-x-3 w-full px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-gray-900 rounded-xl transition-colors ${
-                collapsed ? 'justify-center' : ''
-              }`}
+              className={`flex items-center space-x-3 w-full px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-gray-900 rounded-xl transition-colors ${collapsed ? 'justify-center' : ''
+                }`}
               title={collapsed ? 'Logout' : undefined}
             >
               <LogOut className="w-5 h-5" />
@@ -409,7 +396,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               >
                 <Menu className="w-6 h-6 text-gray-600" />
               </button>
-              
+
               <div className="hidden md:flex items-center space-x-4">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -421,10 +408,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </div>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-4">
               <NotificationsDropdown />
-              
+
               {/* User Dropdown */}
               <div className="relative user-dropdown">
                 <button
@@ -440,7 +427,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   </div>
                   <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${userDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
-                
+
                 {/* Dropdown Menu */}
                 {userDropdownOpen && (
                   <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
@@ -456,7 +443,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                         </div>
                       </div>
                     </div>
-                    
+
                     <Link
                       to="/profile"
                       className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
@@ -465,7 +452,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                       <User className="w-4 h-4 mr-3 text-gray-500" />
                       Profile
                     </Link>
-                    
+
                     <Link
                       to="/settings"
                       className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
@@ -474,9 +461,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                       <Settings className="w-4 h-4 mr-3 text-gray-500" />
                       Settings
                     </Link>
-                    
+
                     <div className="border-t border-gray-100 my-1"></div>
-                    
+
                     <button
                       onClick={() => {
                         setUserDropdownOpen(false);

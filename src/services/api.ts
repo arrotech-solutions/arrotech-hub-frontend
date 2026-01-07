@@ -20,7 +20,11 @@ import {
     MCPTool,
     Message,
     MessageCreate,
+    MpesaAgentConfig,
+    MpesaPayment,
+    MpesaPaymentListResponse,
     MpesaPaymentRequest,
+    MpesaPaymentSummary,
     NotificationSettings,
     Payment,
     PaymentVerificationRequest,
@@ -1921,6 +1925,36 @@ class ApiService {
 
   async updateTheme(theme: 'light' | 'dark' | 'system'): Promise<ApiResponse<any>> {
     const response = await this.api.put('/preferences/theme', null, { params: { theme } });
+    return response.data;
+  }
+
+  // M-Pesa Agent endpoints
+  async getMpesaAgentConfig(): Promise<ApiResponse<MpesaAgentConfig>> {
+    const response = await this.api.get('/api/agents/mpesa/config');
+    return response.data;
+  }
+
+  async updateMpesaAgentConfig(config: Partial<MpesaAgentConfig>): Promise<ApiResponse<MpesaAgentConfig>> {
+    const response = await this.api.post('/api/agents/mpesa/config', config);
+    return response.data;
+  }
+
+  async getMpesaPaymentSummary(days: number = 1): Promise<ApiResponse<MpesaPaymentSummary>> {
+    const response = await this.api.get('/api/agents/mpesa/summary', { params: { days } });
+    return response.data;
+  }
+
+  async getMpesaPayments(params: {
+    limit?: number;
+    offset?: number;
+    status?: 'pending' | 'matched' | 'unmatched';
+  } = {}): Promise<ApiResponse<MpesaPaymentListResponse>> {
+    const response = await this.api.get('/api/agents/mpesa/payments', { params });
+    return response.data;
+  }
+
+  async getUnmatchedMpesaPayments(limit: number = 10): Promise<ApiResponse<{ payments: MpesaPayment[] }>> {
+    const response = await this.api.get('/api/agents/mpesa/payments/unmatched', { params: { limit } });
     return response.data;
   }
 }
