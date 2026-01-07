@@ -1,53 +1,53 @@
 import axios, { AxiosInstance } from 'axios';
 import {
-    AgentCreate,
-    AgentResponse,
-    AgentStatusResponse,
-    ApiResponse,
-    APISettings,
-    ChatToolsResponse,
-    Connection,
-    ConnectionCreate,
-    ConnectionPlatform,
-    ConnectionUpdate,
-    ContentCreationResponse,
-    Conversation,
-    ConversationCreate,
-    DashboardSettings,
-    ImageGenerationResponse,
-    IntegrationSettings,
-    LLMProviderResponse,
-    MCPTool,
-    Message,
-    MessageCreate,
-    MpesaAgentConfig,
-    MpesaPayment,
-    MpesaPaymentListResponse,
-    MpesaPaymentRequest,
-    MpesaPaymentSummary,
-    NotificationSettings,
-    Payment,
-    PaymentVerificationRequest,
-    PDFGenerationResponse,
-    PricingTiers,
-    SecuritySettings,
-    ServerInfo,
-    ServerStatus,
-    ShortLinkResponse,
-    StripeCustomerRequest,
-    StripePaymentRequest,
-    Subscription,
-    ToolInfo,
-    UsageLog,
-    User,
-    UserSettings,
-    UserSettingsUpdate,
-    WebScrapingResponse,
-    // New types for enhanced features
-    Workflow,
-    WorkflowCreateRequest,
-    WorkflowExecuteRequest,
-    WorkflowTemplate
+  AgentCreate,
+  AgentResponse,
+  AgentStatusResponse,
+  ApiResponse,
+  APISettings,
+  ChatToolsResponse,
+  Connection,
+  ConnectionCreate,
+  ConnectionPlatform,
+  ConnectionUpdate,
+  ContentCreationResponse,
+  Conversation,
+  ConversationCreate,
+  DashboardSettings,
+  ImageGenerationResponse,
+  IntegrationSettings,
+  LLMProviderResponse,
+  MCPTool,
+  Message,
+  MessageCreate,
+  MpesaAgentConfig,
+  MpesaPayment,
+  MpesaPaymentListResponse,
+  MpesaPaymentRequest,
+  MpesaPaymentSummary,
+  NotificationSettings,
+  Payment,
+  PaymentVerificationRequest,
+  PDFGenerationResponse,
+  PricingTiers,
+  SecuritySettings,
+  ServerInfo,
+  ServerStatus,
+  ShortLinkResponse,
+  StripeCustomerRequest,
+  StripePaymentRequest,
+  Subscription,
+  ToolInfo,
+  UsageLog,
+  User,
+  UserSettings,
+  UserSettingsUpdate,
+  WebScrapingResponse,
+  // New types for enhanced features
+  Workflow,
+  WorkflowCreateRequest,
+  WorkflowExecuteRequest,
+  WorkflowTemplate
 } from '../types';
 
 class ApiService {
@@ -139,16 +139,16 @@ class ApiService {
   }
 
   async changePassword(currentPassword: string, newPassword: string): Promise<ApiResponse<any>> {
-    const response = await this.api.post('/auth/change-password', { 
-      current_password: currentPassword, 
-      new_password: newPassword 
+    const response = await this.api.post('/auth/change-password', {
+      current_password: currentPassword,
+      new_password: newPassword
     });
     return response.data;
   }
 
   // Connection endpoints
   async getConnections(): Promise<ApiResponse<Connection[]>> {
-    const response = await this.api.get('/connections');
+    const response = await this.api.get('/connections/');
     return response.data;
   }
 
@@ -352,7 +352,7 @@ class ApiService {
   async uploadFile(file: File): Promise<ApiResponse<any>> {
     const formData = new FormData();
     formData.append('file', file);
-    
+
     const response = await this.api.post('/mcp/call', {
       name: 'file_management',
       arguments: {
@@ -565,7 +565,7 @@ class ApiService {
   }
 
   async getWorkflows(): Promise<ApiResponse<Workflow[]>> {
-    const response = await this.api.get('/workflows');
+    const response = await this.api.get('/workflows/');
     return response.data;
   }
 
@@ -694,7 +694,7 @@ class ApiService {
   }
 
   async getAgents(): Promise<ApiResponse<AgentResponse[]>> {
-    const response = await this.api.get('/agents');
+    const response = await this.api.get('/agents/');
     return response.data;
   }
 
@@ -759,9 +759,9 @@ class ApiService {
   }
 
   async createStripeSubscription(customerId: string, priceId: string): Promise<ApiResponse<any>> {
-    const response = await this.api.post('/payments/stripe/create-subscription', { 
-      customer_id: customerId, 
-      price_id: priceId 
+    const response = await this.api.post('/payments/stripe/create-subscription', {
+      customer_id: customerId,
+      price_id: priceId
     });
     return response.data;
   }
@@ -886,16 +886,16 @@ class ApiService {
   }
 
   async updateBrand(brandId: string, brandConfig: any): Promise<any> {
-    return this.executeWhiteLabel('update_brand', { 
-      brand_id: brandId, 
-      brand_config: brandConfig 
+    return this.executeWhiteLabel('update_brand', {
+      brand_id: brandId,
+      brand_config: brandConfig
     });
   }
 
   async createDeployment(brandId: string, domainConfig: any): Promise<any> {
-    return this.executeWhiteLabel('create_deployment', { 
-      brand_id: brandId, 
-      domain_config: domainConfig 
+    return this.executeWhiteLabel('create_deployment', {
+      brand_id: brandId,
+      domain_config: domainConfig
     });
   }
 
@@ -1213,7 +1213,7 @@ class ApiService {
           if (line.startsWith('data: ')) {
             try {
               const data = JSON.parse(line.slice(6));
-              
+
               switch (data.type) {
                 case 'status':
                   onStatus(data.message);
@@ -1815,12 +1815,12 @@ class ApiService {
     search?: string;
     connection?: string;
   }): Promise<ApiResponse<any>> {
-    const response = await this.api.get('/templates', { params });
+    const response = await this.api.get('/templates/', { params });
     return response.data;
   }
 
   async getTemplateCategories(): Promise<ApiResponse<any>> {
-    const response = await this.api.get('/templates/categories');
+    const response = await this.api.get('/templates/categories/');
     return response.data;
   }
 
