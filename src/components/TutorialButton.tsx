@@ -5,16 +5,16 @@ import { useTutorial } from '../hooks/useTutorial';
 
 const TutorialButton: React.FC = () => {
   const { user } = useAuth();
-  const { 
-    startTutorial, 
-    startPageTutorial, 
-    isCompleted, 
-    currentPage, 
+  const {
+    startTutorial,
+    startPageTutorial,
+    isCompleted,
+    currentPage,
     hasCompletedPage,
     availablePages,
-    isActive 
+    isActive
   } = useTutorial();
-  
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -44,7 +44,6 @@ const TutorialButton: React.FC = () => {
     workflows: 'Workflows',
     agents: 'Agents',
     connections: 'Connections',
-    mcptools: 'MCP Tools',
     payments: 'Payments',
     activity: 'Activity',
     settings: 'Settings',
@@ -133,7 +132,7 @@ const TutorialButton: React.FC = () => {
               {availablePages.map((page) => {
                 const isCurrentPage = page === currentPage;
                 const isPageCompleted = hasCompletedPage(page);
-                
+
                 return (
                   <button
                     key={page}
@@ -141,11 +140,10 @@ const TutorialButton: React.FC = () => {
                       startPageTutorial(page);
                       setIsMenuOpen(false);
                     }}
-                    className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${
-                      isCurrentPage 
-                        ? 'bg-blue-50 text-blue-700' 
+                    className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${isCurrentPage
+                        ? 'bg-blue-50 text-blue-700'
                         : 'hover:bg-gray-50 text-gray-700'
-                    }`}
+                      }`}
                   >
                     <span className="flex items-center space-x-2">
                       <span>{pageLabels[page] || page}</span>
@@ -169,11 +167,10 @@ const TutorialButton: React.FC = () => {
       {/* Main Button */}
       <button
         onClick={() => setIsMenuOpen(!isMenuOpen)}
-        className={`p-4 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 ${
-          isMenuOpen
+        className={`p-4 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 ${isMenuOpen
             ? 'bg-gray-100 text-gray-700'
             : 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
-        }`}
+          }`}
         title="Tutorial Guide"
       >
         {isMenuOpen ? (

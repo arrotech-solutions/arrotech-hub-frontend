@@ -77,7 +77,7 @@ const MCPTools: React.FC = () => {
           toast.success('Tool executed successfully');
         }
       );
-      
+
     } catch (error) {
       console.error('Error executing tool:', error);
       toast.error('Failed to execute tool');
@@ -114,13 +114,13 @@ const MCPTools: React.FC = () => {
       slack_notification_manager: '🔔',
       marketing_campaign_automation: '📈',
       campaign_performance_tracking: '📊',
-      
+
       // File Management Tools
       file_management: '📁',
       generate_pdf: '📄',
       generate_qr: '📱',
       convert_document: '🔄',
-      
+
       // Web Tools
       web_tools: '🌐',
       scrape_website: '🔍',
@@ -128,7 +128,7 @@ const MCPTools: React.FC = () => {
       generate_tracking_link: '📊',
       check_status: '✅',
       extract_emails: '📧',
-      
+
       // Content Creation Tools
       content_creation: '✍️',
       generate_image: '🖼️',
@@ -136,25 +136,47 @@ const MCPTools: React.FC = () => {
       generate_bulk_content: '📚',
       optimize_for_seo: '🔍',
       generate_calendar: '📅',
-      
+
       // Advanced Features
       lead_scoring_engine: '🎯',
       customer_journey_mapping: '🗺️',
       predictive_analytics_engine: '🔮',
       ab_testing_platform: '🧪',
       social_media_management: '📱',
-      
+
       // Enterprise Features
       white_label_management: '🏷️',
       workflow_builder: '⚙️',
       api_management: '🔧',
       enterprise_security: '🔒',
       multi_tenant_management: '🏢',
-      
+
+      // HR Hub
+      hr_leave_management: '📅',
+      hr_policy_lookup: '🔍',
+
+      // Lead Intelligence
+      lead_intelligence_qualification: '🎯',
+      lead_intelligence_followup: '✉️',
+
+      // Logistics Hub
+      logistics_tracking: '🚚',
+      logistics_delivery: '📦',
+
+      // Context Intelligence
+      context_translation: '🌐',
+      context_verification: '✅',
+      context_sentiment: '🎭',
+
+      // M-Pesa Business
+      mpesa_payment_reconciliation: '💰',
+      mpesa_account_management: '🏦',
+      mpesa_alert_config: '🔔',
+
       // Default
       default: '🔧'
     };
-    
+
     return iconMap[toolName] || iconMap.default;
   };
 
@@ -176,13 +198,13 @@ const MCPTools: React.FC = () => {
       slack_notification_manager: 'Manage notifications and alerts',
       marketing_campaign_automation: 'Automate marketing campaigns across multiple platforms',
       campaign_performance_tracking: 'Track and analyze campaign performance',
-      
+
       // File Management Tools
       file_management: 'Upload, download, and manage files with various formats',
       generate_pdf: 'Generate PDF documents from content and templates',
       generate_qr: 'Generate QR codes for various purposes',
       convert_document: 'Convert documents between different formats',
-      
+
       // Web Tools
       web_tools: 'Web scraping, link generation, and website analysis tools',
       scrape_website: 'Extract data from websites using selectors',
@@ -190,7 +212,7 @@ const MCPTools: React.FC = () => {
       generate_tracking_link: 'Generate tracking links with analytics',
       check_status: 'Check website status and availability',
       extract_emails: 'Extract email addresses from websites',
-      
+
       // Content Creation Tools
       content_creation: 'Generate images, content, and creative assets',
       generate_image: 'Generate images from text descriptions',
@@ -198,25 +220,47 @@ const MCPTools: React.FC = () => {
       generate_bulk_content: 'Generate multiple content variations',
       optimize_for_seo: 'Optimize content for search engines',
       generate_calendar: 'Generate content calendars and schedules',
-      
+
       // Advanced Features
       lead_scoring_engine: 'Score and qualify leads using AI algorithms',
       customer_journey_mapping: 'Map and analyze customer journeys',
       predictive_analytics_engine: 'Predict customer behavior and outcomes',
       ab_testing_platform: 'Run A/B tests and analyze results',
       social_media_management: 'Manage social media campaigns and content',
-      
+
       // Enterprise Features
       white_label_management: 'Manage white-label branding and deployments',
       workflow_builder: 'Build and manage automated workflows',
       api_management: 'Manage API keys, rate limits, and developer portals',
       enterprise_security: 'Enterprise security policies and encryption',
       multi_tenant_management: 'Manage multi-tenant environments',
-      
+
+      // HR Hub
+      hr_leave_management: 'Manage employee leave requests and balances',
+      hr_policy_lookup: 'Lookup company policies and HR documents',
+
+      // Lead Intelligence
+      lead_intelligence_qualification: 'AI-powered lead qualification and scoring',
+      lead_intelligence_followup: 'Orchestrate and draft lead follow-up communications',
+
+      // Logistics Hub
+      logistics_tracking: 'Track shipments across regional logistics providers',
+      logistics_delivery: 'Create and manage local delivery requests',
+
+      // Context Intelligence
+      context_translation: 'Bilingual translation for regional communications',
+      context_verification: 'Verify tax IDs and business compliance status',
+      context_sentiment: 'Analyze sentiment in regional languages',
+
+      // M-Pesa Business
+      mpesa_payment_reconciliation: 'Reconcile M-Pesa payments with automated matching',
+      mpesa_account_management: 'Manage M-Pesa business account and balances',
+      mpesa_alert_config: 'Configure real-time M-Pesa payment notifications',
+
       // Default
       default: 'Tool for various operations and integrations'
     };
-    
+
     return descriptionMap[toolName] || descriptionMap.default;
   };
 
@@ -250,7 +294,19 @@ const MCPTools: React.FC = () => {
     web_tools: 'utilities',
     content_creation: 'content',
     payment_processing: 'finance',
-    social_media_tools: 'social'
+    social_media_tools: 'social',
+    hr_leave_management: 'hr',
+    hr_policy_lookup: 'hr',
+    lead_intelligence_qualification: 'sales',
+    lead_intelligence_followup: 'sales',
+    logistics_tracking: 'logistics',
+    logistics_delivery: 'logistics',
+    context_translation: 'intelligence',
+    context_verification: 'intelligence',
+    context_sentiment: 'intelligence',
+    mpesa_payment_reconciliation: 'finance',
+    mpesa_account_management: 'finance',
+    mpesa_alert_config: 'finance'
   };
 
   const getToolCategory = (toolName: string) => {
@@ -346,7 +402,7 @@ const MCPTools: React.FC = () => {
             required={isRequired}
           />
         );
-      
+
       case 'integer':
         return (
           <input
@@ -359,7 +415,7 @@ const MCPTools: React.FC = () => {
             required={isRequired}
           />
         );
-      
+
       case 'boolean':
         return (
           <select
@@ -373,11 +429,11 @@ const MCPTools: React.FC = () => {
             <option value="false">False</option>
           </select>
         );
-      
+
       case 'array':
         // User-friendly list/tag input for non-technical users
         const arrayValue = Array.isArray(toolParams[name]) ? toolParams[name] : [];
-        
+
         return (
           <div key={name} className="space-y-2">
             {/* Display current items as tags */}
@@ -404,7 +460,7 @@ const MCPTools: React.FC = () => {
                 ))}
               </div>
             )}
-            
+
             {/* Add new item input */}
             <div className="flex items-center space-x-2">
               <input
@@ -439,12 +495,12 @@ const MCPTools: React.FC = () => {
             <p className="text-xs text-gray-500">💡 Press Enter or click + to add items</p>
           </div>
         );
-      
+
       case 'object':
         // User-friendly key-value editor for non-technical users
         const objectValue = typeof toolParams[name] === 'object' ? toolParams[name] : {};
         const objectEntries = Object.entries(objectValue);
-        
+
         return (
           <div key={name} className="space-y-2">
             {/* Simple Mode: Key-Value Pairs */}
@@ -503,7 +559,7 @@ const MCPTools: React.FC = () => {
                 <span>Add Entry</span>
               </button>
             </div>
-            
+
             {/* Advanced Mode Toggle */}
             <details className="mt-2">
               <summary className="text-xs text-gray-500 cursor-pointer hover:text-gray-700">
@@ -526,7 +582,7 @@ const MCPTools: React.FC = () => {
             </details>
           </div>
         );
-      
+
       default:
         return (
           <input
@@ -572,14 +628,14 @@ const MCPTools: React.FC = () => {
   const getFilteredTools = () => {
     const allTools: (MCPTool | ToolInfo)[] = tools;
     return allTools.filter(tool => {
-      const matchesCategory = filterCategory === 'all' || 
+      const matchesCategory = filterCategory === 'all' ||
         (tool.category && tool.category === filterCategory) ||
         getToolCategory(tool.name) === filterCategory;
-      
-      const matchesSearch = searchTerm === '' || 
+
+      const matchesSearch = searchTerm === '' ||
         tool.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         tool.description.toLowerCase().includes(searchTerm.toLowerCase());
-      
+
       return matchesCategory && matchesSearch;
     });
   };
@@ -710,11 +766,10 @@ const MCPTools: React.FC = () => {
                   <button
                     key={category}
                     onClick={() => setFilterCategory(category)}
-                    className={`px-4 py-2 rounded-lg whitespace-nowrap text-sm font-medium transition-colors ${
-                      filterCategory === category
+                    className={`px-4 py-2 rounded-lg whitespace-nowrap text-sm font-medium transition-colors ${filterCategory === category
                         ? 'bg-blue-600 text-white'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
+                      }`}
                   >
                     {category === 'all' ? 'All Tools' : category.charAt(0).toUpperCase() + category.slice(1).replace(/_/g, ' ')}
                   </button>
@@ -776,7 +831,7 @@ const MCPTools: React.FC = () => {
             <div className="text-gray-400 text-6xl mb-4">🔧</div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">No tools found</h3>
             <p className="text-gray-600">
-              {searchTerm || filterCategory !== 'all' 
+              {searchTerm || filterCategory !== 'all'
                 ? 'Try adjusting your search or filter criteria.'
                 : 'No tools are currently available. Check your connections to see available tools.'
               }

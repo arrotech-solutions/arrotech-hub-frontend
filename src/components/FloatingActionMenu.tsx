@@ -24,14 +24,14 @@ interface MenuItem {
 
 const FloatingActionMenu: React.FC = () => {
   const { user } = useAuth();
-  const { 
-    startTutorial, 
-    startPageTutorial, 
+  const {
+    startTutorial,
+    startPageTutorial,
     isActive: tutorialActive,
     hasCompletedPage,
     currentPage,
   } = useTutorial();
-  
+
   const [isOpen, setIsOpen] = useState(false);
   const [showAssistant, setShowAssistant] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -81,7 +81,6 @@ const FloatingActionMenu: React.FC = () => {
     workflows: 'Workflows',
     agents: 'Agents',
     connections: 'Connections',
-    mcptools: 'MCP Tools',
     marketplace: 'Marketplace',
     templates: 'Templates',
     favorites: 'Favorites',
@@ -138,16 +137,15 @@ const FloatingActionMenu: React.FC = () => {
       <div className="fixed bottom-6 right-6 z-50" ref={menuRef}>
         {/* Backdrop when open */}
         {isOpen && (
-          <div 
+          <div
             className="fixed inset-0 bg-black/20 backdrop-blur-sm -z-10"
             onClick={() => setIsOpen(false)}
           />
         )}
 
         {/* Menu Items - Fan/Wheel Animation */}
-        <div className={`absolute bottom-16 right-0 transition-all duration-300 ${
-          isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
-        }`}>
+        <div className={`absolute bottom-16 right-0 transition-all duration-300 ${isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
+          }`}>
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden w-80">
             {/* Header */}
             <div className="px-4 py-3 bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-500">
@@ -190,13 +188,12 @@ const FloatingActionMenu: React.FC = () => {
                         {item.label}
                       </span>
                       {item.badge && (
-                        <span className={`px-1.5 py-0.5 text-xs font-medium rounded-full ${
-                          item.badge === 'AI' 
+                        <span className={`px-1.5 py-0.5 text-xs font-medium rounded-full ${item.badge === 'AI'
                             ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300'
                             : item.badge === '✓'
-                            ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300'
-                            : 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300'
-                        }`}>
+                              ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300'
+                              : 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300'
+                          }`}>
                           {item.badge}
                         </span>
                       )}
@@ -222,11 +219,10 @@ const FloatingActionMenu: React.FC = () => {
         {/* Main FAB Button */}
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className={`relative p-4 rounded-full shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 ${
-            isOpen
+          className={`relative p-4 rounded-full shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 ${isOpen
               ? 'bg-gray-700 rotate-45'
               : 'bg-gradient-to-br from-purple-600 via-blue-600 to-cyan-500'
-          }`}
+            }`}
           aria-label="Help & Resources"
         >
           {/* Animated rings */}
@@ -236,7 +232,7 @@ const FloatingActionMenu: React.FC = () => {
               <span className="absolute inset-0 rounded-full bg-gradient-to-br from-purple-600 via-blue-600 to-cyan-500 animate-pulse opacity-30" />
             </>
           )}
-          
+
           {/* Icon */}
           <div className={`relative transition-transform duration-300 ${isOpen ? 'rotate-45' : ''}`}>
             {isOpen ? (
@@ -295,7 +291,7 @@ const AIAssistantPanel: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
-    
+
     const userMessage = { role: 'user', content: input };
     setMessages(prev => [...prev, userMessage]);
     setInput('');
@@ -367,11 +363,10 @@ const AIAssistantPanel: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               <div
-                className={`max-w-[80%] rounded-2xl px-4 py-2 ${
-                  msg.role === 'user'
+                className={`max-w-[80%] rounded-2xl px-4 py-2 ${msg.role === 'user'
                     ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white'
                     : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
-                }`}
+                  }`}
               >
                 <p className="text-sm">{msg.content}</p>
               </div>
