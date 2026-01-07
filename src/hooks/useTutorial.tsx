@@ -59,7 +59,6 @@ const pageConfig: Record<string, string> = {
   activity: '/activity',
   settings: '/settings',
   profile: '/profile',
-  mcptools: '/mcp-tools',
 };
 
 // Tutorial steps configuration - using more reliable CSS selectors
@@ -105,7 +104,7 @@ const tutorialSteps: TutorialStep[] = [
     page: 'dashboard',
     order: 4
   },
-  
+
   // Chat page steps (7 steps)
   {
     id: 'chat-sidebar',
@@ -177,7 +176,7 @@ const tutorialSteps: TutorialStep[] = [
     page: 'chat',
     order: 11
   },
-  
+
   // Workflows page steps (6 steps)
   {
     id: 'workflows-intro',
@@ -239,7 +238,7 @@ const tutorialSteps: TutorialStep[] = [
     page: 'workflows',
     order: 17
   },
-  
+
   // Agents page steps (5 steps)
   {
     id: 'agents-intro',
@@ -291,7 +290,7 @@ const tutorialSteps: TutorialStep[] = [
     page: 'agents',
     order: 22
   },
-  
+
   // Connections page steps (5 steps)
   {
     id: 'connections-intro',
@@ -343,49 +342,7 @@ const tutorialSteps: TutorialStep[] = [
     page: 'connections',
     order: 27
   },
-  
-  // MCP Tools page steps (4 steps)
-  {
-    id: 'mcptools-intro',
-    title: 'MCP Tools',
-    description: 'Execute tools from your connected services using the Model Context Protocol.',
-    target: '.mcptools-header',
-    fallbackTarget: 'main h1',
-    position: 'bottom',
-    page: 'mcptools',
-    order: 28
-  },
-  {
-    id: 'mcptools-stats',
-    title: 'Tools Overview',
-    description: 'See how many tools are available, by category, and your usage statistics.',
-    target: '.mcptools-stats',
-    fallbackTarget: '.grid.grid-cols-1.md\\:grid-cols-2',
-    position: 'bottom',
-    page: 'mcptools',
-    order: 29
-  },
-  {
-    id: 'mcptools-filters',
-    title: 'Search & Categories',
-    description: 'Search tools by name and filter by category. Tools are dynamically generated from connections.',
-    target: '.mcptools-filters',
-    fallbackTarget: 'input[placeholder*="Search"]',
-    position: 'bottom',
-    page: 'mcptools',
-    order: 30
-  },
-  {
-    id: 'mcptools-list',
-    title: 'Execute Tools',
-    description: 'Click any tool card to execute it. Fill in parameters and see real-time streaming results.',
-    target: '.mcptools-list',
-    fallbackTarget: '.tool-card',
-    position: 'top',
-    page: 'mcptools',
-    order: 31
-  },
-  
+
   // Payments page steps (4 steps)
   {
     id: 'payments-intro',
@@ -427,7 +384,7 @@ const tutorialSteps: TutorialStep[] = [
     page: 'payments',
     order: 35
   },
-  
+
   // Activity page steps (4 steps)
   {
     id: 'activity-intro',
@@ -469,7 +426,7 @@ const tutorialSteps: TutorialStep[] = [
     page: 'activity',
     order: 39
   },
-  
+
   // Settings page steps (4 steps)
   {
     id: 'settings-intro',
@@ -511,7 +468,7 @@ const tutorialSteps: TutorialStep[] = [
     page: 'settings',
     order: 43
   },
-  
+
   // Profile page steps (4 steps)
   {
     id: 'profile-intro',
@@ -579,7 +536,7 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         // Invalid JSON, ignore
       }
     }
-    
+
     const completedFull = localStorage.getItem('tutorial_completed');
     if (completedFull === 'true') {
       setIsCompleted(true);
@@ -596,18 +553,18 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   useEffect(() => {
     const pathname = location.pathname;
     let page = 'dashboard';
-    
+
     Object.entries(pageConfig).forEach(([pageName, route]) => {
       if (pathname === route || (route !== '/' && pathname.startsWith(route))) {
         page = pageName;
       }
     });
-    
+
     // Reset step index when page changes
     if (page !== currentPage) {
       setCurrentStepIndex(0);
     }
-    
+
     setCurrentPage(page);
   }, [location.pathname, currentPage]);
 
@@ -672,11 +629,11 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       // Mark current page as complete
       const newStatus = { ...pageCompletionStatus, [currentPage]: true };
       savePageStatus(newStatus);
-      
+
       // Find next page with tutorials
       const currentOrder = currentPageSteps[currentStepIndex]?.order || 0;
       const nextStepData = tutorialSteps.find(step => step.order > currentOrder);
-      
+
       if (nextStepData && nextStepData.page !== currentPage) {
         // Navigate to next page
         const nextRoute = pageConfig[nextStepData.page];
@@ -690,7 +647,7 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setTutorialMode('none');
         localStorage.setItem('tutorial_completed', 'true');
         setIsCompleted(true);
-        
+
         // Mark all pages as complete
         const allComplete: PageTutorialStatus = {};
         availablePages.forEach(page => {
@@ -714,7 +671,7 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       // Find previous page with tutorials
       const currentOrder = currentPageSteps[0]?.order || 0;
       const prevSteps = tutorialSteps.filter(step => step.order < currentOrder);
-      
+
       if (prevSteps.length > 0) {
         const prevStep = prevSteps[prevSteps.length - 1];
         const prevRoute = pageConfig[prevStep.page];
@@ -740,7 +697,7 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setTutorialMode('none');
     localStorage.setItem('tutorial_completed', 'true');
     setIsCompleted(true);
-    
+
     // Mark all pages as complete
     const allComplete: PageTutorialStatus = {};
     availablePages.forEach(page => {
@@ -753,7 +710,7 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     // Mark current page as complete
     const newStatus = { ...pageCompletionStatus, [currentPage]: true };
     savePageStatus(newStatus);
-    
+
     setIsActive(false);
     setTutorialMode('none');
   }, [currentPage, pageCompletionStatus, savePageStatus]);
