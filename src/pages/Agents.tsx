@@ -1,38 +1,31 @@
 import {
   Activity,
-  AlertCircle,
   BarChart3,
   Bot,
   CheckCircle,
-  ChevronDown,
-  ChevronRight,
   Clock,
-  Cpu,
-  Edit,
   Eye,
   Filter,
   Grid,
-  HardDrive,
+  Languages,
+  LayoutDashboard,
   List,
-  MoreVertical,
   Pause,
   Play,
   Plus,
+  Rocket,
   Search,
   Settings,
   Share2,
-  Trash2,
-  XCircle,
-  Zap,
-  Rocket,
-  TrendingUp,
   ShieldCheck,
+  Sparkles,
+  Trash2,
+  TrendingUp,
   Truck,
-  LayoutDashboard,
-  Languages,
-  CreditCard,
+  Zap,
   ArrowRight,
-  Sparkles
+  CreditCard,
+  XCircle
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -43,6 +36,7 @@ import { AgentCreate, AgentResponse, AgentStatusResponse, Workflow } from '../ty
 const Agents: React.FC = () => {
   const [agents, setAgents] = useState<AgentResponse[]>([]);
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedAgent, setSelectedAgent] = useState<AgentResponse | null>(null);
@@ -52,7 +46,7 @@ const Agents: React.FC = () => {
     agent_config: {}
   });
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [statusFilter] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
   const [stats, setStats] = useState({
@@ -449,8 +443,8 @@ const Agents: React.FC = () => {
           <button
             onClick={() => setActiveTab('discover')}
             className={`flex items-center space-x-3 px-8 py-4 rounded-[18px] text-sm font-black transition-all duration-300 ${activeTab === 'discover'
-                ? 'bg-white text-purple-600 shadow-lg'
-                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'
+              ? 'bg-white text-purple-600 shadow-lg'
+              : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'
               }`}
           >
             <Rocket className="w-5 h-5" />
@@ -459,8 +453,8 @@ const Agents: React.FC = () => {
           <button
             onClick={() => setActiveTab('managed')}
             className={`flex items-center space-x-3 px-8 py-4 rounded-[18px] text-sm font-black transition-all duration-300 ${activeTab === 'managed'
-                ? 'bg-white text-purple-600 shadow-lg'
-                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'
+              ? 'bg-white text-purple-600 shadow-lg'
+              : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'
               }`}
           >
             <Bot className="w-5 h-5" />
@@ -488,8 +482,8 @@ const Agents: React.FC = () => {
                     key={cat}
                     onClick={() => setHubSearch(cat === 'All' ? '' : cat)}
                     className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${(cat === 'All' && !hubSearch) || hubSearch === cat
-                        ? 'bg-purple-600 text-white shadow-lg'
-                        : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                      ? 'bg-purple-600 text-white shadow-lg'
+                      : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                       }`}
                   >
                     {cat}

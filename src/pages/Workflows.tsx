@@ -14,7 +14,6 @@ import {
   Filter,
   Globe,
   Grid,
-  History,
   Link2,
   List,
   Lock,
@@ -43,8 +42,6 @@ import ExecuteWorkflowModal from '../components/ExecuteWorkflowModal';
 import WorkflowTemplates from '../components/WorkflowTemplates';
 import apiService from '../services/api';
 import {
-  WorkflowCreateRequest,
-  WorkflowExecuteRequest,
   WorkflowExecution,
   WorkflowStepExecution,
   WorkflowVisibility,
@@ -142,17 +139,7 @@ const Workflows: React.FC = () => {
     }
   };
 
-  const loadWorkflowExecutions = async (workflowId: number) => {
-    try {
-      const response = await apiService.getWorkflowExecutions(workflowId);
-      if (response.success) {
-        return response.data;
-      }
-    } catch (error) {
-      console.error('Error loading workflow executions:', error);
-      return [];
-    }
-  };
+  /* Removed loadWorkflowExecutions to satisfy ESLint as it is unused */
 
   const loadStepExecutions = async (executionId: number) => {
     try {

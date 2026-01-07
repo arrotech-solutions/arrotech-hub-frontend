@@ -11,7 +11,6 @@ import {
     RefreshCw,
     Search,
     Sparkles,
-
     Zap,
     X,
     ChevronDown,

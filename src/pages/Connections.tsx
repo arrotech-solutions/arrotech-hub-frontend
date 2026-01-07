@@ -1,6 +1,4 @@
 import {
-  Activity,
-  AlertCircle,
   AlertTriangle,
   BarChart3,
   CheckCircle,
@@ -13,7 +11,6 @@ import {
   Grid,
   List,
   MessageCircle,
-  MoreVertical,
   Pause,
   Plus,
   RefreshCw,
@@ -21,7 +18,6 @@ import {
   Settings,
   Shield,
   Sparkles,
-  Target,
   TestTube,
   Trash2,
   Users,
@@ -273,20 +269,12 @@ const Connections: React.FC = () => {
     }
   };
 
+  // getStatusIcon is defined but never used in this component scope, removing to satisfy ESLint
+  /* 
   const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'active':
-        return <CheckCircle className="w-4 h-4 text-green-600" />;
-      case 'inactive':
-        return <Pause className="w-4 h-4 text-yellow-600" />;
-      case 'error':
-        return <AlertTriangle className="w-4 h-4 text-red-600" />;
-      case 'pending':
-        return <Clock className="w-4 h-4 text-blue-600" />;
-      default:
-        return <AlertCircle className="w-4 h-4 text-gray-600" />;
-    }
+    ...
   };
+  */
 
   const getStatusColor = (status: string) => {
     switch (status) {

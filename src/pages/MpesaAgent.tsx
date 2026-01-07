@@ -5,10 +5,8 @@ import {
   DollarSign,
   Filter,
   Loader2,
-  MessageSquare,
   Settings,
   TrendingUp,
-  XCircle,
   AlertCircle,
   RefreshCw
 } from 'lucide-react';
@@ -32,11 +30,55 @@ const MpesaAgent: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [daysFilter, setDaysFilter] = useState<number>(1);
 
-  useEffect(() => {
-    loadData();
+  const loadConfig = React.useCallback(async () => {
+    try {
+      const response = await apiService.getMpesaAgentConfig();
+      if (response.success) {
+        setConfig(response.data);
+      }
+    } catch (error) {
+      console.error('Error loading config:', error);
+    }
+  }, []);
+
+  const loadSummary = React.useCallback(async () => {
+    try {
+      const response = await apiService.getMpesaPaymentSummary(daysFilter);
+      if (response.success) {
+        setSummary(response.data);
+      }
+    } catch (error) {
+      console.error('Error loading summary:', error);
+    }
   }, [daysFilter]);
 
-  const loadData = async () => {
+  const loadPayments = React.useCallback(async () => {
+    try {
+      const params: any = { limit: 20, offset: 0 };
+      if (statusFilter !== 'all') {
+        params.status = statusFilter;
+      }
+      const response = await apiService.getMpesaPayments(params);
+      if (response.success) {
+        setPayments(response.data.payments);
+      }
+    } catch (error) {
+      console.error('Error loading payments:', error);
+    }
+  }, [statusFilter]);
+
+  const loadUnmatchedPayments = React.useCallback(async () => {
+    try {
+      const response = await apiService.getUnmatchedMpesaPayments(10);
+      if (response.success) {
+        setUnmatchedPayments(response.data.payments);
+      }
+    } catch (error) {
+      console.error('Error loading unmatched payments:', error);
+    }
+  }, []);
+
+  const loadData = React.useCallback(async () => {
     try {
       setLoading(true);
       await Promise.all([
@@ -51,55 +93,12 @@ const MpesaAgent: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loadConfig, loadSummary, loadPayments, loadUnmatchedPayments]);
 
-  const loadConfig = async () => {
-    try {
-      const response = await apiService.getMpesaAgentConfig();
-      if (response.success) {
-        setConfig(response.data);
-      }
-    } catch (error) {
-      console.error('Error loading config:', error);
-    }
-  };
-
-  const loadSummary = async () => {
-    try {
-      const response = await apiService.getMpesaPaymentSummary(daysFilter);
-      if (response.success) {
-        setSummary(response.data);
-      }
-    } catch (error) {
-      console.error('Error loading summary:', error);
-    }
-  };
-
-  const loadPayments = async () => {
-    try {
-      const params: any = { limit: 20, offset: 0 };
-      if (statusFilter !== 'all') {
-        params.status = statusFilter;
-      }
-      const response = await apiService.getMpesaPayments(params);
-      if (response.success) {
-        setPayments(response.data.payments);
-      }
-    } catch (error) {
-      console.error('Error loading payments:', error);
-    }
-  };
-
-  const loadUnmatchedPayments = async () => {
-    try {
-      const response = await apiService.getUnmatchedMpesaPayments(10);
-      if (response.success) {
-        setUnmatchedPayments(response.data.payments);
-      }
-    } catch (error) {
-      console.error('Error loading unmatched payments:', error);
-    }
-  };
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const saveConfig = async () => {
     if (!config) return;
@@ -189,21 +188,19 @@ const MpesaAgent: React.FC = () => {
           <div className="flex space-x-8">
             <button
               onClick={() => setActiveTab('dashboard')}
-              className={`pb-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === 'dashboard'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
+              className={`pb-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === 'dashboard'
+                ? 'border-blue-600 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+                }`}
             >
               Dashboard
             </button>
             <button
               onClick={() => setActiveTab('config')}
-              className={`pb-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === 'config'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
+              className={`pb-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === 'config'
+                ? 'border-blue-600 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+                }`}
             >
               Configuration
             </button>
