@@ -541,25 +541,27 @@ const Workflows: React.FC = () => {
   );
 
   const renderWorkflowList = (workflow: WorkflowType) => (
-    <div key={workflow.id} className="group bg-white rounded-2xl border border-gray-200/60 shadow-sm hover:shadow-lg transition-all duration-300 hover:border-blue-200 flex items-center p-5 space-x-6 relative overflow-hidden">
-      <div className="absolute left-0 top-0 w-1 h-full bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+    <div key={workflow.id} className="group bg-white rounded-2xl border border-gray-200/60 shadow-sm hover:shadow-lg transition-all duration-300 hover:border-blue-200 flex flex-col sm:flex-row items-start sm:items-center p-5 sm:p-6 gap-5 sm:gap-6 relative overflow-hidden">
+      <div className="absolute left-0 top-0 w-1 sm:w-1.5 h-full bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
-      <div className="hidden sm:flex items-center justify-center w-14 h-14 bg-gradient-to-br from-blue-500/10 to-purple-600/10 rounded-2xl border border-blue-100 text-blue-600">
+      <div className="hidden md:flex items-center justify-center w-14 h-14 bg-gradient-to-br from-blue-500/10 to-purple-600/10 rounded-2xl border border-blue-100 text-blue-600 shrink-0">
         <Workflow className="w-7 h-7" />
       </div>
 
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center flex-wrap gap-2 mb-1.5">
-          <h3 className="text-base font-bold text-gray-900 group-hover:text-blue-600 transition-colors truncate">
+      <div className="flex-1 min-w-0 w-full">
+        <div className="flex items-center justify-between sm:justify-start flex-wrap gap-2 mb-1.5">
+          <h3 className="text-base font-bold text-gray-900 group-hover:text-blue-600 transition-colors truncate max-w-[200px] sm:max-w-none">
             {workflow.name}
           </h3>
-          <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-lg font-black uppercase">v{workflow.version}</span>
-          <div className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${getStatusColor(workflow.status)}`}>
-            {workflow.status}
+          <div className="flex items-center space-x-2">
+            <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-lg font-black uppercase tracking-tighter">v{workflow.version}</span>
+            <div className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${getStatusColor(workflow.status)}`}>
+              {workflow.status}
+            </div>
           </div>
         </div>
-        <p className="text-sm text-gray-500 line-clamp-1 mb-2 font-medium">"{workflow.description}"</p>
-        <div className="flex items-center flex-wrap gap-4 text-[10px] font-black uppercase tracking-widest text-gray-400">
+        <p className="text-sm text-gray-500 line-clamp-1 sm:line-clamp-2 mb-3 sm:mb-2 font-medium">"{workflow.description}"</p>
+        <div className="flex items-center flex-wrap gap-x-4 gap-y-2 text-[10px] font-black uppercase tracking-widest text-gray-400">
           <span className="flex items-center space-x-1">
             <Activity className="w-3 h-3 text-blue-500" />
             <span>{workflow.steps?.length || 0} Steps</span>
@@ -575,16 +577,16 @@ const Workflows: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex items-center space-x-3">
+      <div className="flex items-center justify-between sm:justify-end w-full sm:w-auto pt-4 sm:pt-0 border-t sm:border-t-0 border-gray-100 sm:space-x-3">
         <button
           onClick={() => {
             setExecutingWorkflow(workflow);
             setShowExecuteModal(true);
           }}
-          className="flex items-center space-x-2 px-5 py-2.5 bg-gray-900 text-white rounded-xl hover:bg-black transition-all duration-300 font-bold text-xs"
+          className="flex-1 sm:flex-none flex items-center justify-center space-x-2 px-6 py-2.5 bg-gray-900 text-white rounded-xl hover:bg-black transition-all duration-300 font-bold text-xs"
         >
           <Play className="w-3 h-3 fill-current" />
-          <span className="hidden sm:inline">Launch</span>
+          <span>Launch</span>
         </button>
         <button
           onClick={() => setSelectedWorkflow(workflow)}
@@ -618,15 +620,15 @@ const Workflows: React.FC = () => {
           <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-64 h-64 bg-purple-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
 
           <div className="relative px-8 py-10">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-6 sm:gap-10">
               <div className="text-center sm:text-left w-full sm:w-auto">
-                <div className="flex items-center justify-center sm:justify-start space-x-2 mb-2">
-                  <div className="p-1.5 bg-blue-100 rounded-lg">
+                <div className="flex items-center justify-center sm:justify-start space-x-2 mb-3">
+                  <div className="p-1.5 bg-blue-100/80 rounded-lg">
                     <Sparkles className="w-4 h-4 text-blue-600" />
                   </div>
                   <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">Workspace Management</span>
                 </div>
-                <h1 className="text-4xl font-black text-gray-900 mb-2 tracking-tight">
+                <h1 className="text-3xl sm:text-4xl font-black text-gray-900 mb-2 tracking-tight">
                   Welcome back, <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">{user?.name?.split(' ')[0] || 'Builder'}</span>!
                 </h1>
                 <p className="text-gray-500 max-w-md font-medium">
@@ -658,34 +660,36 @@ const Workflows: React.FC = () => {
 
         {/* Tab Navigation */}
         {/* Tab Navigation - Pill Style */}
-        <div className="bg-gray-100/50 p-1.5 rounded-2xl mb-8 flex items-center w-full sm:w-fit backdrop-blur-sm border border-gray-200/50">
-          {[
-            { id: 'workflows', label: 'Workflows', icon: Workflow, count: stats.total, color: 'blue' },
-            { id: 'executions', label: 'Executions', icon: PlayCircle, count: stats.executions, color: 'blue' },
-            { id: 'templates', label: 'Library', icon: BookOpen, count: 'New', color: 'purple' }
-          ].map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`flex-1 sm:flex-none flex items-center justify-center space-x-2 px-6 py-2.5 rounded-xl transition-all duration-300 ${isActive
-                  ? tab.color === 'blue' ? 'bg-white text-blue-600 shadow-md transform scale-105' : 'bg-white text-purple-600 shadow-md transform scale-105'
-                  : 'text-gray-500 hover:text-gray-800 hover:bg-white/50'
-                  }`}
-              >
-                <Icon className={`w-4 h-4 ${isActive ? 'animate-pulse' : ''}`} />
-                <span className="font-bold text-sm">{tab.label}</span>
-                <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black uppercase ${isActive
-                  ? tab.color === 'blue' ? 'bg-blue-100 text-blue-600' : 'bg-purple-100 text-purple-600'
-                  : 'bg-gray-200 text-gray-500'
-                  }`}>
-                  {tab.count}
-                </span>
-              </button>
-            );
-          })}
+        <div className="overflow-x-auto custom-scrollbar-hide mb-8">
+          <div className="bg-gray-100/50 p-1.5 rounded-2xl flex items-center w-max sm:w-fit backdrop-blur-sm border border-gray-200/50">
+            {[
+              { id: 'workflows', label: 'Workflows', icon: Workflow, count: stats.total, color: 'blue' },
+              { id: 'executions', label: 'Executions', icon: PlayCircle, count: stats.executions, color: 'blue' },
+              { id: 'templates', label: 'Library', icon: BookOpen, count: 'New', color: 'purple' }
+            ].map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`flex-1 sm:flex-none flex items-center justify-center space-x-2 px-6 py-2.5 rounded-xl transition-all duration-300 ${isActive
+                    ? tab.color === 'blue' ? 'bg-white text-blue-600 shadow-md transform scale-105' : 'bg-white text-purple-600 shadow-md transform scale-105'
+                    : 'text-gray-500 hover:text-gray-800 hover:bg-white/50'
+                    }`}
+                >
+                  <Icon className={`w-4 h-4 ${isActive ? 'animate-pulse' : ''}`} />
+                  <span className="font-bold text-sm">{tab.label}</span>
+                  <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black uppercase ${isActive
+                    ? tab.color === 'blue' ? 'bg-blue-100 text-blue-600' : 'bg-purple-100 text-purple-600'
+                    : 'bg-gray-200 text-gray-500'
+                    }`}>
+                    {tab.count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Stats Overview */}
@@ -726,21 +730,21 @@ const Workflows: React.FC = () => {
         {/* Filters and Search - Integrated Design */}
         <div className={`mb-10 p-6 bg-white/40 backdrop-blur-md rounded-2xl border border-white/60 shadow-sm ${activeTab === 'templates' ? 'hidden' : ''}`}>
           <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
-            <div className="flex flex-col sm:flex-row items-center space-x-0 sm:space-x-4 space-y-4 sm:space-y-0 flex-1 w-full">
-              <div className="relative flex-1 w-full max-w-none lg:max-w-md group">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-x-0 sm:space-x-4 space-y-4 sm:space-y-0 flex-1 w-full">
+              <div className="relative flex-1 group">
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 group-focus-within:text-blue-500 transition-colors" />
                 <input
                   type="text"
-                  placeholder="Search workflows by name or tool..."
+                  placeholder="Search workflows..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-12 pr-4 py-3.5 bg-white border border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all placeholder:text-gray-400 font-medium"
                 />
               </div>
-              <div className="flex items-center space-x-3 w-full sm:w-auto">
+              <div className="flex items-center space-x-2 w-full sm:w-auto">
                 <button
                   onClick={() => setShowFilters(!showFilters)}
-                  className={`flex items-center space-x-2 px-6 py-3.5 border rounded-2xl transition-all font-bold text-sm ${showFilters ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'}`}
+                  className={`flex-1 sm:flex-none flex items-center justify-center space-x-2 px-6 py-3.5 border rounded-2xl transition-all font-bold text-sm ${showFilters ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'}`}
                 >
                   <Filter className="w-4 h-4" />
                   <span>Refine</span>
@@ -897,21 +901,21 @@ const Workflows: React.FC = () => {
         {selectedWorkflow && (
           <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col border border-gray-100">
-              <div className="flex items-center justify-between px-8 py-6 bg-gradient-to-r from-blue-600 to-purple-600">
-                <div className="flex items-center space-x-4">
-                  <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-md">
-                    <Workflow className="w-6 h-6 text-white" />
+              <div className="flex items-center justify-between px-6 sm:px-8 py-5 sm:py-6 bg-gradient-to-r from-blue-600 to-purple-600">
+                <div className="flex items-center space-x-3 sm:space-x-4">
+                  <div className="p-2 sm:p-3 bg-white/20 rounded-xl sm:rounded-2xl backdrop-blur-md">
+                    <Workflow className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-black text-white leading-tight">{selectedWorkflow.name}</h2>
-                    <p className="text-white/70 text-xs font-bold uppercase tracking-widest">Version {selectedWorkflow.version}</p>
+                    <h2 className="text-lg sm:text-2xl font-black text-white leading-tight truncate max-w-[200px] sm:max-w-none">{selectedWorkflow.name}</h2>
+                    <p className="text-white/70 text-[10px] sm:text-xs font-bold uppercase tracking-widest">Version {selectedWorkflow.version}</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setSelectedWorkflow(null)}
-                  className="p-2 bg-white/10 hover:bg-white/20 rounded-xl transition-all"
+                  className="p-1.5 sm:p-2 bg-white/10 hover:bg-white/20 rounded-lg sm:rounded-xl transition-all"
                 >
-                  <X className="w-6 h-6 text-white" />
+                  <X className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </button>
               </div>
 
@@ -987,21 +991,21 @@ const Workflows: React.FC = () => {
         {showExecutionModal && selectedExecution && (
           <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col border border-gray-100">
-              <div className="flex items-center justify-between px-8 py-6 bg-gradient-to-r from-purple-600 to-blue-600">
-                <div className="flex items-center space-x-4">
-                  <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-md">
-                    <PlayCircle className="w-6 h-6 text-white" />
+              <div className="flex items-center justify-between px-6 sm:px-8 py-5 sm:py-6 bg-gradient-to-r from-purple-600 to-blue-600">
+                <div className="flex items-center space-x-3 sm:space-x-4">
+                  <div className="p-2 sm:p-3 bg-white/20 rounded-xl sm:rounded-2xl backdrop-blur-md">
+                    <PlayCircle className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-black text-white leading-tight">Execution Report</h2>
-                    <p className="text-white/70 text-xs font-bold uppercase tracking-widest">ID #{selectedExecution.id}</p>
+                    <h2 className="text-lg sm:text-2xl font-black text-white leading-tight">Execution Report</h2>
+                    <p className="text-white/70 text-[10px] sm:text-xs font-bold uppercase tracking-widest">ID #{selectedExecution.id}</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setShowExecutionModal(false)}
-                  className="p-2 bg-white/10 hover:bg-white/20 rounded-xl transition-all"
+                  className="p-1.5 sm:p-2 bg-white/10 hover:bg-white/20 rounded-lg sm:rounded-xl transition-all"
                 >
-                  <X className="w-6 h-6 text-white" />
+                  <X className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </button>
               </div>
 
@@ -1129,23 +1133,23 @@ const Workflows: React.FC = () => {
 
         {/* Share Modal */}
         {showShareModal && sharingWorkflow && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowShareModal(false)} />
-            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-hidden">
+            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[95vh] sm:max-h-[90vh] overflow-hidden">
               {/* Header */}
               <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-purple-600 to-pink-600">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
-                    <Share2 className="w-5 h-5 text-white" />
+                  <div className="p-2 sm:p-2.5 rounded-xl bg-white/20 flex items-center justify-center">
+                    <Share2 className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                   </div>
-                  <div>
-                    <h2 className="text-xl font-bold text-white">Share Workflow</h2>
-                    <p className="text-sm text-white/80">{sharingWorkflow.name}</p>
+                  <div className="min-w-0">
+                    <h2 className="text-base sm:text-xl font-bold text-white truncate max-w-[150px] sm:max-w-[300px]">{sharingWorkflow.name}</h2>
+                    <p className="text-[10px] sm:text-sm text-white/80">Share Workflow</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setShowShareModal(false)}
-                  className="p-2 rounded-lg hover:bg-white/20 transition-colors"
+                  className="p-1.5 sm:p-2 rounded-lg hover:bg-white/20 transition-colors"
                 >
                   <X className="w-5 h-5 text-white" />
                 </button>
