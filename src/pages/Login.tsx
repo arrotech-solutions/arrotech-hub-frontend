@@ -1,14 +1,14 @@
 import {
-    ArrowRight,
-    CheckCircle,
-    Eye,
-    EyeOff,
-    Globe,
-    Lock,
-    Mail,
-    Shield,
-    Sparkles,
-    Zap
+  ArrowRight,
+  CheckCircle,
+  Eye,
+  EyeOff,
+  Globe,
+  Lock,
+  Mail,
+  Shield,
+  Sparkles,
+  Zap
 } from 'lucide-react';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -33,13 +33,22 @@ const Login: React.FC = () => {
     formState: { errors },
   } = useForm<LoginFormData>();
 
+  const [formError, setFormError] = useState<string | null>(null);
+
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
+    setFormError(null);
     try {
       await login(data.email, data.password, rememberMe);
-      navigate('/');
-    } catch (error) {
-      // Error is handled by the auth hook
+      if (data.email.toLowerCase() === 'support@arrotechsolutions') {
+        navigate('/admin');
+      } else {
+        navigate('/');
+      }
+    } catch (error: any) {
+      // Handle specific access errors
+      const errorMessage = error.response?.data?.detail || 'Login failed. Please try again.';
+      setFormError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -64,9 +73,17 @@ const Login: React.FC = () => {
               Sign in to your Mini-Hub account
             </p>
           </div>
-          
+
           {/* Form */}
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-gray-200/50">
+            {formError && (
+              <div className="mb-6 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm flex items-start">
+                <div className="mr-3 mt-0.5">
+                  <Shield className="w-5 h-5 text-red-500" />
+                </div>
+                <span>{formError}</span>
+              </div>
+            )}
             <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
               <div className="space-y-4">
                 <div>
@@ -141,8 +158,8 @@ const Login: React.FC = () => {
 
               <div className="flex items-center justify-between">
                 <label className="flex items-center">
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
@@ -178,6 +195,12 @@ const Login: React.FC = () => {
                 Don't have an account?{' '}
                 <Link to="/register" className="font-semibold text-blue-600 hover:text-blue-500 transition-colors">
                   Create account
+                </Link>
+              </p>
+              <p className="text-center text-sm text-gray-600 mt-2">
+                Need access?{' '}
+                <Link to="/" className="font-semibold text-blue-600 hover:text-blue-500 transition-colors">
+                  Request invite
                 </Link>
               </p>
             </div>
