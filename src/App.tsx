@@ -22,6 +22,8 @@ import Register from './pages/Register';
 import ResetPassword from './pages/ResetPassword';
 import Settings from './pages/Settings';
 import Workflows from './pages/Workflows';
+import RequestAccess from './pages/RequestAccess';
+import AdminDashboard from './pages/AdminDashboard'; // Import AdminDashboard
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -45,6 +47,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 // Public Route Component (redirects to dashboard if already logged in)
 const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading } = useAuth();
+  const accessApproved = localStorage.getItem('access_approved_email');
 
   if (loading) {
     return (
@@ -55,6 +58,14 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   }
 
   if (user) {
+    if (user.email?.toLowerCase() === 'support@arrotechsolutions') {
+      return <Navigate to="/admin" replace />;
+    }
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  // If not logged in and not approved, redirect to landing page
+  if (!accessApproved) {
     return <Navigate to="/" replace />;
   }
 
@@ -64,6 +75,9 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 const AppRoutes: React.FC = () => {
   return (
     <Routes>
+      {/* Landing Page / Waitlist */}
+      <Route path="/" element={<RequestAccess />} />
+
       {/* Public Routes */}
       <Route
         path="/login"
@@ -99,17 +113,6 @@ const AppRoutes: React.FC = () => {
       />
 
       {/* Protected Routes */}
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute>
-            <Layout>
-              <Dashboard />
-            </Layout>
-          </ProtectedRoute>
-        }
-      />
-
       <Route
         path="/dashboard"
         element={
@@ -258,6 +261,16 @@ const AppRoutes: React.FC = () => {
         element={
           <ProtectedRoute>
             <Chat />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Admin Route */}
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute>
+            <AdminDashboard />
           </ProtectedRoute>
         }
       />

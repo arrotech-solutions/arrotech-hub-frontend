@@ -146,6 +146,27 @@ class ApiService {
     return response.data;
   }
 
+  // Access Request endpoints
+  async requestAccess(email: string, name?: string, reason?: string): Promise<ApiResponse<any>> {
+    const response = await this.api.post('/access/request', { email, name, reason });
+    return response.data;
+  }
+
+  async getAccessStatus(email: string): Promise<ApiResponse<any>> {
+    const response = await this.api.get('/access/status', { params: { email } });
+    return response.data;
+  }
+
+  async getAccessRequests(status?: string): Promise<ApiResponse<any[]>> {
+    const response = await this.api.get('/access/requests', { params: { status } });
+    return response.data;
+  }
+
+  async approveAccess(email: string, action: 'approve' | 'reject'): Promise<ApiResponse<any>> {
+    const response = await this.api.post('/access/approve', { email, action });
+    return response.data;
+  }
+
   // Connection endpoints
   async getConnections(): Promise<ApiResponse<Connection[]>> {
     const response = await this.api.get('/connections/');
