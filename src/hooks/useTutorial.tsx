@@ -59,6 +59,9 @@ const pageConfig: Record<string, string> = {
   activity: '/activity',
   settings: '/settings',
   profile: '/profile',
+  marketplace: '/marketplace',
+  favorites: '/favorites',
+  creator: '/creator-profile',
 };
 
 // Tutorial steps configuration - using more reliable CSS selectors
@@ -131,7 +134,7 @@ const tutorialSteps: TutorialStep[] = [
     title: 'Conversation History',
     description: 'Your chats are organized by time. Click to continue a conversation, hover for rename/delete options.',
     target: '.chat-conversations-list',
-    fallbackTarget: '.overflow-y-auto',
+    fallbackTarget: '.chat-history-empty',
     position: 'right',
     page: 'chat',
     order: 7
@@ -151,7 +154,7 @@ const tutorialSteps: TutorialStep[] = [
     title: 'Messages Area',
     description: 'Your conversation appears here. AI responses include tool execution results and structured data.',
     target: '.chat-messages-area',
-    fallbackTarget: '.overflow-y-auto.p-8',
+    fallbackTarget: '.chat-messages-empty',
     position: 'left',
     page: 'chat',
     order: 9
@@ -222,7 +225,7 @@ const tutorialSteps: TutorialStep[] = [
     id: 'workflows-filters',
     title: 'Search & Filter',
     description: 'Search workflows by name and filter by status. Toggle between grid and list views.',
-    target: '.bg-white.rounded-xl.shadow-sm.border.p-6.mb-6',
+    target: '.workflows-filters',
     fallbackTarget: 'input[placeholder*="Search"]',
     position: 'bottom',
     page: 'workflows',
@@ -232,8 +235,8 @@ const tutorialSteps: TutorialStep[] = [
     id: 'workflows-actions',
     title: 'Workflow Actions',
     description: 'Execute workflows, view details, edit configurations, or delete. Use the Execute modal for input data.',
-    target: 'button[class*="Execute"]',
-    fallbackTarget: '[class*="execute"]',
+    target: '.execute-workflow-btn',
+    fallbackTarget: '.workflows-list-empty',
     position: 'left',
     page: 'workflows',
     order: 17
@@ -284,8 +287,8 @@ const tutorialSteps: TutorialStep[] = [
     id: 'agents-actions',
     title: 'Agent Controls',
     description: 'Start, pause, or stop agents. View execution history and modify configurations.',
-    target: 'button[class*="Play"], button[class*="Pause"]',
-    fallbackTarget: '[class*="agent-card"]',
+    target: '.agent-actions-container',
+    fallbackTarget: '.agents-list-empty',
     position: 'left',
     page: 'agents',
     order: 22
@@ -316,7 +319,7 @@ const tutorialSteps: TutorialStep[] = [
     id: 'connections-stats',
     title: 'Connection Status',
     description: 'View total connections, active services, inactive, and any with errors.',
-    target: '.stats-overview',
+    target: '.connections-stats',
     fallbackTarget: '.grid.grid-cols-1.md\\:grid-cols-4',
     position: 'bottom',
     page: 'connections',
@@ -327,7 +330,7 @@ const tutorialSteps: TutorialStep[] = [
     title: 'Your Connections',
     description: 'Manage existing connections - test connectivity, sync data, edit config, or disconnect.',
     target: '.connection-cards',
-    fallbackTarget: '[class*="connection"]',
+    fallbackTarget: '.connections-list-empty',
     position: 'top',
     page: 'connections',
     order: 26
@@ -379,7 +382,7 @@ const tutorialSteps: TutorialStep[] = [
     title: 'Transaction History',
     description: 'View all past payments and subscriptions with status, amounts, and timestamps.',
     target: '.payment-history',
-    fallbackTarget: '.grid.grid-cols-1.lg\\:grid-cols-2',
+    fallbackTarget: '.payments-list-empty',
     position: 'top',
     page: 'payments',
     order: 35
@@ -421,7 +424,7 @@ const tutorialSteps: TutorialStep[] = [
     title: 'Activity Logs',
     description: 'Detailed logs with timestamps, descriptions, categories, and status indicators.',
     target: '.activity-list',
-    fallbackTarget: '.space-y-6',
+    fallbackTarget: '.activity-list-empty',
     position: 'top',
     page: 'activity',
     order: 39
@@ -509,6 +512,154 @@ const tutorialSteps: TutorialStep[] = [
     position: 'top',
     page: 'profile',
     order: 47
+  },
+
+
+
+  // Marketplace steps (5 steps)
+  {
+    id: 'marketplace-intro',
+    title: 'Workflow Marketplace',
+    description: 'Discover and import community-built intelligent workflows for your business.',
+    target: '.marketplace-header',
+    fallbackTarget: 'main h1',
+    position: 'bottom',
+    page: 'marketplace',
+    order: 54
+  },
+  {
+    id: 'marketplace-trending',
+    title: 'Trending Workflows',
+    description: 'See the most popular and highly-rated workflows this week.',
+    target: '.marketplace-trending-header',
+    fallbackTarget: '.marketplace-tabs',
+    position: 'bottom',
+    page: 'marketplace',
+    order: 55
+  },
+  {
+    id: 'marketplace-tabs',
+    title: 'Browse & Your Activity',
+    description: 'Manage your shared workflows and your downloaded tools.',
+    target: '.marketplace-tabs',
+    fallbackTarget: '.bg-gray-100/50',
+    position: 'bottom',
+    page: 'marketplace',
+    order: 56
+  },
+  {
+    id: 'marketplace-filters',
+    title: 'Filter Marketplace',
+    description: 'Search by keyword or filter by category and popularity.',
+    target: '.marketplace-filters',
+    fallbackTarget: 'input[placeholder*="Search"]',
+    position: 'bottom',
+    page: 'marketplace',
+    order: 57
+  },
+  {
+    id: 'marketplace-list',
+    title: 'Workflow Selection',
+    description: 'Review workflow details, steps, and ratings before importing to your account.',
+    target: '.marketplace-list',
+    fallbackTarget: '.marketplace-list-empty',
+    position: 'top',
+    page: 'marketplace',
+    order: 58
+  },
+
+  // Favorites steps (3 steps)
+  {
+    id: 'favorites-intro',
+    title: 'Saved Workflows',
+    description: 'Access your bookmarked workflows from the marketplace for quick reference.',
+    target: '.favorites-header',
+    fallbackTarget: 'main h1',
+    position: 'bottom',
+    page: 'favorites',
+    order: 59
+  },
+  {
+    id: 'favorites-list',
+    title: 'Your Favorites',
+    description: 'Manage your saved collection. You can view details or remove items easily.',
+    target: '.favorites-list',
+    fallbackTarget: '.favorites-empty-state',
+    position: 'top',
+    page: 'favorites',
+    order: 60
+  },
+  {
+    id: 'favorites-empty',
+    title: 'Find New Workflows',
+    description: 'If you haven\'t saved any yet, head over to the marketplace to explore!',
+    target: '.favorites-empty-state',
+    fallbackTarget: 'button',
+    position: 'top',
+    page: 'favorites',
+    order: 61
+  },
+
+  // Creator Profile steps (6 steps)
+  {
+    id: 'creator-intro',
+    title: 'Creator Profile',
+    description: 'Personalize your public presence and showcase your contributions to the community.',
+    target: '.creator-header',
+    fallbackTarget: 'main h1',
+    position: 'bottom',
+    page: 'creator',
+    order: 62
+  },
+  {
+    id: 'creator-card',
+    title: 'Profile Customization',
+    description: 'Update your bio, social links, and public visibility settings.',
+    target: '.creator-profile-card',
+    fallbackTarget: '.bg-white.rounded-xl',
+    position: 'bottom',
+    page: 'creator',
+    order: 63
+  },
+  {
+    id: 'creator-stats',
+    title: 'Creator Stats',
+    description: 'Track your impact with total downloads, reviews, and average rating.',
+    target: '.creator-stats',
+    fallbackTarget: '.grid-cols-6',
+    position: 'bottom',
+    page: 'creator',
+    order: 64
+  },
+  {
+    id: 'creator-workflows',
+    title: 'Public Workflows',
+    description: 'View all workflows you\'ve shared with the marketplace.',
+    target: '.creator-workflows',
+    fallbackTarget: '.creator-workflows-empty',
+    position: 'top',
+    page: 'creator',
+    order: 65
+  },
+  {
+    id: 'creator-activity',
+    title: 'Creator Activity',
+    description: 'Monitor engagement with your workflows and new follower alerts.',
+    target: '.creator-activity',
+    fallbackTarget: '.creator-activity-empty',
+    position: 'top',
+    page: 'creator',
+    order: 66
+  },
+  {
+    id: 'creator-leaderboard',
+    title: 'Top Creators',
+    description: 'See where you stand among the community\'s most influential contributors.',
+    target: '.creator-top-leaderboard',
+    fallbackTarget: '.creator-leaderboard',
+    position: 'left',
+    page: 'creator',
+    order: 67
   },
 ];
 

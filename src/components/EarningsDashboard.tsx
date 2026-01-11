@@ -57,42 +57,43 @@ const EarningsDashboard: React.FC<EarningsDashboardProps> = ({ className }) => {
     );
   }
 
-  const monthlyChange = earnings.this_month > 0 ? 
+  const monthlyChange = earnings.this_month > 0 ?
     ((earnings.this_month / (earnings.total_earnings || 1)) * 100).toFixed(1) : '0';
 
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center space-x-3">
-          <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg">
+          <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg shrink-0">
             <Wallet className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">Earnings Dashboard</h3>
+            <h3 className="text-lg font-semibold text-gray-900 leading-tight">Earnings Dashboard</h3>
             <p className="text-sm text-gray-500">Track your workflow sales</p>
           </div>
         </div>
         <button
           onClick={loadEarnings}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          className="flex items-center justify-center space-x-2 px-3 py-1.5 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200 text-sm text-gray-600 sm:border-none sm:p-2"
         >
-          <RefreshCw className="w-4 h-4 text-gray-600" />
+          <RefreshCw className="w-4 h-4" />
+          <span className="sm:hidden">Refresh</span>
         </button>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {/* Total Earnings */}
         <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-5 border border-green-200">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-green-800">Total Earnings</p>
-              <p className="text-3xl font-bold text-green-900 mt-1">
+              <p className="text-2xl sm:text-3xl font-bold text-green-900 mt-1">
                 ${earnings.total_earnings.toFixed(2)}
               </p>
             </div>
-            <div className="p-3 bg-green-100 rounded-full">
+            <div className="p-3 bg-green-100 rounded-full shrink-0">
               <DollarSign className="w-6 h-6 text-green-600" />
             </div>
           </div>
@@ -107,11 +108,11 @@ const EarningsDashboard: React.FC<EarningsDashboardProps> = ({ className }) => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-blue-800">This Month</p>
-              <p className="text-3xl font-bold text-blue-900 mt-1">
+              <p className="text-2xl sm:text-3xl font-bold text-blue-900 mt-1">
                 ${earnings.this_month.toFixed(2)}
               </p>
             </div>
-            <div className="p-3 bg-blue-100 rounded-full">
+            <div className="p-3 bg-blue-100 rounded-full shrink-0">
               <Calendar className="w-6 h-6 text-blue-600" />
             </div>
           </div>
@@ -122,15 +123,15 @@ const EarningsDashboard: React.FC<EarningsDashboardProps> = ({ className }) => {
         </div>
 
         {/* Pending Payout */}
-        <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-5 border border-amber-200">
+        <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-5 border border-amber-200 sm:col-span-2 lg:col-span-1">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-amber-800">Pending Payout</p>
-              <p className="text-3xl font-bold text-amber-900 mt-1">
+              <p className="text-2xl sm:text-3xl font-bold text-amber-900 mt-1">
                 ${earnings.pending_earnings.toFixed(2)}
               </p>
             </div>
-            <div className="p-3 bg-amber-100 rounded-full">
+            <div className="p-3 bg-amber-100 rounded-full shrink-0">
               <CreditCard className="w-6 h-6 text-amber-600" />
             </div>
           </div>
@@ -146,7 +147,7 @@ const EarningsDashboard: React.FC<EarningsDashboardProps> = ({ className }) => {
           <h4 className="font-semibold text-gray-900">Recent Transactions</h4>
           <span className="text-sm text-gray-500">{earnings.transactions.length} transactions</span>
         </div>
-        
+
         {earnings.transactions.length === 0 ? (
           <div className="p-8 text-center">
             <Download className="w-12 h-12 text-gray-300 mx-auto mb-3" />
@@ -158,10 +159,9 @@ const EarningsDashboard: React.FC<EarningsDashboardProps> = ({ className }) => {
             {earnings.transactions.map((tx) => (
               <div key={tx.id} className="p-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
                 <div className="flex items-center space-x-3">
-                  <div className={`p-2 rounded-full ${
-                    tx.status === 'completed' ? 'bg-green-100' : 
-                    tx.status === 'pending' ? 'bg-yellow-100' : 'bg-red-100'
-                  }`}>
+                  <div className={`p-2 rounded-full ${tx.status === 'completed' ? 'bg-green-100' :
+                      tx.status === 'pending' ? 'bg-yellow-100' : 'bg-red-100'
+                    }`}>
                     {tx.status === 'completed' ? (
                       <ArrowUpRight className="w-4 h-4 text-green-600" />
                     ) : tx.status === 'pending' ? (
@@ -184,10 +184,9 @@ const EarningsDashboard: React.FC<EarningsDashboardProps> = ({ className }) => {
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className={`font-semibold ${
-                    tx.status === 'completed' ? 'text-green-600' : 
-                    tx.status === 'pending' ? 'text-yellow-600' : 'text-red-600'
-                  }`}>
+                  <p className={`font-semibold ${tx.status === 'completed' ? 'text-green-600' :
+                      tx.status === 'pending' ? 'text-yellow-600' : 'text-red-600'
+                    }`}>
                     +${tx.amount.toFixed(2)}
                   </p>
                   <p className="text-xs text-gray-500 capitalize">{tx.status}</p>
