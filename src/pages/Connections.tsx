@@ -26,12 +26,16 @@ import {
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { useSubscription } from '../hooks/useSubscription';
 import apiService from '../services/api';
 import { Connection, ConnectionCreate, ConnectionPlatform, PlatformCapability } from '../types';
 
 const Connections: React.FC = () => {
   const { user } = useAuth();
+  const { hasConnectionAccess, tier } = useSubscription();
+  const navigate = useNavigate();
   const [connections, setConnections] = useState<Connection[]>([]);
   const [platforms, setPlatforms] = useState<ConnectionPlatform[]>([]);
   const [loading, setLoading] = useState(true);
@@ -742,6 +746,11 @@ const Connections: React.FC = () => {
   };
 
   const openCreateModal = (platform: ConnectionPlatform) => {
+    if (!hasConnectionAccess(platform.id)) {
+      toast.error(`${platform.name} connection is not available on the ${tier} plan. Please upgrade to use this integration.`);
+      navigate('/pricing');
+      return;
+    }
     setSelectedPlatform(platform);
     setFormData({ platform: platform.id, name: '', config: {} });
     setJsonErrors({}); // Clear any previous JSON errors
@@ -944,7 +953,7 @@ const Connections: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
       <div className="max-w-7xl mx-auto p-6">
         {/* Header with Mesh Gradient */}
-        <div className="relative overflow-hidden bg-white rounded-3xl border border-gray-200 shadow-sm mb-8">
+        <div className="relative overflow-hidden bg-white rounded-3xl border border-gray-200 shadow-sm mb-8 connections-header">
           <div className="absolute top-0 right-0 -mt-20 -mr-20 w-80 h-80 bg-blue-400/20 rounded-full blur-3xl animate-pulse"></div>
           <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-64 h-64 bg-purple-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
 
@@ -966,7 +975,7 @@ const Connections: React.FC = () => {
               </div>
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="group relative flex items-center space-x-3 px-8 py-4 bg-gray-900 text-white rounded-2xl hover:shadow-[0_20px_40px_rgba(0,0,0,0.2)] transition-all duration-300 transform hover:-translate-y-1 overflow-hidden"
+                className="group relative flex items-center space-x-3 px-8 py-4 bg-gray-900 text-white rounded-2xl hover:shadow-[0_20px_40px_rgba(0,0,0,0.2)] transition-all duration-300 transform hover:-translate-y-1 overflow-hidden add-connection-btn"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 <Plus className="relative w-5 h-5 transition-transform group-hover:rotate-90" />
@@ -977,7 +986,7 @@ const Connections: React.FC = () => {
         </div>
 
         {/* Stats Overview - Glassmorphism */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10 connections-stats">
           {statsData.map((stat, index) => (
             <div
               key={index}
@@ -1051,7 +1060,7 @@ const Connections: React.FC = () => {
             {filteredConnections.map(viewMode === 'grid' ? renderConnectionCard : renderConnectionList)}
           </div>
         ) : (
-          <div className="text-center py-16">
+          <div className="text-center py-16 connections-list-empty">
             <div className="p-4 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
               <Globe className="w-10 h-10 text-blue-600" />
             </div>
@@ -1077,7 +1086,7 @@ const Connections: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 available-platforms">
             {platforms.map((platform) => {
               const isExpanded = expandedPlatforms.has(platform.id);
               const hasExpandableContent =

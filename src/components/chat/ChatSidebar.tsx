@@ -94,7 +94,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
 
     return (
         <aside
-            className={`fixed inset-y-0 left-0 z-50 md:relative flex flex-col border-r backdrop-blur-md transition-all duration-300 ease-in-out
+            className={`fixed inset-y-0 left-0 z-50 md:relative flex flex-col border-r backdrop-blur-md transition-all duration-300 ease-in-out chat-sidebar
                 ${sidebarCollapsed
                     ? '-translate-x-full md:translate-x-0 md:w-20'
                     : 'translate-x-0 w-[280px] md:w-72'} 
@@ -136,7 +136,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
                             <select
                                 value={selectedProvider}
                                 onChange={(e) => setSelectedProvider(e.target.value)}
-                                className={`w-full appearance-none px-3 py-2 text-xs font-bold rounded-lg border focus:outline-none transition-all
+                                className={`w-full appearance-none px-3 py-2 text-xs font-bold rounded-lg border focus:outline-none transition-all chat-provider-select
                                     ${isDarkMode ? 'bg-gray-800/50 border-gray-700 text-gray-200' : 'bg-gray-50 border-gray-200 text-gray-700'}`}
                             >
                                 {providers?.all_providers?.map((p) => (
@@ -152,61 +152,72 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
             </div>
 
             {/* Conversations List */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-3">
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-3 chat-conversations-list">
                 {!sidebarCollapsed ? (
-                    Object.entries(groupConversationsByTime(conversations)).map(([group, l]) => (
-                        <div key={group} className="mb-6 last:mb-2">
-                            <h3 className={`px-3 mb-2 text-[10px] font-bold uppercase tracking-widest ${isDarkMode ? 'text-gray-600' : 'text-gray-400'}`}>{group}</h3>
-                            <div className="space-y-0.5">
-                                {l.map((c) => (
-                                    <div
-                                        key={c.id}
-                                        onClick={() => {
-                                            setCurrentConversation(c);
-                                            // Auto collapse on mobile when selection happens
-                                            if (window.innerWidth < 768) setSidebarCollapsed(true);
-                                        }}
-                                        className={`group relative flex items-center p-3 rounded-xl cursor-pointer transition-all duration-200
-                                            ${currentConversation?.id === c.id
-                                                ? (isDarkMode ? 'bg-indigo-600/20 text-indigo-100' : 'bg-indigo-50 text-indigo-700')
-                                                : (isDarkMode ? 'hover:bg-gray-800/50 text-gray-400' : 'hover:bg-gray-50 text-gray-600')}`}
-                                    >
-                                        <MessageSquare size={16} className={`shrink-0 ${currentConversation?.id === c.id ? 'text-indigo-500' : 'text-gray-400'}`} />
-                                        <div className="ml-3 flex-1 min-w-0 pr-6">
-                                            {editingConversation === c.id ? (
-                                                <input
-                                                    autoFocus
-                                                    value={editingTitle}
-                                                    onChange={(e) => setEditingTitle(e.target.value)}
-                                                    onKeyDown={(e) => {
-                                                        if (e.key === 'Enter') handleUpdateTitle(c.id);
-                                                        if (e.key === 'Escape') setEditingConversation(null);
-                                                    }}
-                                                    onClick={(e) => e.stopPropagation()}
-                                                    className="w-full bg-transparent outline-none text-sm font-bold"
-                                                />
-                                            ) : (
-                                                <p className="text-sm font-bold truncate">{c.title || 'Untitled Chat'}</p>
-                                            )}
+                    conversations.length > 0 ? (
+                        Object.entries(groupConversationsByTime(conversations)).map(([group, l]) => (
+                            <div key={group} className="mb-6 last:mb-2">
+                                <h3 className={`px-3 mb-2 text-[10px] font-bold uppercase tracking-widest ${isDarkMode ? 'text-gray-600' : 'text-gray-400'}`}>{group}</h3>
+                                <div className="space-y-0.5">
+                                    {l.map((c) => (
+                                        <div
+                                            key={c.id}
+                                            onClick={() => {
+                                                setCurrentConversation(c);
+                                                // Auto collapse on mobile when selection happens
+                                                if (window.innerWidth < 768) setSidebarCollapsed(true);
+                                            }}
+                                            className={`group relative flex items-center p-3 rounded-xl cursor-pointer transition-all duration-200
+                                                ${currentConversation?.id === c.id
+                                                    ? (isDarkMode ? 'bg-indigo-600/20 text-indigo-100' : 'bg-indigo-50 text-indigo-700')
+                                                    : (isDarkMode ? 'hover:bg-gray-800/50 text-gray-400' : 'hover:bg-gray-50 text-gray-600')}`}
+                                        >
+                                            <MessageSquare size={16} className={`shrink-0 ${currentConversation?.id === c.id ? 'text-indigo-500' : 'text-gray-400'}`} />
+                                            <div className="ml-3 flex-1 min-w-0 pr-6">
+                                                {editingConversation === c.id ? (
+                                                    <input
+                                                        autoFocus
+                                                        value={editingTitle}
+                                                        onChange={(e) => setEditingTitle(e.target.value)}
+                                                        onKeyDown={(e) => {
+                                                            if (e.key === 'Enter') handleUpdateTitle(c.id);
+                                                            if (e.key === 'Escape') setEditingConversation(null);
+                                                        }}
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        className="w-full bg-transparent outline-none text-sm font-bold"
+                                                    />
+                                                ) : (
+                                                    <p className="text-sm font-bold truncate">{c.title || 'Untitled Chat'}</p>
+                                                )}
+                                            </div>
+                                            <div className="absolute right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <MoreVertical size={14} onClick={(e) => { e.stopPropagation(); setShowOptionsMenu(showOptionsMenu === c.id ? null : c.id); }} />
+                                                {showOptionsMenu === c.id && (
+                                                    <div className={`absolute right-0 top-full mt-1 z-50 w-32 rounded-lg border shadow-xl overflow-hidden ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'}`}>
+                                                        <button onClick={() => startEditing(c)} className={`w-full flex items-center px-3 py-2 text-xs ${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-50'}`}>
+                                                            <Edit size={12} className="mr-2" /> Rename
+                                                        </button>
+                                                        <button onClick={() => deleteConversation(c.id)} className="w-full flex items-center px-3 py-2 text-xs text-red-500 hover:bg-red-50">
+                                                            <Trash2 size={12} className="mr-2" /> Delete
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
-                                        <div className="absolute right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <MoreVertical size={14} onClick={(e) => { e.stopPropagation(); setShowOptionsMenu(showOptionsMenu === c.id ? null : c.id); }} />
-                                            {showOptionsMenu === c.id && (
-                                                <div className={`absolute right-0 top-full mt-1 z-50 w-32 rounded-lg border shadow-xl overflow-hidden ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'}`}>
-                                                    <button onClick={() => startEditing(c)} className={`w-full flex items-center px-3 py-2 text-xs ${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-50'}`}>
-                                                        <Edit size={12} className="mr-2" /> Rename
-                                                    </button>
-                                                    <button onClick={() => deleteConversation(c.id)} className="w-full flex items-center px-3 py-2 text-xs text-red-500 hover:bg-red-50">
-                                                        <Trash2 size={12} className="mr-2" /> Delete
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                ))}
+                                    ))}
+                                </div>
                             </div>
+                        ))
+                    ) : (
+                        <div className="flex flex-col items-center justify-center py-12 px-4 text-center chat-history-empty">
+                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 ${isDarkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
+                                <MessageSquare className={`w-6 h-6 ${isDarkMode ? 'text-gray-600' : 'text-gray-300'}`} />
+                            </div>
+                            <p className={`text-xs font-bold leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                                Your conversation history will appear here.
+                            </p>
                         </div>
-                    ))
+                    )
                 ) : (
                     <div className="flex flex-col items-center space-y-3">
                         {conversations.slice(0, 10).map((c) => (
@@ -240,7 +251,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
                         createNewConversation();
                         if (window.innerWidth < 768) setSidebarCollapsed(true);
                     }}
-                    className={`flex items-center justify-center space-x-2 w-full py-3 rounded-xl font-bold transition-all active:scale-95 shadow-lg
+                    className={`flex items-center justify-center space-x-2 w-full py-3 rounded-xl font-bold transition-all active:scale-95 shadow-lg chat-new-conversation
                         ${sidebarCollapsed ? 'p-0 h-12' : 'px-4'}
                         bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600 text-white`}
                 >

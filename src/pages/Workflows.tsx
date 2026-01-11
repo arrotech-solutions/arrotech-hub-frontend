@@ -36,6 +36,8 @@ import {
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
+import { useSubscription } from '../hooks/useSubscription';
 import toast from 'react-hot-toast';
 import EnhancedWorkflowCreator from '../components/EnhancedWorkflowCreator';
 import ExecuteWorkflowModal from '../components/ExecuteWorkflowModal';
@@ -50,6 +52,8 @@ import {
 
 const Workflows: React.FC = () => {
   const { user } = useAuth();
+  const { canUseFeature, tier } = useSubscription();
+  const navigate = useNavigate();
   const [workflows, setWorkflows] = useState<WorkflowType[]>([]);
   const [executions, setExecutions] = useState<WorkflowExecution[]>([]);
   const [loading, setLoading] = useState(true);
@@ -503,7 +507,7 @@ const Workflows: React.FC = () => {
               setExecutingWorkflow(workflow);
               setShowExecuteModal(true);
             }}
-            className="flex items-center justify-center space-x-2 py-3 bg-gray-900 text-white rounded-xl hover:bg-black hover:shadow-lg transition-all duration-300 font-bold text-xs"
+            className="flex items-center justify-center space-x-2 py-3 bg-gray-900 text-white rounded-xl hover:bg-black hover:shadow-lg transition-all duration-300 font-bold text-xs execute-workflow-btn"
           >
             <Play className="w-3.5 h-3.5 fill-current" />
             <span>Launch</span>
@@ -583,7 +587,7 @@ const Workflows: React.FC = () => {
             setExecutingWorkflow(workflow);
             setShowExecuteModal(true);
           }}
-          className="flex-1 sm:flex-none flex items-center justify-center space-x-2 px-6 py-2.5 bg-gray-900 text-white rounded-xl hover:bg-black transition-all duration-300 font-bold text-xs"
+          className="flex-1 sm:flex-none flex items-center justify-center space-x-2 px-6 py-2.5 bg-gray-900 text-white rounded-xl hover:bg-black transition-all duration-300 font-bold text-xs execute-workflow-btn"
         >
           <Play className="w-3 h-3 fill-current" />
           <span>Launch</span>
@@ -628,7 +632,7 @@ const Workflows: React.FC = () => {
                   </div>
                   <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">Workspace Management</span>
                 </div>
-                <h1 className="text-3xl sm:text-4xl font-black text-gray-900 mb-2 tracking-tight">
+                <h1 className="text-3xl sm:text-4xl font-black text-gray-900 mb-2 tracking-tight workflows-header">
                   Welcome back, <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">{user?.name?.split(' ')[0] || 'Builder'}</span>!
                 </h1>
                 <p className="text-gray-500 max-w-md font-medium">
@@ -647,8 +651,16 @@ const Workflows: React.FC = () => {
                   <RefreshCw className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" />
                 </button>
                 <button
-                  onClick={() => setShowEnhancedCreator(true)}
-                  className="flex-1 sm:flex-none flex items-center justify-center space-x-2 px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl hover:shadow-[0_0_20px_rgba(37,99,235,0.4)] transform hover:-translate-y-1 transition-all duration-300 font-bold"
+                  onClick={() => {
+                    const activeWorkflows = workflows.filter(w => w.status === 'active').length;
+                    if (!canUseFeature('max_active_workflows', activeWorkflows)) {
+                      toast.error(`You've reached the limit of active workflows for the ${tier} plan. Please upgrade to create more.`);
+                      navigate('/pricing');
+                      return;
+                    }
+                    setShowEnhancedCreator(true);
+                  }}
+                  className="flex-1 sm:flex-none flex items-center justify-center space-x-2 px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl hover:shadow-[0_0_20px_rgba(37,99,235,0.4)] transform hover:-translate-y-1 transition-all duration-300 font-bold workflow-builder"
                 >
                   <Plus className="w-5 h-5" />
                   <span>Create Workflow</span>
@@ -660,7 +672,7 @@ const Workflows: React.FC = () => {
 
         {/* Tab Navigation */}
         {/* Tab Navigation - Pill Style */}
-        <div className="overflow-x-auto custom-scrollbar-hide mb-8">
+        <div className="overflow-x-auto custom-scrollbar-hide mb-8 workflows-tabs">
           <div className="bg-gray-100/50 p-1.5 rounded-2xl flex items-center w-max sm:w-fit backdrop-blur-sm border border-gray-200/50">
             {[
               { id: 'workflows', label: 'Workflows', icon: Workflow, count: stats.total, color: 'blue' },
@@ -694,7 +706,7 @@ const Workflows: React.FC = () => {
 
         {/* Stats Overview */}
         {/* Stats Overview - Glassmorphism */}
-        <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10 ${activeTab === 'templates' ? 'hidden' : ''}`}>
+        <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10 workflows-stats ${activeTab === 'templates' ? 'hidden' : ''}`}>
           {[
             { label: activeTab === 'workflows' ? 'Total Workflows' : 'Total Executions', value: activeTab === 'workflows' ? stats.total : stats.executions, icon: activeTab === 'workflows' ? Workflow : PlayCircle, color: 'blue', bgColor: 'bg-blue-500' },
             { label: activeTab === 'workflows' ? 'Active Workflows' : 'Running Jobs', value: activeTab === 'workflows' ? stats.active : stats.running, icon: activeTab === 'workflows' ? CheckCircle : RefreshCw, color: 'emerald', bgColor: 'bg-emerald-500' },
@@ -728,7 +740,7 @@ const Workflows: React.FC = () => {
         </div>
 
         {/* Filters and Search - Integrated Design */}
-        <div className={`mb-10 p-6 bg-white/40 backdrop-blur-md rounded-2xl border border-white/60 shadow-sm ${activeTab === 'templates' ? 'hidden' : ''}`}>
+        <div className={`mb-10 p-6 bg-white/40 backdrop-blur-md rounded-2xl border border-white/60 shadow-sm workflows-filters ${activeTab === 'templates' ? 'hidden' : ''}`}>
           <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-x-0 sm:space-x-4 space-y-4 sm:space-y-0 flex-1 w-full">
               <div className="relative flex-1 group">
@@ -791,7 +803,7 @@ const Workflows: React.FC = () => {
           </div>
         ) : activeTab === 'workflows' ? (
           filteredWorkflows.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-24 px-6 text-center">
+            <div className="flex flex-col items-center justify-center py-24 px-6 text-center workflows-list-empty">
               <div className="relative mb-10">
                 <div className="absolute inset-0 bg-blue-500/20 blur-3xl rounded-full scale-150 animate-pulse"></div>
                 <div className="relative p-8 bg-white border border-blue-100 shadow-2xl rounded-[2.5rem] transform hover:rotate-6 transition-transform duration-500">

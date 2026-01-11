@@ -336,6 +336,30 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
         const fieldType = schema.type || 'string';
         const isRequired = schema.required || false;
 
+        // Render select dropdown if enum is provided
+        if (schema.enum && Array.isArray(schema.enum)) {
+            return (
+                <div className="relative">
+                    <select
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm appearance-none bg-white"
+                        value={stepParams[name] || ''}
+                        onChange={(e) => setStepParams({ ...stepParams, [name]: e.target.value })}
+                        required={isRequired}
+                    >
+                        <option value="">Select {name}...</option>
+                        {schema.enum.map((option: string) => (
+                            <option key={option} value={option}>
+                                {option.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                            </option>
+                        ))}
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                        <ChevronDown className="w-4 h-4 text-gray-400" />
+                    </div>
+                </div>
+            );
+        }
+
         switch (fieldType) {
             case 'string':
                 return (
@@ -353,11 +377,19 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
             case 'number':
                 return (
                     <input
-                        type="number"
-                        placeholder={`Enter ${name}`}
+                        type="text"
+                        placeholder={`Enter ${name} or {{variable}}`}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
                         value={stepParams[name] || ''}
-                        onChange={(e) => setStepParams({ ...stepParams, [name]: parseInt(e.target.value) || 0 })}
+                        onChange={(e) => {
+                            const val = e.target.value;
+                            if (val.includes('{{') || val === '') {
+                                setStepParams({ ...stepParams, [name]: val });
+                            } else {
+                                const num = fieldType === 'integer' ? parseInt(val) : parseFloat(val);
+                                setStepParams({ ...stepParams, [name]: isNaN(num) ? val : num });
+                            }
+                        }}
                         required={isRequired}
                     />
                 );

@@ -2,7 +2,9 @@ export interface User {
   id: number;
   email: string;
   name: string;
-  subscription_tier: 'free' | 'testing' | 'pro' | 'enterprise';
+  subscription_tier: 'free' | 'starter' | 'testing' | 'pro' | 'enterprise';
+  subscription_status?: 'active' | 'past_due' | 'canceled' | 'expired' | 'grace_period';
+  subscription_end_date?: string;
   api_key?: string;
   stripe_customer_id?: string;
   created_at: string;
@@ -1249,7 +1251,7 @@ export interface MultiTenantResponse {
   integration_id?: string;
   integration?: TenantIntegration;
   error?: string;
-} 
+}
 
 // Power BI Types
 export interface PowerBIConnectionConfig {
@@ -1632,7 +1634,7 @@ export interface TrendingWorkflow {
 }
 
 // Notification types
-export type NotificationType = 
+export type NotificationType =
   | 'workflow_imported'
   | 'workflow_reviewed'
   | 'workflow_rated'
