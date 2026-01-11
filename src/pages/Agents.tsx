@@ -24,12 +24,12 @@ import {
   Truck,
   Zap,
   ArrowRight,
-  CreditCard,
   XCircle
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { useTutorial } from '../hooks/useTutorial';
 import apiService from '../services/api';
 import { AgentCreate, AgentResponse, AgentStatusResponse, Workflow } from '../types';
 
@@ -58,19 +58,21 @@ const Agents: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'discover' | 'managed'>('discover');
   const [hubSearch, setHubSearch] = useState('');
   const navigate = useNavigate();
+  const { currentStep, isActive: isTutorialActive } = useTutorial();
+
+  // Switch tabs based on tutorial step
+  useEffect(() => {
+    if (isTutorialActive && currentStep) {
+      if (['agents-stats', 'agents-filters', 'agents-actions'].includes(currentStep.id)) {
+        setActiveTab('managed');
+      } else if (['agents-intro', 'agents-create'].includes(currentStep.id)) {
+        setActiveTab('discover');
+      }
+    }
+  }, [currentStep, isTutorialActive]);
 
   const FEATURED_AGENTS = [
-    {
-      id: 'mpesa-recon',
-      name: 'M-Pesa Reconciliation',
-      description: 'Automated payment matching and real-time ledger updates for Daraja API.',
-      icon: <CreditCard className="w-6 h-6" />,
-      color: 'from-green-500 to-emerald-600',
-      lightColor: 'bg-green-50',
-      textColor: 'text-green-700',
-      category: 'Finance',
-      route: '/agents/mpesa'
-    },
+
     {
       id: 'hr-advisor',
       name: 'HR Policy Advisor',
@@ -296,7 +298,7 @@ const Agents: React.FC = () => {
   );
 
   const renderAgentCard = (agent: AgentResponse) => (
-    <div key={agent.agent_id} className="group relative bg-white rounded-[32px] p-6 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-500 overflow-hidden">
+    <div key={agent.agent_id} className="group relative bg-white rounded-[32px] p-6 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-500 overflow-hidden agent-card">
       <div className="absolute top-0 right-0 w-32 h-32 bg-purple-50 rounded-full -mr-16 -mt-16 opacity-50 group-hover:scale-110 transition-transform duration-500" />
       <div className="relative z-10">
         <div className="flex items-start justify-between mb-6">
@@ -331,30 +333,30 @@ const Agents: React.FC = () => {
             <p className="text-lg font-black text-gray-900 leading-none">{new Date(agent.created_at).toLocaleDateString()}</p>
           </div>
         </div>
-        <div className="flex items-center justify-between pt-6 border-t border-gray-100">
+        <div className="flex items-center justify-between pt-6 border-t border-gray-100 agent-actions-container">
           <div className="flex items-center space-x-2">
             {agent.status === 'active' ? (
-              <button onClick={() => handlePauseAgent(agent.agent_id)} className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center hover:bg-amber-100 transition-colors shadow-sm">
+              <button onClick={() => handlePauseAgent(agent.agent_id)} className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center hover:bg-amber-100 transition-colors shadow-sm agent-pause-btn">
                 <Pause className="w-4 h-4" />
               </button>
             ) : (
-              <button onClick={() => handleResumeAgent(agent.agent_id)} className="w-10 h-10 rounded-xl bg-green-50 text-green-600 flex items-center justify-center hover:bg-green-100 transition-colors shadow-sm">
+              <button onClick={() => handleResumeAgent(agent.agent_id)} className="w-10 h-10 rounded-xl bg-green-50 text-green-600 flex items-center justify-center hover:bg-green-100 transition-colors shadow-sm agent-resume-btn">
                 <Play className="w-4 h-4" />
               </button>
             )}
-            <button onClick={() => handleExecuteAgent(agent.agent_id)} className="px-4 h-10 rounded-xl bg-purple-600 text-white font-bold text-sm flex items-center space-x-2 hover:bg-purple-700 transition-all shadow-lg shadow-purple-200">
+            <button onClick={() => handleExecuteAgent(agent.agent_id)} className="px-4 h-10 rounded-xl bg-purple-600 text-white font-bold text-sm flex items-center space-x-2 hover:bg-purple-700 transition-all shadow-lg shadow-purple-200 agent-execute-btn">
               <Zap className="w-4 h-4" />
               <span>Execute</span>
             </button>
           </div>
           <div className="flex items-center space-x-1">
-            <button onClick={() => { setSelectedAgent(agent); loadAgentStatus(agent.agent_id); }} className="p-2.5 text-gray-400 hover:text-purple-600 transition-colors rounded-xl hover:bg-purple-50">
+            <button onClick={() => { setSelectedAgent(agent); loadAgentStatus(agent.agent_id); }} className="p-2.5 text-gray-400 hover:text-purple-600 transition-colors rounded-xl hover:bg-purple-50 agent-view-btn">
               <Eye className="w-5 h-5" />
             </button>
-            <button onClick={() => handleShareAgent(agent)} className="p-2.5 text-gray-400 hover:text-blue-600 transition-colors rounded-xl hover:bg-blue-50">
+            <button onClick={() => handleShareAgent(agent)} className="p-2.5 text-gray-400 hover:text-blue-600 transition-colors rounded-xl hover:bg-blue-50 agent-share-btn">
               <Share2 className="w-5 h-5" />
             </button>
-            <button onClick={() => handleDeleteAgent(agent.agent_id)} className="p-2.5 text-gray-400 hover:text-red-600 transition-colors rounded-xl hover:bg-red-50">
+            <button onClick={() => handleDeleteAgent(agent.agent_id)} className="p-2.5 text-gray-400 hover:text-red-600 transition-colors rounded-xl hover:bg-red-50 agent-delete-btn">
               <Trash2 className="w-5 h-5" />
             </button>
           </div>
@@ -364,7 +366,7 @@ const Agents: React.FC = () => {
   );
 
   const renderAgentList = (agent: AgentResponse) => (
-    <div key={agent.agent_id} className="group relative bg-white rounded-[24px] p-5 border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300">
+    <div key={agent.agent_id} className="group relative bg-white rounded-[24px] p-5 border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 agent-card">
       <div className="flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="flex items-center space-x-5 flex-1">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-purple-200">
@@ -386,17 +388,17 @@ const Agents: React.FC = () => {
             </div>
           </div>
         </div>
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-3 agent-actions-container">
           <div className="flex items-center bg-gray-50 rounded-2xl p-1.5 border border-gray-100">
             {agent.status === 'active' ? (
-              <button onClick={() => handlePauseAgent(agent.agent_id)} className="w-10 h-10 rounded-xl bg-white text-amber-600 flex items-center justify-center shadow-sm border border-gray-100"><Pause className="w-4 h-4" /></button>
+              <button onClick={() => handlePauseAgent(agent.agent_id)} className="w-10 h-10 rounded-xl bg-white text-amber-600 flex items-center justify-center shadow-sm border border-gray-100 agent-pause-btn"><Pause className="w-4 h-4" /></button>
             ) : (
-              <button onClick={() => handleResumeAgent(agent.agent_id)} className="w-10 h-10 rounded-xl bg-white text-green-600 flex items-center justify-center shadow-sm border border-gray-100"><Play className="w-4 h-4" /></button>
+              <button onClick={() => handleResumeAgent(agent.agent_id)} className="w-10 h-10 rounded-xl bg-white text-green-600 flex items-center justify-center shadow-sm border border-gray-100 agent-resume-btn"><Play className="w-4 h-4" /></button>
             )}
-            <button onClick={() => handleExecuteAgent(agent.agent_id)} className="px-5 h-10 rounded-xl bg-purple-600 text-white font-bold text-sm flex items-center space-x-2 ml-1.5 shadow-lg shadow-purple-200"><Zap className="w-4 h-4" /><span>Run</span></button>
+            <button onClick={() => handleExecuteAgent(agent.agent_id)} className="px-5 h-10 rounded-xl bg-purple-600 text-white font-bold text-sm flex items-center space-x-2 ml-1.5 shadow-lg shadow-purple-200 agent-execute-btn"><Zap className="w-4 h-4" /><span>Run</span></button>
           </div>
-          <button onClick={() => { setSelectedAgent(agent); loadAgentStatus(agent.agent_id); }} className="p-2.5 text-gray-400 hover:text-purple-600 transition-colors rounded-xl"><Eye className="w-5 h-5" /></button>
-          <button onClick={() => handleDeleteAgent(agent.agent_id)} className="p-2.5 text-gray-400 hover:text-red-600 transition-colors rounded-xl"><Trash2 className="w-5 h-5" /></button>
+          <button onClick={() => { setSelectedAgent(agent); loadAgentStatus(agent.agent_id); }} className="p-2.5 text-gray-400 hover:text-purple-600 transition-colors rounded-xl agent-view-btn"><Eye className="w-5 h-5" /></button>
+          <button onClick={() => handleDeleteAgent(agent.agent_id)} className="p-2.5 text-gray-400 hover:text-red-600 transition-colors rounded-xl agent-delete-btn"><Trash2 className="w-5 h-5" /></button>
         </div>
       </div>
     </div>
@@ -412,7 +414,7 @@ const Agents: React.FC = () => {
               <Sparkles className="w-3 h-3" />
               <span>Regional Intelligence</span>
             </div>
-            <h1 className="text-5xl md:text-6xl font-black text-gray-900 tracking-tight leading-none">
+            <h1 className="text-5xl md:text-6xl font-black text-gray-900 tracking-tight leading-none agents-header">
               Agent <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600">Hub</span>
             </h1>
             <p className="text-xl text-gray-500 font-medium max-w-xl">
@@ -430,7 +432,7 @@ const Agents: React.FC = () => {
             </button>
             <button
               onClick={() => setShowCreateModal(true)}
-              className="flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-8 py-4 rounded-[20px] font-bold shadow-xl shadow-purple-200 hover:shadow-2xl hover:scale-[1.02] transition-all active:scale-95"
+              className="flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-8 py-4 rounded-[20px] font-bold shadow-xl shadow-purple-200 hover:shadow-2xl hover:scale-[1.02] transition-all active:scale-95 create-agent-btn"
             >
               <Plus className="w-6 h-6" />
               <span>Create Agent</span>
@@ -439,7 +441,7 @@ const Agents: React.FC = () => {
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex p-1.5 bg-gray-100/80 backdrop-blur-sm rounded-[24px] w-fit mb-10 border border-gray-200/50">
+        <div className="flex p-1.5 bg-gray-100/80 backdrop-blur-sm rounded-[24px] w-fit mb-10 border border-gray-200/50 agent-hub-tabs">
           <button
             onClick={() => setActiveTab('discover')}
             className={`flex items-center space-x-3 px-8 py-4 rounded-[18px] text-sm font-black transition-all duration-300 ${activeTab === 'discover'
@@ -463,7 +465,7 @@ const Agents: React.FC = () => {
         </div>
 
         {activeTab === 'discover' ? (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 discover-hub-section">
             {/* Hub Tools */}
             <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white/50 backdrop-blur-md p-4 rounded-[24px] border border-gray-100">
               <div className="relative flex-1 w-full">
@@ -535,7 +537,7 @@ const Agents: React.FC = () => {
         ) : (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Stats Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 agents-stats">
               {[
                 { label: 'Total Fleet', value: stats.total, color: 'text-purple-600', icon: <Bot className="w-5 h-5" /> },
                 { label: 'Active Now', value: stats.active, color: 'text-green-600', icon: <CheckCircle className="w-5 h-5" /> },
@@ -553,7 +555,7 @@ const Agents: React.FC = () => {
             </div>
 
             {/* Management Controls */}
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6 bg-white/50 backdrop-blur-md p-6 rounded-[32px] border border-gray-100 shadow-sm">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6 bg-white/50 backdrop-blur-md p-6 rounded-[32px] border border-gray-100 shadow-sm agents-filters">
               <div className="relative flex-1 w-full">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
@@ -577,9 +579,35 @@ const Agents: React.FC = () => {
             </div>
 
             {/* Agents Display */}
-            <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-20' : 'space-y-4 pb-20'}>
-              {filteredAgents.map(viewMode === 'grid' ? renderAgentCard : renderAgentList)}
-            </div>
+            {filteredAgents.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-24 px-6 text-center bg-white/40 backdrop-blur-md rounded-[40px] border border-white/60 agents-list-empty">
+                <div className="relative mb-10">
+                  <div className="absolute inset-0 bg-purple-500/20 blur-3xl rounded-full scale-150 animate-pulse"></div>
+                  <div className="relative p-8 bg-white border border-purple-100 shadow-2xl rounded-[2.5rem] transform hover:rotate-6 transition-transform duration-500">
+                    <Bot className="w-16 h-16 text-purple-600" />
+                    <div className="absolute -top-2 -right-2 w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center shadow-lg border-2 border-white">
+                      <Plus className="w-4 h-4 text-white" />
+                    </div>
+                  </div>
+                </div>
+                <h3 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">Your fleet is empty</h3>
+                <p className="text-gray-500 mb-10 max-w-md font-medium leading-relaxed">
+                  You haven't deployed any autonomous agents yet. Start by creating an agent from one of your workflows.
+                </p>
+                <button
+                  onClick={() => setShowCreateModal(true)}
+                  className="group relative inline-flex items-center justify-center space-x-3 px-10 py-5 bg-gray-900 text-white rounded-[2rem] hover:shadow-[0_20px_40px_rgba(0,0,0,0.2)] transition-all duration-300 transform hover:-translate-y-1 overflow-hidden"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <Plus className="relative w-5 h-5 transition-transform group-hover:rotate-90" />
+                  <span className="relative font-bold">Deploy Your First Agent</span>
+                </button>
+              </div>
+            ) : (
+              <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-20' : 'space-y-4 pb-20'}>
+                {filteredAgents.map(viewMode === 'grid' ? renderAgentCard : renderAgentList)}
+              </div>
+            )}
           </div>
         )}
 

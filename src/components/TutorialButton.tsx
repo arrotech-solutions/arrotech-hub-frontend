@@ -48,6 +48,9 @@ const TutorialButton: React.FC = () => {
     activity: 'Activity',
     settings: 'Settings',
     profile: 'Profile',
+    marketplace: 'Marketplace',
+    favorites: 'Favorites',
+    creator: 'Creator Profile',
   };
 
   const currentPageLabel = pageLabels[currentPage] || currentPage;
@@ -141,8 +144,8 @@ const TutorialButton: React.FC = () => {
                       setIsMenuOpen(false);
                     }}
                     className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${isCurrentPage
-                        ? 'bg-blue-50 text-blue-700'
-                        : 'hover:bg-gray-50 text-gray-700'
+                      ? 'bg-blue-50 text-blue-700'
+                      : 'hover:bg-gray-50 text-gray-700'
                       }`}
                   >
                     <span className="flex items-center space-x-2">
@@ -168,8 +171,8 @@ const TutorialButton: React.FC = () => {
       <button
         onClick={() => setIsMenuOpen(!isMenuOpen)}
         className={`p-4 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 ${isMenuOpen
-            ? 'bg-gray-100 text-gray-700'
-            : 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
+          ? 'bg-gray-100 text-gray-700'
+          : 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
           }`}
         title="Tutorial Guide"
       >

@@ -15,13 +15,13 @@ import Login from './pages/Login';
 import Marketplace from './pages/Marketplace';
 import CreatorProfile from './pages/CreatorProfile';
 import Favorites from './pages/Favorites';
-import MpesaAgent from './pages/MpesaAgent';
 import Payments from './pages/Payments';
 import Profile from './pages/Profile';
 import Register from './pages/Register';
 import ResetPassword from './pages/ResetPassword';
 import Settings from './pages/Settings';
 import Workflows from './pages/Workflows';
+import Pricing from './pages/Pricing';
 import RequestAccess from './pages/RequestAccess';
 import AdminDashboard from './pages/AdminDashboard'; // Import AdminDashboard
 
@@ -163,16 +163,7 @@ const AppRoutes: React.FC = () => {
         }
       />
 
-      <Route
-        path="/agents/mpesa"
-        element={
-          <ProtectedRoute>
-            <Layout>
-              <MpesaAgent />
-            </Layout>
-          </ProtectedRoute>
-        }
-      />
+
 
       <Route
         path="/marketplace"
@@ -222,6 +213,19 @@ const AppRoutes: React.FC = () => {
           </ProtectedRoute>
         }
       />
+
+      <Route
+        path="/pricing"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <Pricing />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+
 
       <Route
         path="/activity"

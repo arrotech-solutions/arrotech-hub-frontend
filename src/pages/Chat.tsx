@@ -14,6 +14,7 @@ import { Activity } from 'lucide-react';
 import ChatSidebar from '../components/chat/ChatSidebar';
 import MessageList from '../components/chat/MessageList';
 import ChatInput from '../components/chat/ChatInput';
+import { useSubscription } from '../hooks/useSubscription';
 
 // TypeScript declarations for speech recognition
 declare global {
@@ -25,6 +26,7 @@ declare global {
 
 const Chat: React.FC = () => {
   useAuth();
+  const { canUseFeature, usage, limits, tier, refreshUsage } = useSubscription();
   const navigate = useNavigate();
 
   // -- State --
@@ -208,10 +210,14 @@ const Chat: React.FC = () => {
   };
 
   const sendMessage = async () => {
-    if (!inputMessage.trim() || isLoading) return;
-
     if (selectedProvider && !isProviderAvailable(selectedProvider)) {
       toast.error(`Provider ${getProviderDisplayName(selectedProvider)} not available`);
+      return;
+    }
+
+    if (!canUseFeature('max_ai_messages_daily')) {
+      toast.error(`Daily AI message limit reached for the ${tier} plan. Please upgrade to continue.`);
+      navigate('/pricing');
       return;
     }
 
@@ -244,6 +250,7 @@ const Chat: React.FC = () => {
 
       setMessages(prev => [...prev, response]);
       loadConversations();
+      refreshUsage();
     } catch (error) {
       toast.error('Failed to send message');
       setInputMessage(messageContent);
@@ -454,6 +461,8 @@ const Chat: React.FC = () => {
           selectedProvider={selectedProvider}
           getProviderDisplayName={getProviderDisplayName}
           isProviderAvailable={isProviderAvailable}
+          usage={usage}
+          limits={limits}
         />
       </main>
 

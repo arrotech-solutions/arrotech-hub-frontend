@@ -71,13 +71,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       description: 'AI agents management',
       badge: null
     },
-    {
-      name: 'M-Pesa Agent',
-      href: '/agents/mpesa',
-      icon: CreditCard,
-      description: 'Payment reconciliation',
-      badge: 'New'
-    },
+
     {
       name: 'Marketplace',
       href: '/marketplace',
@@ -107,11 +101,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       badge: null
     },
     {
-      name: 'Payments',
+      name: 'Payments & Subscriptions',
       href: '/payments',
       icon: CreditCard,
       description: 'Billing and subscriptions',
       badge: null
+    },
+    {
+      name: 'Pricing',
+      href: '/pricing',
+      icon: Sparkles,
+      description: 'Upgrade your plan',
+      badge: 'New'
     },
     {
       name: 'Activity',

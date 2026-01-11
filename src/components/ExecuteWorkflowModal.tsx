@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   X,
   Play,
@@ -34,9 +34,10 @@ const ExecuteWorkflowModal: React.FC<ExecuteWorkflowModalProps> = ({
   const [jsonError, setJsonError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showSteps, setShowSteps] = useState(false);
+  const [availableTools, setAvailableTools] = useState<any[]>([]);
 
   // Extract input fields from workflow step parameters
-  const getInputFields = () => {
+  const inputFields = useMemo(() => {
     const fields: Array<{
       name: string;
       type: string;
@@ -45,7 +46,12 @@ const ExecuteWorkflowModal: React.FC<ExecuteWorkflowModalProps> = ({
       description?: string;
       stepNumber?: number;
       toolName?: string;
+      options?: string[] | null;
     }> = [];
+
+    const findToolSchema = (toolName: string) => {
+      return availableTools.find(t => t.name === toolName || t.id === toolName);
+    };
 
     // Get fields from workflow variables (for parameterized workflows)
     if (workflow.variables) {
@@ -56,6 +62,7 @@ const ExecuteWorkflowModal: React.FC<ExecuteWorkflowModalProps> = ({
           required: config?.required || false,
           default: config?.default || '',
           description: config?.description,
+          options: config?.enum || null,
         });
       });
     }
@@ -79,6 +86,10 @@ const ExecuteWorkflowModal: React.FC<ExecuteWorkflowModalProps> = ({
             if (typeof paramValue === 'boolean') fieldType = 'boolean';
             else if (typeof paramValue === 'number') fieldType = 'number';
 
+            // Find schema info if available
+            const toolSchema = findToolSchema(step.tool_name);
+            const paramSchema = toolSchema?.inputSchema?.properties?.[paramName];
+
             fields.push({
               name: fieldName,
               type: fieldType,
@@ -87,6 +98,7 @@ const ExecuteWorkflowModal: React.FC<ExecuteWorkflowModalProps> = ({
               description: `${step.tool_name} - ${displayName}`,
               stepNumber: step.step_number || index + 1,
               toolName: step.tool_name,
+              options: paramSchema?.enum || null,
             });
           });
         }
@@ -122,23 +134,47 @@ const ExecuteWorkflowModal: React.FC<ExecuteWorkflowModalProps> = ({
     }
 
     return fields;
-  };
-
-  const inputFields = getInputFields();
+  }, [workflow, availableTools]);
 
   // Initialize input data with defaults
   useEffect(() => {
     if (isOpen) {
-      const defaults: Record<string, any> = {};
+      loadTools();
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (isOpen && inputFields.length > 0) {
+      // Initialize with defaults if not already set or if workflow changed
+      const defaults: Record<string, any> = { ...inputData };
+      let updated = false;
+
       inputFields.forEach(field => {
-        defaults[field.name] = field.default || '';
+        if (defaults[field.name] === undefined) {
+          defaults[field.name] = field.default || '';
+          updated = true;
+        }
       });
-      setInputData(defaults);
-      setJsonInput(JSON.stringify(defaults, null, 2));
-      setJsonError(null);
+
+      if (updated || Object.keys(inputData).length === 0) {
+        setInputData(defaults);
+        setJsonInput(JSON.stringify(defaults, null, 2));
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, workflow.id]);
+  }, [isOpen, inputFields]);
+
+  const loadTools = async () => {
+    try {
+      const { default: apiService } = await import('../services/api');
+      const response = await apiService.getMCPTools();
+      if (response.success) {
+        setAvailableTools(response.data || []);
+      }
+    } catch (err) {
+      console.error('Error loading tools:', err);
+    }
+  };
 
   const handleFieldChange = (name: string, value: any) => {
     const updated = { ...inputData, [name]: value };
@@ -216,8 +252,8 @@ const ExecuteWorkflowModal: React.FC<ExecuteWorkflowModalProps> = ({
               <button
                 onClick={() => setInputMode('simple')}
                 className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${inputMode === 'simple'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
                   }`}
               >
                 <FormInput className="w-4 h-4" />
@@ -226,8 +262,8 @@ const ExecuteWorkflowModal: React.FC<ExecuteWorkflowModalProps> = ({
               <button
                 onClick={() => setInputMode('advanced')}
                 className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${inputMode === 'advanced'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
                   }`}
               >
                 <Code className="w-4 h-4" />
@@ -261,13 +297,39 @@ const ExecuteWorkflowModal: React.FC<ExecuteWorkflowModalProps> = ({
                           {inputData[field.name] ? 'Enabled' : 'Disabled'}
                         </span>
                       </div>
+                    ) : (field.options && Array.isArray(field.options)) ? (
+                      <div className="relative">
+                        <select
+                          value={inputData[field.name] || ''}
+                          onChange={(e) => handleFieldChange(field.name, e.target.value)}
+                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white font-medium"
+                        >
+                          <option value="">Select {field.name.replace(/_/g, ' ')}...</option>
+                          {field.options.map((option: string) => (
+                            <option key={option} value={option}>
+                              {option.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
+                          <ChevronDown className="w-4 h-4 text-gray-400" />
+                        </div>
+                      </div>
                     ) : field.type === 'number' ? (
                       <input
-                        type="number"
+                        type="text"
                         value={inputData[field.name] || ''}
-                        onChange={(e) => handleFieldChange(field.name, parseFloat(e.target.value) || 0)}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val.includes('{{') || val === '') {
+                            handleFieldChange(field.name, val);
+                          } else {
+                            const num = parseFloat(val);
+                            handleFieldChange(field.name, isNaN(num) ? val : num);
+                          }
+                        }}
                         className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder={`Enter ${field.name.replace(/_/g, ' ')}`}
+                        placeholder={`Enter ${field.name.replace(/_/g, ' ')} or {{variable}}`}
                       />
                     ) : (
                       <input
@@ -310,8 +372,8 @@ const ExecuteWorkflowModal: React.FC<ExecuteWorkflowModalProps> = ({
                 value={jsonInput}
                 onChange={(e) => handleJsonChange(e.target.value)}
                 className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent font-mono text-sm ${jsonError
-                    ? 'border-red-300 bg-red-50 focus:ring-red-500'
-                    : 'border-gray-300 focus:ring-blue-500'
+                  ? 'border-red-300 bg-red-50 focus:ring-red-500'
+                  : 'border-gray-300 focus:ring-blue-500'
                   }`}
                 rows={8}
                 placeholder="{}"
