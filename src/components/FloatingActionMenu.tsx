@@ -88,6 +88,7 @@ const FloatingActionMenu: React.FC = () => {
     activity: 'Activity',
     settings: 'Settings',
     profile: 'Profile',
+    creator: 'Creator Profile',
   };
 
   const currentPageLabel = pageLabels[currentPage] || 'This Page';
@@ -189,10 +190,10 @@ const FloatingActionMenu: React.FC = () => {
                       </span>
                       {item.badge && (
                         <span className={`px-1.5 py-0.5 text-xs font-medium rounded-full ${item.badge === 'AI'
-                            ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300'
-                            : item.badge === '✓'
-                              ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300'
-                              : 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300'
+                          ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300'
+                          : item.badge === '✓'
+                            ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300'
+                            : 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300'
                           }`}>
                           {item.badge}
                         </span>
@@ -220,8 +221,8 @@ const FloatingActionMenu: React.FC = () => {
         <button
           onClick={() => setIsOpen(!isOpen)}
           className={`relative p-4 rounded-full shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 ${isOpen
-              ? 'bg-gray-700 rotate-45'
-              : 'bg-gradient-to-br from-purple-600 via-blue-600 to-cyan-500'
+            ? 'bg-gray-700 rotate-45'
+            : 'bg-gradient-to-br from-purple-600 via-blue-600 to-cyan-500'
             }`}
           aria-label="Help & Resources"
         >
@@ -278,6 +279,9 @@ const AIAssistantPanel: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     if (path.includes('/chat')) return 'chat';
     if (path.includes('/connections')) return 'connections';
     if (path.includes('/marketplace')) return 'marketplace';
+    if (path.includes('/favorites')) return 'favorites';
+    if (path.includes('/creator-profile')) return 'creator_profile';
+
     if (path.includes('/settings')) return 'settings';
     return 'general';
   };
@@ -364,8 +368,8 @@ const AIAssistantPanel: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             >
               <div
                 className={`max-w-[80%] rounded-2xl px-4 py-2 ${msg.role === 'user'
-                    ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
+                  ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white'
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
                   }`}
               >
                 <p className="text-sm">{msg.content}</p>

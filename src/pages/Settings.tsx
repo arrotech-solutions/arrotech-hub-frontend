@@ -1,38 +1,38 @@
 import {
-    Activity,
-    AlertCircle,
-    Bell,
-    CheckCircle,
-    ChevronDown,
-    ChevronRight,
-    Clock,
-    Database,
-    Globe,
-    Loader2,
-    Lock,
-    Mail,
-    MessageSquare,
-    Monitor,
-    Monitor as MonitorIcon,
-    Palette,
-    RefreshCw,
-    RotateCcw,
-    Settings as SettingsIcon,
-    Shield,
-    Webhook,
-    Zap
+  Activity,
+  AlertCircle,
+  Bell,
+  CheckCircle,
+  ChevronDown,
+  ChevronRight,
+  Clock,
+  Database,
+  Globe,
+  Loader2,
+  Lock,
+  Mail,
+  MessageSquare,
+  Monitor,
+  Monitor as MonitorIcon,
+  Palette,
+  RefreshCw,
+  RotateCcw,
+  Shield,
+  Webhook,
+  Zap,
+  Sparkles
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import apiService from '../services/api';
 import {
-    APISettings,
-    DashboardSettings,
-    IntegrationSettings,
-    NotificationSettings,
-    SecuritySettings,
-    UserSettings,
-    UserSettingsUpdate
+  APISettings,
+  DashboardSettings,
+  IntegrationSettings,
+  NotificationSettings,
+  SecuritySettings,
+  UserSettings,
+  UserSettingsUpdate
 } from '../types';
 
 const Settings: React.FC = () => {
@@ -140,46 +140,46 @@ const Settings: React.FC = () => {
   };
 
   const tabs = [
-    { 
-      id: 'notifications', 
-      name: 'Notifications', 
-      icon: Bell, 
+    {
+      id: 'notifications',
+      name: 'Notifications',
+      icon: Bell,
       description: 'Manage email, Slack, and webhook notifications',
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
       borderColor: 'border-blue-200'
     },
-    { 
-      id: 'api', 
-      name: 'API Settings', 
-      icon: Zap, 
+    {
+      id: 'api',
+      name: 'API Settings',
+      icon: Zap,
       description: 'Configure API rate limits and timeouts',
       color: 'text-purple-600',
       bgColor: 'bg-purple-50',
       borderColor: 'border-purple-200'
     },
-    { 
-      id: 'dashboard', 
-      name: 'Dashboard', 
-      icon: Monitor, 
+    {
+      id: 'dashboard',
+      name: 'Dashboard',
+      icon: Monitor,
       description: 'Customize your dashboard appearance and layout',
       color: 'text-green-600',
       bgColor: 'bg-green-50',
       borderColor: 'border-green-200'
     },
-    { 
-      id: 'integrations', 
-      name: 'Integrations', 
-      icon: Database, 
+    {
+      id: 'integrations',
+      name: 'Integrations',
+      icon: Database,
       description: 'Manage third-party integrations and sync settings',
       color: 'text-orange-600',
       bgColor: 'bg-orange-50',
       borderColor: 'border-orange-200'
     },
-    { 
-      id: 'security', 
-      name: 'Security', 
-      icon: Shield, 
+    {
+      id: 'security',
+      name: 'Security',
+      icon: Shield,
       description: 'Configure security policies and access controls',
       color: 'text-red-600',
       bgColor: 'bg-red-50',
@@ -203,144 +203,158 @@ const Settings: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
-      <div className="max-w-7xl mx-auto p-6">
-        {/* Header */}
-        <div className="settings-header mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="flex items-center space-x-3 mb-2">
-                <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
-                  <SettingsIcon className="w-6 h-6 text-white" />
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-orange-50/30">
+      <div className="max-w-7xl mx-auto p-6 md:p-10">
+        {/* Header with Mesh Gradient */}
+        <div className="relative overflow-hidden bg-white rounded-3xl border border-gray-200 shadow-sm mb-8">
+          <div className="absolute top-0 right-0 -mt-20 -mr-20 w-80 h-80 bg-orange-400/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-64 h-64 bg-blue-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+
+          <div className="relative px-8 py-10 settings-header">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+              <div className="flex-1 text-center sm:text-left">
+                <div className="flex items-center justify-center sm:justify-start space-x-2 mb-3">
+                  <div className="p-1.5 bg-orange-100/80 rounded-lg">
+                    <Sparkles className="w-4 h-4 text-orange-600" />
+                  </div>
+                  <span className="text-xs font-bold text-orange-600 uppercase tracking-wider">Configuration Node</span>
                 </div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-blue-600 bg-clip-text text-transparent">
-                  Settings
+                <h1 className="text-3xl sm:text-4xl font-black text-gray-900 mb-2 tracking-tight">
+                  System <span className="bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">Settings</span>
                 </h1>
+                <p className="text-gray-500 max-w-md font-medium mx-auto sm:mx-0">
+                  Calibrate your account preferences, security protocols, and integration pathways.
+                </p>
               </div>
-              <p className="text-gray-600">Manage your account preferences and system configurations</p>
-            </div>
-            <div className="settings-actions flex space-x-3">
-              <button
-                onClick={resetSettings}
-                disabled={saving}
-                className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 transition-colors"
-              >
-                <RotateCcw className="w-4 h-4" />
-                <span>Reset to Defaults</span>
-              </button>
-              {saving && (
-                <div className="flex items-center text-sm text-gray-600">
-                  <Loader2 className="animate-spin h-4 w-4 mr-2" />
-                  <span>Saving...</span>
-                </div>
-              )}
+              <div className="settings-actions flex items-center justify-center sm:justify-end gap-3 font-bold">
+                <button
+                  onClick={resetSettings}
+                  disabled={saving}
+                  className="flex items-center space-x-2 px-6 py-4 bg-white text-gray-700 rounded-2xl border border-gray-200 hover:border-orange-300 hover:bg-orange-50 transition-all duration-200 shadow-sm disabled:opacity-50"
+                >
+                  <RotateCcw className="w-5 h-5" />
+                  <span>Reset Node</span>
+                </button>
+                {saving && (
+                  <div className="flex items-center px-4 py-2 bg-orange-50 text-orange-700 rounded-xl text-sm font-black uppercase tracking-widest border border-orange-100">
+                    <Loader2 className="animate-spin h-4 w-4 mr-2" />
+                    <span>Syncing...</span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-
-          {message && (
-            <div className={`mt-4 p-4 rounded-lg border ${
-              message.type === 'success' 
-                ? 'bg-green-50 border-green-200 text-green-800' 
-                : 'bg-red-50 border-red-200 text-red-800'
-            }`}>
-              <div className="flex items-center">
-                {message.type === 'success' ? (
-                  <CheckCircle className="w-5 h-5 mr-2" />
-                ) : (
-                  <AlertCircle className="w-5 h-5 mr-2" />
-                )}
-                <span>{message.text}</span>
-              </div>
-            </div>
-          )}
         </div>
 
-        {/* Settings Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Navigation Sidebar */}
-          <div className="settings-categories lg:col-span-1">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Settings Categories</h3>
-              <div className="space-y-2">
-                {tabs.map((tab) => {
-                  const Icon = tab.icon;
-                  const isActive = activeTab === tab.id;
-                  return (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`w-full text-left p-4 rounded-lg border transition-all duration-200 ${
-                        isActive
-                          ? `${tab.bgColor} ${tab.borderColor} ${tab.color} border-2`
-                          : 'border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300'
-                      }`}
-                    >
-                      <div className="flex items-center space-x-3">
-                        <div className={`p-2 rounded-lg ${isActive ? 'bg-white' : 'bg-gray-100'}`}>
-                          <Icon className="w-5 h-5" />
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="font-medium">{tab.name}</h4>
-                          <p className="text-sm opacity-75">{tab.description}</p>
-                        </div>
-                        <ChevronRight className={`w-4 h-4 transition-transform ${isActive ? 'rotate-90' : ''}`} />
-                      </div>
-                    </button>
-                  );
-                })}
+        {message && (
+          <div className={`mb-8 p-6 rounded-[24px] border animate-in slide-in-from-top-4 duration-500 ${message.type === 'success'
+            ? 'bg-emerald-50 border-emerald-100 text-emerald-800'
+            : 'bg-rose-50 border-rose-100 text-rose-800'
+            }`}>
+            <div className="flex items-center">
+              <div className={`p-2 rounded-xl mr-4 ${message.type === 'success' ? 'bg-emerald-100' : 'bg-rose-100'}`}>
+                {message.type === 'success' ? (
+                  <CheckCircle className="w-5 h-5" />
+                ) : (
+                  <AlertCircle className="w-5 h-5" />
+                )}
               </div>
+              <p className="font-bold">{message.text}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Settings Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Navigation Sidebar */}
+          <div className="lg:col-span-1">
+            <div className="settings-tabs settings-categories bg-white/60 backdrop-blur-xl rounded-[32px] border border-white/50 p-6 space-y-2 sticky top-24">
+              <h3 className="px-4 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-6">Configuration Domains</h3>
+              {tabs.map((tab) => {
+                const Icon = tab.icon;
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`w-full flex items-center space-x-4 p-4 rounded-2xl transition-all duration-300 group ${isActive
+                      ? 'bg-white shadow-sm border border-gray-100'
+                      : 'hover:bg-white/40 border border-transparent hover:border-white'
+                      }`}
+                  >
+                    <div className={`p-2 rounded-xl transition-all duration-300 ${isActive
+                      ? `${tab.bgColor} ${tab.color} scale-110 shadow-sm`
+                      : 'bg-gray-50 text-gray-400 group-hover:bg-white group-hover:text-gray-600'
+                      }`}>
+                      <Icon className="w-5 h-5" />
+                    </div>
+                    <div className="text-left flex-1">
+                      <p className={`text-sm font-black tracking-tight ${isActive ? 'text-gray-900' : 'text-gray-500 group-hover:text-gray-700'}`}>
+                        {tab.name}
+                      </p>
+                      <p className="text-[10px] font-medium text-gray-400 truncate max-w-[180px]">
+                        {tab.description}
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          {/* Settings Content */}
-          <div className="settings-content lg:col-span-2">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-              <div className="p-6">
-                {activeTab === 'notifications' && settings && (
+          {/* Settings Content Area */}
+          <div className="lg:col-span-2">
+            <div className="settings-container settings-content bg-white/60 backdrop-blur-xl rounded-[32px] border border-white/50 p-8 min-h-[600px] shadow-sm">
+              {activeTab === 'notifications' && settings && (
+                <div className="animate-in fade-in slide-in-from-right-4 duration-500">
                   <NotificationSettingsTab
                     settings={settings.notification_settings}
                     onUpdate={handleNotificationSettingsUpdate}
                     expanded={expandedSections.has('notifications')}
                     onToggle={() => toggleSection('notifications')}
                   />
-                )}
-
-                {activeTab === 'api' && settings && (
+                </div>
+              )}
+              {activeTab === 'api' && settings && (
+                <div className="animate-in fade-in slide-in-from-right-4 duration-500">
                   <APISettingsTab
                     settings={settings.api_settings}
                     onUpdate={handleAPISettingsUpdate}
                     expanded={expandedSections.has('api')}
                     onToggle={() => toggleSection('api')}
                   />
-                )}
-
-                {activeTab === 'dashboard' && settings && (
+                </div>
+              )}
+              {activeTab === 'dashboard' && settings && (
+                <div className="animate-in fade-in slide-in-from-right-4 duration-500">
                   <DashboardSettingsTab
                     settings={settings.dashboard_settings}
                     onUpdate={handleDashboardSettingsUpdate}
                     expanded={expandedSections.has('dashboard')}
                     onToggle={() => toggleSection('dashboard')}
                   />
-                )}
-
-                {activeTab === 'integrations' && settings && (
+                </div>
+              )}
+              {activeTab === 'integrations' && settings && (
+                <div className="animate-in fade-in slide-in-from-right-4 duration-500">
                   <IntegrationSettingsTab
                     settings={settings.integration_settings}
                     onUpdate={handleIntegrationSettingsUpdate}
                     expanded={expandedSections.has('integrations')}
                     onToggle={() => toggleSection('integrations')}
                   />
-                )}
-
-                {activeTab === 'security' && settings && (
+                </div>
+              )}
+              {activeTab === 'security' && settings && (
+                <div className="animate-in fade-in slide-in-from-right-4 duration-500">
                   <SecuritySettingsTab
                     settings={settings.security_settings}
                     onUpdate={handleSecuritySettingsUpdate}
                     expanded={expandedSections.has('security')}
                     onToggle={() => toggleSection('security')}
                   />
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
