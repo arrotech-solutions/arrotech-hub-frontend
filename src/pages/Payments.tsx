@@ -16,7 +16,6 @@ import {
   Star,
   Calendar,
   AlertCircle,
-  Info,
   Check,
   TrendingUp,
   Users
@@ -88,8 +87,6 @@ const Payments: React.FC = () => {
   const currentPlan = plans.find(p => p.id === tier) || plans[0];
   const isActive = user?.subscription_status === 'active';
   const isCanceled = user?.subscription_status === 'canceled';
-  const isGracePeriod = user?.subscription_status === 'grace_period';
-  const isExpired = user?.subscription_status === 'expired';
   const isFree = tier === 'free';
 
   // Mock stats for demonstration
