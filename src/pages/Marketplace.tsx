@@ -422,7 +422,7 @@ const Marketplace: React.FC = () => {
           {/* Trending Section */}
           {trendingWorkflows.length > 0 && !searchQuery && !selectedCategory && (
             <div className="mb-8">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-4 marketplace-trending-header">
                 <div className="flex items-center space-x-2">
                   <TrendingUp className="w-5 h-5 text-orange-500" />
                   <h2 className="text-lg font-semibold text-gray-900">Trending This Week</h2>
@@ -476,7 +476,7 @@ const Marketplace: React.FC = () => {
               <RefreshCw className="w-8 h-8 text-purple-600 animate-spin" />
             </div>
           ) : workflows.length === 0 ? (
-            <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
+            <div className="text-center py-12 bg-white rounded-xl border border-gray-200 marketplace-list-empty">
               <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-gray-900">No workflows found</h3>
               <p className="text-gray-600 mt-2">

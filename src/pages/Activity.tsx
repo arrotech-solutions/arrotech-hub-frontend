@@ -1,28 +1,29 @@
 import {
-    Activity as ActivityIcon,
-    AlertCircle,
-    AlertTriangle,
-    Bot,
-    CheckCircle,
-    ChevronDown,
-    ChevronRight,
-    Clock,
-    Cpu,
-    CreditCard,
-    Database,
-    Filter,
-    Grid,
-    HardDrive,
-    Info,
-    List,
-    Network,
-    RefreshCw,
-    Search,
-    Server,
-    Shield,
-    Timer,
-    Users,
-    Workflow
+  Activity as ActivityIcon,
+  AlertCircle,
+  AlertTriangle,
+  Bot,
+  CheckCircle,
+  ChevronDown,
+  ChevronRight,
+  Clock,
+  Cpu,
+  CreditCard,
+  Database,
+  Filter,
+  Grid,
+  HardDrive,
+  Info,
+  List,
+  Network,
+  RefreshCw,
+  Search,
+  Server,
+  Shield,
+  Timer,
+  Users,
+  Workflow,
+  Sparkles
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -111,6 +112,10 @@ const Activity: React.FC = () => {
 
     setFilteredActivities(filtered);
   }, [activities, selectedCategory, selectedStatus, selectedPriority, searchTerm]);
+
+  const handleRefresh = () => {
+    loadActivityData();
+  };
 
   const loadActivityData = async () => {
     try {
@@ -418,131 +423,6 @@ const Activity: React.FC = () => {
     </div>
   );
 
-  const renderSystemMetrics = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-gray-600">CPU Usage</p>
-            <p className="text-2xl font-bold text-gray-900">{systemMetrics?.cpu_usage}%</p>
-          </div>
-          <div className="p-3 bg-blue-100 rounded-lg">
-            <Cpu className="w-6 h-6 text-blue-600" />
-          </div>
-        </div>
-        <div className="mt-4">
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div 
-              className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
-              style={{ width: `${systemMetrics?.cpu_usage}%` }}
-            ></div>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-gray-600">Memory Usage</p>
-            <p className="text-2xl font-bold text-gray-900">{systemMetrics?.memory_usage}%</p>
-          </div>
-          <div className="p-3 bg-green-100 rounded-lg">
-            <HardDrive className="w-6 h-6 text-green-600" />
-          </div>
-        </div>
-        <div className="mt-4">
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div 
-              className="bg-green-600 h-2 rounded-full transition-all duration-300" 
-              style={{ width: `${systemMetrics?.memory_usage}%` }}
-            ></div>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-gray-600">Active Connections</p>
-            <p className="text-2xl font-bold text-gray-900">{systemMetrics?.active_connections}</p>
-          </div>
-          <div className="p-3 bg-purple-100 rounded-lg">
-            <Network className="w-6 h-6 text-purple-600" />
-          </div>
-        </div>
-        <div className="mt-2">
-          <p className="text-xs text-gray-500">Total Requests: {systemMetrics?.total_requests}</p>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-gray-600">Error Rate</p>
-            <p className="text-2xl font-bold text-gray-900">{systemMetrics?.error_rate}%</p>
-          </div>
-          <div className="p-3 bg-red-100 rounded-lg">
-            <AlertCircle className="w-6 h-6 text-red-600" />
-          </div>
-        </div>
-        <div className="mt-2">
-          <p className="text-xs text-gray-500">Response Time: {systemMetrics?.response_time}ms</p>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderActivityStats = () => (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-gray-600">Total Activities</p>
-            <p className="text-2xl font-bold text-gray-900">{stats?.total_activities.toLocaleString()}</p>
-          </div>
-          <div className="p-3 bg-blue-100 rounded-lg">
-            <ActivityIcon className="w-6 h-6 text-blue-600" />
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-gray-600">Successful</p>
-            <p className="text-2xl font-bold text-green-600">{stats?.successful_activities.toLocaleString()}</p>
-          </div>
-          <div className="p-3 bg-green-100 rounded-lg">
-            <CheckCircle className="w-6 h-6 text-green-600" />
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-gray-600">Failed</p>
-            <p className="text-2xl font-bold text-red-600">{stats?.failed_activities.toLocaleString()}</p>
-          </div>
-          <div className="p-3 bg-red-100 rounded-lg">
-            <AlertCircle className="w-6 h-6 text-red-600" />
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-gray-600">Avg Duration</p>
-            <p className="text-2xl font-bold text-gray-900">{stats?.average_duration}s</p>
-          </div>
-          <div className="p-3 bg-purple-100 rounded-lg">
-            <Timer className="w-6 h-6 text-purple-600" />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
 
   if (loading) {
     return (
@@ -560,59 +440,127 @@ const Activity: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
-      <div className="max-w-7xl mx-auto p-6">
-        {/* Header */}
-        <div className="activity-header mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="flex items-center space-x-3 mb-2">
-                <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
-                  <ActivityIcon className="w-6 h-6 text-white" />
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-indigo-50">
+      <div className="max-w-7xl mx-auto p-6 md:p-10">
+        {/* Header with Mesh Gradient */}
+        <div className="relative overflow-hidden bg-white rounded-3xl border border-gray-200 shadow-sm mb-8">
+          <div className="absolute top-0 right-0 -mt-20 -mr-20 w-80 h-80 bg-blue-400/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-64 h-64 bg-indigo-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+
+          <div className="relative px-8 py-10 activity-header">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+              <div className="flex-1 text-center sm:text-left">
+                <div className="flex items-center justify-center sm:justify-start space-x-2 mb-3">
+                  <div className="p-1.5 bg-blue-100/80 rounded-lg">
+                    <Sparkles className="w-4 h-4 text-blue-600" />
+                  </div>
+                  <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">System Telemetry</span>
                 </div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-blue-600 bg-clip-text text-transparent">
-                  Activity Monitor
+                <h1 className="text-3xl sm:text-4xl font-black text-gray-900 mb-2 tracking-tight">
+                  Activity <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Monitor</span>
                 </h1>
+                <p className="text-gray-500 max-w-md font-medium mx-auto sm:mx-0">
+                  Track system performance, audit logs, and workflow executions in real-time.
+                </p>
               </div>
-              <p className="text-gray-600">Monitor system activity, user actions, and performance metrics</p>
-            </div>
-            <div className="flex items-center space-x-3">
-              <button
-                onClick={loadActivityData}
-                disabled={loading}
-                className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 transition-colors"
-              >
-                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                <span>Refresh</span>
-              </button>
-              <label className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  checked={autoRefresh}
-                  onChange={(e) => setAutoRefresh(e.target.checked)}
-                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                />
-                <span className="text-sm text-gray-700">Auto refresh</span>
-              </label>
+              <div className="flex flex-col xs:flex-row items-center justify-center sm:justify-end gap-4">
+                <button
+                  onClick={handleRefresh}
+                  disabled={loading}
+                  className="flex items-center space-x-2 px-6 py-4 bg-white text-gray-700 rounded-2xl border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 shadow-sm group disabled:opacity-50"
+                >
+                  <RefreshCw className={`w-5 h-5 group-hover:rotate-180 transition-transform duration-500 ${loading ? 'animate-spin' : ''}`} />
+                  <span className="font-bold">Refresh</span>
+                </button>
+                <label className="flex items-center space-x-3 px-4 py-2 bg-gray-50 rounded-xl border border-gray-100 cursor-pointer hover:bg-gray-100 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={autoRefresh}
+                    onChange={(e) => setAutoRefresh(e.target.checked)}
+                    className="w-5 h-5 text-blue-600 border-gray-300 rounded-lg focus:ring-blue-500 focus:ring-offset-0"
+                  />
+                  <span className="text-sm font-bold text-gray-600 whitespace-nowrap">Auto refresh</span>
+                </label>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* System Metrics */}
-        <div className="system-metrics">
-          {systemMetrics && renderSystemMetrics()}
+        {/* System Metrics - Glassmorphism */}
+        <div className="system-metrics grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+          {[
+            { label: 'CPU Usage', value: systemMetrics ? `${systemMetrics.cpu_usage}%` : '0%', icon: Cpu, color: 'blue', bgColor: 'bg-blue-500', progress: systemMetrics?.cpu_usage || 0 },
+            { label: 'Memory Usage', value: systemMetrics ? `${systemMetrics.memory_usage}%` : '0%', icon: HardDrive, color: 'emerald', bgColor: 'bg-emerald-500', progress: systemMetrics?.memory_usage || 0 },
+            { label: 'Network Load', value: systemMetrics ? `${systemMetrics.network_usage}%` : '0%', icon: Network, color: 'purple', bgColor: 'bg-purple-500', progress: systemMetrics?.network_usage || 0 },
+            { label: 'Error Rate', value: systemMetrics ? `${systemMetrics.error_rate}%` : '0%', icon: AlertTriangle, color: 'red', bgColor: 'bg-red-500', progress: systemMetrics?.error_rate || 0 }
+          ].map((metric, idx) => {
+            const Icon = metric.icon;
+            return (
+              <div key={idx} className="relative group overflow-hidden bg-white/60 backdrop-blur-xl rounded-2xl p-6 border border-white/50 shadow-sm hover:shadow-xl transition-all duration-500">
+                <div className={`absolute top-0 right-0 w-24 h-24 ${metric.bgColor}/10 rounded-full -mr-12 -mt-12 blur-2xl group-hover:blur-3xl transition-all duration-500`}></div>
+                <div className="relative flex items-center justify-between mb-4">
+                  <div>
+                    <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">{metric.label}</p>
+                    <p className="text-3xl font-black text-gray-900 tracking-tight">{metric.value}</p>
+                  </div>
+                  <div className={`p-3 rounded-xl bg-white shadow-sm border border-gray-100 group-hover:scale-110 transition-transform duration-500 group-hover:shadow-md ${metric.color === 'blue' ? 'text-blue-600' :
+                    metric.color === 'emerald' ? 'text-emerald-600' :
+                      metric.color === 'purple' ? 'text-purple-600' :
+                        'text-red-600'
+                    }`}>
+                    <Icon className="w-6 h-6" />
+                  </div>
+                </div>
+                <div className="relative w-full bg-gray-200/50 rounded-full h-1.5 overflow-hidden">
+                  <div
+                    className={`h-1.5 rounded-full transition-all duration-1000 ${metric.color === 'blue' ? 'bg-blue-600' :
+                      metric.color === 'emerald' ? 'bg-emerald-600' :
+                        metric.color === 'purple' ? 'bg-purple-600' :
+                          'bg-red-600'
+                      }`}
+                    style={{ width: `${metric.progress}%` }}
+                  ></div>
+                </div>
+              </div>
+            );
+          })}
         </div>
 
-        {/* Activity Stats */}
-        <div className="activity-stats">
-          {stats && renderActivityStats()}
+        {/* Activity Stats - Glassmorphism */}
+        <div className="activity-stats grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+          {[
+            { label: 'Total Logs', value: stats?.total_activities || 0, icon: Database, color: 'blue', bgColor: 'bg-blue-500' },
+            { label: 'Successful', value: stats?.successful_activities || 0, icon: CheckCircle, color: 'emerald', bgColor: 'bg-emerald-500' },
+            { label: 'Failed Ops', value: stats?.failed_activities || 0, icon: AlertCircle, color: 'red', bgColor: 'bg-red-500' },
+            { label: 'Avg Latency', value: `${stats?.average_duration || 0}ms`, icon: Timer, color: 'indigo', bgColor: 'bg-indigo-500' }
+          ].map((stat, idx) => {
+            const Icon = stat.icon;
+            return (
+              <div key={idx} className="relative group overflow-hidden bg-white/60 backdrop-blur-xl rounded-2xl p-6 border border-white/50 shadow-sm hover:shadow-xl transition-all duration-500">
+                <div className={`absolute top-0 right-0 w-24 h-24 ${stat.bgColor}/10 rounded-full -mr-12 -mt-12 blur-2xl group-hover:blur-3xl transition-all duration-500`}></div>
+                <div className="relative flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">{stat.label}</p>
+                    <p className="text-3xl font-black text-gray-900 tracking-tight">{stat.value}</p>
+                  </div>
+                  <div className={`p-3 rounded-xl bg-white shadow-sm border border-gray-100 group-hover:scale-110 transition-transform duration-500 group-hover:shadow-md ${stat.color === 'blue' ? 'text-blue-600' :
+                    stat.color === 'emerald' ? 'text-emerald-600' :
+                      stat.color === 'red' ? 'text-red-600' :
+                        'text-indigo-600'
+                    }`}>
+                    <Icon className="w-6 h-6" />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         {/* Filters and Search */}
-        <div className="activity-filters bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4 flex-1">
-              <div className="relative flex-1 max-w-md">
+        <div className="activity-filters bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 mb-6">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 flex-1">
+              <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
                   type="text"
@@ -622,33 +570,35 @@ const Activity: React.FC = () => {
                   className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center space-x-2 px-4 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <Filter className="w-4 h-4" />
-                <span>Filters</span>
-                {showFilters ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-              </button>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center gap-2">
                 <button
-                  onClick={() => setViewMode('list')}
-                  className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-blue-100 text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="flex-1 sm:flex-none flex items-center justify-center space-x-2 px-4 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                 >
-                  <List className="w-5 h-5" />
+                  <Filter className="w-4 h-4" />
+                  <span>Filters</span>
+                  {showFilters ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                 </button>
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-blue-100 text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
-                >
-                  <Grid className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => setViewMode('timeline')}
-                  className={`p-2 rounded-lg transition-colors ${viewMode === 'timeline' ? 'bg-blue-100 text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
-                >
-                  <Clock className="w-5 h-5" />
-                </button>
+                <div className="flex items-center bg-gray-50 rounded-lg p-1 border border-gray-200">
+                  <button
+                    onClick={() => setViewMode('list')}
+                    className={`p-1.5 rounded transition-colors ${viewMode === 'list' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+                  >
+                    <List className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => setViewMode('grid')}
+                    className={`p-1.5 rounded transition-colors ${viewMode === 'grid' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+                  >
+                    <Grid className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => setViewMode('timeline')}
+                    className={`p-1.5 rounded transition-colors ${viewMode === 'timeline' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+                  >
+                    <Clock className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -706,7 +656,7 @@ const Activity: React.FC = () => {
               {filteredActivities.map(renderActivityCard)}
             </div>
           ) : (
-            <div className="text-center py-16">
+            <div className="text-center py-16 activity-list-empty">
               <div className="p-4 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
                 <ActivityIcon className="w-10 h-10 text-blue-600" />
               </div>

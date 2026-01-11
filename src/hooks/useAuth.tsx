@@ -14,6 +14,7 @@ interface AuthContextType {
   resetPassword: (token: string, newPassword: string) => Promise<void>;
   validateResetToken: (token: string) => Promise<void>;
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -30,10 +31,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const refreshUser = async () => {
+    try {
+      const response = await apiService.getCurrentUser();
+      setUser(response.data);
+    } catch (error) {
+      console.error('Failed to refresh user:', error);
+    }
+  };
+
   useEffect(() => {
     const token = localStorage.getItem('auth_token');
     const rememberMeToken = localStorage.getItem('remember_me_token');
-    
+
     if (token) {
       apiService.getCurrentUser()
         .then((response) => {
@@ -61,11 +71,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const response = await apiService.login(email, password, rememberMe);
       localStorage.setItem('auth_token', response.data.token);
-      
+
       if (response.data.remember_me_token) {
         localStorage.setItem('remember_me_token', response.data.remember_me_token);
       }
-      
+
       setUser(response.data.user);
       toast.success('Login successful!');
     } catch (error: any) {
@@ -161,6 +171,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     resetPassword,
     validateResetToken,
     changePassword,
+    refreshUser,
   };
 
   return (

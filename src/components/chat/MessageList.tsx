@@ -122,12 +122,12 @@ const MessageList: React.FC<MessageListProps> = ({
     );
 
     return (
-        <div className="flex-1 overflow-y-auto custom-scrollbar px-4 py-8">
+        <div className="flex-1 overflow-y-auto custom-scrollbar px-4 py-8 chat-messages-area">
             <div className="max-w-4xl mx-auto flex flex-col min-h-full">
                 {!currentConversation ? (
                     renderWelcomeScreen()
                 ) : messages.length === 0 ? (
-                    <div className="flex-1 flex flex-col items-center justify-center text-center py-20 animate-in fade-in duration-700">
+                    <div className="flex-1 flex flex-col items-center justify-center text-center py-20 animate-in fade-in duration-700 chat-messages-empty">
                         <div className={`w-16 h-16 rounded-3xl flex items-center justify-center mb-6
               ${isDarkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
                             <MessageSquare className={`w-8 h-8 ${isDarkMode ? 'text-gray-600' : 'text-gray-300'}`} />

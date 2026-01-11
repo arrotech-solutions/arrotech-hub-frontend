@@ -112,6 +112,11 @@ class ApiService {
     return response.data;
   }
 
+  async getUsageStats(): Promise<ApiResponse<any>> {
+    const response = await this.api.get('/subscription/usage');
+    return response.data;
+  }
+
   async updateUser(data: Partial<User>): Promise<ApiResponse<User>> {
     const response = await this.api.put('/auth/me', data);
     return response.data;
@@ -848,11 +853,6 @@ class ApiService {
     return response.data;
   }
 
-  async cancelSubscription(subscriptionId: string): Promise<ApiResponse<any>> {
-    const response = await this.api.post(`/payments/subscriptions/${subscriptionId}/cancel`);
-    return response.data;
-  }
-
   // Usage logs
   async getUsageLogs(): Promise<ApiResponse<UsageLog[]>> {
     const response = await this.api.get('/api/v1/usage-logs');
@@ -1455,6 +1455,12 @@ class ApiService {
     return response.data;
   }
 
+
+  async createStripeSubscriptionCheckoutSession(planId: string, amount: number, currency: string = 'kes'): Promise<ApiResponse<{ checkout_url: string; session_id: string }>> {
+    const response = await this.api.post('/payments/stripe/create-subscription-checkout-session', { plan_id: planId, amount, currency });
+    return response.data;
+  }
+
   async zoomDeleteRecording(meetingId: string, recordingId: string): Promise<ApiResponse<any>> {
     const response = await this.api.delete(`/connections/zoom/meetings/${meetingId}/recordings/${recordingId}`);
     return response.data;
@@ -1976,6 +1982,23 @@ class ApiService {
 
   async getUnmatchedMpesaPayments(limit: number = 10): Promise<ApiResponse<{ payments: MpesaPayment[] }>> {
     const response = await this.api.get('/api/agents/mpesa/payments/unmatched', { params: { limit } });
+    return response.data;
+  }
+
+  // ========================================
+  // SUBSCRIPTION MANAGEMENT
+  // ========================================
+
+  async cancelSubscription(reason?: string, feedback?: string): Promise<ApiResponse<any>> {
+    const response = await this.api.post('/payments/subscriptions/cancel', {
+      reason,
+      feedback
+    });
+    return response.data;
+  }
+
+  async reactivateSubscription(): Promise<ApiResponse<any>> {
+    const response = await this.api.post('/payments/subscriptions/reactivate');
     return response.data;
   }
 }
