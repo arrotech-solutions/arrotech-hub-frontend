@@ -818,7 +818,15 @@ const Workflows: React.FC = () => {
                 You haven't created any workflows yet. Use our visual builder to automate your repetitive tasks in minutes.
               </p>
               <button
-                onClick={() => setShowEnhancedCreator(true)}
+                onClick={() => {
+                  const activeWorkflows = workflows.filter(w => w.status === 'active').length;
+                  if (!canUseFeature('max_active_workflows', activeWorkflows)) {
+                    toast.error(`You've reached the limit of active workflows for the ${tier} plan. Please upgrade to create more.`);
+                    navigate('/pricing');
+                    return;
+                  }
+                  setShowEnhancedCreator(true);
+                }}
                 className="group relative inline-flex items-center justify-center space-x-3 px-10 py-5 bg-gray-900 text-white rounded-[2rem] hover:shadow-[0_20px_40px_rgba(0,0,0,0.2)] transition-all duration-300 transform hover:-translate-y-1 overflow-hidden"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
