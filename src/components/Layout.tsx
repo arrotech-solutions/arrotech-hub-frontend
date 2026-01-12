@@ -8,7 +8,6 @@ import {
   CreditCard,
   Crown,
   Database,
-  Globe,
   Heart,
   Home,
   LogOut,
@@ -24,6 +23,7 @@ import {
   X,
   Zap
 } from 'lucide-react';
+import logo from '../assets/Logo/icononly_transparent_nobuffer.png';
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
@@ -198,12 +198,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <div className="fixed inset-y-0 left-0 w-80 bg-white/95 backdrop-blur-xl shadow-2xl border-r border-gray-200/50 flex flex-col">
           <div className="flex-shrink-0 flex items-center justify-between p-6 border-b border-gray-200/50">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl">
-                <Globe className="w-6 h-6 text-white" />
-              </div>
+              <img src={logo} alt="Arrotech Hub" className="w-10 h-10 object-contain" />
               <div>
                 <h1 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-blue-600 bg-clip-text text-transparent">
-                  Mini-Hub
+                  Arrotech Hub
                 </h1>
                 <p className="text-xs text-gray-500">AI-Powered Platform</p>
               </div>
@@ -291,20 +289,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <div className="flex-shrink-0 flex items-center justify-between p-6 border-b border-gray-200/50">
             {!collapsed && (
               <div className="flex items-center space-x-3">
-                <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl">
-                  <Globe className="w-6 h-6 text-white" />
-                </div>
+                <img src={logo} alt="Arrotech Hub" className="w-10 h-10 object-contain" />
                 <div>
                   <h1 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-blue-600 bg-clip-text text-transparent">
-                    Mini-Hub
+                    Arrotech Hub
                   </h1>
                   <p className="text-xs text-gray-500">AI-Powered Platform</p>
                 </div>
               </div>
             )}
             {collapsed && (
-              <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl mx-auto">
-                <Globe className="w-6 h-6 text-white" />
+              <div className="mx-auto">
+                <img src={logo} alt="Arrotech Hub" className="w-10 h-10 object-contain" />
               </div>
             )}
             <button

@@ -24,7 +24,13 @@ import {
     Users,
     Webhook,
     X,
-    Zap
+    Zap,
+    Activity,
+    CreditCard,
+    Droplets,
+    Leaf,
+    ShoppingBag,
+    Truck
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -54,6 +60,46 @@ interface WorkflowStep {
 type TriggerType = 'manual' | 'scheduled' | 'webhook' | 'event';
 
 const TOOL_CATEGORIES = {
+    'Fintech': {
+        icon: CreditCard,
+        color: 'emerald',
+        keywords: ['payment', 'mpesa', 'airtel', 't_kash', 'equity_jenga', 'flutterwave', 'paystack', 'kopo_kopo', 'cellulant', 'pesapal', 'ipay', 'little_pay']
+    },
+    'E-commerce': {
+        icon: ShoppingBag,
+        color: 'blue',
+        keywords: ['ecommerce', 'jumia', 'kilimall', 'jiji', 'masoko', 'copia', 'twiga', 'wasoko', 'sky_garden']
+    },
+    'Accounting': {
+        icon: FileText,
+        color: 'indigo',
+        keywords: ['accounting', 'kra', 'itax', 'quickbooks', 'xero', 'zoho', 'lipabiz', 'sasapay']
+    },
+    'Logistics': {
+        icon: Truck,
+        color: 'amber',
+        keywords: ['logistics', 'amitruck', 'lori', 'sendy', 'busybee', 'fargo', 'g4s']
+    },
+    'Human Resources': {
+        icon: Users,
+        color: 'rose',
+        keywords: ['hr', 'workpay', 'seamlesshr', 'bitrix', 'bamboo']
+    },
+    'Agritech': {
+        icon: Leaf,
+        color: 'green',
+        keywords: ['agri', 'shamba', 'digifarm', 'apollo', 'iprocure', 'farmdrive']
+    },
+    'Healthtech': {
+        icon: Activity,
+        color: 'red',
+        keywords: ['health', 'mydawa', 'penda', 'ilara', 'tibu']
+    },
+    'Utilities': {
+        icon: Droplets,
+        color: 'cyan',
+        keywords: ['utility', 'kenya_power', 'nairobi_water', 'safaricom_biz', 'zuku']
+    },
     'Slack': {
         icon: Users,
         color: 'purple',
@@ -158,7 +204,9 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
     const loadTools = async () => {
         try {
             setLoadingTools(true);
-            const response = await apiService.getMCPTools();
+            // Fetch all tools (including non-connected for discovery)
+            // Passing true for includeAll
+            const response = await apiService.getMCPTools(true);
             if (response.success) {
                 setAvailableTools(response.data || []);
             }
@@ -171,9 +219,18 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
     };
 
     const getToolCategory = (toolName: string): string => {
+        const lowerName = toolName.toLowerCase();
         for (const [category, config] of Object.entries(TOOL_CATEGORIES)) {
-            if (config.prefix && toolName.startsWith(config.prefix)) {
+            const cfg = config as any;
+            if (cfg.prefix && lowerName.startsWith(cfg.prefix)) {
                 return category;
+            }
+            if (cfg.keywords) {
+                for (const keyword of cfg.keywords) {
+                    if (lowerName.includes(keyword)) {
+                        return category;
+                    }
+                }
             }
         }
         return 'General';
