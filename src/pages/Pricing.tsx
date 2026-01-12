@@ -17,9 +17,9 @@ const Pricing: React.FC = () => {
             price: '0',
             description: 'Ideal for getting started with basic automation.',
             features: [
-                '1 Active Workflow',
-                '5 AI Messages / day',
-                'Google Analytics 4 (GA4)',
+                '3 Active Workflows',
+                '10 AI Messages / day',
+                'Access to M-Pesa, Slack, & Context Tools',
                 'Standard Support',
                 'Basic Dashboard'
             ],

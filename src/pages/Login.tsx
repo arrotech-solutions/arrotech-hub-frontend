@@ -3,7 +3,6 @@ import {
   CheckCircle,
   Eye,
   EyeOff,
-  Globe,
   Lock,
   Mail,
   Shield,
@@ -13,6 +12,7 @@ import {
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
+import logo from '../assets/Logo/icononly_transparent_nobuffer.png';
 import { useAuth } from '../hooks/useAuth';
 
 interface LoginFormData {
@@ -62,15 +62,13 @@ const Login: React.FC = () => {
           {/* Header */}
           <div className="text-center">
             <div className="flex items-center justify-center mb-6">
-              <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl">
-                <Globe className="w-8 h-8 text-white" />
-              </div>
+              <img src={logo} alt="Arrotech Hub" className="w-16 h-16 object-contain" />
             </div>
             <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-blue-600 bg-clip-text text-transparent mb-2">
               Welcome back
             </h1>
             <p className="text-lg text-gray-600 mb-8">
-              Sign in to your Mini-Hub account
+              Sign in to your Arrotech Hub account
             </p>
           </div>
 
