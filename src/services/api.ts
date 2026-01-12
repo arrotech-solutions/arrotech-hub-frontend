@@ -224,8 +224,13 @@ class ApiService {
   }
 
   // MCP Tools endpoints
-  async getMCPTools(): Promise<ApiResponse<MCPTool[]>> {
-    const response = await this.api.get('/mcp/tools');
+  async getMCPTools(includeAll: boolean = false): Promise<ApiResponse<MCPTool[]>> {
+    const response = await this.api.get('/mcp/tools', {
+      params: {
+        include_all: includeAll,
+        all: includeAll // Synonym for backward compatibility
+      }
+    });
     // Backend returns { success: true, data: { tools: [...] } }
     const toolsData = response.data?.data?.tools || response.data?.tools || [];
     return {

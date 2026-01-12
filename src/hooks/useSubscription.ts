@@ -19,8 +19,8 @@ export interface UsageStats {
 
 export const PLAN_LIMITS: Record<SubscriptionTier, PlanLimits> = {
     free: {
-        max_active_workflows: 1,
-        max_ai_messages_daily: 5,
+        max_active_workflows: 3,
+        max_ai_messages_daily: 10,
         allowed_connections: ['ga4'],
         features: ['basic_analytics', 'standard_support'],
     },
