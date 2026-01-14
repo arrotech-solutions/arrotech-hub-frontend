@@ -63,6 +63,7 @@ const Workflows: React.FC = () => {
   const [selectedWorkflow, setSelectedWorkflow] = useState<WorkflowType | null>(null);
   const [selectedExecution, setSelectedExecution] = useState<WorkflowExecution | null>(null);
   const [executingWorkflow, setExecutingWorkflow] = useState<WorkflowType | null>(null);
+  const [editingWorkflow, setEditingWorkflow] = useState<WorkflowType | null>(null);
 
   // Sharing state
   const [showShareModal, setShowShareModal] = useState(false);
@@ -185,6 +186,25 @@ const Workflows: React.FC = () => {
     } catch (error) {
       console.error('Error deleting workflow:', error);
       toast.error('Failed to delete workflow');
+    }
+  };
+
+  const handleToggleStatus = async (workflow: WorkflowType) => {
+    try {
+      const newStatus = workflow.status === 'active' ? 'paused' : 'active';
+      const response = await apiService.updateWorkflow(workflow.id, {
+        status: newStatus
+      });
+
+      if (response.success) {
+        toast.success(`Workflow ${newStatus === 'active' ? 'resumed' : 'paused'} successfully`);
+        loadWorkflows();
+      } else {
+        toast.error('Failed to update workflow status');
+      }
+    } catch (error) {
+      console.error('Error updating workflow status:', error);
+      toast.error('Failed to update workflow status');
     }
   };
 
@@ -514,11 +534,24 @@ const Workflows: React.FC = () => {
           </button>
           <div className="flex space-x-1">
             <button
-              onClick={() => setSelectedWorkflow(workflow)}
+              onClick={() => {
+                setEditingWorkflow(workflow);
+                setShowEnhancedCreator(true);
+              }}
               className="flex-1 flex items-center justify-center p-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
-              title="View Details"
+              title="View & Edit"
             >
               <Eye className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => handleToggleStatus(workflow)}
+              className={`flex-1 flex items-center justify-center p-3 rounded-xl transition-colors ${workflow.status === 'active'
+                ? 'bg-orange-50 text-orange-600 hover:bg-orange-100'
+                : 'bg-green-50 text-green-600 hover:bg-green-100'
+                }`}
+              title={workflow.status === 'active' ? 'Pause Workflow' : 'Resume Workflow'}
+            >
+              {workflow.status === 'active' ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
             </button>
             <button
               onClick={() => openShareModal(workflow)}
@@ -593,10 +626,24 @@ const Workflows: React.FC = () => {
           <span>Launch</span>
         </button>
         <button
-          onClick={() => setSelectedWorkflow(workflow)}
+          onClick={() => {
+            setEditingWorkflow(workflow);
+            setShowEnhancedCreator(true);
+          }}
           className="p-2.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
+          title="View & Edit"
         >
           <Eye className="w-5 h-5" />
+        </button>
+        <button
+          onClick={() => handleToggleStatus(workflow)}
+          className={`p-2.5 rounded-xl transition-all ${workflow.status === 'active'
+            ? 'text-orange-400 hover:text-orange-600 hover:bg-orange-50'
+            : 'text-green-400 hover:text-green-600 hover:bg-green-50'
+            }`}
+          title={workflow.status === 'active' ? 'Pause Workflow' : 'Resume Workflow'}
+        >
+          {workflow.status === 'active' ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
         </button>
         <button
           onClick={() => openShareModal(workflow)}
@@ -879,10 +926,15 @@ const Workflows: React.FC = () => {
         {/* Enhanced Workflow Creator */}
         <EnhancedWorkflowCreator
           open={showEnhancedCreator}
-          onClose={() => setShowEnhancedCreator(false)}
-          onWorkflowCreated={() => {
+          onClose={() => {
+            setShowEnhancedCreator(false);
+            setEditingWorkflow(null);
+          }}
+          initialData={editingWorkflow}
+          onWorkflowCreated={(workflow) => {
             loadWorkflows();
             setShowEnhancedCreator(false);
+            setEditingWorkflow(null);
           }}
         />
 
