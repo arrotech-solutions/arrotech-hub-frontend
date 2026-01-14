@@ -41,6 +41,7 @@ interface EnhancedWorkflowCreatorProps {
     open: boolean;
     onClose: () => void;
     onWorkflowCreated?: (workflow: any) => void;
+    initialData?: any; // Workflow to edit
 }
 
 interface WorkflowStep {
@@ -155,7 +156,8 @@ const TOOL_CATEGORIES = {
 const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
     open,
     onClose,
-    onWorkflowCreated
+    onWorkflowCreated,
+    initialData
 }) => {
     // Step management
     const [currentStep, setCurrentStep] = useState(0);
@@ -165,6 +167,7 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
     const [workflowName, setWorkflowName] = useState('');
     const [description, setDescription] = useState('');
     const [triggerType, setTriggerType] = useState<TriggerType>('manual');
+    const [triggerConfig, setTriggerConfig] = useState<Record<string, any>>({});
     const [category, setCategory] = useState('');
     const [tags, setTags] = useState('');
 
@@ -183,23 +186,53 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
     // UI state
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const isEditing = !!initialData;
 
     useEffect(() => {
         if (open) {
             loadTools();
-            // Reset state
-            setCurrentStep(0);
-            setWorkflowName('');
-            setDescription('');
-            setTriggerType('manual');
-            setCategory('');
-            setTags('');
-            setWorkflowSteps([]);
+            // Reset or Initialize state
+            if (initialData) {
+                setCurrentStep(0);
+                setWorkflowName(initialData.name || '');
+                setDescription(initialData.description || '');
+                setTriggerType((initialData.trigger_type?.toLowerCase() as TriggerType) || 'manual');
+                setTriggerConfig(initialData.trigger_config || {});
+                // Extract category/tags if stored in metadata or infer
+                setCategory(initialData.workflow_metadata?.category || '');
+                setTags(initialData.workflow_metadata?.tags?.join(', ') || '');
+
+                // Map steps
+                if (initialData.steps) {
+                    const mappedSteps = initialData.steps.map((s: any) => ({
+                        id: s.id || Math.random().toString(36).substr(2, 9),
+                        step_number: s.step_number,
+                        tool_name: s.tool_name,
+                        tool_parameters: s.tool_parameters || {},
+                        description: s.description || '',
+                        condition: s.condition,
+                        retry_config: s.retry_config,
+                        timeout: s.timeout
+                    })).sort((a: any, b: any) => a.step_number - b.step_number);
+                    setWorkflowSteps(mappedSteps);
+                } else {
+                    setWorkflowSteps([]);
+                }
+            } else {
+                setCurrentStep(0);
+                setWorkflowName('');
+                setDescription('');
+                setTriggerType('manual');
+                setTriggerConfig({});
+                setCategory('');
+                setTags('');
+                setWorkflowSteps([]);
+            }
             setSearchQuery('');
             setSelectedCategory('All');
             setError(null);
         }
-    }, [open]);
+    }, [open, initialData]);
 
     const loadTools = async () => {
         try {
@@ -351,24 +384,48 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                 timeout: step.timeout
             }));
 
-            const response = await apiService.createWorkflowFromSteps({
-                workflow_name: workflowName,
-                description: description || `Created with ${workflowSteps.length} steps`,
-                steps: steps,
-                trigger_type: triggerType,
-                variables: {}
-            });
+            if (isEditing) {
+                const response = await apiService.updateWorkflow(initialData.id, {
+                    name: workflowName,
+                    description: description || `Updated with ${workflowSteps.length} steps`,
+                    steps: steps,
+                    trigger_type: triggerType,
+                    trigger_config: triggerConfig,
+                    variables: {},
+                    workflow_metadata: {
+                        category: category,
+                        tags: tags.split(',').map(t => t.trim()).filter(Boolean)
+                    }
+                });
 
-            if (response.success && response.data) {
-                toast.success(`Workflow "${workflowName}" created successfully!`);
-                onWorkflowCreated?.(response.data);
-                onClose();
+                if (response.success && response.data) {
+                    toast.success(`Workflow "${workflowName}" updated successfully!`);
+                    onWorkflowCreated?.(response.data);
+                    onClose();
+                } else {
+                    setError('Failed to update workflow');
+                }
             } else {
-                setError(response.error || 'Failed to create workflow');
+                const response = await apiService.createWorkflowFromSteps({
+                    workflow_name: workflowName,
+                    description: description || `Created with ${workflowSteps.length} steps`,
+                    steps: steps,
+                    trigger_type: triggerType,
+                    trigger_config: triggerConfig,
+                    variables: {}
+                });
+
+                if (response.success && response.data) {
+                    toast.success(`Workflow "${workflowName}" created successfully!`);
+                    onWorkflowCreated?.(response.data);
+                    onClose();
+                } else {
+                    setError('Failed to create workflow');
+                }
             }
         } catch (err: any) {
-            console.error('Error creating workflow:', err);
-            setError(err.message || 'An error occurred while creating the workflow');
+            console.error('Error saving workflow:', err);
+            setError(err.message || 'An error occurred while saving the workflow');
         } finally {
             setLoading(false);
         }
@@ -377,7 +434,10 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
     const canProceed = () => {
         switch (currentStep) {
             case 0:
-                return workflowName.trim() !== '';
+                if (workflowName.trim() === '') return false;
+                if (triggerType === 'scheduled' && !triggerConfig.cron_expression) return false;
+                if (triggerType === 'event' && !triggerConfig.event_type) return false;
+                return true;
             case 1:
                 return workflowSteps.length > 0;
             case 2:
@@ -496,7 +556,7 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                             <Sparkles className="w-5 h-5 text-white" />
                         </div>
                         <div>
-                            <h2 className="text-xl font-bold text-white">Create Workflow</h2>
+                            <h2 className="text-xl font-bold text-white">{isEditing ? 'Update Workflow' : 'Create Workflow'}</h2>
                             <p className="text-sm text-white/80">
                                 Step {currentStep + 1} of {steps.length}: {steps[currentStep]}
                             </p>
@@ -608,6 +668,69 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                                     ))}
                                 </div>
                             </div>
+
+                            {/* Trigger Configuration */}
+                            {triggerType !== 'manual' && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h4 className="text-sm font-medium text-gray-900 border-b border-gray-200 pb-2 mb-2">
+                                        {triggerType.charAt(0).toUpperCase() + triggerType.slice(1)} Configuration
+                                    </h4>
+
+                                    {triggerType === 'scheduled' && (
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Cron Expression *
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={triggerConfig.cron_expression || ''}
+                                                onChange={(e) => setTriggerConfig({ ...triggerConfig, cron_expression: e.target.value })}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm font-mono"
+                                                placeholder="0 9 * * 1-5 (At 09:00 on every day-of-week from Monday through Friday)"
+                                            />
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                Use standard cron syntax. <a href="https://crontab.guru/" target="_blank" rel="noreferrer" className="text-purple-600 hover:underline">Need help?</a>
+                                            </p>
+                                        </div>
+                                    )}
+
+                                    {triggerType === 'event' && (
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Event Type *
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={triggerConfig.event_type || ''}
+                                                onChange={(e) => setTriggerConfig({ ...triggerConfig, event_type: e.target.value })}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                                                placeholder="e.g., user.created, payment.received"
+                                            />
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                The event name that will trigger this workflow.
+                                            </p>
+                                        </div>
+                                    )}
+
+                                    {triggerType === 'webhook' && (
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Webhook Secret (Optional)
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={triggerConfig.webhook_secret || ''}
+                                                onChange={(e) => setTriggerConfig({ ...triggerConfig, webhook_secret: e.target.value })}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                                                placeholder="Enter a secret token to verify requests"
+                                            />
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                If provided, the webhook must include this secret in the headers for verification.
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
@@ -955,7 +1078,12 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
 
                     {currentStep < steps.length - 1 ? (
                         <button
-                            onClick={() => setCurrentStep(currentStep + 1)}
+                            onClick={() => {
+                                if (editingStep) {
+                                    handleUpdateStepParams(editingStep);
+                                }
+                                setCurrentStep(currentStep + 1);
+                            }}
                             disabled={!canProceed()}
                             className="flex items-center space-x-2 px-6 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         >
@@ -976,14 +1104,14 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                             ) : (
                                 <>
                                     <Save className="w-4 h-4" />
-                                    <span>Create Workflow</span>
+                                    <span>{isEditing ? 'Update Workflow' : 'Create Workflow'}</span>
                                 </>
                             )}
                         </button>
                     )}
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 
