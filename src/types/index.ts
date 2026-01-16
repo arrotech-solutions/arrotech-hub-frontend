@@ -189,7 +189,7 @@ export interface ConnectionPlatform {
 export interface Connection {
   id: number;
   user_id: number;
-  platform: 'hubspot' | 'ga4' | 'slack' | 'whatsapp' | 'facebook' | 'twitter' | 'linkedin' | 'instagram' | 'powerbi' | 'asana' | 'zoom' | 'teams' | 'salesforce' | 'mcp_remote' | string;
+  platform: 'hubspot' | 'ga4' | 'slack' | 'whatsapp' | 'facebook' | 'twitter' | 'linkedin' | 'instagram' | 'powerbi' | 'asana' | 'zoom' | 'teams' | 'salesforce' | 'google_workspace' | 'mcp_remote' | string;
   name: string;
   status: 'active' | 'inactive' | 'error' | 'pending';
   config: Record<string, any>;
