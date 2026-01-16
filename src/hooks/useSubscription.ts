@@ -33,7 +33,7 @@ export const PLAN_LIMITS: Record<SubscriptionTier, PlanLimits> = {
     pro: {
         max_active_workflows: 100,
         max_ai_messages_daily: 1000,
-        allowed_connections: ['ga4', 'mpesa', 'slack', 'whatsapp', 'hubspot', 'asana', 'teams'],
+        allowed_connections: ['ga4', 'mpesa', 'slack', 'whatsapp', 'hubspot', 'asana', 'teams', 'google_workspace'],
         features: ['real_time_analytics', 'dedicated_whatsapp', 'advanced_automation', 'custom_branding'],
     },
     enterprise: {
