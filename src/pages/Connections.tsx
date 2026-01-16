@@ -32,7 +32,7 @@ import {
   TrendingUp,
   Wallet
 } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
@@ -55,6 +55,7 @@ const Connections: React.FC = () => {
     config: {}
   });
   const [jsonErrors, setJsonErrors] = useState<{ [key: string]: string }>({});
+  const processedCallback = useRef(false);
   const [testingConnection, setTestingConnection] = useState<number | null>(null);
   const [syncingConnection, setSyncingConnection] = useState<number | null>(null);
   const [oauthInProgress, setOauthInProgress] = useState<number | null>(null);
@@ -70,10 +71,79 @@ const Connections: React.FC = () => {
   });
   const [expandedPlatforms, setExpandedPlatforms] = useState<Set<string>>(new Set());
 
+  const fetchConnections = useCallback(async () => {
+    try {
+      const response = await apiService.getConnections();
+      setConnections(response.data);
+    } catch (error) {
+      console.error('Error fetching connections:', error);
+      toast.error('Failed to load connections');
+    }
+  }, []);
+
+  const fetchPlatforms = useCallback(async () => {
+    try {
+      const response = await apiService.getAvailablePlatforms();
+      console.log('[DEBUG] Raw platform response:', response);
+
+      // The API service already handles the data extraction
+      const platformsData = response.data || [];
+      console.log('[DEBUG] Extracted platforms data:', platformsData);
+      console.log('[DEBUG] Loaded platforms:', platformsData.map(p => p.id));
+
+      setPlatforms(platformsData);
+    } catch (error) {
+      console.error('Error fetching platforms:', error);
+      toast.error('Failed to load available platforms');
+      setPlatforms([]); // Set empty array to prevent undefined errors
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Handle OAuth callback from Google Workspace
+  const handleOAuthCallback = useCallback(async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    const state = urlParams.get('state');
+    const error = urlParams.get('error');
+
+    // Check if this is an OAuth callback
+    if (code && state) {
+      // Prevent double execution
+      if (processedCallback.current) return;
+      processedCallback.current = true;
+
+      try {
+        toast.loading('Completing Google Workspace connection...', { id: 'oauth-callback' });
+
+        // Send the authorization code to backend
+        const response = await apiService.getGoogleWorkspaceCallback(code, state);
+
+        if (response.success) {
+          toast.success(`Google Workspace connected successfully!`, { id: 'oauth-callback' });
+          // Clear URL parameters
+          window.history.replaceState({}, document.title, window.location.pathname);
+          // Refresh connections
+          fetchConnections();
+        } else {
+          toast.error(response.error || 'Failed to complete connection', { id: 'oauth-callback' });
+        }
+      } catch (err: any) {
+        console.error('OAuth callback error:', err);
+        toast.error(err?.response?.data?.detail || 'Failed to connect Google Workspace', { id: 'oauth-callback' });
+      }
+    } else if (error) {
+      toast.error(`Google authorization failed: ${error}`);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, [fetchConnections]);
+
   useEffect(() => {
     fetchConnections();
     fetchPlatforms();
-  }, []);
+    handleOAuthCallback();
+  }, [fetchConnections, fetchPlatforms, handleOAuthCallback]);
 
   useEffect(() => {
     // Calculate stats when connections change
@@ -117,35 +187,7 @@ const Connections: React.FC = () => {
     }
   ];
 
-  const fetchConnections = async () => {
-    try {
-      const response = await apiService.getConnections();
-      setConnections(response.data);
-    } catch (error) {
-      console.error('Error fetching connections:', error);
-      toast.error('Failed to load connections');
-    }
-  };
 
-  const fetchPlatforms = async () => {
-    try {
-      const response = await apiService.getAvailablePlatforms();
-      console.log('[DEBUG] Raw platform response:', response);
-
-      // The API service already handles the data extraction
-      const platformsData = response.data || [];
-      console.log('[DEBUG] Extracted platforms data:', platformsData);
-      console.log('[DEBUG] Loaded platforms:', platformsData.map(p => p.id));
-
-      setPlatforms(platformsData);
-    } catch (error) {
-      console.error('Error fetching platforms:', error);
-      toast.error('Failed to load available platforms');
-      setPlatforms([]); // Set empty array to prevent undefined errors
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleCreateConnection = async () => {
     // Check if there are any JSON errors
@@ -319,6 +361,7 @@ const Connections: React.FC = () => {
       zoom: <MessageCircle className="w-5 h-5" />,
       teams: <Users className="w-5 h-5" />,
       salesforce: <Database className="w-5 h-5" />,
+      google_workspace: <Globe className="w-5 h-5" />,
       hr_hub: <Users className="w-5 h-5" />,
       logistics_hub: <Globe className="w-5 h-5" />,
       lead_intelligence: <Zap className="w-5 h-5" />,
@@ -396,6 +439,7 @@ const Connections: React.FC = () => {
       zoom: 'bg-blue-100 text-blue-800',
       teams: 'bg-purple-100 text-purple-800',
       salesforce: 'bg-blue-100 text-blue-800',
+      google_workspace: 'bg-blue-100 text-blue-800',
       hr_hub: 'bg-indigo-100 text-indigo-800',
       logistics_hub: 'bg-emerald-100 text-emerald-800',
       lead_intelligence: 'bg-amber-100 text-amber-800',
@@ -855,12 +899,31 @@ const Connections: React.FC = () => {
     );
   };
 
-  const openCreateModal = (platform: ConnectionPlatform) => {
+  const openCreateModal = async (platform: ConnectionPlatform) => {
     if (!hasConnectionAccess(platform.id)) {
       toast.error(`${platform.name} connection is not available on the ${tier} plan. Please upgrade to use this integration.`);
       navigate('/pricing');
       return;
     }
+
+    // Special handling for Google Workspace OAuth flow
+    if (platform.id === 'google_workspace') {
+      try {
+        toast.loading('Redirecting to Google...', { id: 'google-oauth' });
+        const response = await apiService.getGoogleWorkspaceAuthUrl();
+        if (response.auth_url) {
+          // Redirect to Google's OAuth page
+          window.location.href = response.auth_url;
+        } else {
+          toast.error('Failed to initiate Google Workspace connection', { id: 'google-oauth' });
+        }
+      } catch (error) {
+        console.error('Error initiating Google Workspace OAuth:', error);
+        toast.error('Failed to connect to Google Workspace', { id: 'google-oauth' });
+      }
+      return;
+    }
+
     setSelectedPlatform(platform);
     setFormData({ platform: platform.id, name: '', config: {} });
     setJsonErrors({}); // Clear any previous JSON errors

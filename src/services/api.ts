@@ -207,6 +207,17 @@ class ApiService {
     };
   }
 
+  // Google Workspace OAuth endpoints
+  async getGoogleWorkspaceAuthUrl(): Promise<{ auth_url: string; state: string }> {
+    const response = await this.api.get('/api/google-workspace/auth-url');
+    return response.data;  // Backend returns {auth_url, state} directly
+  }
+
+  async getGoogleWorkspaceCallback(code: string, state: string): Promise<{ success: boolean; error?: string }> {
+    const response = await this.api.get(`/api/google-workspace/callback?code=${code}&state=${state}`);
+    return response.data;  // Backend returns {success, error?} directly
+  }
+
   // Dynamic Tool Registry endpoints
   async getDynamicTools(): Promise<ApiResponse<ToolInfo[]>> {
     const response = await this.api.get('/mcp/tools/dynamic');
