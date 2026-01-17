@@ -58,7 +58,7 @@ import {
     TwitterLogo,
     LinkedInLogo,
     StripeLogo
-} from '../components/BrandLogos';
+} from '../components/BrandIcons';
 
 // --- Components ---
 
