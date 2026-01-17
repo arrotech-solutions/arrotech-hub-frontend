@@ -2,8 +2,7 @@ import {
   Database,
   Search,
   Settings,
-  Zap,
-  Filter
+  Zap
 } from 'lucide-react';
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import toast from 'react-hot-toast';
@@ -35,8 +34,6 @@ import {
 } from '../components/BrandLogos';
 
 const Integrations: React.FC = () => {
-  const { user } = useAuth();
-  const { hasConnectionAccess, tier } = useSubscription();
   const navigate = useNavigate();
 
   // State
@@ -54,7 +51,6 @@ const Integrations: React.FC = () => {
     name: '',
     config: {}
   });
-  const [jsonErrors, setJsonErrors] = useState<{ [key: string]: string }>({});
   const [editingConnection, setEditingConnection] = useState<Connection | null>(null);
 
   // Computed State
