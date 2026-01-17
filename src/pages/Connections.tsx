@@ -7,8 +7,6 @@ import {
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
-import { useSubscription } from '../hooks/useSubscription';
 import apiService from '../services/api';
 import { Connection, ConnectionCreate, ConnectionPlatform } from '../types';
 import {
