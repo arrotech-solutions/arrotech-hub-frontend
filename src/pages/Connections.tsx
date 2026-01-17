@@ -29,7 +29,7 @@ import {
   ZoomLogo,
   AsanaLogo,
   PowerBILogo
-} from '../components/BrandLogos';
+} from '../components/BrandIcons';
 
 const Integrations: React.FC = () => {
   const navigate = useNavigate();
