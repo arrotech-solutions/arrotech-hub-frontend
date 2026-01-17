@@ -218,6 +218,17 @@ class ApiService {
     return response.data;  // Backend returns {success, error?} directly
   }
 
+  // Slack OAuth endpoints
+  async getSlackAuthUrl(): Promise<{ auth_url: string; state: string }> {
+    const response = await this.api.get('/api/slack/auth-url');
+    return response.data;
+  }
+
+  async getSlackCallback(code: string, state: string): Promise<{ success: boolean; error?: string; team_name?: string }> {
+    const response = await this.api.get(`/api/slack/callback?code=${code}&state=${state}`);
+    return response.data;
+  }
+
   // Dynamic Tool Registry endpoints
   async getDynamicTools(): Promise<ApiResponse<ToolInfo[]>> {
     const response = await this.api.get('/mcp/tools/dynamic');
