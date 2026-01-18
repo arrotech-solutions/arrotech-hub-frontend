@@ -28,7 +28,16 @@ import {
   MicrosoftTeamsLogo,
   ZoomLogo,
   AsanaLogo,
-  PowerBILogo
+  PowerBILogo,
+  EquityLogo,
+  KenyaPowerLogo,
+  KilimallLogo,
+  PesapalLogo,
+  QuickBooksLogo,
+  SendyLogo,
+  TKashLogo,
+  TwigaFoodsLogo,
+  ZohoLogo
 } from '../components/BrandIcons';
 
 const Integrations: React.FC = () => {
@@ -57,8 +66,27 @@ const Integrations: React.FC = () => {
   const processedCallback = useRef(false);
 
   // Logo Mapping
+  const getPlatformLogoStyle = (platformId: string) => {
+    // Tailored sizing to prevent distortion or "too small" look
+    if (platformId.includes('hubspot')) return 'h-full w-auto object-contain';
+    if (platformId.includes('shopify')) return 'h-full w-auto object-contain';
+    if (platformId.includes('mpesa')) return 'h-full w-auto object-contain';
+    if (platformId.includes('airtel')) return 'h-full w-auto object-contain';
+    if (platformId.includes('jumia')) return 'h-full w-auto object-contain';
+    if (platformId.includes('stripe')) return 'h-full w-auto object-contain';
+    if (platformId.includes('equity')) return 'h-full w-auto object-contain';
+    if (platformId.includes('pesapal')) return 'h-full w-auto object-contain';
+    if (platformId.includes('sendy')) return 'h-full w-auto object-contain';
+    if (platformId.includes('kilimall')) return 'h-full w-auto object-contain';
+    if (platformId.includes('zoho')) return 'h-full w-auto object-contain';
+    if (platformId.includes('quick_books')) return 'h-full w-auto object-contain';
+    // Square default
+    return 'w-full h-full object-contain';
+  };
+
   const getPlatformLogo = (platformId: string) => {
-    const props = { className: "w-full h-full" };
+    const className = getPlatformLogoStyle(platformId);
+    const props = { className };
     switch (platformId) {
       case 'google_workspace': return <GoogleLogo {...props} />;
       case 'slack': return <SlackLogo {...props} />;
@@ -86,7 +114,22 @@ const Integrations: React.FC = () => {
       case 'microsoft_teams': return <MicrosoftTeamsLogo {...props} />;
       case 'zoom': return <ZoomLogo {...props} />;
       case 'asana': return <AsanaLogo {...props} />;
-      case 'power_bi': return <PowerBILogo {...props} />;
+      case 'power_bi':
+      case 'powerbi': return <PowerBILogo {...props} />;
+      case 'equity_bank':
+      case 'equity': return <EquityLogo {...props} />;
+      case 'kenya_power': return <KenyaPowerLogo {...props} />;
+      case 'kilimall': return <KilimallLogo {...props} />;
+      case 'pesapal': return <PesapalLogo {...props} />;
+      case 'quick_books':
+      case 'quickbooks': return <QuickBooksLogo {...props} />;
+      case 'sendy': return <SendyLogo {...props} />;
+      case 't_kash':
+      case 'tkash': return <TKashLogo {...props} />;
+      case 'twiga_foods':
+      case 'twiga': return <TwigaFoodsLogo {...props} />;
+      case 'zoho':
+      case 'zoho_crm': return <ZohoLogo {...props} />;
       default: return <Database {...props} className="text-gray-400 p-2" />;
     }
   };
@@ -134,6 +177,26 @@ const Integrations: React.FC = () => {
       toast.error('Connection failed: ' + error);
       navigate('/connections', { replace: true });
       processedCallback.current = true;
+
+      return;
+    }
+
+    const success = params.get('success');
+    if (success) {
+      if (success === 'whatsapp_connected') {
+        toast.success('WhatsApp Business connected successfully!');
+      } else if (success === 'facebook_connected') {
+        toast.success('Facebook Pages connected successfully!');
+      } else if (success === 'instagram_connected') {
+        toast.success('Instagram Business connected successfully!');
+      } else if (success === 'twitter_connected') {
+        toast.success('Twitter connected successfully!');
+      } else {
+        toast.success('Connection successful!');
+      }
+      navigate('/connections', { replace: true });
+      processedCallback.current = true;
+      fetchData(); // Refresh list to show new connection
       return;
     }
 
@@ -149,9 +212,12 @@ const Integrations: React.FC = () => {
             // Actually, we should know based on where we came from, but we lost that context on redirect.
             // Let's try to detect based on how the callback was formed.
             // Google and Slack both use `code` and `state`.
-            // Simple hack: Try Slack if Google fails, or differentiate earlier?
-            // Better: Google uses `scope` in response often, Slack does too.
-            // Let's just try to call the one that matches our last intention? No, that's lost.
+            // WhatsApp uses a full redirect so it might return success/error params handled below,
+            // but if we need to handle code manually we would add it here.
+            // Current WhatsApp implementation redirects with ?success=whatsapp_connected
+
+            // Simple hack: Try Google, then Slack. WhatsApp is handled by params check earlier if using ?success 
+            // (Wait, look at lines 135-144 which I can't see but presumably handle `success` param).
 
             // Check if we are coming from Slack (check for something specific if possible, or just try catch)
             // Slack auth usually doesn't append extra params we can rely on universally except standard oauth.
@@ -213,6 +279,58 @@ const Integrations: React.FC = () => {
         toast.loading('Redirecting to Slack...', { id: 'oauth-redirect' });
         const { auth_url } = await apiService.getSlackAuthUrl();
         window.location.href = auth_url;
+        return;
+      } catch (error) {
+        toast.error('Failed to initiate connection', { id: 'oauth-redirect' });
+        return;
+      }
+    }
+
+    // Redirect to WhatsApp Auth if it's WhatsApp AND NOT already connected
+    if (platform.id === 'whatsapp' && !existing) {
+      try {
+        toast.loading('Redirecting to Facebook...', { id: 'oauth-redirect' });
+        const { url } = await apiService.getWhatsAppAuthUrl();
+        window.location.href = url;
+        return;
+      } catch (error) {
+        toast.error('Failed to initiate connection', { id: 'oauth-redirect' });
+        return;
+      }
+    }
+
+    // Redirect to Facebook Auth if it's Facebook AND NOT already connected
+    if (platform.id === 'facebook' && !existing) {
+      try {
+        toast.loading('Redirecting to Facebook...', { id: 'oauth-redirect' });
+        const { url } = await apiService.getFacebookAuthUrl();
+        window.location.href = url;
+        return;
+      } catch (error) {
+        toast.error('Failed to initiate connection', { id: 'oauth-redirect' });
+        return;
+      }
+    }
+
+    // Redirect to Instagram Auth if it's Instagram AND NOT already connected
+    if (platform.id === 'instagram' && !existing) {
+      try {
+        toast.loading('Redirecting to Instagram...', { id: 'oauth-redirect' });
+        const { url } = await apiService.getInstagramAuthUrl();
+        window.location.href = url;
+        return;
+      } catch (error) {
+        toast.error('Failed to initiate connection', { id: 'oauth-redirect' });
+        return;
+      }
+    }
+
+    // Redirect to Twitter Auth if it's Twitter AND NOT already connected
+    if (platform.id === 'twitter' && !existing) {
+      try {
+        toast.loading('Redirecting to Twitter...', { id: 'oauth-redirect' });
+        const { url } = await apiService.getTwitterAuthUrl();
+        window.location.href = url;
         return;
       } catch (error) {
         toast.error('Failed to initiate connection', { id: 'oauth-redirect' });

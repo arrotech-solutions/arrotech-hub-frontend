@@ -57,7 +57,20 @@ import {
     InstagramLogo,
     TwitterLogo,
     LinkedInLogo,
-    StripeLogo
+    StripeLogo,
+    MicrosoftTeamsLogo,
+    PowerBILogo,
+    EquityLogo,
+    KenyaPowerLogo,
+    KilimallLogo,
+    PesapalLogo,
+    QuickBooksLogo,
+    SendyLogo,
+    TKashLogo,
+    TwigaFoodsLogo,
+    ZohoLogo,
+    ZoomLogo,
+    AsanaLogo
 } from '../components/BrandIcons';
 
 // --- Components ---
@@ -206,6 +219,25 @@ const Integrations: React.FC = () => {
             twitter: TwitterLogo,
             linkedin: LinkedInLogo,
             mcp_remote: Server,
+            teams: MicrosoftTeamsLogo,
+            microsoft_teams: MicrosoftTeamsLogo,
+            zoom: ZoomLogo,
+            asana: AsanaLogo,
+            power_bi: PowerBILogo,
+            equity: EquityLogo,
+            equity_bank: EquityLogo,
+            kenya_power: KenyaPowerLogo,
+            kilimall: KilimallLogo,
+            pesapal: PesapalLogo,
+            quick_books: QuickBooksLogo,
+            quickbooks: QuickBooksLogo,
+            sendy: SendyLogo,
+            t_kash: TKashLogo,
+            tkash: TKashLogo,
+            twiga: TwigaFoodsLogo,
+            twiga_foods: TwigaFoodsLogo,
+            zoho: ZohoLogo,
+            zoho_crm: ZohoLogo,
             // Add generic fallbacks
             marketing: Zap,
             crm: Users,
@@ -215,6 +247,14 @@ const Integrations: React.FC = () => {
 
         // Improved mapping logic based on ID patterns
         if (iconMap[platformId]) return iconMap[platformId];
+        // Handle variations
+        if (platformId.includes('teams')) return MicrosoftTeamsLogo;
+        if (platformId.includes('equity')) return EquityLogo;
+        if (platformId.includes('kenya_power')) return KenyaPowerLogo;
+        if (platformId.includes('power_bi')) return PowerBILogo;
+        if (platformId.includes('pesapal')) return PesapalLogo;
+        if (platformId.includes('zoho')) return ZohoLogo;
+
         if (platformId.includes('pay') || platformId.includes('finance') || platformId.includes('bank')) return CreditCard;
         if (platformId.includes('shop') || platformId.includes('store') || platformId.includes('commerce')) return ShoppingBag;
         if (platformId.includes('health')) return Activity;
@@ -245,6 +285,18 @@ const Integrations: React.FC = () => {
         if (platformId.includes('airtel')) return 'bg-red-50 text-red-600';
         if (platformId.includes('whatsapp')) return 'bg-green-50 text-green-600';
         return 'bg-gray-50 text-gray-700';
+    };
+
+    const getPlatformLogoStyle = (platformId: string) => {
+        // Custom styling for non-square logos to prevent "small" or "stretched" look
+        if (platformId.includes('hubspot')) return 'h-8 w-auto min-w-[2rem] max-w-full object-contain';
+        if (platformId.includes('shopify')) return 'h-8 w-auto max-w-full object-contain';
+        if (platformId.includes('mpesa')) return 'h-8 w-auto max-w-full object-contain';
+        if (platformId.includes('airtel')) return 'h-8 w-auto max-w-full object-contain';
+        if (platformId.includes('jumia')) return 'h-8 w-auto max-w-full object-contain';
+        if (platformId.includes('stripe')) return 'h-8 w-auto max-w-full object-contain';
+        // Default square constraint
+        return 'w-8 h-8 object-contain';
     };
 
     // --- Filtering Logic ---
@@ -443,7 +495,7 @@ const Integrations: React.FC = () => {
                                     <div className="p-6">
                                         <div className="flex items-start justify-between mb-4">
                                             <div className={`p-3 rounded-xl ${platformColorClass} ring-1 ring-black/5`}>
-                                                <Icon className="w-8 h-8" strokeWidth={1.5} />
+                                                <Icon className={getPlatformLogoStyle(platform.id)} strokeWidth={1.5} />
                                             </div>
                                             {isConnected && (
                                                 <div className="flex flex-col items-end gap-2">

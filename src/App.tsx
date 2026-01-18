@@ -24,6 +24,7 @@ import Workflows from './pages/Workflows';
 import Pricing from './pages/Pricing';
 import RequestAccess from './pages/RequestAccess';
 import AdminDashboard from './pages/AdminDashboard'; // Import AdminDashboard
+import UnifiedDashboard from './pages/UnifiedDashboard';
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -113,6 +114,16 @@ const AppRoutes: React.FC = () => {
       />
 
       {/* Protected Routes */}
+      <Route
+        path="/unified"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <UnifiedDashboard />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/dashboard"
         element={
