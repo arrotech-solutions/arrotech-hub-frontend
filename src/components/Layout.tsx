@@ -21,7 +21,8 @@ import {
   User,
   Workflow,
   X,
-  Zap
+  Zap,
+  LayoutDashboard
 } from 'lucide-react';
 import logo from '../assets/Logo/icononly_transparent_nobuffer.png';
 import React from 'react';
@@ -49,6 +50,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       icon: Home,
       description: 'Overview and analytics',
       badge: null
+    },
+    {
+      name: 'Workspace',
+      href: '/unified',
+      icon: LayoutDashboard,
+      description: 'Unified view of all apps',
+      badge: 'New'
     },
     {
       name: 'Chat',

@@ -14,7 +14,19 @@ import mpesaIcon from '../assets/apps/mpesa.png';
 import teamsIcon from '../assets/apps/microsoft_teams.png';
 import zoomIcon from '../assets/apps/zoom.jpeg';
 import asanaIcon from '../assets/apps/asana.png';
-import powerBiIcon from '../assets/apps/power_bi.png';
+import powerBiIcon from '../assets/apps/power_bi.jpg'; // switched to jpg
+import airtelIcon from '../assets/apps/airtel.jpg';
+import equityIcon from '../assets/apps/equity.jpeg';
+import jumiaIcon from '../assets/apps/jumia.png';
+import kenyaPowerIcon from '../assets/apps/kenya_power.png';
+import kilimallIcon from '../assets/apps/kilimall.png';
+import pesapalIcon from '../assets/apps/pesapal.jpeg';
+import quickBooksIcon from '../assets/apps/quick_books.jpg';
+import sendyIcon from '../assets/apps/sendy.png';
+import tKashIcon from '../assets/apps/t_kash.png';
+import twigaFoodsIcon from '../assets/apps/twiga_foods.png';
+import zohoIcon from '../assets/apps/zoho.jpg';
+
 
 type IconProps = React.SVGProps<SVGSVGElement> | React.ImgHTMLAttributes<HTMLImageElement> | any;
 
@@ -22,7 +34,7 @@ const ImageLogo = ({ src, alt, ...props }: { src: string, alt: string } & any) =
     <img
         src={src}
         alt={alt}
-        className={`w-full h-full object-contain ${props.className || ''}`}
+        className={`object-contain ${props.className || 'w-full h-full'}`}
         {...props}
     />
 );
@@ -53,19 +65,18 @@ export const ShopifyLogo = (props: IconProps) => (
 
 export const MPesaLogo = (props: IconProps) => <ImageLogo src={mpesaIcon} alt="M-Pesa" {...props} />;
 
-export const AirtelLogo = (props: IconProps) => (
-    <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" {...props}>
-        <path d="M0 0h24v24H0z" fill="#F01826" />
-        <path d="M16 11.5c-2.3 0-3.5 1.2-3.8 2.8.6-.5 1.4-.8 2.2-.8 1.4 0 2.2.8 2.2 2 0 1.8-2 2.8-4.2 2.8-2.6 0-4-1.5-4-3.8 0-2.8 2-5 6.2-5 1.8 0 3.2.3 4.2.8l-.8 1.4c-.8-.5-1.9-.8-3.2-.8-2.5 0-3.8 1.2-3.8 3 0 .2 0 .4.1.5.3-.8 1.2-1.2 2.2-1.2 1.5 0 2 .8 2 1.8 0 .8-.8 1.2-1.8 1.2-.8 0-1.5-.4-1.5-1.2h-1.8c0 1.5 1.2 2.8 3.2 2.8 2.5 0 3.8-1.5 3.8-3.5 0-2.2-1.8-3.5-5-3.5h-.2z" fill="white" />
-    </svg>
-);
-
-export const JumiaLogo = (props: IconProps) => (
-    <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" {...props}>
-        <path d="M10.92 13.56l-1.02 5.14h-3.4l1.02-5.14h3.4zm10.7-3.96l-2.02 6.86h-2.92l1.62-6.86h3.32zm-7.6 0l-1.62 6.86h-2.92l1.32-6.86h3.22zm-7.9 0l-1.32 6.86h-2.92l1.02-6.86h3.82z" fill="#282828" />
-        <path d="M11.66 4.96l2.1 3.54-4.06.66 1.96-4.2zm6.9 1.6l-3.3-1.6 1.5-2.68 1.8 4.28zm-11.8.8l3.1-4.28 1.5 2.56-4.6 1.72z" fill="#282828" />
-    </svg>
-);
+// Updated Logos
+export const AirtelLogo = (props: IconProps) => <ImageLogo src={airtelIcon} alt="Airtel" {...props} />;
+export const JumiaLogo = (props: IconProps) => <ImageLogo src={jumiaIcon} alt="Jumia" {...props} />;
+export const EquityLogo = (props: IconProps) => <ImageLogo src={equityIcon} alt="Equity Bank" {...props} />;
+export const KenyaPowerLogo = (props: IconProps) => <ImageLogo src={kenyaPowerIcon} alt="Kenya Power" {...props} />;
+export const KilimallLogo = (props: IconProps) => <ImageLogo src={kilimallIcon} alt="Kilimall" {...props} />;
+export const PesapalLogo = (props: IconProps) => <ImageLogo src={pesapalIcon} alt="Pesapal" {...props} />;
+export const QuickBooksLogo = (props: IconProps) => <ImageLogo src={quickBooksIcon} alt="QuickBooks" {...props} />;
+export const SendyLogo = (props: IconProps) => <ImageLogo src={sendyIcon} alt="Sendy" {...props} />;
+export const TKashLogo = (props: IconProps) => <ImageLogo src={tKashIcon} alt="T-Kash" {...props} />;
+export const TwigaFoodsLogo = (props: IconProps) => <ImageLogo src={twigaFoodsIcon} alt="Twiga Foods" {...props} />;
+export const ZohoLogo = (props: IconProps) => <ImageLogo src={zohoIcon} alt="Zoho" {...props} />;
 
 export const SalesforceLogo = (props: IconProps) => <ImageLogo src={salesforceIcon} alt="Salesforce" {...props} />;
 
