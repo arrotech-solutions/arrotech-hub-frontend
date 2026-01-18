@@ -148,6 +148,25 @@ const ToolResultWidget: React.FC<ToolResultWidgetProps> = ({
                                             </div>
                                         )}
 
+                                        {/* Workflow Created UI */}
+                                        {tool.name === 'workflow_management' && tool.result.workflow_id && (
+                                            <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-purple-900/20 border-purple-800' : 'bg-purple-50 border-purple-100'}`}>
+                                                <div className="flex items-center space-x-3 mb-2">
+                                                    <Zap size={18} className="text-purple-500" />
+                                                    <div>
+                                                        <p className="text-sm font-bold text-purple-700">Workflow Draft Created</p>
+                                                        <p className="text-xs text-purple-600">{tool.result.message}</p>
+                                                    </div>
+                                                </div>
+                                                <a
+                                                    href={`/workflows/${tool.result.workflow_id}`}
+                                                    className="mt-3 block w-full text-center py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors shadow-lg shadow-purple-500/20 text-xs font-bold uppercase tracking-wide"
+                                                >
+                                                    View & Edit Workflow
+                                                </a>
+                                            </div>
+                                        )}
+
                                         {/* Generic Data Visualizer (Table/Grid) */}
                                         {tool.result.data && !Array.isArray(tool.result.data) && typeof tool.result.data === 'object' && (
                                             <div className={`grid grid-cols-2 gap-2 p-2 rounded-xl ${isDarkMode ? 'bg-gray-900/40' : 'bg-gray-50/50'}`}>
