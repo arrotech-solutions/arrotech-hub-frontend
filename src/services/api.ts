@@ -229,6 +229,31 @@ class ApiService {
     return response.data;
   }
 
+  // WhatsApp OAuth endpoints
+  async getWhatsAppAuthUrl(): Promise<{ url: string }> {
+    const response = await this.api.get('/api/whatsapp/auth-url');
+    // The backend returns { url: "..." }
+    return response.data;
+  }
+
+  // Facebook OAuth endpoints
+  async getFacebookAuthUrl(): Promise<{ url: string }> {
+    const response = await this.api.get('/api/facebook/auth-url');
+    return response.data;
+  }
+
+  // Instagram OAuth endpoints
+  async getInstagramAuthUrl(): Promise<{ url: string }> {
+    const response = await this.api.get('/api/instagram/auth-url');
+    return response.data;
+  }
+
+  // Twitter OAuth endpoints
+  async getTwitterAuthUrl(): Promise<{ url: string }> {
+    const response = await this.api.get('/api/twitter/auth-url');
+    return response.data;
+  }
+
   // Dynamic Tool Registry endpoints
   async getDynamicTools(): Promise<ApiResponse<ToolInfo[]>> {
     const response = await this.api.get('/mcp/tools/dynamic');
