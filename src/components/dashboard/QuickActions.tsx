@@ -2,7 +2,11 @@ import React, { useState } from 'react';
 import { Mail, MessageSquare, Calendar, CheckSquare, Zap } from 'lucide-react';
 import QuickActionModal, { ActionType } from './QuickActionModal';
 
-const QuickActions: React.FC = () => {
+interface QuickActionsProps {
+    onCreateTask?: () => void;
+}
+
+const QuickActions: React.FC<QuickActionsProps> = ({ onCreateTask }) => {
     const [activeAction, setActiveAction] = useState<ActionType>(null);
 
     const actions = [
@@ -36,6 +40,14 @@ const QuickActions: React.FC = () => {
         },
     ];
 
+    const handleActionClick = (type: ActionType) => {
+        if (type === 'task' && onCreateTask) {
+            onCreateTask();
+        } else {
+            setActiveAction(type);
+        }
+    };
+
     return (
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
             <div className="flex items-center space-x-2 mb-6">
@@ -49,7 +61,7 @@ const QuickActions: React.FC = () => {
                 {actions.map((action, index) => (
                     <button
                         key={index}
-                        onClick={() => setActiveAction(action.type)}
+                        onClick={() => handleActionClick(action.type)}
                         className={`group relative p-4 rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 overflow-hidden bg-white`}
                     >
                         <div className={`absolute inset-0 bg-gradient-to-br ${action.bg} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}></div>
