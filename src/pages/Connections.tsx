@@ -37,7 +37,8 @@ import {
   SendyLogo,
   TKashLogo,
   TwigaFoodsLogo,
-  ZohoLogo
+  ZohoLogo,
+  ClickUpLogo
 } from '../components/BrandIcons';
 
 const Integrations: React.FC = () => {
@@ -61,8 +62,6 @@ const Integrations: React.FC = () => {
   const [editingConnection, setEditingConnection] = useState<Connection | null>(null);
 
   // Computed State
-  const categories = ['All', 'Communication', 'CRM', 'Marketing', 'Analytics', 'E-commerce', 'Payment', 'Social'];
-
   const processedCallback = useRef(false);
 
   // Logo Mapping
@@ -130,6 +129,7 @@ const Integrations: React.FC = () => {
       case 'twiga': return <TwigaFoodsLogo {...props} />;
       case 'zoho':
       case 'zoho_crm': return <ZohoLogo {...props} />;
+      case 'clickup': return <ClickUpLogo {...props} />;
       default: return <Database {...props} className="text-gray-400 p-2" />;
     }
   };
@@ -140,7 +140,9 @@ const Integrations: React.FC = () => {
     if (id.includes('facebook') || id.includes('instagram') || id.includes('twitter') || id.includes('linkedin')) return 'Social';
     if (id.includes('ga4') || id.includes('analytics')) return 'Analytics';
     if (id.includes('shopify') || id.includes('jumia')) return 'E-commerce';
+    if (id.includes('shopify') || id.includes('jumia')) return 'E-commerce';
     if (id.includes('mpesa') || id.includes('airtel') || id.includes('stripe')) return 'Payment';
+    if (id.includes('clickup') || id.includes('asana') || id.includes('trello')) return 'Productivity';
     return 'Other';
   };
 
@@ -191,6 +193,8 @@ const Integrations: React.FC = () => {
         toast.success('Instagram Business connected successfully!');
       } else if (success === 'twitter_connected') {
         toast.success('Twitter connected successfully!');
+      } else if (success === 'clickup_connected') {
+        toast.success('ClickUp connected successfully!');
       } else {
         toast.success('Connection successful!');
       }
@@ -338,6 +342,19 @@ const Integrations: React.FC = () => {
       }
     }
 
+    // Redirect to ClickUp Auth if it's ClickUp AND NOT already connected
+    if (platform.id === 'clickup' && !existing) {
+      try {
+        toast.loading('Redirecting to ClickUp...', { id: 'oauth-redirect' });
+        const { url } = await apiService.getClickUpAuthUrl();
+        window.location.href = url;
+        return;
+      } catch (error) {
+        toast.error('Failed to initiate connection', { id: 'oauth-redirect' });
+        return;
+      }
+    }
+
     if (existing) {
       setEditingConnection(existing);
       setFormData({
@@ -416,7 +433,7 @@ const Integrations: React.FC = () => {
 
           {/* Categories */}
           <div className="flex overflow-x-auto pb-2 md:pb-0 gap-2 no-scrollbar">
-            {categories.map(cat => (
+            {['All', 'Communication', 'CRM', 'Marketing', 'Analytics', 'E-commerce', 'Payment', 'Social', 'Productivity'].map((cat) => (
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
@@ -449,8 +466,8 @@ const Integrations: React.FC = () => {
         {/* Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {filteredPlatforms.map(platform => {
-            const isConnected = connections.some(c => c.platform === platform.id);
-            const connection = connections.find(c => c.platform === platform.id);
+            const isConnected = connections.some(c => c.platform.toLowerCase() === platform.id.toLowerCase());
+            const connection = connections.find(c => c.platform.toLowerCase() === platform.id.toLowerCase());
             const hasError = connection?.status === 'error';
 
             return (

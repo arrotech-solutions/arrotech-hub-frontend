@@ -5,6 +5,8 @@ import TaskWidget from '../components/dashboard/TaskWidget';
 import QuickActions from '../components/dashboard/QuickActions';
 
 const UnifiedDashboard: React.FC = () => {
+    const [triggerTaskModal, setTriggerTaskModal] = React.useState(0);
+
     return (
         <div className="min-h-screen bg-slate-50/50">
             <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
@@ -25,7 +27,7 @@ const UnifiedDashboard: React.FC = () => {
                 </div>
 
                 {/* Quick Actions Section */}
-                <QuickActions />
+                <QuickActions onCreateTask={() => setTriggerTaskModal(prev => prev + 1)} />
 
                 {/* Main Grid Layout */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
@@ -37,7 +39,7 @@ const UnifiedDashboard: React.FC = () => {
                     {/* Right Column: Calendar & Tasks (Span 5) */}
                     <div className="lg:col-span-5 flex flex-col space-y-6">
                         <CalendarWidget />
-                        <TaskWidget />
+                        <TaskWidget openModalTrigger={triggerTaskModal} />
                     </div>
                 </div>
             </div>
