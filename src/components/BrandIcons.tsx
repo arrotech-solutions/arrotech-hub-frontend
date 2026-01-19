@@ -26,6 +26,7 @@ import sendyIcon from '../assets/apps/sendy.png';
 import tKashIcon from '../assets/apps/t_kash.png';
 import twigaFoodsIcon from '../assets/apps/twiga_foods.png';
 import zohoIcon from '../assets/apps/zoho.jpg';
+import clickupIcon from '../assets/apps/clickup.png';
 
 
 type IconProps = React.SVGProps<SVGSVGElement> | React.ImgHTMLAttributes<HTMLImageElement> | any;
@@ -101,3 +102,5 @@ export const ZoomLogo = (props: IconProps) => <ImageLogo src={zoomIcon} alt="Zoo
 export const AsanaLogo = (props: IconProps) => <ImageLogo src={asanaIcon} alt="Asana" {...props} />;
 
 export const PowerBILogo = (props: IconProps) => <ImageLogo src={powerBiIcon} alt="Power BI" {...props} />;
+
+export const ClickUpLogo = (props: IconProps) => <ImageLogo src={clickupIcon} alt="ClickUp" {...props} />;

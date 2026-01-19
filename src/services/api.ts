@@ -174,7 +174,7 @@ class ApiService {
 
   // Connection endpoints
   async getConnections(): Promise<ApiResponse<Connection[]>> {
-    const response = await this.api.get('/connections/');
+    const response = await this.api.get(`/connections?_t=${new Date().getTime()}`);
     return response.data;
   }
 
@@ -251,6 +251,11 @@ class ApiService {
   // Twitter OAuth endpoints
   async getTwitterAuthUrl(): Promise<{ url: string }> {
     const response = await this.api.get('/api/twitter/auth-url');
+    return response.data;
+  }
+
+  async getClickUpAuthUrl(): Promise<{ url: string }> {
+    const response = await this.api.get('/api/clickup/auth-url');
     return response.data;
   }
 
@@ -2051,6 +2056,15 @@ class ApiService {
 
   async reactivateSubscription(): Promise<ApiResponse<any>> {
     const response = await this.api.post('/payments/subscriptions/reactivate');
+    return response.data;
+  }
+
+  // Generic MCP Tool Execution
+  async executeTool(name: string, args: Record<string, any>): Promise<ApiResponse<any>> {
+    const response = await this.api.post('/mcp/call', {
+      name,
+      arguments: args
+    });
     return response.data;
   }
 }
