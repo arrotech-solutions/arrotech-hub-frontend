@@ -40,6 +40,7 @@ const TutorialButton: React.FC = () => {
 
   const pageLabels: Record<string, string> = {
     dashboard: 'Dashboard',
+    workspace: 'Workspace',
     chat: 'Chat',
     workflows: 'Workflows',
     agents: 'Agents',
@@ -51,9 +52,13 @@ const TutorialButton: React.FC = () => {
     marketplace: 'Marketplace',
     favorites: 'Favorites',
     creator: 'Creator Profile',
+    mcptools: 'MCP Tools',
+    pricing: 'Pricing',
   };
 
-  const currentPageLabel = pageLabels[currentPage] || currentPage;
+  // Get the label for the current page with proper capitalization
+  const currentPageLabel = pageLabels[currentPage] ||
+    (currentPage ? currentPage.charAt(0).toUpperCase() + currentPage.slice(1) : 'This Page');
   const hasCompletedCurrentPage = hasCompletedPage(currentPage);
 
   return (

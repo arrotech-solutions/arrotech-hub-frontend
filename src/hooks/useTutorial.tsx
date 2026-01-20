@@ -50,7 +50,8 @@ export const useTutorial = () => {
 
 // Page configuration with routes
 const pageConfig: Record<string, string> = {
-  dashboard: '/',
+  dashboard: '/dashboard',
+  workspace: '/unified',  // UnifiedDashboard
   chat: '/chat',
   workflows: '/workflows',
   agents: '/agents',
@@ -63,6 +64,7 @@ const pageConfig: Record<string, string> = {
   favorites: '/favorites',
   creator: '/creator-profile',
   mcptools: '/mcp-tools',
+  pricing: '/pricing',
 };
 
 // Tutorial steps configuration - using more reliable CSS selectors
@@ -70,41 +72,41 @@ const tutorialSteps: TutorialStep[] = [
   // Dashboard steps (4 steps)
   {
     id: 'dashboard-welcome',
-    title: 'Welcome to Your Unified Workspace',
-    description: 'This is your central hub for managing email, tasks, and calendar events from all your connected services.',
-    target: '.dashboard-header-tut',
+    title: 'Welcome to Your Command Center',
+    description: 'Your operational nexus for monitoring workflows, agents, connections, and system performance.',
+    target: '.dashboard-header',
     fallbackTarget: 'main',
     position: 'bottom',
     page: 'dashboard',
     order: 1
   },
   {
-    id: 'dashboard-inbox',
-    title: 'Unified Inbox',
-    description: 'View and reply to messages from Gmail, Outlook, Slack, and Teams in one place. Filter by unread or compose new messages instantly.',
-    target: '.unified-inbox-tut',
-    fallbackTarget: '.lg\\:col-span-7',
-    position: 'right',
+    id: 'dashboard-stats',
+    title: 'System Overview',
+    description: 'Real-time metrics for your active connections, workflows, AI agents, and API requests.',
+    target: '.stats-overview',
+    fallbackTarget: '.grid.grid-cols-1.sm\\:grid-cols-2',
+    position: 'bottom',
     page: 'dashboard',
     order: 2
   },
   {
-    id: 'dashboard-calendar',
-    title: 'Calendar Hub',
-    description: 'See your upcoming events from Google Calendar and Outlook. Join meetings directly or schedule new ones.',
-    target: '.calendar-hub-tut',
-    fallbackTarget: '.lg\\:col-span-5',
-    position: 'left',
+    id: 'dashboard-quick-actions',
+    title: 'Quick Commands',
+    description: 'Rapidly create workflows, add connections, browse MCP tools, or manage your AI agents.',
+    target: '.quick-actions',
+    fallbackTarget: 'section',
+    position: 'top',
     page: 'dashboard',
     order: 3
   },
   {
-    id: 'dashboard-tasks',
-    title: 'Task Hub',
-    description: 'Manage tasks from Jira, Trello, ClickUp, and Asana. Track status, priority, and create new tasks across platforms.',
-    target: '.task-hub-tut',
-    fallbackTarget: '.lg\\:col-span-5',
-    position: 'left',
+    id: 'dashboard-activity',
+    title: 'Live Telemetry',
+    description: 'Monitor recent workflow executions, connection events, agent activity, and tool usage.',
+    target: '.recent-activity',
+    fallbackTarget: '.lg\\:col-span-2',
+    position: 'top',
     page: 'dashboard',
     order: 4
   },
@@ -684,6 +686,90 @@ const tutorialSteps: TutorialStep[] = [
     page: 'creator',
     order: 67
   },
+
+  // Pricing page steps (4 steps)
+  {
+    id: 'pricing-intro',
+    title: 'Subscription Plans',
+    description: 'Choose the plan that fits your business needs - from Free Lite to Business Pro.',
+    target: '.text-center.mb-16',
+    fallbackTarget: 'main',
+    position: 'bottom',
+    page: 'pricing',
+    order: 68
+  },
+  {
+    id: 'pricing-payment-toggle',
+    title: 'Payment Method',
+    description: 'Switch between M-Pesa mobile money and Card payment methods.',
+    target: '.bg-white.dark\\:bg-gray-800.p-1.rounded-lg',
+    fallbackTarget: 'button',
+    position: 'bottom',
+    page: 'pricing',
+    order: 69
+  },
+  {
+    id: 'pricing-tiers',
+    title: 'Plan Comparison',
+    description: 'Compare features, API limits, and pricing across all tiers. The Starter plan is most popular for growing businesses.',
+    target: '.grid.grid-cols-1.md\\:grid-cols-3',
+    fallbackTarget: '.relative.bg-white',
+    position: 'top',
+    page: 'pricing',
+    order: 70
+  },
+  {
+    id: 'pricing-features',
+    title: 'Local Business Features',
+    description: 'M-Pesa integration, Kenyan market optimization, automated tax reporting, and enterprise security.',
+    target: '.grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-4',
+    fallbackTarget: '.mt-20',
+    position: 'top',
+    page: 'pricing',
+    order: 71
+  },
+
+  // Workspace / UnifiedDashboard steps (4 steps)
+  {
+    id: 'workspace-welcome',
+    title: 'Unified Workspace',
+    description: 'Your command center for email, tasks, and calendar - all in one intelligent dashboard.',
+    target: '.dashboard-header-tut',
+    fallbackTarget: 'main',
+    position: 'bottom',
+    page: 'workspace',
+    order: 71
+  },
+  {
+    id: 'workspace-inbox',
+    title: 'Unified Inbox',
+    description: 'Messages from Gmail, Outlook, Slack, and Teams in one place. Filter, search, and reply without switching apps.',
+    target: '.unified-inbox-tut',
+    fallbackTarget: '.lg\\:col-span-7',
+    position: 'right',
+    page: 'workspace',
+    order: 72
+  },
+  {
+    id: 'workspace-calendar',
+    title: 'Calendar Hub',
+    description: 'View upcoming events from Google Calendar and Outlook. Join meetings or schedule new ones.',
+    target: '.calendar-hub-tut',
+    fallbackTarget: '.lg\\:col-span-5',
+    position: 'left',
+    page: 'workspace',
+    order: 73
+  },
+  {
+    id: 'workspace-tasks',
+    title: 'Task Hub',
+    description: 'Manage tasks from Jira, Trello, ClickUp, and Asana. Track status, priority, and create new tasks.',
+    target: '.task-hub-tut',
+    fallbackTarget: '.lg\\:col-span-5',
+    position: 'left',
+    page: 'workspace',
+    order: 75
+  },
 ];
 
 export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -728,11 +814,23 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const pathname = location.pathname;
     let page = 'dashboard';
 
-    Object.entries(pageConfig).forEach(([pageName, route]) => {
-      if (pathname === route || (route !== '/' && pathname.startsWith(route))) {
+    // Check for exact matches first
+    for (const [pageName, route] of Object.entries(pageConfig)) {
+      if (pathname === route) {
         page = pageName;
+        break;
       }
-    });
+    }
+
+    // If no exact match, check for starts-with (for routes with params)
+    if (page === 'dashboard' && pathname !== '/') {
+      for (const [pageName, route] of Object.entries(pageConfig)) {
+        if (route !== '/' && pathname.startsWith(route)) {
+          page = pageName;
+          break;
+        }
+      }
+    }
 
     // Reset step index when page changes
     if (page !== currentPage) {
