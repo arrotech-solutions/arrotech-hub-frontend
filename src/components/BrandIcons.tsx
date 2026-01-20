@@ -27,6 +27,10 @@ import tKashIcon from '../assets/apps/t_kash.png';
 import twigaFoodsIcon from '../assets/apps/twiga_foods.png';
 import zohoIcon from '../assets/apps/zoho.jpg';
 import clickupIcon from '../assets/apps/clickup.png';
+import outlookIcon from '../assets/apps/outlook.png';
+import notionIcon from '../assets/apps/notion.png';
+import trelloIcon from '../assets/apps/trello.jpg';
+import jiraIcon from '../assets/apps/jira.jpeg';
 
 
 type IconProps = React.SVGProps<SVGSVGElement> | React.ImgHTMLAttributes<HTMLImageElement> | any;
@@ -104,3 +108,11 @@ export const AsanaLogo = (props: IconProps) => <ImageLogo src={asanaIcon} alt="A
 export const PowerBILogo = (props: IconProps) => <ImageLogo src={powerBiIcon} alt="Power BI" {...props} />;
 
 export const ClickUpLogo = (props: IconProps) => <ImageLogo src={clickupIcon} alt="ClickUp" {...props} />;
+
+export const OutlookLogo = (props: IconProps) => <ImageLogo src={outlookIcon} alt="Outlook" {...props} />;
+
+export const NotionLogo = (props: IconProps) => <ImageLogo src={notionIcon} alt="Notion" {...props} />;
+
+export const TrelloLogo = (props: IconProps) => <ImageLogo src={trelloIcon} alt="Trello" {...props} />;
+
+export const JiraLogo = (props: IconProps) => <ImageLogo src={jiraIcon} alt="Jira" {...props} />;
