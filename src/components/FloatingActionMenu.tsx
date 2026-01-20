@@ -77,6 +77,7 @@ const FloatingActionMenu: React.FC = () => {
 
   const pageLabels: Record<string, string> = {
     dashboard: 'Dashboard',
+    workspace: 'Workspace',
     chat: 'Chat',
     workflows: 'Workflows',
     agents: 'Agents',
@@ -89,6 +90,8 @@ const FloatingActionMenu: React.FC = () => {
     settings: 'Settings',
     profile: 'Profile',
     creator: 'Creator Profile',
+    mcptools: 'MCP Tools',
+    pricing: 'Pricing',
   };
 
   const currentPageLabel = pageLabels[currentPage] || 'This Page';
