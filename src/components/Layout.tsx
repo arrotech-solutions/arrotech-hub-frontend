@@ -30,6 +30,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import FloatingActionMenu from './FloatingActionMenu';
 import NotificationsDropdown from './NotificationsDropdown';
+import CookieConsent from './CookieConsent';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -506,6 +507,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* Floating Action Menu - Help, AI Assistant, Tutorial */}
       <FloatingActionMenu />
+      <CookieConsent />
     </div>
   );
 };
