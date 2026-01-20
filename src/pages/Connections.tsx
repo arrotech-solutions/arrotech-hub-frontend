@@ -38,7 +38,11 @@ import {
   TKashLogo,
   TwigaFoodsLogo,
   ZohoLogo,
-  ClickUpLogo
+  ClickUpLogo,
+  OutlookLogo,
+  NotionLogo,
+  TrelloLogo,
+  JiraLogo
 } from '../components/BrandIcons';
 
 const Integrations: React.FC = () => {
@@ -79,6 +83,10 @@ const Integrations: React.FC = () => {
     if (platformId.includes('kilimall')) return 'h-full w-auto object-contain';
     if (platformId.includes('zoho')) return 'h-full w-auto object-contain';
     if (platformId.includes('quick_books')) return 'h-full w-auto object-contain';
+    if (platformId.includes('outlook')) return 'h-full w-auto object-contain';
+    if (platformId.includes('notion')) return 'h-full w-auto object-contain';
+    if (platformId.includes('trello')) return 'h-full w-auto object-contain';
+    if (platformId.includes('jira')) return 'h-full w-auto object-contain';
     // Square default
     return 'w-full h-full object-contain';
   };
@@ -130,19 +138,24 @@ const Integrations: React.FC = () => {
       case 'zoho':
       case 'zoho_crm': return <ZohoLogo {...props} />;
       case 'clickup': return <ClickUpLogo {...props} />;
+      case 'outlook':
+      case 'microsoft_outlook': return <OutlookLogo {...props} />;
+      case 'notion': return <NotionLogo {...props} />;
+      case 'trello': return <TrelloLogo {...props} />;
+      case 'jira': return <JiraLogo {...props} />;
       default: return <Database {...props} className="text-gray-400 p-2" />;
     }
   };
 
   const getPlatformCategory = (id: string): string => {
-    if (id.includes('slack') || id.includes('whatsapp') || id.includes('google')) return 'Communication';
+    if (id.includes('slack') || id.includes('whatsapp') || id.includes('google') || id.includes('teams') || id.includes('outlook')) return 'Communication';
     if (id.includes('hubspot') || id.includes('salesforce')) return 'CRM';
     if (id.includes('facebook') || id.includes('instagram') || id.includes('twitter') || id.includes('linkedin')) return 'Social';
     if (id.includes('ga4') || id.includes('analytics')) return 'Analytics';
     if (id.includes('shopify') || id.includes('jumia')) return 'E-commerce';
     if (id.includes('shopify') || id.includes('jumia')) return 'E-commerce';
     if (id.includes('mpesa') || id.includes('airtel') || id.includes('stripe')) return 'Payment';
-    if (id.includes('clickup') || id.includes('asana') || id.includes('trello')) return 'Productivity';
+    if (id.includes('clickup') || id.includes('asana') || id.includes('trello') || id.includes('notion') || id.includes('jira')) return 'Productivity';
     return 'Other';
   };
 
@@ -195,6 +208,18 @@ const Integrations: React.FC = () => {
         toast.success('Twitter connected successfully!');
       } else if (success === 'clickup_connected') {
         toast.success('ClickUp connected successfully!');
+      } else if (success === 'notion_connected') {
+        toast.success('Notion connected successfully!');
+      } else if (success === 'trello_connected') {
+        toast.success('Trello connected successfully!');
+      } else if (success === 'jira_connected') {
+        toast.success('Jira connected successfully!');
+      } else if (success === 'teams_connected') {
+        toast.success('Microsoft Teams connected successfully!');
+      } else if (success === 'zoom_connected') {
+        toast.success('Zoom connected successfully!');
+      } else if (success === 'outlook_connected') {
+        toast.success('Outlook connected successfully!');
       } else {
         toast.success('Connection successful!');
       }
@@ -210,26 +235,7 @@ const Integrations: React.FC = () => {
         const toastId = toast.loading('Finalizing connection...');
         try {
           if (state.startsWith('user_')) {
-            // Try to determine if it's Google or Slack based on URL or just try both? 
-            // Ideally the state or a param would indicate, but for now we can infer or try based on platform
-            // Since state format is consistent, let's look at the URLSearchParams again or perhaps assume checking both is safe if valid
-            // Actually, we should know based on where we came from, but we lost that context on redirect.
-            // Let's try to detect based on how the callback was formed.
-            // Google and Slack both use `code` and `state`.
-            // WhatsApp uses a full redirect so it might return success/error params handled below,
-            // but if we need to handle code manually we would add it here.
-            // Current WhatsApp implementation redirects with ?success=whatsapp_connected
-
-            // Simple hack: Try Google, then Slack. WhatsApp is handled by params check earlier if using ?success 
-            // (Wait, look at lines 135-144 which I can't see but presumably handle `success` param).
-
-            // Check if we are coming from Slack (check for something specific if possible, or just try catch)
-            // Slack auth usually doesn't append extra params we can rely on universally except standard oauth.
-            // Let's try to infer from the error message or just add a query param to our redirect URI if we could control it fully.
-            // But simpler: Just try Google first (as it was there), if it fails with specific "invalid grant" maybe try Slack?
-            // Actually, the `state` is identical.
-            // IMPORTANT: The backend throws 400 if code is invalid for that provider.
-
+            // Try to determine if it's Google or Slack 
             try {
               await apiService.getGoogleWorkspaceCallback(code, state);
               toast.success('Google Workspace connected successfully!', { id: toastId });
@@ -355,6 +361,90 @@ const Integrations: React.FC = () => {
       }
     }
 
+    // Redirect to Microsoft Teams Auth
+    if ((platform.id === 'teams' || platform.id === 'microsoft_teams') && !existing) {
+      try {
+        toast.loading('Redirecting to Microsoft Teams...', { id: 'oauth-redirect' });
+        const { auth_url } = await apiService.getTeamsAuthUrl();
+        window.location.href = auth_url;
+        return;
+      } catch (error) {
+        console.error(error);
+        toast.error('Failed to initiate connection', { id: 'oauth-redirect' });
+        return;
+      }
+    }
+
+    // Redirect to Zoom Auth
+    if (platform.id === 'zoom' && !existing) {
+      try {
+        toast.loading('Redirecting to Zoom...', { id: 'oauth-redirect' });
+        const { auth_url } = await apiService.getZoomAuthUrl();
+        window.location.href = auth_url;
+        return;
+      } catch (error) {
+        console.error(error);
+        toast.error('Failed to initiate connection', { id: 'oauth-redirect' });
+        return;
+      }
+    }
+
+    // Redirect to Outlook Auth
+    if ((platform.id === 'outlook' || platform.id === 'microsoft_outlook') && !existing) {
+      try {
+        toast.loading('Redirecting to Outlook...', { id: 'oauth-redirect' });
+        const { auth_url } = await apiService.getOutlookAuthUrl();
+        window.location.href = auth_url;
+        return;
+      } catch (error) {
+        console.error(error);
+        toast.error('Failed to initiate connection', { id: 'oauth-redirect' });
+        return;
+      }
+    }
+
+    // Redirect to Notion Auth
+    if (platform.id === 'notion' && !existing) {
+      try {
+        toast.loading('Redirecting to Notion...', { id: 'oauth-redirect' });
+        const { auth_url } = await apiService.getNotionAuthUrl();
+        window.location.href = auth_url;
+        return;
+      } catch (error) {
+        console.error(error);
+        toast.error('Failed to initiate connection', { id: 'oauth-redirect' });
+        return;
+      }
+    }
+
+    // Redirect to Trello Auth
+    if (platform.id === 'trello' && !existing) {
+      try {
+        toast.loading('Redirecting to Trello...', { id: 'oauth-redirect' });
+        const { auth_url } = await apiService.getTrelloAuthUrl();
+        window.location.href = auth_url;
+        return;
+      } catch (error) {
+        console.error(error);
+        toast.error('Failed to initiate connection', { id: 'oauth-redirect' });
+        return;
+      }
+    }
+
+    // Redirect to Jira Auth
+    if (platform.id === 'jira' && !existing) {
+      try {
+        toast.loading('Redirecting to Jira...', { id: 'oauth-redirect' });
+        const { auth_url } = await apiService.getJiraAuthUrl();
+        window.location.href = auth_url;
+        return;
+      } catch (error) {
+        console.error(error);
+        toast.error('Failed to initiate connection', { id: 'oauth-redirect' });
+        return;
+      }
+    }
+
     if (existing) {
       setEditingConnection(existing);
       setFormData({
@@ -412,7 +502,7 @@ const Integrations: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 pb-20 font-sans">
       {/* Hero Section */}
-      <div className="bg-white border-b border-gray-200">
+      <div className="bg-white border-b border-gray-200 connections-header">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-16">
           <div className="max-w-3xl">
             <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight sm:text-5xl mb-4">
@@ -429,7 +519,7 @@ const Integrations: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         {/* Controls */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10 connections-filters">
 
           {/* Categories */}
           <div className="flex overflow-x-auto pb-2 md:pb-0 gap-2 no-scrollbar">
@@ -464,7 +554,7 @@ const Integrations: React.FC = () => {
         </div>
 
         {/* Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 available-platforms">
           {filteredPlatforms.map(platform => {
             const isConnected = connections.some(c => c.platform.toLowerCase() === platform.id.toLowerCase());
             const connection = connections.find(c => c.platform.toLowerCase() === platform.id.toLowerCase());

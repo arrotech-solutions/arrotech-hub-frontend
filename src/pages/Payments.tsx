@@ -555,7 +555,7 @@ const Payments: React.FC = () => {
                 {filteredPayments.length > 0 ? (
                   filteredPayments.map(payment => renderPaymentCard(payment))
                 ) : (
-                  <div className="text-center py-20 bg-gray-50/50 rounded-[32px] border border-dashed border-gray-200">
+                  <div className="text-center py-20 bg-gray-50/50 rounded-[32px] border border-dashed border-gray-200 payment-list-empty">
                     <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm">
                       <Search className="w-8 h-8 text-gray-200" />
                     </div>
