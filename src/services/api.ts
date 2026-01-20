@@ -112,6 +112,16 @@ class ApiService {
     return response.data;
   }
 
+  async deleteAccount(confirmation: string): Promise<ApiResponse<any>> {
+    const response = await this.api.delete('/auth/me', { params: { confirmation } });
+    return response.data;
+  }
+
+  async exportData(): Promise<Blob> {
+    const response = await this.api.get('/auth/me/export', { responseType: 'blob' });
+    return response.data;
+  }
+
   async getUsageStats(): Promise<ApiResponse<any>> {
     const response = await this.api.get('/subscription/usage');
     return response.data;

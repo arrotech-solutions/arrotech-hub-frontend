@@ -20,6 +20,7 @@ import Profile from './pages/Profile';
 import Register from './pages/Register';
 import ResetPassword from './pages/ResetPassword';
 import Settings from './pages/Settings';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 import Workflows from './pages/Workflows';
 import Pricing from './pages/Pricing';
 import RequestAccess from './pages/RequestAccess';
@@ -244,6 +245,17 @@ const AppRoutes: React.FC = () => {
           <ProtectedRoute>
             <Layout>
               <Activity />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/privacy"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <PrivacyPolicy />
             </Layout>
           </ProtectedRoute>
         }
