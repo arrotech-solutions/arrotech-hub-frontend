@@ -62,48 +62,49 @@ const pageConfig: Record<string, string> = {
   marketplace: '/marketplace',
   favorites: '/favorites',
   creator: '/creator-profile',
+  mcptools: '/mcp-tools',
 };
 
 // Tutorial steps configuration - using more reliable CSS selectors
 const tutorialSteps: TutorialStep[] = [
-  // Dashboard steps (5 steps)
+  // Dashboard steps (4 steps)
   {
     id: 'dashboard-welcome',
-    title: 'Welcome to Mini-Hub!',
-    description: 'Let\'s take a quick tour of your dashboard to get you started with your AI-powered automation platform.',
-    target: '.dashboard-header',
-    fallbackTarget: 'main h1',
+    title: 'Welcome to Your Unified Workspace',
+    description: 'This is your central hub for managing email, tasks, and calendar events from all your connected services.',
+    target: '.dashboard-header-tut',
+    fallbackTarget: 'main',
     position: 'bottom',
     page: 'dashboard',
     order: 1
   },
   {
-    id: 'dashboard-stats',
-    title: 'Quick Stats Overview',
-    description: 'View your key metrics at a glance - total connections, active workflows, AI agents, and monthly API usage.',
-    target: '.stats-overview',
-    fallbackTarget: '.grid.grid-cols-1',
-    position: 'bottom',
+    id: 'dashboard-inbox',
+    title: 'Unified Inbox',
+    description: 'View and reply to messages from Gmail, Outlook, Slack, and Teams in one place. Filter by unread or compose new messages instantly.',
+    target: '.unified-inbox-tut',
+    fallbackTarget: '.lg\\:col-span-7',
+    position: 'right',
     page: 'dashboard',
     order: 2
   },
   {
-    id: 'dashboard-actions',
-    title: 'Quick Actions',
-    description: 'Access common tasks quickly - create new workflows, add connections, browse MCP tools, or manage agents.',
-    target: '.quick-actions',
-    fallbackTarget: '.grid.grid-cols-1.md\\:grid-cols-2',
-    position: 'top',
+    id: 'dashboard-calendar',
+    title: 'Calendar Hub',
+    description: 'See your upcoming events from Google Calendar and Outlook. Join meetings directly or schedule new ones.',
+    target: '.calendar-hub-tut',
+    fallbackTarget: '.lg\\:col-span-5',
+    position: 'left',
     page: 'dashboard',
     order: 3
   },
   {
-    id: 'dashboard-activity',
-    title: 'Recent Activity',
-    description: 'Monitor your latest workflow executions, tool usage, and system events in real-time.',
-    target: '.recent-activity',
-    fallbackTarget: '[class*="Recent"]',
-    position: 'right',
+    id: 'dashboard-tasks',
+    title: 'Task Hub',
+    description: 'Manage tasks from Jira, Trello, ClickUp, and Asana. Track status, priority, and create new tasks across platforms.',
+    target: '.task-hub-tut',
+    fallbackTarget: '.lg\\:col-span-5',
+    position: 'left',
     page: 'dashboard',
     order: 4
   },
@@ -294,11 +295,11 @@ const tutorialSteps: TutorialStep[] = [
     order: 22
   },
 
-  // Connections page steps (5 steps)
+  // Connections page steps (3 steps)
   {
     id: 'connections-intro',
-    title: 'Connection Manager',
-    description: 'Connect and manage third-party services - Slack, HubSpot, Google Analytics, and more.',
+    title: 'Integrations Hub',
+    description: 'Connect and manage third-party services - Slack, HubSpot, Google, and more.',
     target: '.connections-header',
     fallbackTarget: 'main h1',
     position: 'bottom',
@@ -306,44 +307,66 @@ const tutorialSteps: TutorialStep[] = [
     order: 23
   },
   {
-    id: 'connections-add',
-    title: 'Add New Connection',
-    description: 'Click to connect a new service. Configure API keys, OAuth, or other authentication methods.',
-    target: '.add-connection-btn',
-    fallbackTarget: 'button[class*="gradient"]',
-    position: 'left',
+    id: 'connections-filters',
+    title: 'Filter & Search',
+    description: 'Find integrations by category or search by name to quickly locate the service you need.',
+    target: '.connections-filters',
+    fallbackTarget: 'input[placeholder*="Search"]',
+    position: 'bottom',
     page: 'connections',
     order: 24
   },
   {
-    id: 'connections-stats',
-    title: 'Connection Status',
-    description: 'View total connections, active services, inactive, and any with errors.',
-    target: '.connections-stats',
-    fallbackTarget: '.grid.grid-cols-1.md\\:grid-cols-4',
-    position: 'bottom',
+    id: 'connections-grid',
+    title: 'Available Platforms',
+    description: 'Browse all supported platforms. Click "Connect" to set up a new integration or "Manage" to configure existing ones.',
+    target: '.available-platforms',
+    fallbackTarget: '.grid',
+    position: 'top',
     page: 'connections',
     order: 25
   },
+
+  // MCP Tools steps (4 steps)
   {
-    id: 'connections-active',
-    title: 'Your Connections',
-    description: 'Manage existing connections - test connectivity, sync data, edit config, or disconnect.',
-    target: '.connection-cards',
-    fallbackTarget: '.connections-list-empty',
-    position: 'top',
-    page: 'connections',
-    order: 26
+    id: 'mcptools-intro',
+    title: 'MCP Tools Explorer',
+    description: 'Browse and execute AI capabilities provided by the Model Context Protocol (MCP).',
+    target: '.mcptools-header',
+    fallbackTarget: 'main h1',
+    position: 'bottom',
+    page: 'mcptools',
+    order: 28
   },
   {
-    id: 'connections-platforms',
-    title: 'Available Platforms',
-    description: 'Browse all supported platforms and their features. Click Connect to add any service.',
-    target: '.available-platforms',
-    fallbackTarget: '.platforms-grid',
+    id: 'mcptools-stats',
+    title: 'Tools Overview',
+    description: 'See the total number of available tools and their categories at a glance.',
+    target: '.mcptools-stats',
+    fallbackTarget: '.grid.grid-cols-1',
+    position: 'bottom',
+    page: 'mcptools',
+    order: 29
+  },
+  {
+    id: 'mcptools-filters',
+    title: 'Find Tools',
+    description: 'Search for specific tools or filter by category to find exactly what you need.',
+    target: '.mcptools-filters',
+    fallbackTarget: 'input[placeholder*="Search"]',
+    position: 'bottom',
+    page: 'mcptools',
+    order: 30
+  },
+  {
+    id: 'mcptools-list',
+    title: 'Execute Tools',
+    description: 'Click on any tool to configure its parameters and execute it directly from the UI.',
+    target: '.mcptools-list',
+    fallbackTarget: '.grid.grid-cols-1',
     position: 'top',
-    page: 'connections',
-    order: 27
+    page: 'mcptools',
+    order: 31
   },
 
   // Payments page steps (4 steps)

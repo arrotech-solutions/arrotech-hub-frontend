@@ -259,6 +259,72 @@ class ApiService {
     return response.data;
   }
 
+  // Microsoft Teams OAuth endpoints
+  async getTeamsAuthUrl(): Promise<{ auth_url: string; state: string }> {
+    const response = await this.api.get('/api/teams/auth-url');
+    return response.data;
+  }
+
+  async getTeamsCallback(code: string, state: string): Promise<{ success: boolean; message?: string; connection_id?: number }> {
+    const response = await this.api.get(`/api/teams/callback?code=${code}&state=${state}`);
+    return response.data;
+  }
+
+  // Outlook OAuth endpoints
+  async getOutlookAuthUrl(): Promise<{ auth_url: string; state: string }> {
+    const response = await this.api.get('/api/outlook/auth-url');
+    return response.data;
+  }
+
+  async getOutlookCallback(code: string, state: string): Promise<{ success: boolean; message?: string }> {
+    const response = await this.api.get(`/api/outlook/callback?code=${code}&state=${state}`);
+    return response.data;
+  }
+
+  // Notion OAuth endpoints
+  async getNotionAuthUrl(): Promise<{ auth_url: string; state: string }> {
+    const response = await this.api.get('/api/notion/auth-url');
+    return response.data;
+  }
+
+  async getNotionCallback(code: string, state: string): Promise<{ success: boolean; message?: string }> {
+    const response = await this.api.get(`/api/notion/callback?code=${code}&state=${state}`);
+    return response.data;
+  }
+
+  // Trello OAuth endpoints
+  async getTrelloAuthUrl(): Promise<{ auth_url: string; state: string }> {
+    const response = await this.api.get('/api/trello/auth-url');
+    return response.data;
+  }
+
+  async getTrelloCallback(code: string, state: string): Promise<{ success: boolean; message?: string }> {
+    const response = await this.api.get(`/api/trello/callback?code=${code}&state=${state}`);
+    return response.data;
+  }
+
+  // Jira OAuth endpoints
+  async getJiraAuthUrl(): Promise<{ auth_url: string; state: string }> {
+    const response = await this.api.get('/api/jira/auth-url');
+    return response.data;
+  }
+
+  async getJiraCallback(code: string, state: string): Promise<{ success: boolean; message?: string }> {
+    const response = await this.api.get(`/api/jira/callback?code=${code}&state=${state}`);
+    return response.data;
+  }
+
+  // Zoom OAuth endpoints
+  async getZoomAuthUrl(): Promise<{ auth_url: string; state: string }> {
+    const response = await this.api.get('/api/zoom/auth-url');
+    return response.data;
+  }
+
+  async getZoomCallback(code: string, state: string): Promise<{ success: boolean; message?: string; connection_id?: number }> {
+    const response = await this.api.get(`/api/zoom/callback?code=${code}&state=${state}`);
+    return response.data;
+  }
+
   // Dynamic Tool Registry endpoints
   async getDynamicTools(): Promise<ApiResponse<ToolInfo[]>> {
     const response = await this.api.get('/mcp/tools/dynamic');
