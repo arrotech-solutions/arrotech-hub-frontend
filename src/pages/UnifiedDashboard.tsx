@@ -1,48 +1,87 @@
-import React from 'react';
-import InboxWidget from '../components/dashboard/InboxWidget';
-import CalendarWidget from '../components/dashboard/CalendarWidget';
-import TaskWidget from '../components/dashboard/TaskWidget';
-import QuickActions from '../components/dashboard/QuickActions';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../hooks/useAuth';
+import DashboardHeader from '../components/dashboard/DashboardHeader';
+import UnifiedInboxTile from '../components/dashboard/UnifiedInboxTile';
+import TaskHubTile from '../components/dashboard/TaskHubTile';
+import CommandPalette from '../components/dashboard/CommandPalette';
+
+import CalendarHubTile from '../components/dashboard/CalendarHubTile';
+import ComposeMessageModal from '../components/dashboard/ComposeMessageModal';
+import CreateTaskModal from '../components/dashboard/CreateTaskModal';
+import apiService from '../services/api';
 
 const UnifiedDashboard: React.FC = () => {
-    const [triggerTaskModal, setTriggerTaskModal] = React.useState(0);
+    const { user } = useAuth();
+    const [isFocusMode, setIsFocusMode] = useState(false);
+    const [isComposeOpen, setIsComposeOpen] = useState(false);
+    const [isCreateTaskOpen, setIsCreateTaskOpen] = useState(false);
+    const [connections, setConnections] = useState<any[]>([]);
+
+    useEffect(() => {
+        const fetchConnections = async () => {
+            try {
+                const res = await apiService.getConnections();
+                if (res.data) {
+                    setConnections(res.data);
+                }
+            } catch (err) {
+                console.error("Failed to fetch connections", err);
+            }
+        };
+        fetchConnections();
+    }, []);
 
     return (
-        <div className="min-h-screen bg-slate-50/50">
-            <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
-                {/* Page Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white/80 backdrop-blur-sm p-6 rounded-2xl border border-white/20 shadow-sm transition-all duration-300 hover:shadow-md">
-                    <div>
-                        <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
-                            Workspace
-                        </h1>
-                        <p className="mt-2 text-lg text-gray-600">
-                            Your centralized command center for daily operations.
-                        </p>
-                    </div>
-                    <div className="mt-4 sm:mt-0 flex items-center space-x-2 text-sm text-gray-500 bg-gray-50 px-4 py-2 rounded-xl border border-gray-100">
-                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <span>System Operational</span>
-                    </div>
+        <div className="min-h-screen bg-slate-50/50 p-4 sm:p-6 lg:p-8 relative">
+            {/* Background Elements */}
+            <div className="fixed top-0 left-0 w-full h-[500px] bg-gradient-to-b from-indigo-50/50 to-transparent pointer-events-none" />
+
+            <div className="max-w-[1600px] mx-auto space-y-6 relative z-10">
+                {/* Header Row */}
+                <div className="dashboard-header-tut">
+                    <DashboardHeader
+                        userName={user?.name || 'User'}
+                        isFocusMode={isFocusMode}
+                        onToggleFocusMode={() => setIsFocusMode(!isFocusMode)}
+                    />
                 </div>
 
-                {/* Quick Actions Section */}
-                <QuickActions onCreateTask={() => setTriggerTaskModal(prev => prev + 1)} />
+                {/* Main Grid Layout (Bento Grid) */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 auto-rows-[minmax(180px,auto)]">
 
-                {/* Main Grid Layout */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
-                    {/* Left Column: Inbox (Span 7) */}
-                    <div className="lg:col-span-7 space-y-6">
-                        <InboxWidget />
+                    {/* Left Column: Inbox (Span 7, Height 2 rows) */}
+                    <div className="lg:col-span-7 lg:row-span-2 h-[544px] unified-inbox-tut">
+                        <UnifiedInboxTile onCompose={() => setIsComposeOpen(true)} />
                     </div>
 
-                    {/* Right Column: Calendar & Tasks (Span 5) */}
-                    <div className="lg:col-span-5 flex flex-col space-y-6">
-                        <CalendarWidget />
-                        <TaskWidget openModalTrigger={triggerTaskModal} />
+                    {/* Right Column Top: Calendar (Span 5, Height 1 row) */}
+                    <div className="lg:col-span-5 h-[240px] calendar-hub-tut">
+                        <CalendarHubTile />
                     </div>
+
+                    {/* Right Column Middle: Task Hub (Span 5, Height 1 row) */}
+                    <div className="lg:col-span-5 h-[280px] task-hub-tut">
+                        <TaskHubTile onCreateTask={() => setIsCreateTaskOpen(true)} />
+                    </div>
+
+
                 </div>
             </div>
+
+            {/* Modals */}
+            <ComposeMessageModal isOpen={isComposeOpen} onClose={() => setIsComposeOpen(false)} />
+            <CreateTaskModal
+                isOpen={isCreateTaskOpen}
+                onClose={() => setIsCreateTaskOpen(false)}
+                connections={connections}
+                onTaskCreated={() => { }} // Force refresh logic would go here via context/prop
+            />
+
+            {/* Global Command Palette */}
+            <CommandPalette
+                onCreateTask={() => setIsCreateTaskOpen(true)}
+                onComposeMessage={() => setIsComposeOpen(true)}
+            />
         </div>
     );
 };
