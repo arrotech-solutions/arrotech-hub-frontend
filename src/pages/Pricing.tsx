@@ -13,14 +13,14 @@ const Pricing: React.FC = () => {
     const plans = [
         {
             id: 'free',
-            name: 'Lite',
+            name: 'Free Tier',
             price: '0',
-            description: 'Ideal for getting started with basic automation.',
+            description: 'Perfect for testing and learning automation.',
             features: [
                 '3 Active Workflows',
                 '10 AI Messages / day',
-                'Access to M-Pesa, Slack, & Context Tools',
-                'Standard Support',
+                'M-Pesa, Slack & Context Tools',
+                'Community Support',
                 'Basic Dashboard'
             ],
             cta: 'Current Plan',
@@ -28,37 +28,56 @@ const Pricing: React.FC = () => {
             color: 'gray'
         },
         {
-            id: 'starter',
-            name: 'Starter (Kushiriki)',
-            price: '1,500',
-            description: 'Perfect for growing businesses needing more automation.',
+            id: 'lite',
+            name: 'Biashara Lite',
+            price: '200',
+            description: 'Essential tools for solo entrepreneurs.',
             features: [
                 '10 Active Workflows',
-                '100 AI Messages / day',
-                'GA4 + M-Pesa + Slack',
-                'Daily Performance Reports',
-                'Priority Email Support',
-                'Basic Automation Templates'
+                '50 AI Messages / day',
+                'Google Workspace Integration',
+                'M-Pesa + Slack + WhatsApp',
+                'Email Support',
+                'Weekly Reports'
             ],
-            cta: 'Upgrade to Starter',
+            cta: 'Upgrade to Lite',
+            highlight: false,
+            color: 'blue'
+        },
+        {
+            id: 'pro',
+            name: 'Business Pro',
+            price: '2,500',
+            description: 'Full power for growing businesses.',
+            features: [
+                '50 Active Workflows',
+                '500 AI Messages / day',
+                '25+ Platform Integrations',
+                'Daily Automated Reports',
+                'Priority Support',
+                'Team Collaboration (5 users)',
+                'API Access (5,000/day)'
+            ],
+            cta: 'Upgrade to Pro',
             highlight: true,
             color: 'indigo'
         },
         {
-            id: 'pro',
-            name: 'Business (Hub Pro)',
-            price: '5,000',
-            description: 'Ultimate power for established enterprises.',
+            id: 'enterprise',
+            name: 'Enterprise',
+            price: '10,000',
+            description: 'Ultimate solution for large organizations.',
             features: [
-                'Unlimited Workflows*',
-                'Unlimited AI Messages*',
-                'All Connections + Custom',
+                'Unlimited Workflows',
+                'Unlimited AI Messages',
+                'All 50+ Integrations + Custom',
                 'Real-time Analytics',
                 'Dedicated WhatsApp Support',
-                'Advanced Multi-step Automation',
-                'Custom Branding & White-labeling'
+                'White-labeling & SSO',
+                'Custom Integrations (2/year)',
+                'Unlimited Team Members'
             ],
-            cta: 'Upgrade to Business',
+            cta: 'Contact Sales',
             highlight: false,
             color: 'purple'
         }
@@ -75,7 +94,24 @@ const Pricing: React.FC = () => {
             return;
         }
 
-        const amount = planId === 'starter' ? 1500 : 5000;
+        // Enterprise requires contacting sales
+        if (planId === 'enterprise') {
+            window.location.href = 'mailto:sales@arrotechsolutions.co.ke?subject=Enterprise Plan Inquiry';
+            return;
+        }
+
+        const amountMap: { [key: string]: number } = {
+            'lite': 200,
+            'pro': 2500,
+            'enterprise': 10000
+        };
+        const amount = amountMap[planId] || 0;
+
+        if (!amount) {
+            toast.error('Invalid plan selected');
+            return;
+        }
+
         setLoading(planId);
 
         try {
