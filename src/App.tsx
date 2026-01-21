@@ -67,7 +67,8 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   }
 
   // If not logged in and not approved, redirect to landing page
-  if (!accessApproved) {
+  // Exception: Allow reset password page to be accessed without prior approval (e.g. new device)
+  if (!accessApproved && window.location.pathname !== '/reset-password') {
     return <Navigate to="/" replace />;
   }
 
