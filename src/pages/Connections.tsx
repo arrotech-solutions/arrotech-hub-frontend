@@ -4,6 +4,7 @@ import {
   Settings,
   Zap
 } from 'lucide-react';
+import UpgradeModal from '../components/UpgradeModal';
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
@@ -56,6 +57,12 @@ const Integrations: React.FC = () => {
   const [selectedPlatform, setSelectedPlatform] = useState<ConnectionPlatform | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
+  const [upgradeModal, setUpgradeModal] = useState<{
+    isOpen: boolean;
+    feature: string;
+    requiredTier: string;
+    currentTier: string;
+  }>({ isOpen: false, feature: '', requiredTier: '', currentTier: '' });
 
   // Form State
   const [formData, setFormData] = useState<ConnectionCreate>({
@@ -277,8 +284,25 @@ const Integrations: React.FC = () => {
         const { auth_url } = await apiService.getGoogleWorkspaceAuthUrl();
         window.location.href = auth_url;
         return;
-      } catch (error) {
-        toast.error('Failed to initiate connection', { id: 'oauth-redirect' });
+      } catch (error: any) {
+        toast.dismiss('oauth-redirect');
+        console.log('OAuth Error:', error);
+        console.log('Error response:', error.response);
+        console.log('Error status:', error.response?.status);
+        console.log('Error data:', error.response?.data);
+
+        // Check for 402 Payment Required error (tier restriction)
+        if (error.response?.status === 402 || error.response?.data?.error === 'upgrade_required') {
+          const details = error.response?.data?.detail || error.response?.data || {};
+          setUpgradeModal({
+            isOpen: true,
+            feature: details.feature || 'Google Workspace integration',
+            requiredTier: details.required_tier || 'Biashara Lite',
+            currentTier: details.current_tier || 'Free'
+          });
+        } else {
+          toast.error('Failed to initiate connection');
+        }
         return;
       }
     }
@@ -290,8 +314,19 @@ const Integrations: React.FC = () => {
         const { auth_url } = await apiService.getSlackAuthUrl();
         window.location.href = auth_url;
         return;
-      } catch (error) {
-        toast.error('Failed to initiate connection', { id: 'oauth-redirect' });
+      } catch (error: any) {
+        toast.dismiss('oauth-redirect');
+        if (error.response?.status === 402) {
+          const details = error.response.data;
+          setUpgradeModal({
+            isOpen: true,
+            feature: details.feature || `${platform.name} integration`,
+            requiredTier: details.required_tier || 'Biashara Lite',
+            currentTier: details.current_tier || 'Free'
+          });
+        } else {
+          toast.error('Failed to initiate connection');
+        }
         return;
       }
     }
@@ -303,8 +338,19 @@ const Integrations: React.FC = () => {
         const { url } = await apiService.getWhatsAppAuthUrl();
         window.location.href = url;
         return;
-      } catch (error) {
-        toast.error('Failed to initiate connection', { id: 'oauth-redirect' });
+      } catch (error: any) {
+        toast.dismiss('oauth-redirect');
+        if (error.response?.status === 402) {
+          const details = error.response.data;
+          setUpgradeModal({
+            isOpen: true,
+            feature: details.feature || 'WhatsApp Business integration',
+            requiredTier: details.required_tier || 'Biashara Lite',
+            currentTier: details.current_tier || 'Free'
+          });
+        } else {
+          toast.error('Failed to initiate connection');
+        }
         return;
       }
     }
@@ -316,8 +362,19 @@ const Integrations: React.FC = () => {
         const { url } = await apiService.getFacebookAuthUrl();
         window.location.href = url;
         return;
-      } catch (error) {
-        toast.error('Failed to initiate connection', { id: 'oauth-redirect' });
+      } catch (error: any) {
+        toast.dismiss('oauth-redirect');
+        if (error.response?.status === 402) {
+          const details = error.response.data;
+          setUpgradeModal({
+            isOpen: true,
+            feature: details.feature || 'Facebook integration',
+            requiredTier: details.required_tier || 'Business Pro',
+            currentTier: details.current_tier || 'Free'
+          });
+        } else {
+          toast.error('Failed to initiate connection');
+        }
         return;
       }
     }
@@ -329,8 +386,19 @@ const Integrations: React.FC = () => {
         const { url } = await apiService.getInstagramAuthUrl();
         window.location.href = url;
         return;
-      } catch (error) {
-        toast.error('Failed to initiate connection', { id: 'oauth-redirect' });
+      } catch (error: any) {
+        toast.dismiss('oauth-redirect');
+        if (error.response?.status === 402) {
+          const details = error.response.data;
+          setUpgradeModal({
+            isOpen: true,
+            feature: details.feature || 'Instagram integration',
+            requiredTier: details.required_tier || 'Business Pro',
+            currentTier: details.current_tier || 'Free'
+          });
+        } else {
+          toast.error('Failed to initiate connection');
+        }
         return;
       }
     }
@@ -342,8 +410,19 @@ const Integrations: React.FC = () => {
         const { url } = await apiService.getTwitterAuthUrl();
         window.location.href = url;
         return;
-      } catch (error) {
-        toast.error('Failed to initiate connection', { id: 'oauth-redirect' });
+      } catch (error: any) {
+        toast.dismiss('oauth-redirect');
+        if (error.response?.status === 402) {
+          const details = error.response.data;
+          setUpgradeModal({
+            isOpen: true,
+            feature: details.feature || 'Twitter integration',
+            requiredTier: details.required_tier || 'Business Pro',
+            currentTier: details.current_tier || 'Free'
+          });
+        } else {
+          toast.error('Failed to initiate connection');
+        }
         return;
       }
     }
@@ -355,8 +434,19 @@ const Integrations: React.FC = () => {
         const { url } = await apiService.getClickUpAuthUrl();
         window.location.href = url;
         return;
-      } catch (error) {
-        toast.error('Failed to initiate connection', { id: 'oauth-redirect' });
+      } catch (error: any) {
+        toast.dismiss('oauth-redirect');
+        if (error.response?.status === 402 || error.response?.data?.error === 'upgrade_required') {
+          const details = error.response?.data?.detail || error.response?.data || {};
+          setUpgradeModal({
+            isOpen: true,
+            feature: details.feature || 'ClickUp integration',
+            requiredTier: details.required_tier || 'Business Pro',
+            currentTier: details.current_tier || 'Free'
+          });
+        } else {
+          toast.error('Failed to initiate connection');
+        }
         return;
       }
     }
@@ -368,9 +458,19 @@ const Integrations: React.FC = () => {
         const { auth_url } = await apiService.getTeamsAuthUrl();
         window.location.href = auth_url;
         return;
-      } catch (error) {
-        console.error(error);
-        toast.error('Failed to initiate connection', { id: 'oauth-redirect' });
+      } catch (error: any) {
+        toast.dismiss('oauth-redirect');
+        if (error.response?.status === 402 || error.response?.data?.error === 'upgrade_required') {
+          const details = error.response?.data?.detail || error.response?.data || {};
+          setUpgradeModal({
+            isOpen: true,
+            feature: details.feature || 'Microsoft Teams integration',
+            requiredTier: details.required_tier || 'Business Pro',
+            currentTier: details.current_tier || 'Free'
+          });
+        } else {
+          toast.error('Failed to initiate connection');
+        }
         return;
       }
     }
@@ -382,9 +482,19 @@ const Integrations: React.FC = () => {
         const { auth_url } = await apiService.getZoomAuthUrl();
         window.location.href = auth_url;
         return;
-      } catch (error) {
-        console.error(error);
-        toast.error('Failed to initiate connection', { id: 'oauth-redirect' });
+      } catch (error: any) {
+        toast.dismiss('oauth-redirect');
+        if (error.response?.status === 402 || error.response?.data?.error === 'upgrade_required') {
+          const details = error.response?.data?.detail || error.response?.data || {};
+          setUpgradeModal({
+            isOpen: true,
+            feature: details.feature || 'Zoom integration',
+            requiredTier: details.required_tier || 'Business Pro',
+            currentTier: details.current_tier || 'Free'
+          });
+        } else {
+          toast.error('Failed to initiate connection');
+        }
         return;
       }
     }
@@ -396,9 +506,19 @@ const Integrations: React.FC = () => {
         const { auth_url } = await apiService.getOutlookAuthUrl();
         window.location.href = auth_url;
         return;
-      } catch (error) {
-        console.error(error);
-        toast.error('Failed to initiate connection', { id: 'oauth-redirect' });
+      } catch (error: any) {
+        toast.dismiss('oauth-redirect');
+        if (error.response?.status === 402 || error.response?.data?.error === 'upgrade_required') {
+          const details = error.response?.data?.detail || error.response?.data || {};
+          setUpgradeModal({
+            isOpen: true,
+            feature: details.feature || 'Microsoft Outlook integration',
+            requiredTier: details.required_tier || 'Biashara Lite',
+            currentTier: details.current_tier || 'Free'
+          });
+        } else {
+          toast.error('Failed to initiate connection');
+        }
         return;
       }
     }
@@ -410,9 +530,19 @@ const Integrations: React.FC = () => {
         const { auth_url } = await apiService.getNotionAuthUrl();
         window.location.href = auth_url;
         return;
-      } catch (error) {
-        console.error(error);
-        toast.error('Failed to initiate connection', { id: 'oauth-redirect' });
+      } catch (error: any) {
+        toast.dismiss('oauth-redirect');
+        if (error.response?.status === 402 || error.response?.data?.error === 'upgrade_required') {
+          const details = error.response?.data?.detail || error.response?.data || {};
+          setUpgradeModal({
+            isOpen: true,
+            feature: details.feature || 'Notion integration',
+            requiredTier: details.required_tier || 'Business Pro',
+            currentTier: details.current_tier || 'Free'
+          });
+        } else {
+          toast.error('Failed to initiate connection');
+        }
         return;
       }
     }
@@ -424,9 +554,19 @@ const Integrations: React.FC = () => {
         const { auth_url } = await apiService.getTrelloAuthUrl();
         window.location.href = auth_url;
         return;
-      } catch (error) {
-        console.error(error);
-        toast.error('Failed to initiate connection', { id: 'oauth-redirect' });
+      } catch (error: any) {
+        toast.dismiss('oauth-redirect');
+        if (error.response?.status === 402 || error.response?.data?.error === 'upgrade_required') {
+          const details = error.response?.data?.detail || error.response?.data || {};
+          setUpgradeModal({
+            isOpen: true,
+            feature: details.feature || 'Trello integration',
+            requiredTier: details.required_tier || 'Business Pro',
+            currentTier: details.current_tier || 'Free'
+          });
+        } else {
+          toast.error('Failed to initiate connection');
+        }
         return;
       }
     }
@@ -438,9 +578,19 @@ const Integrations: React.FC = () => {
         const { auth_url } = await apiService.getJiraAuthUrl();
         window.location.href = auth_url;
         return;
-      } catch (error) {
-        console.error(error);
-        toast.error('Failed to initiate connection', { id: 'oauth-redirect' });
+      } catch (error: any) {
+        toast.dismiss('oauth-redirect');
+        if (error.response?.status === 402 || error.response?.data?.error === 'upgrade_required') {
+          const details = error.response?.data?.detail || error.response?.data || {};
+          setUpgradeModal({
+            isOpen: true,
+            feature: details.feature || 'Jira integration',
+            requiredTier: details.required_tier || 'Business Pro',
+            currentTier: details.current_tier || 'Free'
+          });
+        } else {
+          toast.error('Failed to initiate connection');
+        }
         return;
       }
     }
@@ -706,6 +856,15 @@ const Integrations: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Upgrade Modal */}
+      <UpgradeModal
+        isOpen={upgradeModal.isOpen}
+        onClose={() => setUpgradeModal({ isOpen: false, feature: '', requiredTier: '', currentTier: '' })}
+        feature={upgradeModal.feature}
+        requiredTier={upgradeModal.requiredTier}
+        currentTier={upgradeModal.currentTier}
+      />
     </div>
   );
 };
