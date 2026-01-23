@@ -65,6 +65,9 @@ const pageConfig: Record<string, string> = {
   creator: '/creator-profile',
   mcptools: '/mcp-tools',
   pricing: '/pricing',
+  unifiedInbox: '/unified/inbox',
+  unifiedTasks: '/unified/tasks',
+  unifiedCalendar: '/unified/calendar',
 };
 
 // Tutorial steps configuration - using more reliable CSS selectors
@@ -769,6 +772,62 @@ const tutorialSteps: TutorialStep[] = [
     position: 'left',
     page: 'workspace',
     order: 75
+  },
+
+  // Unified Inbox steps
+  {
+    id: 'inbox-intro',
+    title: 'Unified Inbox',
+    description: 'All your communications in one place. Switch tabs to filter by provider like Gmail, Slack, or Teams.',
+    target: 'h1',
+    fallbackTarget: 'body',
+    position: 'bottom',
+    page: 'unifiedInbox',
+    order: 76
+  },
+  {
+    id: 'inbox-search',
+    title: 'Search Messages',
+    description: 'Quickly find any message across all connected platforms.',
+    target: 'input[type="text"]',
+    fallbackTarget: 'body',
+    position: 'bottom',
+    page: 'unifiedInbox',
+    order: 77
+  },
+
+  // Unified Tasks steps
+  {
+    id: 'tasks-intro',
+    title: 'Unified Task View',
+    description: 'Manage tasks from Jira, Trello, Asana, and ClickUp in a single list.',
+    target: 'h1',
+    fallbackTarget: 'body',
+    position: 'bottom',
+    page: 'unifiedTasks',
+    order: 78
+  },
+  {
+    id: 'tasks-new',
+    title: 'Create Task',
+    description: 'Add a new task directly from here. It will sync back to the source platform.',
+    target: 'button.bg-blue-600',
+    fallbackTarget: 'body',
+    position: 'left',
+    page: 'unifiedTasks',
+    order: 79
+  },
+
+  // Unified Calendar steps
+  {
+    id: 'calendar-intro',
+    title: 'Unified Calendar',
+    description: 'Your aggregated schedule. View events from Google Calendar and Outlook.',
+    target: 'h1',
+    fallbackTarget: 'body',
+    position: 'bottom',
+    page: 'unifiedCalendar',
+    order: 80
   },
 ];
 
