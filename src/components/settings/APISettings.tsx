@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Zap, Activity, Clock, RefreshCw, ChevronDown, ChevronRight, Copy, Check } from 'lucide-react';
+import { Zap, Activity, Clock, RefreshCw, ChevronDown, ChevronRight, Copy, Check, Lock, Globe } from 'lucide-react';
 import { APISettings } from '../../types';
 import toast from 'react-hot-toast';
 
@@ -95,6 +95,83 @@ const APISettingsTab: React.FC<APISettingsProps> = ({
                         <p className="mt-3 text-xs text-gray-500">
                             Keep this key secret. It grants full access to your account via the API.
                         </p>
+                    </div>
+
+                    {/* Bring Your Own Key (BYOK) */}
+                    <div className="bg-gray-50 rounded-lg p-6 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-4 opacity-10">
+                            <Globe className="w-24 h-24 text-blue-600" />
+                        </div>
+                        <div className="flex items-center space-x-3 mb-4">
+                            <Lock className="w-5 h-5 text-blue-600" />
+                            <h4 className="text-lg font-medium text-gray-900">Bring Your Own Key (BYOK)</h4>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-4">
+                            Provide your own API keys to bypass rate limits and use your own quotas.
+                            These keys are prioritized over system defaults.
+                        </p>
+
+                        <div className="space-y-4">
+                            {/* OpenAI */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">OpenAI API Key</label>
+                                <input
+                                    type="password"
+                                    value={localSettings.openai_api_key || ''}
+                                    onChange={(e) => handleChange('openai_api_key', e.target.value)}
+                                    placeholder="sk-..."
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                                />
+                            </div>
+
+                            {/* Anthropic */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Anthropic API Key</label>
+                                <input
+                                    type="password"
+                                    value={localSettings.anthropic_api_key || ''}
+                                    onChange={(e) => handleChange('anthropic_api_key', e.target.value)}
+                                    placeholder="sk-ant-..."
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                                />
+                            </div>
+
+                            {/* Gemini */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Google Gemini API Key</label>
+                                <input
+                                    type="password"
+                                    value={localSettings.gemini_api_key || ''}
+                                    onChange={(e) => handleChange('gemini_api_key', e.target.value)}
+                                    placeholder="AIza..."
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                                />
+                            </div>
+
+                            {/* Hugging Face */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Hugging Face API Key</label>
+                                <input
+                                    type="password"
+                                    value={localSettings.huggingface_api_key || ''}
+                                    onChange={(e) => handleChange('huggingface_api_key', e.target.value)}
+                                    placeholder="hf_..."
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                                />
+                            </div>
+
+                            {/* Together AI */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Together AI API Key</label>
+                                <input
+                                    type="password"
+                                    value={localSettings.together_api_key || ''}
+                                    onChange={(e) => handleChange('together_api_key', e.target.value)}
+                                    placeholder="xxxxxxxx..."
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                                />
+                            </div>
+                        </div>
                     </div>
 
                     {/* Rate Limits */}

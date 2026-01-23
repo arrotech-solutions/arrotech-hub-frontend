@@ -26,6 +26,9 @@ import Pricing from './pages/Pricing';
 import RequestAccess from './pages/RequestAccess';
 import AdminDashboard from './pages/AdminDashboard'; // Import AdminDashboard
 import UnifiedDashboard from './pages/UnifiedDashboard';
+import UnifiedInbox from './pages/UnifiedInbox';
+import UnifiedTaskView from './pages/UnifiedTaskView';
+import UnifiedCalendar from './pages/UnifiedCalendar';
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -122,6 +125,36 @@ const AppRoutes: React.FC = () => {
           <ProtectedRoute>
             <Layout>
               <UnifiedDashboard />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/unified/inbox"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <UnifiedInbox />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/unified/tasks"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <UnifiedTaskView />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/unified/calendar"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <UnifiedCalendar />
             </Layout>
           </ProtectedRoute>
         }
