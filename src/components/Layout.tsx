@@ -43,6 +43,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
   const [collapsed, setCollapsed] = React.useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = React.useState(false);
+  const [expandedMenus, setExpandedMenus] = React.useState<string[]>(['Workspace']); // Default expanded
+
+  const toggleMenu = (name: string) => {
+    setExpandedMenus(prev =>
+      prev.includes(name)
+        ? prev.filter(item => item !== name)
+        : [...prev, name]
+    );
+  };
 
   const navigation = [
     {
@@ -54,10 +63,39 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     },
     {
       name: 'Workspace',
-      href: '/unified',
       icon: LayoutDashboard,
       description: 'Unified view of all apps',
-      badge: 'New'
+      badge: 'New',
+      children: [
+        {
+          name: 'Overview',
+          href: '/unified',
+          icon: Home, // Or another icon for overview
+          description: 'Dashboard overview',
+          badge: null
+        },
+        {
+          name: 'Inbox',
+          href: '/unified/inbox',
+          icon: MessageCircle, // Using MessageCircle as placeholder if Inbox not available
+          description: 'Unified Inbox',
+          badge: null
+        },
+        {
+          name: 'Task View',
+          href: '/unified/tasks',
+          icon: Workflow, // Using Workflow as placeholder
+          description: 'Unified Tasks',
+          badge: null
+        },
+        {
+          name: 'Calendar',
+          href: '/unified/calendar',
+          icon: Activity, // Using Activity as placeholder
+          description: 'Unified Calendar',
+          badge: null
+        }
+      ]
     },
     {
       name: 'Chat',
@@ -199,6 +237,112 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     return <>{children}</>;
   }
 
+  const renderNavItem = (item: any, isMobile: boolean = false) => {
+    const Icon = item.icon;
+    const isActive = location.pathname === item.href || (item.children && item.children.some((child: any) => location.pathname === child.href));
+    const isExpanded = expandedMenus.includes(item.name);
+    const hasChildren = item.children && item.children.length > 0;
+
+    if (hasChildren) {
+      return (
+        <div key={item.name}>
+          <button
+            onClick={() => toggleMenu(item.name)}
+            className={`w-full group flex items-center px-4 py-3 rounded-xl transition-all duration-200 ${isActive && !isExpanded
+              ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
+              : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+              }`}
+            title={collapsed && !isMobile ? item.name : undefined}
+          >
+            <div className="relative">
+              <Icon className={`w-5 h-5 ${collapsed && !isMobile ? 'mx-auto' : 'mr-3'} ${isActive && !isExpanded ? 'text-white' : 'text-gray-500 group-hover:text-gray-700'}`} />
+              {collapsed && !isMobile && item.badge && (
+                <span className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full border-2 border-white"></span>
+              )}
+            </div>
+            {(!collapsed || isMobile) && (
+              <div className="flex-1 flex items-center justify-between">
+                <div>
+                  <div className="flex items-center">
+                    <span className="font-medium">{item.name}</span>
+                    {item.badge && (
+                      <span className="ml-2 px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">
+                        {item.badge}
+                      </span>
+                    )}
+                  </div>
+                  <p className={`text-xs mt-1 ${isActive && !isExpanded ? 'text-blue-100' : 'text-gray-500'}`}>
+                    {item.description}
+                  </p>
+                </div>
+                <ChevronDown className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+              </div>
+            )}
+          </button>
+
+          {/* Children */}
+          {isExpanded && (!collapsed || isMobile) && (
+            <div className="ml-4 pl-4 border-l border-gray-200 space-y-1 mt-1">
+              {item.children.map((child: any) => {
+                const ChildIcon = child.icon;
+                const isChildActive = location.pathname === child.href;
+                return (
+                  <Link
+                    key={child.name}
+                    to={child.href}
+                    className={`group flex items-center px-4 py-2 rounded-lg transition-all duration-200 ${isChildActive
+                      ? 'bg-blue-50 text-blue-700'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      }`}
+                    onClick={() => isMobile && setSidebarOpen(false)}
+                  >
+                    <ChildIcon className={`w-4 h-4 mr-3 ${isChildActive ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'}`} />
+                    <span className="text-sm font-medium">{child.name}</span>
+                  </Link>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    return (
+      <Link
+        key={item.name}
+        to={item.href}
+        className={`group flex items-center px-4 py-3 rounded-xl transition-all duration-200 ${isActive
+          ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
+          : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+          }`}
+        title={collapsed && !isMobile ? item.name : undefined}
+        onClick={() => isMobile && setSidebarOpen(false)}
+      >
+        <div className="relative">
+          <Icon className={`w-5 h-5 ${collapsed && !isMobile ? 'mx-auto' : 'mr-3'} ${isActive ? 'text-white' : 'text-gray-500 group-hover:text-gray-700'}`} />
+          {collapsed && !isMobile && item.badge && (
+            <span className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full border-2 border-white"></span>
+          )}
+        </div>
+        {(!collapsed || isMobile) && (
+          <div className="flex-1">
+            <div className="flex items-center justify-between">
+              <span className="font-medium">{item.name}</span>
+              {item.badge && (
+                <span className="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">
+                  {item.badge}
+                </span>
+              )}
+            </div>
+            <p className={`text-xs mt-1 ${isActive ? 'text-blue-100' : 'text-gray-500'}`}>
+              {item.description}
+            </p>
+          </div>
+        )}
+      </Link>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
       {/* Mobile sidebar */}
@@ -245,36 +389,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </div>
 
           <nav className="flex-1 min-h-0 p-6 space-y-2 overflow-y-auto">
-            {navigation.map((item) => {
-              const Icon = item.icon;
-              const isActive = location.pathname === item.href;
-              return (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className={`group flex items-center px-4 py-3 rounded-xl transition-all duration-200 ${isActive
-                    ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
-                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                    }`}
-                  onClick={() => setSidebarOpen(false)}
-                >
-                  <Icon className={`w-5 h-5 mr-3 ${isActive ? 'text-white' : 'text-gray-500 group-hover:text-gray-700'}`} />
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium">{item.name}</span>
-                      {item.badge && (
-                        <span className="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">
-                          {item.badge}
-                        </span>
-                      )}
-                    </div>
-                    <p className={`text-xs mt-1 ${isActive ? 'text-blue-100' : 'text-gray-500'}`}>
-                      {item.description}
-                    </p>
-                  </div>
-                </Link>
-              );
-            })}
+            {navigation.map((item) => renderNavItem(item, true))}
           </nav>
 
           {/* Logout Section */}
@@ -348,43 +463,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
           {/* Navigation */}
           <nav className="flex-1 min-h-0 p-6 space-y-2 overflow-y-auto">
-            {navigation.map((item) => {
-              const Icon = item.icon;
-              const isActive = location.pathname === item.href;
-              return (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className={`group flex items-center px-4 py-3 rounded-xl transition-all duration-200 ${isActive
-                    ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
-                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                    }`}
-                  title={collapsed ? item.name : undefined}
-                >
-                  <div className="relative">
-                    <Icon className={`w-5 h-5 ${collapsed ? 'mx-auto' : 'mr-3'} ${isActive ? 'text-white' : 'text-gray-500 group-hover:text-gray-700'}`} />
-                    {collapsed && item.badge && (
-                      <span className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full border-2 border-white"></span>
-                    )}
-                  </div>
-                  {!collapsed && (
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium">{item.name}</span>
-                        {item.badge && (
-                          <span className="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">
-                            {item.badge}
-                          </span>
-                        )}
-                      </div>
-                      <p className={`text-xs mt-1 ${isActive ? 'text-blue-100' : 'text-gray-500'}`}>
-                        {item.description}
-                      </p>
-                    </div>
-                  )}
-                </Link>
-              );
-            })}
+            {navigation.map((item) => renderNavItem(item, false))}
           </nav>
 
           {/* Logout Section */}
