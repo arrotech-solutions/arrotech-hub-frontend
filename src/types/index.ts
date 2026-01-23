@@ -423,6 +423,11 @@ export interface APISettings {
   api_rate_limit: number;
   api_timeout: number;
   auto_refresh_tokens: boolean;
+  openai_api_key?: string;
+  anthropic_api_key?: string;
+  gemini_api_key?: string;
+  huggingface_api_key?: string;
+  together_api_key?: string;
 }
 
 export interface DashboardSettings {

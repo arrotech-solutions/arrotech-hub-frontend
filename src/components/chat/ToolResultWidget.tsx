@@ -168,17 +168,51 @@ const ToolResultWidget: React.FC<ToolResultWidgetProps> = ({
                                         )}
 
                                         {/* Generic Data Visualizer (Table/Grid) */}
+                                        {/* Handle Array of Objects (Table View) */}
+                                        {tool.result.data && Array.isArray(tool.result.data) && tool.result.data.length > 0 && typeof tool.result.data[0] === 'object' && (
+                                            <div className="overflow-x-auto">
+                                                <table className={`w-full text-left border-collapse text-xs ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                                                    <thead>
+                                                        <tr className={`border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                                                            {Object.keys(tool.result.data[0]).slice(0, 4).map(key => (
+                                                                <th key={key} className="py-2 px-3 font-semibold uppercase tracking-wider text-[10px] whitespace-nowrap">
+                                                                    {key.replace(/_/g, ' ')}
+                                                                </th>
+                                                            ))}
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {tool.result.data.slice(0, 5).map((row: any, i: number) => (
+                                                            <tr key={i} className={`border-b last:border-0 ${isDarkMode ? 'border-gray-800' : 'border-gray-100'} hover:bg-black/5 dark:hover:bg-white/5`}>
+                                                                {Object.keys(row).slice(0, 4).map(key => (
+                                                                    <td key={key} className="py-2 px-3 truncate max-w-[150px]">
+                                                                        {typeof row[key] === 'object' ? JSON.stringify(row[key]) : String(row[key])}
+                                                                    </td>
+                                                                ))}
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                                {tool.result.data.length > 5 && (
+                                                    <div className="p-2 text-center text-[10px] opacity-60">
+                                                        + {tool.result.data.length - 5} more items
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {/* Handle Object (Key-Value Grid) */}
                                         {tool.result.data && !Array.isArray(tool.result.data) && typeof tool.result.data === 'object' && (
                                             <div className={`grid grid-cols-2 gap-2 p-2 rounded-xl ${isDarkMode ? 'bg-gray-900/40' : 'bg-gray-50/50'}`}>
-                                                {Object.entries(tool.result.data).slice(0, 6).map(([key, value]) => {
-                                                    if (typeof value === 'object' || Array.isArray(value)) return null;
+                                                {Object.entries(tool.result.data).slice(0, 8).map(([key, value]) => {
+                                                    if (typeof value === 'object' && value !== null && !Array.isArray(value)) return null; // Skip nested objects for grid
                                                     return (
                                                         <div key={key} className="p-2">
                                                             <p className={`text-[9px] font-bold uppercase tracking-widest ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
                                                                 {key.replace(/_/g, ' ')}
                                                             </p>
                                                             <p className={`text-xs font-medium truncate ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                                                                {String(value)}
+                                                                {Array.isArray(value) ? `Array[${value.length}]` : String(value)}
                                                             </p>
                                                         </div>
                                                     );

@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { Message } from '../../types';
 import ToolResultWidget from './ToolResultWidget';
+import ReasoningBubble, { extractThought } from './ReasoningBubble';
 
 interface MessageItemProps {
     message: Message;
@@ -47,6 +48,11 @@ const MessageItem: React.FC<MessageItemProps> = ({
     const isUser = message.role === 'user';
     const isEditing = editingMessageId === message.id;
     const hasVersions = messageVersions.length > 0;
+
+    // Extract thought from content
+    const { cleanContent } = (!isUser && message.content)
+        ? extractThought(message.content)
+        : { cleanContent: message.content };
 
     const copyToClipboard = (text: string) => {
         navigator.clipboard.writeText(text);
@@ -103,7 +109,11 @@ const MessageItem: React.FC<MessageItemProps> = ({
                             </div>
                         ) : (
                             <div className="text-sm sm:text-[15px] leading-relaxed whitespace-pre-wrap">
-                                {message.content}
+                                {!isUser && message.content && (
+                                    <ReasoningBubble content={message.content} isDarkMode={isDarkMode} />
+                                )}
+
+                                {cleanContent}
 
                                 {/* Tool Results in Assistant Messages */}
                                 {!isUser && message.tools_called && (
@@ -179,7 +189,7 @@ const MessageItem: React.FC<MessageItemProps> = ({
                     )}
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 
