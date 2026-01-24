@@ -1,14 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Check, Info, Shield, Zap, Sparkles, Smartphone, CreditCard, ChevronRight } from 'lucide-react';
 import { useSubscription } from '../hooks/useSubscription';
 import toast from 'react-hot-toast';
 import apiService from '../services/api';
+import { usePaystackPayment } from 'react-paystack';
 
 const Pricing: React.FC = () => {
     const { tier, user } = useSubscription();
     const [loading, setLoading] = useState<string | null>(null);
     const [phoneNumber, setPhoneNumber] = useState('');
-    const [paymentMethod, setPaymentMethod] = useState<'mpesa' | 'card'>('mpesa');
+    const [paymentMethod, setPaymentMethod] = useState<'mpesa' | 'card'>('card');
+    const [paystackKey, setPaystackKey] = useState('');
+    const [paystackConfig, setPaystackConfig] = useState<any>(null);
+
+    useEffect(() => {
+        fetchPaystackConfig();
+    }, []);
+
+    const fetchPaystackConfig = async () => {
+        try {
+            const response = await apiService.getPaystackConfig();
+            if (response.success && response.data && response.data.key) {
+                setPaystackKey(response.data.key);
+            }
+        } catch (error) {
+            console.error('Failed to fetch Paystack config', error);
+        }
+    };
 
     const plans = [
         {
@@ -83,6 +101,35 @@ const Pricing: React.FC = () => {
         }
     ];
 
+
+
+    const handleSuccess = async (reference: any) => {
+        try {
+            // Call backend to verify and activate subscription
+            const response = await apiService.verifyPaystackPayment(reference.reference);
+            if (response.success) {
+                toast.success('Subscription activated successfully!');
+            } else {
+                toast.error('Payment verified but subscription activation failed. Please contact support.');
+            }
+        } catch (error) {
+            console.error('Verification error:', error);
+            toast.error('Failed to verify payment. Please contact support.');
+        } finally {
+            setLoading(null);
+            setPaystackConfig(null);
+        }
+    };
+
+    const handleClose = () => {
+        toast('Payment cancelled');
+        setLoading(null);
+        setPaystackConfig(null);
+    };
+
+
+
+
     const handleUpgrade = async (planId: string) => {
         if (planId === tier) {
             toast.error('You are already on this plan');
@@ -137,29 +184,88 @@ const Pricing: React.FC = () => {
                 } else {
                     toast.error(response.error || 'Failed to initiate M-Pesa payment');
                 }
+                setLoading(null);
             } else {
-                // Stripe Card Payment
-                const response = await apiService.createStripeSubscriptionCheckoutSession(
-                    planId,
-                    amount
-                );
-
-                if (response.success && response.data?.checkout_url) {
-                    window.location.href = response.data.checkout_url;
-                } else {
-                    toast.error('Failed to start Card checkout session');
+                // Paystack Card Payment
+                if (!paystackKey) {
+                    toast.error("Payment system initializing, please try again in a moment.");
+                    fetchPaystackConfig();
+                    setLoading(null);
+                    return;
                 }
+
+                const config = {
+                    reference: (new Date()).getTime().toString(),
+                    email: user?.email || 'customer@arrotech.co.ke',
+                    amount: amount * 100, // Paystack expects kobo/cents
+                    publicKey: paystackKey,
+                    currency: 'KES',
+                    metadata: {
+                        custom_fields: [
+                            {
+                                display_name: "Plan",
+                                variable_name: "plan",
+                                value: planId
+                            }
+                        ]
+                    }
+                };
+
+                // We can't use the hook dynamically easily inside the function.
+                // We have to set state, and maybe render a hidden PaystackButton or use the hook in a way that respects updates.
+                // Re-implementation with PaystackConsumer or inline trigger if possible.
+                // Actually, simply returning the config to state, and having a `PaystackButton` or similar might be easier, 
+                // but let's try to use the hook correctly.
+
+                // Workaround: We will use a separate component for the Paystack button or just accept that we need to define the hook at the top level with default values, 
+                // and then call the function return by the hook with the new config? NO, hook doesn't work like that.
+
+                // Correct way with hook:
+                // The hook `usePaystackPayment` returns `initializePayment`.
+                // `initializePayment` takes `onSuccess` and `onClose`.
+                // BUT it uses the config passed during `usePaystackPayment(config)`.
+
+                // So we need to put the *current* plan config into a state tailored for the hook, wait for render, then trigger.
+                // This is clunky.
+
+                // Better: Use `PaystackButton` component if available? 
+                // Or just use the inline script method? No, React wrapper is safer.
+
+                // Let's use the state-based approach.
+                setPaystackConfig(config);
             }
 
         } catch (error) {
             toast.error('An error occurred. Please try again.');
-        } finally {
             setLoading(null);
         }
     };
 
+    // Effect to trigger payment when config is set
+
+
+    // Helper component to trigger payment
+    // ensure we don't break rules of hooks
+
+    const TriggerPaystack = ({ config, onSuccess, onClose }: any) => {
+        const initializePayment = usePaystackPayment(config);
+        useEffect(() => {
+            // @ts-ignore - The type definition might be incorrect or older version
+            initializePayment(onSuccess, onClose);
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+        }, []);
+        return null;
+    };
+
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+            {paystackConfig && (
+                <TriggerPaystack
+                    config={paystackConfig}
+                    onSuccess={handleSuccess}
+                    onClose={handleClose}
+                />
+            )}
             <div className="max-w-7xl mx-auto">
                 <div className="text-center mb-16">
                     <h2 className="text-base font-semibold text-indigo-600 dark:text-indigo-400 tracking-wide uppercase">
@@ -177,7 +283,8 @@ const Pricing: React.FC = () => {
                         <div className="bg-white dark:bg-gray-800 p-1 rounded-lg border border-gray-200 dark:border-gray-700 flex shadow-sm">
                             <button
                                 onClick={() => setPaymentMethod('mpesa')}
-                                className={`flex items-center px-4 py-2 rounded-md transition-all ${paymentMethod === 'mpesa'
+                                disabled={true}
+                                className={`flex items-center px-4 py-2 rounded-md transition-all cursor-not-allowed opacity-50 ${paymentMethod === 'mpesa'
                                     ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-medium'
                                     : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}
                             >
@@ -283,7 +390,7 @@ const Pricing: React.FC = () => {
 
                                 {plan.id !== 'free' && (
                                     <div className="mt-4 flex items-center justify-center text-[10px] text-gray-400 uppercase tracking-widest font-bold">
-                                        <Shield className="w-3 h-3 mr-1" /> Secure M-Pesa Checkout
+                                        <Shield className="w-3 h-3 mr-1" /> Secure {paymentMethod === 'card' ? 'Card' : 'M-Pesa'} Checkout
                                     </div>
                                 )}
                             </div>

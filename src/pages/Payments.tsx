@@ -26,7 +26,8 @@ import { useAuth } from '../hooks/useAuth';
 import { useSubscription } from '../hooks/useSubscription';
 import apiService from '../services/api';
 import { useNavigate } from 'react-router-dom';
-import { MpesaPaymentRequest, Payment, StripePaymentRequest, Subscription } from '../types';
+import { usePaystackPayment } from 'react-paystack';
+import { MpesaPaymentRequest, Payment, Subscription } from '../types';
 
 const Payments: React.FC = () => {
   useAuth();
@@ -34,7 +35,7 @@ const Payments: React.FC = () => {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
   const [showMpesaModal, setShowMpesaModal] = useState(false);
-  const [showStripeModal, setShowStripeModal] = useState(false);
+  const [showPaystackModal, setShowPaystackModal] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [selectedMethod, setSelectedMethod] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -46,10 +47,13 @@ const Payments: React.FC = () => {
     reference: '',
     description: 'Mini-Hub Payment'
   });
-  const [stripeForm, setStripeForm] = useState<StripePaymentRequest>({
+  const [paystackConfig, setPaystackConfig] = useState({
+    reference: '',
+    email: '',
     amount: 0,
-    currency: 'kes'
+    publicKey: '',
   });
+  const [paystackKey, setPaystackKey] = useState('');
 
   // Subscription management state
   const { tier, user, refetch: refetchSubscription } = useSubscription();
@@ -103,7 +107,19 @@ const Payments: React.FC = () => {
 
   useEffect(() => {
     fetchPaymentData();
+    fetchPaystackConfig();
   }, []);
+
+  const fetchPaystackConfig = async () => {
+    try {
+      const response = await apiService.getPaystackConfig();
+      if (response.success && response.data && response.data.key) {
+        setPaystackKey(response.data.key);
+      }
+    } catch (error) {
+      console.error('Failed to fetch Paystack config', error);
+    }
+  };
 
   useEffect(() => {
     const totalPayments = payments.length;
@@ -233,33 +249,67 @@ const Payments: React.FC = () => {
     }
   };
 
-  const handleStripePayment = async () => {
+  // Paystack Hook
+  const paystackHookConfig = {
+    ...paystackConfig,
+    publicKey: paystackKey,
+    firstname: user?.name,
+    phone: user?.phone_number
+  };
+
+  const initializePaystackPayment = usePaystackPayment(paystackHookConfig);
+
+  const handlePaystackSuccess = async (reference: any) => {
     try {
-      // Stripe expects amount in cents
-      const stripePayload = {
-        ...stripeForm,
-        amount: Math.round(stripeForm.amount * 100)
-      };
-      const response = await apiService.createStripePaymentIntent(stripePayload);
+      const response = await apiService.verifyPaystackPayment(reference.reference);
       if (response.success) {
-        toast.success('Stripe payment intent created');
-        setShowStripeModal(false);
-        setStripeForm({ amount: 0, currency: 'kes' });
+        toast.success('Payment successful!');
+        setShowPaystackModal(false);
+        setPaystackConfig(prev => ({ ...prev, amount: 0 }));
         fetchPaymentData();
       } else {
-        toast.error(response.error || 'Payment intent creation failed');
+        toast.error(response.error || 'Payment verification failed');
       }
     } catch (error) {
-      console.error('Error creating Stripe payment intent:', error);
-      toast.error('Failed to create payment intent');
+      console.error('Payment verification error:', error);
+      toast.error('Failed to verify payment');
     }
   };
+
+  const handlePaystackClose = () => {
+    toast('Payment canceled');
+  };
+
+  const handlePaystackClick = () => {
+
+
+    // We need to force update the config passed to the hook? 
+    // Limitations of the hook: it uses the config passed at render time.
+    // So we must ensure state is updated before user clicks "Pay" button inside the modal.
+    // But initialization happens on click.
+
+    // Actually, define config as derived state from `paystackConfig` state.
+    // When user types amount, `paystackConfig` updates.
+    // Hook re-runs.
+    // Then we call `initializePaystackPayment(handlePaystackSuccess, handlePaystackClose)`
+
+    if (!paystackKey) {
+      toast.error('Payment system initializing...');
+      fetchPaystackConfig();
+      return;
+    }
+
+    // @ts-ignore - React Paystack types might be mismatching
+    initializePaystackPayment(handlePaystackSuccess, handlePaystackClose);
+  };
+
 
   const getPaymentIcon = (method: string) => {
     switch (method) {
       case 'mpesa':
         return <Smartphone className="w-5 h-5 text-green-600" />;
       case 'stripe':
+      case 'paystack':
         return <CreditCard className="w-5 h-5 text-blue-600" />;
       default:
         return <DollarSign className="w-5 h-5 text-gray-600" />;
@@ -470,15 +520,16 @@ const Payments: React.FC = () => {
 
               <div className="shrink-0 flex items-center gap-4 payment-actions">
                 <button
-                  onClick={() => setShowStripeModal(true)}
+                  onClick={() => setShowPaystackModal(true)}
                   className="flex items-center space-x-2 px-8 py-4 bg-gray-900 hover:bg-emerald-600 text-white rounded-[24px] font-black text-xs uppercase tracking-widest transition-all duration-300 shadow-xl active:scale-95"
                 >
                   <CreditCard className="w-4 h-4" />
-                  <span>Direct Ledger</span>
+                  <span>Card / Mobile</span>
                 </button>
                 <button
                   onClick={() => setShowMpesaModal(true)}
-                  className="flex items-center space-x-2 px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-[24px] font-black text-xs uppercase tracking-widest transition-all duration-300 shadow-xl active:scale-95"
+                  disabled={true}
+                  className="flex items-center space-x-2 px-8 py-4 bg-emerald-600/50 text-white/50 rounded-[24px] font-black text-xs uppercase tracking-widest cursor-not-allowed shadow-none"
                 >
                   <Smartphone className="w-4 h-4" />
                   <span>STK Push</span>
@@ -742,7 +793,7 @@ const Payments: React.FC = () => {
           </div>
         )}
 
-        {showStripeModal && (
+        {showPaystackModal && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-6 animate-in fade-in duration-300">
             <div className="bg-white rounded-[40px] p-10 w-full max-w-md shadow-2xl border border-white relative overflow-hidden">
               <div className="absolute top-0 right-0 -mt-10 -mr-10 w-32 h-32 bg-blue-100 rounded-full blur-2xl opacity-50"></div>
@@ -750,7 +801,7 @@ const Payments: React.FC = () => {
                 <div className="p-3 bg-blue-100 rounded-2xl">
                   <CreditCard className="w-6 h-6 text-blue-600" />
                 </div>
-                <h2 className="text-2xl font-black text-gray-900 tracking-tight uppercase">Ledger Credit</h2>
+                <h2 className="text-2xl font-black text-gray-900 tracking-tight uppercase">Pay with Card</h2>
               </div>
 
               <div className="space-y-6">
@@ -758,27 +809,36 @@ const Payments: React.FC = () => {
                   <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2">Value Units (KES)</label>
                   <input
                     type="number"
-                    value={stripeForm.amount}
-                    onChange={(e) => setStripeForm({ ...stripeForm, amount: parseInt(e.target.value) || 0 })}
+                    value={paystackConfig.amount > 0 ? paystackConfig.amount / 100 : ''}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value) || 0;
+                      setPaystackConfig(prev => ({
+                        ...prev,
+                        amount: val * 100, // Convert to kobo/cents immediately
+                        email: user?.email || '',
+                        reference: (new Date()).getTime().toString()
+                      }));
+                    }}
                     className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl font-black text-gray-900 focus:ring-2 focus:ring-blue-500"
                     placeholder="Amount"
                   />
+                  <p className="text-xs text-gray-400 mt-2">Secured by Paystack</p>
                 </div>
               </div>
 
               <div className="flex space-x-4 mt-10">
                 <button
-                  onClick={() => setShowStripeModal(false)}
+                  onClick={() => setShowPaystackModal(false)}
                   className="flex-1 py-4 text-gray-400 font-black text-xs uppercase tracking-widest hover:text-gray-900 transition-colors"
                 >
                   Abort
                 </button>
                 <button
-                  onClick={handleStripePayment}
-                  disabled={!stripeForm.amount}
+                  onClick={handlePaystackClick}
+                  disabled={!paystackConfig.amount}
                   className="flex-1 py-4 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-500 transition-all shadow-lg disabled:opacity-50"
                 >
-                  Authorize
+                  Pay Now
                 </button>
               </div>
             </div>
