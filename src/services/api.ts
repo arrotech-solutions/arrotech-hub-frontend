@@ -264,6 +264,17 @@ class ApiService {
     return response.data;
   }
 
+  // Paystack endpoints
+  async verifyPaystackPayment(reference: string): Promise<ApiResponse<any>> {
+    const response = await this.api.post('/paystack/verify', { reference });
+    return response.data;
+  }
+
+  async getPaystackConfig(): Promise<ApiResponse<{ key: string }>> {
+    const response = await this.api.get('/paystack/config');
+    return response.data;
+  }
+
   async getClickUpAuthUrl(): Promise<{ url: string }> {
     const response = await this.api.get('/api/clickup/auth-url');
     return response.data;
