@@ -7,6 +7,7 @@ export interface User {
   subscription_end_date?: string;
   api_key?: string;
   stripe_customer_id?: string;
+  phone_number?: string;
   created_at: string;
   updated_at: string;
 }
