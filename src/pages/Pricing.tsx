@@ -1,439 +1,332 @@
 import React, { useState, useEffect } from 'react';
-import { Check, Info, Shield, Zap, Sparkles, Smartphone, CreditCard, ChevronRight } from 'lucide-react';
+import { Check, Shield, Zap, Sparkles } from 'lucide-react';
 import { useSubscription } from '../hooks/useSubscription';
+import { useAuth } from '../hooks/useAuth';
 import toast from 'react-hot-toast';
 import apiService from '../services/api';
-import { usePaystackPayment } from 'react-paystack';
+import { PaystackButton } from 'react-paystack';
+
+// Subscription plans configuration
+const PLANS = [
+    {
+        id: 'free',
+        name: 'Free Tier',
+        price: 0,
+        priceDisplay: '0',
+        description: 'Perfect for testing and learning automation.',
+        features: [
+            '3 Active Workflows',
+            '10 AI Messages / day',
+            'M-Pesa, Slack & Context Tools',
+            'Community Support',
+            'Basic Dashboard'
+        ],
+        highlight: false,
+        color: 'gray'
+    },
+    {
+        id: 'lite',
+        name: 'Biashara Lite',
+        price: 200,
+        priceDisplay: '200',
+        description: 'Essential tools for solo entrepreneurs.',
+        features: [
+            '10 Active Workflows',
+            '50 AI Messages / day',
+            'Google Workspace Integration',
+            'M-Pesa + Slack + WhatsApp',
+            'Email Support',
+            'Weekly Reports'
+        ],
+        highlight: false,
+        color: 'blue'
+    },
+    {
+        id: 'pro',
+        name: 'Business Pro',
+        price: 2500,
+        priceDisplay: '2,500',
+        description: 'Full power for growing businesses.',
+        features: [
+            '50 Active Workflows',
+            '500 AI Messages / day',
+            '25+ Platform Integrations',
+            'Daily Automated Reports',
+            'Priority Support',
+            'Team Collaboration (5 users)',
+            'API Access (5,000/day)'
+        ],
+        highlight: true,
+        color: 'indigo'
+    },
+    {
+        id: 'enterprise',
+        name: 'Enterprise',
+        price: 10000,
+        priceDisplay: '10,000',
+        description: 'Ultimate solution for large organizations.',
+        features: [
+            'Unlimited Workflows',
+            'Unlimited AI Messages',
+            'All 50+ Integrations + Custom',
+            'Real-time Analytics',
+            'Dedicated WhatsApp Support',
+            'White-labeling & SSO',
+            'Custom Integrations (2/year)',
+            'Unlimited Team Members'
+        ],
+        highlight: false,
+        color: 'purple'
+    }
+];
 
 const Pricing: React.FC = () => {
     const { tier, user } = useSubscription();
-    const [loading, setLoading] = useState<string | null>(null);
-    const [phoneNumber, setPhoneNumber] = useState('');
-    const [paymentMethod, setPaymentMethod] = useState<'mpesa' | 'card'>('card');
+    const { refreshUser } = useAuth();
     const [paystackKey, setPaystackKey] = useState('');
-    const [paystackConfig, setPaystackConfig] = useState<any>(null);
+    const [loading, setLoading] = useState(false);
 
+    // Fetch Paystack public key on mount
     useEffect(() => {
-        fetchPaystackConfig();
+        const fetchConfig = async () => {
+            try {
+                const response = await apiService.getPaystackConfig();
+                if (response.success && response.data?.key) {
+                    setPaystackKey(response.data.key);
+                }
+            } catch (error) {
+                console.error('Failed to fetch Paystack config:', error);
+            }
+        };
+        fetchConfig();
     }, []);
 
-    const fetchPaystackConfig = async () => {
+    // Handle successful payment
+    const handlePaymentSuccess = async (response: any) => {
+        console.log('[PRICING] Payment success callback:', response);
+        const toastId = toast.loading('Verifying payment...');
+        setLoading(true);
+
         try {
-            const response = await apiService.getPaystackConfig();
-            if (response.success && response.data && response.data.key) {
-                setPaystackKey(response.data.key);
+            const reference = response?.reference || response?.trxref;
+
+            if (!reference) {
+                console.error('[PRICING] No reference in response:', response);
+                toast.error('Payment completed but reference missing. Please contact support.', { id: toastId });
+                return;
             }
-        } catch (error) {
-            console.error('Failed to fetch Paystack config', error);
-        }
-    };
 
-    const plans = [
-        {
-            id: 'free',
-            name: 'Free Tier',
-            price: '0',
-            description: 'Perfect for testing and learning automation.',
-            features: [
-                '3 Active Workflows',
-                '10 AI Messages / day',
-                'M-Pesa, Slack & Context Tools',
-                'Community Support',
-                'Basic Dashboard'
-            ],
-            cta: 'Current Plan',
-            highlight: false,
-            color: 'gray'
-        },
-        {
-            id: 'lite',
-            name: 'Biashara Lite',
-            price: '200',
-            description: 'Essential tools for solo entrepreneurs.',
-            features: [
-                '10 Active Workflows',
-                '50 AI Messages / day',
-                'Google Workspace Integration',
-                'M-Pesa + Slack + WhatsApp',
-                'Email Support',
-                'Weekly Reports'
-            ],
-            cta: 'Upgrade to Lite',
-            highlight: false,
-            color: 'blue'
-        },
-        {
-            id: 'pro',
-            name: 'Business Pro',
-            price: '2,500',
-            description: 'Full power for growing businesses.',
-            features: [
-                '50 Active Workflows',
-                '500 AI Messages / day',
-                '25+ Platform Integrations',
-                'Daily Automated Reports',
-                'Priority Support',
-                'Team Collaboration (5 users)',
-                'API Access (5,000/day)'
-            ],
-            cta: 'Upgrade to Pro',
-            highlight: true,
-            color: 'indigo'
-        },
-        {
-            id: 'enterprise',
-            name: 'Enterprise',
-            price: '10,000',
-            description: 'Ultimate solution for large organizations.',
-            features: [
-                'Unlimited Workflows',
-                'Unlimited AI Messages',
-                'All 50+ Integrations + Custom',
-                'Real-time Analytics',
-                'Dedicated WhatsApp Support',
-                'White-labeling & SSO',
-                'Custom Integrations (2/year)',
-                'Unlimited Team Members'
-            ],
-            cta: 'Contact Sales',
-            highlight: false,
-            color: 'purple'
-        }
-    ];
+            console.log('[PRICING] Verifying reference:', reference);
+            const result = await apiService.verifyPaystackPayment(reference);
+            console.log('[PRICING] Verification result:', result);
 
-
-
-    const handleSuccess = async (reference: any) => {
-        try {
-            // Call backend to verify and activate subscription
-            const response = await apiService.verifyPaystackPayment(reference.reference);
-            if (response.success) {
-                toast.success('Subscription activated successfully!');
+            if (result.success) {
+                toast.success('Subscription activated! 🎉', { id: toastId });
+                await refreshUser();
             } else {
-                toast.error('Payment verified but subscription activation failed. Please contact support.');
+                toast.error(result.error || 'Verification failed. Please contact support.', { id: toastId });
             }
-        } catch (error) {
-            console.error('Verification error:', error);
-            toast.error('Failed to verify payment. Please contact support.');
+        } catch (error: any) {
+            console.error('[PRICING] Verification error:', error);
+            const message = error?.response?.data?.detail || 'Failed to verify payment';
+            toast.error(message, { id: toastId });
         } finally {
-            setLoading(null);
-            setPaystackConfig(null);
+            setLoading(false);
         }
     };
 
-    const handleClose = () => {
-        toast('Payment cancelled');
-        setLoading(null);
-        setPaystackConfig(null);
+    // Handle payment modal close
+    const handlePaymentClose = () => {
+        console.log('[PRICING] Payment modal closed');
+        toast('Payment cancelled', { icon: '❌' });
     };
 
+    // Generate unique reference
+    const generateReference = (planId: string) => {
+        return `${Date.now()}_${planId}_${Math.random().toString(36).substr(2, 9)}`;
+    };
 
-
-
-    const handleUpgrade = async (planId: string) => {
-        if (planId === tier) {
-            toast.error('You are already on this plan');
-            return;
+    // Render payment button based on plan
+    const renderPaymentButton = (plan: typeof PLANS[0]) => {
+        // Current plan - show disabled button
+        if (tier === plan.id) {
+            return (
+                <button
+                    disabled
+                    className="w-full py-3 px-6 rounded-xl font-bold bg-gray-100 dark:bg-gray-700 text-gray-400 cursor-not-allowed"
+                >
+                    Current Plan
+                </button>
+            );
         }
 
-        if (planId === 'free') {
-            toast.error('Cannot downgrade to free plan via this menu');
-            return;
+        // Free tier - no payment needed
+        if (plan.id === 'free') {
+            return (
+                <button
+                    disabled
+                    className="w-full py-3 px-6 rounded-xl font-bold bg-gray-100 dark:bg-gray-700 text-gray-500 cursor-not-allowed"
+                >
+                    Free Forever
+                </button>
+            );
         }
 
-        // Enterprise requires contacting sales
-        if (planId === 'enterprise') {
-            window.location.href = 'mailto:sales@arrotechsolutions.co.ke?subject=Enterprise Plan Inquiry';
-            return;
+        // Enterprise - contact sales
+        if (plan.id === 'enterprise') {
+            return (
+                <button
+                    onClick={() => window.location.href = 'mailto:sales@arrotechsolutions.co.ke?subject=Enterprise Plan Inquiry'}
+                    className="w-full py-3 px-6 rounded-xl font-bold bg-purple-600 hover:bg-purple-700 text-white transition-all"
+                >
+                    Contact Sales
+                </button>
+            );
         }
 
-        const amountMap: { [key: string]: number } = {
-            'lite': 200,
-            'pro': 2500,
-            'enterprise': 10000
-        };
-        const amount = amountMap[planId] || 0;
-
-        if (!amount) {
-            toast.error('Invalid plan selected');
-            return;
+        // Paid plans - show Paystack button
+        if (!paystackKey) {
+            return (
+                <button
+                    disabled
+                    className="w-full py-3 px-6 rounded-xl font-bold bg-gray-200 dark:bg-gray-600 text-gray-500 cursor-wait animate-pulse"
+                >
+                    Loading...
+                </button>
+            );
         }
 
-        setLoading(planId);
-
-        try {
-            if (paymentMethod === 'mpesa') {
-                if (!phoneNumber) {
-                    const phone = prompt('Please enter your M-Pesa phone number (254...):');
-                    if (!phone) {
-                        setLoading(null);
-                        return;
+        const config = {
+            reference: generateReference(plan.id),
+            email: user?.email || 'customer@arrotech.co.ke',
+            amount: plan.price * 100, // Convert to kobo
+            publicKey: paystackKey,
+            currency: 'KES',
+            metadata: {
+                plan: plan.id,
+                custom_fields: [
+                    {
+                        display_name: "Plan",
+                        variable_name: "plan",
+                        value: plan.id
                     }
-                    setPhoneNumber(phone);
-                }
-
-                const response = await apiService.initiateMpesaPayment({
-                    phone_number: phoneNumber || '254700000000',
-                    amount: amount, // KES
-                    reference: `Upgrade to ${planId}`,
-                    description: `Subscription upgrade for Arrotech Hub`
-                });
-
-                if (response.success) {
-                    toast.success(`Payment initiated! Please check your phone for the M-Pesa prompt.`);
-                } else {
-                    toast.error(response.error || 'Failed to initiate M-Pesa payment');
-                }
-                setLoading(null);
-            } else {
-                // Paystack Card Payment
-                if (!paystackKey) {
-                    toast.error("Payment system initializing, please try again in a moment.");
-                    fetchPaystackConfig();
-                    setLoading(null);
-                    return;
-                }
-
-                const config = {
-                    reference: (new Date()).getTime().toString(),
-                    email: user?.email || 'customer@arrotech.co.ke',
-                    amount: amount * 100, // Paystack expects kobo/cents
-                    publicKey: paystackKey,
-                    currency: 'KES',
-                    metadata: {
-                        custom_fields: [
-                            {
-                                display_name: "Plan",
-                                variable_name: "plan",
-                                value: planId
-                            }
-                        ]
-                    }
-                };
-
-                // We can't use the hook dynamically easily inside the function.
-                // We have to set state, and maybe render a hidden PaystackButton or use the hook in a way that respects updates.
-                // Re-implementation with PaystackConsumer or inline trigger if possible.
-                // Actually, simply returning the config to state, and having a `PaystackButton` or similar might be easier, 
-                // but let's try to use the hook correctly.
-
-                // Workaround: We will use a separate component for the Paystack button or just accept that we need to define the hook at the top level with default values, 
-                // and then call the function return by the hook with the new config? NO, hook doesn't work like that.
-
-                // Correct way with hook:
-                // The hook `usePaystackPayment` returns `initializePayment`.
-                // `initializePayment` takes `onSuccess` and `onClose`.
-                // BUT it uses the config passed during `usePaystackPayment(config)`.
-
-                // So we need to put the *current* plan config into a state tailored for the hook, wait for render, then trigger.
-                // This is clunky.
-
-                // Better: Use `PaystackButton` component if available? 
-                // Or just use the inline script method? No, React wrapper is safer.
-
-                // Let's use the state-based approach.
-                setPaystackConfig(config);
+                ]
             }
+        };
 
-        } catch (error) {
-            toast.error('An error occurred. Please try again.');
-            setLoading(null);
-        }
-    };
-
-    // Effect to trigger payment when config is set
-
-
-    // Helper component to trigger payment
-    // ensure we don't break rules of hooks
-
-    const TriggerPaystack = ({ config, onSuccess, onClose }: any) => {
-        const initializePayment = usePaystackPayment(config);
-        useEffect(() => {
-            // @ts-ignore - The type definition might be incorrect or older version
-            initializePayment(onSuccess, onClose);
-            // eslint-disable-next-line react-hooks/exhaustive-deps
-        }, []);
-        return null;
+        return (
+            <PaystackButton
+                {...config}
+                text={loading ? 'Processing...' : `Subscribe - KES ${plan.priceDisplay}`}
+                onSuccess={handlePaymentSuccess}
+                onClose={handlePaymentClose}
+                className={`w-full py-3 px-6 rounded-xl font-bold transition-all ${plan.highlight
+                        ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg hover:shadow-xl'
+                        : 'bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 border-2 border-indigo-600 dark:border-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20'
+                    }`}
+            />
+        );
     };
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
-            {paystackConfig && (
-                <TriggerPaystack
-                    config={paystackConfig}
-                    onSuccess={handleSuccess}
-                    onClose={handleClose}
-                />
-            )}
             <div className="max-w-7xl mx-auto">
+                {/* Header */}
                 <div className="text-center mb-16">
                     <h2 className="text-base font-semibold text-indigo-600 dark:text-indigo-400 tracking-wide uppercase">
                         Pricing Plans
                     </h2>
-                    <p className="mt-2 text-4xl font-extrabold text-gray-900 dark:text-white sm:text-5xl sm:tracking-tight">
-                        Empower Your Business {user?.name && ` , ${user.name}`}
+                    <p className="mt-2 text-4xl font-extrabold text-gray-900 dark:text-white sm:text-5xl">
+                        Empower Your Business
                     </p>
                     <p className="mt-5 max-w-xl mx-auto text-xl text-gray-500 dark:text-gray-400">
-                        Select the perfect plan for your business needs in the Kenyan market.
+                        Select the perfect plan for your business needs.
                     </p>
-
-                    {/* Payment Method Toggle */}
-                    <div className="mt-8 flex justify-center">
-                        <div className="bg-white dark:bg-gray-800 p-1 rounded-lg border border-gray-200 dark:border-gray-700 flex shadow-sm">
-                            <button
-                                onClick={() => setPaymentMethod('mpesa')}
-                                disabled={true}
-                                className={`flex items-center px-4 py-2 rounded-md transition-all cursor-not-allowed opacity-50 ${paymentMethod === 'mpesa'
-                                    ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-medium'
-                                    : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}
-                            >
-                                <Smartphone className="w-4 h-4 mr-2" />
-                                M-Pesa
-                            </button>
-                            <button
-                                onClick={() => setPaymentMethod('card')}
-                                className={`flex items-center px-4 py-2 rounded-md transition-all ${paymentMethod === 'card'
-                                    ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 font-medium'
-                                    : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}
-                            >
-                                <CreditCard className="w-4 h-4 mr-2" />
-                                Card
-                            </button>
-                        </div>
-                    </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {plans.map((plan, index) => (
+                {/* Pricing Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    {PLANS.map((plan) => (
                         <div
                             key={plan.id}
-                            className={`relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1 ${plan.highlight ? 'ring-2 ring-indigo-500 transform scale-105 z-10' : 'border border-gray-200 dark:border-gray-700'
+                            className={`relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1 ${plan.highlight
+                                    ? 'ring-2 ring-indigo-500 transform scale-105 z-10'
+                                    : 'border border-gray-200 dark:border-gray-700'
                                 }`}
                         >
                             {plan.highlight && (
-                                <div className="absolute top-0 right-0 bg-indigo-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg uppercase tracking-wider">
-                                    Most Popular
+                                <div className="absolute top-0 right-0 bg-indigo-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
+                                    POPULAR
                                 </div>
                             )}
 
-                            <div className="p-8 flex-1">
+                            <div className="p-6 flex-1">
                                 <div className="flex items-center justify-between mb-4">
-                                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{plan.name}</h3>
-                                    {plan.id === 'pro' && <Sparkles className="w-6 h-6 text-purple-500" />}
-                                    {plan.id === 'starter' && <Zap className="w-6 h-6 text-indigo-500" />}
-                                    {plan.id === 'free' && <Shield className="w-6 h-6 text-gray-400" />}
+                                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                                        {plan.name}
+                                    </h3>
+                                    {plan.id === 'pro' && <Sparkles className="w-5 h-5 text-indigo-500" />}
+                                    {plan.id === 'lite' && <Zap className="w-5 h-5 text-blue-500" />}
+                                    {plan.id === 'free' && <Shield className="w-5 h-5 text-gray-400" />}
                                 </div>
 
                                 <div className="flex items-baseline mb-4">
-                                    <span className="text-sm font-medium text-gray-500 dark:text-gray-400 mr-1">KES</span>
-                                    <span className="text-4xl font-extrabold text-gray-900 dark:text-white">{plan.price}</span>
-                                    <span className="text-base font-medium text-gray-500 dark:text-gray-400 ml-1">/mo</span>
+                                    <span className="text-sm text-gray-500 mr-1">KES</span>
+                                    <span className="text-3xl font-extrabold text-gray-900 dark:text-white">
+                                        {plan.priceDisplay}
+                                    </span>
+                                    <span className="text-gray-500 ml-1">/mo</span>
                                 </div>
 
-                                <p className="text-gray-500 dark:text-gray-400 mb-8 border-b border-gray-100 dark:border-gray-700 pb-6">
+                                <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">
                                     {plan.description}
                                 </p>
 
-                                <ul className="space-y-4">
-                                    {plan.features.map((feature, i) => (
-                                        <li key={i} className="flex items-start">
-                                            <div className="flex-shrink-0">
-                                                <Check className="h-5 w-5 text-green-500" />
-                                            </div>
-                                            <p className="ml-3 text-sm text-gray-700 dark:text-gray-300">{feature}</p>
+                                <ul className="space-y-3 mb-6">
+                                    {plan.features.map((feature, idx) => (
+                                        <li key={idx} className="flex items-start text-sm">
+                                            <Check className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                                            <span className="text-gray-600 dark:text-gray-300">{feature}</span>
                                         </li>
                                     ))}
                                 </ul>
                             </div>
 
-                            <div className="p-8 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-700">
-                                {plan.id !== 'free' && plan.id !== tier && paymentMethod === 'mpesa' && (
-                                    <div className="mb-4">
-                                        <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 uppercase mb-1">
-                                            M-Pesa Number
-                                        </label>
-                                        <div className="relative">
-                                            <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                                            <input
-                                                type="text"
-                                                placeholder="254700000000"
-                                                className="w-full pl-9 pr-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all dark:text-white"
-                                                value={phoneNumber}
-                                                onChange={(e) => setPhoneNumber(e.target.value)}
-                                            />
-                                        </div>
-                                    </div>
-                                )}
-
-                                <button
-                                    onClick={() => handleUpgrade(plan.id)}
-                                    disabled={loading === plan.id || tier === plan.id}
-                                    className={`w-full py-3 px-6 rounded-xl font-bold flex items-center justify-center transition-all ${tier === plan.id
-                                        ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 cursor-not-allowed border border-gray-200 dark:border-gray-600'
-                                        : plan.highlight
-                                            ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-200 dark:shadow-none'
-                                            : 'bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 border-2 border-indigo-600 dark:border-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20'
-                                        }`}
-                                >
-                                    {loading === plan.id ? (
-                                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                    ) : (
-                                        <>
-                                            {tier === plan.id ? 'Current Plan' : (
-                                                paymentMethod === 'card' ? 'Pay with Card' : plan.cta
-                                            )}
-                                            {tier !== plan.id && <ChevronRight className="ml-2 w-4 h-4" />}
-                                        </>
-                                    )}
-                                </button>
-
-                                {plan.id !== 'free' && (
-                                    <div className="mt-4 flex items-center justify-center text-[10px] text-gray-400 uppercase tracking-widest font-bold">
-                                        <Shield className="w-3 h-3 mr-1" /> Secure {paymentMethod === 'card' ? 'Card' : 'M-Pesa'} Checkout
-                                    </div>
-                                )}
+                            <div className="p-6 pt-0">
+                                {renderPaymentButton(plan)}
                             </div>
                         </div>
                     ))}
                 </div>
 
-                <div className="mt-20 border-t border-gray-200 dark:border-gray-800 pt-16">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                        <div className="flex flex-col items-center text-center">
-                            <div className="p-3 bg-indigo-100 dark:bg-indigo-900/30 rounded-2xl mb-4">
-                                <Smartphone className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
-                            </div>
-                            <h4 className="font-bold text-gray-900 dark:text-white mb-2">Local M-Pesa Integration</h4>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Seamlessly connect your business with M-Pesa for real-time reporting.</p>
-                        </div>
-                        <div className="flex flex-col items-center text-center">
-                            <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-2xl mb-4">
-                                <Zap className="w-6 h-6 text-purple-600 dark:text-purple-400" />
-                            </div>
-                            <h4 className="font-bold text-gray-900 dark:text-white mb-2">Kenyan Market Optimized</h4>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Pricing and features tailored specifically for the local business landscape.</p>
-                        </div>
-                        <div className="flex flex-col items-center text-center">
-                            <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-2xl mb-4">
-                                <Info className="w-6 h-6 text-green-600 dark:text-green-400" />
-                            </div>
-                            <h4 className="font-bold text-gray-900 dark:text-white mb-2">Automated Tax Reporting</h4>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Simplify your KRA reporting with automated daily and monthly summaries.</p>
-                        </div>
-                        <div className="flex flex-col items-center text-center">
-                            <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-2xl mb-4">
-                                <Shield className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-                            </div>
-                            <h4 className="font-bold text-gray-900 dark:text-white mb-2">Enterprise Security</h4>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Bank-grade security and data privacy for all your business workflows.</p>
-                        </div>
-                    </div>
+                {/* Manual Verification Fallback */}
+                <div className="mt-12 text-center">
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                        Payment completed but subscription not updated?
+                    </p>
+                    <button
+                        onClick={async () => {
+                            const ref = prompt('Enter your Paystack reference (from email receipt):');
+                            if (ref) {
+                                await handlePaymentSuccess({ reference: ref });
+                            }
+                        }}
+                        className="text-sm text-indigo-600 dark:text-indigo-400 underline hover:text-indigo-800"
+                    >
+                        Manually verify transaction
+                    </button>
                 </div>
 
-                <div className="mt-20 text-center">
+                {/* Footer info */}
+                <div className="mt-16 text-center">
                     <p className="text-gray-500 dark:text-gray-400">
-                        Need a custom enterprise solution? <a href="mailto:support@arrotechsolutions.co.ke" className="font-bold text-indigo-600 dark:text-indigo-400 hover:underline">Contact our Nairobi team</a>
+                        Need a custom solution?{' '}
+                        <a
+                            href="mailto:support@arrotechsolutions.co.ke"
+                            className="font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
+                        >
+                            Contact our team
+                        </a>
                     </p>
                 </div>
             </div>

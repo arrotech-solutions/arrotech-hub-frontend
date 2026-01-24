@@ -266,12 +266,12 @@ class ApiService {
 
   // Paystack endpoints
   async verifyPaystackPayment(reference: string): Promise<ApiResponse<any>> {
-    const response = await this.api.post('/paystack/verify', { reference });
+    const response = await this.api.post('/payments/paystack/verify', { reference });
     return response.data;
   }
 
   async getPaystackConfig(): Promise<ApiResponse<{ key: string }>> {
-    const response = await this.api.get('/paystack/config');
+    const response = await this.api.get('/payments/paystack/config');
     return response.data;
   }
 
