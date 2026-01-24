@@ -67,23 +67,30 @@ const Payments: React.FC = () => {
   const plans = [
     {
       id: 'free',
-      name: 'Lite',
+      name: 'Free Tier',
       price: 0,
-      features: ['1 Active Workflow', '5 AI Messages / day', 'Google Analytics 4', 'Standard Support'],
+      features: ['3 Active Workflows', '10 AI Messages / day', 'M-Pesa, Slack & Context', 'Community Support'],
       color: 'gray'
     },
     {
-      id: 'starter',
-      name: 'Starter',
-      price: 1500,
-      features: ['10 Active Workflows', '100 AI Messages / day', 'GA4 + M-Pesa + Slack', 'Priority Support'],
-      color: 'indigo'
+      id: 'lite',
+      name: 'Biashara Lite',
+      price: 200,
+      features: ['10 Active Workflows', '50 AI Messages / day', 'Google Workspace', 'Email Support'],
+      color: 'blue'
     },
     {
       id: 'pro',
-      name: 'Business',
-      price: 5000,
-      features: ['Unlimited Workflows', 'Unlimited AI Messages', 'All Connections', 'Dedicated Support'],
+      name: 'Business Pro',
+      price: 2500,
+      features: ['50 Active Workflows', '500 AI Messages / day', '25+ Integrations', 'Priority Support'],
+      color: 'indigo'
+    },
+    {
+      id: 'enterprise',
+      name: 'Enterprise',
+      price: 10000,
+      features: ['Unlimited Workflows', 'Unlimited AI Messages', 'All Integrations', 'Dedicated Support'],
       color: 'purple'
     }
   ];

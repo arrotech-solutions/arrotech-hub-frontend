@@ -2,7 +2,7 @@ import { useMemo, useState, useEffect, useCallback } from 'react';
 import { useAuth } from './useAuth';
 import apiService from '../services/api';
 
-export type SubscriptionTier = 'free' | 'starter' | 'pro' | 'enterprise';
+export type SubscriptionTier = 'free' | 'lite' | 'starter' | 'pro' | 'enterprise';
 
 export interface PlanLimits {
     max_active_workflows: number;
@@ -24,6 +24,12 @@ export const PLAN_LIMITS: Record<SubscriptionTier, PlanLimits> = {
         allowed_connections: ['ga4'],
         features: ['basic_analytics', 'standard_support'],
     },
+    lite: {
+        max_active_workflows: 10,
+        max_ai_messages_daily: 50,
+        allowed_connections: ['ga4', 'mpesa', 'slack', 'whatsapp', 'google_workspace'],
+        features: ['daily_reports', 'email_support', 'basic_automation'],
+    },
     starter: {
         max_active_workflows: 10,
         max_ai_messages_daily: 100,
@@ -31,8 +37,8 @@ export const PLAN_LIMITS: Record<SubscriptionTier, PlanLimits> = {
         features: ['daily_reports', 'priority_email', 'basic_automation'],
     },
     pro: {
-        max_active_workflows: 100,
-        max_ai_messages_daily: 1000,
+        max_active_workflows: 50,
+        max_ai_messages_daily: 500,
         allowed_connections: ['ga4', 'mpesa', 'slack', 'whatsapp', 'hubspot', 'asana', 'teams', 'google_workspace'],
         features: ['real_time_analytics', 'dedicated_whatsapp', 'advanced_automation', 'custom_branding'],
     },
