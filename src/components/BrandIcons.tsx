@@ -31,6 +31,7 @@ import outlookIcon from '../assets/apps/outlook.png';
 import notionIcon from '../assets/apps/notion.png';
 import trelloIcon from '../assets/apps/trello.jpg';
 import jiraIcon from '../assets/apps/jira.jpeg';
+import tiktokIcon from '../assets/apps/tiktok.png';
 
 
 type IconProps = React.SVGProps<SVGSVGElement> | React.ImgHTMLAttributes<HTMLImageElement> | any;
@@ -116,3 +117,22 @@ export const NotionLogo = (props: IconProps) => <ImageLogo src={notionIcon} alt=
 export const TrelloLogo = (props: IconProps) => <ImageLogo src={trelloIcon} alt="Trello" {...props} />;
 
 export const JiraLogo = (props: IconProps) => <ImageLogo src={jiraIcon} alt="Jira" {...props} />;
+
+export const TikTokLogo = (props: IconProps) => (
+    // Fallback if image missing, or use image if available
+    <div className={`relative ${props.className}`}>
+        <img
+            src={tiktokIcon}
+            alt="TikTok"
+            className="object-contain w-full h-full"
+            onError={(e) => {
+                e.currentTarget.style.display = 'none';
+                e.currentTarget.parentElement?.classList.add('flex', 'items-center', 'justify-center', 'bg-black', 'text-white', 'rounded-lg');
+                const fallback = document.createElement('div');
+                fallback.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/></svg>';
+                e.currentTarget.parentElement?.appendChild(fallback.firstChild as Node);
+            }}
+            {...props}
+        />
+    </div>
+);
