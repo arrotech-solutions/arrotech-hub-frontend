@@ -246,6 +246,91 @@ class ApiService {
     return response.data;
   }
 
+  // WhatsApp Business API endpoints
+  async getWhatsAppContacts(params?: { search?: string; tag?: string; limit?: number; offset?: number }): Promise<ApiResponse<any>> {
+    const response = await this.api.get('/api/whatsapp/contacts', { params });
+    return response.data;
+  }
+
+  async getWhatsAppContact(contactId: number): Promise<ApiResponse<any>> {
+    const response = await this.api.get(`/api/whatsapp/contacts/${contactId}`);
+    return response.data;
+  }
+
+  async createWhatsAppContact(data: { phone_number: string; name?: string; tags?: string[]; notes?: string }): Promise<ApiResponse<any>> {
+    const response = await this.api.post('/api/whatsapp/contacts', data);
+    return response.data;
+  }
+
+  async updateWhatsAppContact(contactId: number, data: { name?: string; tags?: string[]; notes?: string; is_blocked?: boolean }): Promise<ApiResponse<any>> {
+    const response = await this.api.put(`/api/whatsapp/contacts/${contactId}`, data);
+    return response.data;
+  }
+
+  async deleteWhatsAppContact(contactId: number): Promise<ApiResponse<any>> {
+    const response = await this.api.delete(`/api/whatsapp/contacts/${contactId}`);
+    return response.data;
+  }
+
+  async getWhatsAppMessages(contactId: number, params?: { limit?: number; before_id?: number }): Promise<ApiResponse<any>> {
+    const response = await this.api.get(`/api/whatsapp/contacts/${contactId}/messages`, { params });
+    return response.data;
+  }
+
+  async sendWhatsAppMessage(contactId: number, data: { content: string; message_type?: string }): Promise<ApiResponse<any>> {
+    const response = await this.api.post(`/api/whatsapp/contacts/${contactId}/messages`, data);
+    return response.data;
+  }
+
+  async getWhatsAppAutoReplies(): Promise<ApiResponse<any>> {
+    const response = await this.api.get('/api/whatsapp/auto-replies');
+    return response.data;
+  }
+
+  async createWhatsAppAutoReply(data: {
+    name: string;
+    description?: string;
+    trigger_type: string;
+    trigger_value?: string;
+    response_type?: string;
+    response_content?: string;
+    is_active?: boolean;
+    priority?: number;
+  }): Promise<ApiResponse<any>> {
+    const response = await this.api.post('/api/whatsapp/auto-replies', data);
+    return response.data;
+  }
+
+  async updateWhatsAppAutoReply(ruleId: number, data: any): Promise<ApiResponse<any>> {
+    const response = await this.api.put(`/api/whatsapp/auto-replies/${ruleId}`, data);
+    return response.data;
+  }
+
+  async deleteWhatsAppAutoReply(ruleId: number): Promise<ApiResponse<any>> {
+    const response = await this.api.delete(`/api/whatsapp/auto-replies/${ruleId}`);
+    return response.data;
+  }
+
+  async toggleWhatsAppAutoReply(ruleId: number): Promise<ApiResponse<any>> {
+    const response = await this.api.patch(`/api/whatsapp/auto-replies/${ruleId}/toggle`);
+    return response.data;
+  }
+
+  async getWhatsAppBusinessProfile(): Promise<ApiResponse<any>> {
+    const response = await this.api.get('/api/whatsapp/business-profile');
+    return response.data;
+  }
+
+  async updateWhatsAppBusinessProfile(data: any): Promise<ApiResponse<any>> {
+    const response = await this.api.put('/api/whatsapp/business-profile', data);
+    return response.data;
+  }
+
+  async getWhatsAppStats(): Promise<ApiResponse<any>> {
+    const response = await this.api.get('/api/whatsapp/stats');
+    return response.data;
+  }
+
   // Facebook OAuth endpoints
   async getFacebookAuthUrl(): Promise<{ url: string }> {
     const response = await this.api.get('/api/facebook/auth-url');
@@ -261,6 +346,59 @@ class ApiService {
   // Twitter OAuth endpoints
   async getTwitterAuthUrl(): Promise<{ url: string }> {
     const response = await this.api.get('/api/twitter/auth-url');
+    return response.data;
+  }
+
+  // TikTok OAuth endpoints
+  async getTikTokAuthUrl(): Promise<{ url: string }> {
+    const response = await this.api.get('/api/tiktok/auth-url');
+    return response.data;
+  }
+
+  async getTikTokProfile(): Promise<ApiResponse<any>> {
+    const response = await this.api.get('/api/tiktok/profile');
+    return response.data;
+  }
+
+  async uploadTikTokVideo(file: File): Promise<ApiResponse<any>> {
+    const formData = new FormData();
+    formData.append('file', file);
+    // Note: This matches the @router.post("/upload") endpoint in tiktok_routes.py
+    const response = await this.api.post('/api/tiktok/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  }
+
+  async generateTikTokCaption(data: { topic: string; tone?: string; context?: string }): Promise<ApiResponse<any>> {
+    const response = await this.api.post('/api/tiktok/generate-caption', data);
+    return response.data;
+  }
+
+  async createTikTokPost(data: { caption: string; video_path: string; scheduled_time?: string; hashtags?: string[] }): Promise<ApiResponse<any>> {
+    const response = await this.api.post('/api/tiktok/schedule', data);
+    return response.data;
+  }
+
+  async getViralCard(): Promise<ApiResponse<any>> {
+    const response = await this.api.get('/api/tiktok/viral-card');
+    return response.data;
+  }
+
+  async getPublicProfile(username: string): Promise<ApiResponse<any>> {
+    const response = await this.api.get(`/api/tiktok/public/u/${username}`);
+    return response.data;
+  }
+
+  async createPremiumLink(data: { title: string; url: string; price: number; description?: string }): Promise<ApiResponse<any>> {
+    const response = await this.api.post('/api/tiktok/premium-links', data);
+    return response.data;
+  }
+
+  async unlockPremiumLink(linkId: number, phoneNumber: string): Promise<ApiResponse<any>> {
+    const response = await this.api.post(`/api/tiktok/premium-links/${linkId}/unlock?phone_number=${phoneNumber}`);
     return response.data;
   }
 
@@ -2152,6 +2290,74 @@ class ApiService {
       name,
       arguments: args
     });
+    return response.data;
+  }
+
+  // ========================================
+  // WHATSAPP BROADCAST & TEMPLATES
+  // ========================================
+
+  // Template endpoints
+  async getWhatsAppTemplates(): Promise<ApiResponse<any[]>> {
+    const response = await this.api.get('/api/whatsapp/templates');
+    return response.data;
+  }
+
+  async syncWhatsAppTemplates(): Promise<ApiResponse<any>> {
+    const response = await this.api.post('/api/whatsapp/templates/sync');
+    return response.data;
+  }
+
+  // Broadcast endpoints
+  async getWhatsAppBroadcasts(params?: { status?: string; limit?: number; offset?: number }): Promise<ApiResponse<any>> {
+    const response = await this.api.get('/api/whatsapp/broadcasts', { params });
+    return response.data;
+  }
+
+  async createWhatsAppBroadcast(data: {
+    name: string;
+    description?: string;
+    message_type: 'template' | 'text';
+    template_id?: number;
+    template_variables?: Record<string, any>;
+    text_content?: string;
+    target_type: 'all' | 'tag' | 'selected';
+    target_tag?: string;
+    target_contact_ids?: number[];
+    scheduled_at?: string;
+  }): Promise<ApiResponse<any>> {
+    const response = await this.api.post('/api/whatsapp/broadcasts', data);
+    return response.data;
+  }
+
+  async getWhatsAppBroadcast(broadcastId: number): Promise<ApiResponse<any>> {
+    const response = await this.api.get(`/api/whatsapp/broadcasts/${broadcastId}`);
+    return response.data;
+  }
+
+  async sendWhatsAppBroadcast(broadcastId: number): Promise<ApiResponse<any>> {
+    const response = await this.api.post(`/api/whatsapp/broadcasts/${broadcastId}/send`);
+    return response.data;
+  }
+
+  async cancelWhatsAppBroadcast(broadcastId: number): Promise<ApiResponse<any>> {
+    const response = await this.api.post(`/api/whatsapp/broadcasts/${broadcastId}/cancel`);
+    return response.data;
+  }
+
+  async deleteWhatsAppBroadcast(broadcastId: number): Promise<ApiResponse<any>> {
+    const response = await this.api.delete(`/api/whatsapp/broadcasts/${broadcastId}`);
+    return response.data;
+  }
+
+  async getWhatsAppBroadcastRecipients(broadcastId: number, params?: { status?: string; limit?: number; offset?: number }): Promise<ApiResponse<any>> {
+    const response = await this.api.get(`/api/whatsapp/broadcasts/${broadcastId}/recipients`, { params });
+    return response.data;
+  }
+
+  // Analytics endpoint
+  async getWhatsAppAnalytics(days: number = 7): Promise<ApiResponse<any>> {
+    const response = await this.api.get('/api/whatsapp/analytics', { params: { days } });
     return response.data;
   }
 }

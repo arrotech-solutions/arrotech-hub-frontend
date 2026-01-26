@@ -68,6 +68,7 @@ const pageConfig: Record<string, string> = {
   unifiedInbox: '/unified/inbox',
   unifiedTasks: '/unified/tasks',
   unifiedCalendar: '/unified/calendar',
+  whatsapp: '/whatsapp',
 };
 
 // Tutorial steps configuration - using more reliable CSS selectors
@@ -828,6 +829,68 @@ const tutorialSteps: TutorialStep[] = [
     position: 'bottom',
     page: 'unifiedCalendar',
     order: 80
+  },
+
+  // WhatsApp steps (6 steps)
+  {
+    id: 'whatsapp-intro',
+    title: 'WhatsApp Business Hub',
+    description: 'Manage all your WhatsApp customer conversations, auto-replies, and business profile from one place.',
+    target: '.whatsapp-header-tut',
+    fallbackTarget: 'main',
+    position: 'bottom',
+    page: 'whatsapp',
+    order: 81
+  },
+  {
+    id: 'whatsapp-stats',
+    title: 'Dashboard Statistics',
+    description: 'Monitor your total contacts, messages today, and active auto-reply rules at a glance.',
+    target: '.whatsapp-stats-tut',
+    fallbackTarget: 'main',
+    position: 'bottom',
+    page: 'whatsapp',
+    order: 82
+  },
+  {
+    id: 'whatsapp-tabs',
+    title: 'Navigation Tabs',
+    description: 'Switch between Conversations, Auto-Reply rules, and Settings to manage different aspects.',
+    target: '.whatsapp-tabs-tut',
+    fallbackTarget: 'main',
+    position: 'bottom',
+    page: 'whatsapp',
+    order: 83
+  },
+  {
+    id: 'whatsapp-contacts',
+    title: 'Contact List',
+    description: 'View all your WhatsApp contacts. Search by name or phone number. New contacts appear automatically when they message you.',
+    target: '.overflow-y-auto',
+    fallbackTarget: 'main',
+    position: 'right',
+    page: 'whatsapp',
+    order: 84
+  },
+  {
+    id: 'whatsapp-chat',
+    title: 'Chat Window',
+    description: 'Select a contact to view conversation history. Send messages directly and see delivery status (sent, delivered, read).',
+    target: '.lg\\:col-span-2',
+    fallbackTarget: 'main',
+    position: 'left',
+    page: 'whatsapp',
+    order: 85
+  },
+  {
+    id: 'whatsapp-auto-reply',
+    title: 'Auto-Reply Automation',
+    description: 'Create rules to automatically respond to customers 24/7. Use keywords, business hours, or AI-powered responses.',
+    target: '.space-y-6',
+    fallbackTarget: 'main',
+    position: 'top',
+    page: 'whatsapp',
+    order: 86
   },
 ];
 
