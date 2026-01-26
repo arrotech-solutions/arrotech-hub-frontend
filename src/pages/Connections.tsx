@@ -43,7 +43,8 @@ import {
   OutlookLogo,
   NotionLogo,
   TrelloLogo,
-  JiraLogo
+  JiraLogo,
+  TikTokLogo
 } from '../components/BrandIcons';
 
 const Integrations: React.FC = () => {
@@ -150,6 +151,7 @@ const Integrations: React.FC = () => {
       case 'notion': return <NotionLogo {...props} />;
       case 'trello': return <TrelloLogo {...props} />;
       case 'jira': return <JiraLogo {...props} />;
+      case 'tiktok': return <TikTokLogo {...props} />;
       default: return <Database {...props} className="text-gray-400 p-2" />;
     }
   };
@@ -227,6 +229,8 @@ const Integrations: React.FC = () => {
         toast.success('Zoom connected successfully!');
       } else if (success === 'outlook_connected') {
         toast.success('Outlook connected successfully!');
+      } else if (success === 'tiktok_connected') {
+        toast.success('TikTok connected successfully!');
       } else {
         toast.success('Connection successful!');
       }
@@ -590,6 +594,31 @@ const Integrations: React.FC = () => {
           });
         } else {
           toast.error('Failed to initiate connection');
+        }
+        return;
+      }
+    }
+
+    // Redirect to TikTok Auth
+    if (platform.id === 'tiktok' && !existing) {
+      try {
+        toast.loading('Redirecting to TikTok...', { id: 'oauth-redirect' });
+        // Assuming apiService.getTikTokAuthUrl exists, otherwise fetch directly or add to service
+        const { url } = await apiService.getTikTokAuthUrl();
+        window.location.href = url;
+        return;
+      } catch (error: any) {
+        toast.dismiss('oauth-redirect');
+        if (error.response?.status === 402 || error.response?.data?.error === 'upgrade_required') {
+          const details = error.response?.data?.detail || error.response?.data || {};
+          setUpgradeModal({
+            isOpen: true,
+            feature: details.feature || 'TikTok integration',
+            requiredTier: details.required_tier || 'Biashara Lite',
+            currentTier: details.current_tier || 'Free'
+          });
+        } else {
+          toast.error('Failed to initiate TikTok connection');
         }
         return;
       }
