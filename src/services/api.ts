@@ -377,8 +377,13 @@ class ApiService {
     return response.data;
   }
 
-  async createTikTokPost(data: { caption: string; video_path: string; scheduled_time?: string; hashtags?: string[] }): Promise<ApiResponse<any>> {
+  async createTikTokPost(data: { caption: string; video_path: string; scheduled_time?: string; hashtags?: string[]; privacy_level?: string }): Promise<ApiResponse<any>> {
     const response = await this.api.post('/api/tiktok/schedule', data);
+    return response.data;
+  }
+
+  async getScheduledPosts(): Promise<ApiResponse<any>> {
+    const response = await this.api.get('/api/tiktok/scheduled-posts');
     return response.data;
   }
 

@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import apiService from '../services/api';
 
 const TikTokScheduler: React.FC = () => {
+    // ... state hooks same as before ...
     const [videoFile, setVideoFile] = useState<File | null>(null);
     const [uploading, setUploading] = useState(false);
     const [uploadedPath, setUploadedPath] = useState<string | null>(null);
@@ -14,18 +15,18 @@ const TikTokScheduler: React.FC = () => {
     const [generating, setGenerating] = useState(false);
 
     const [scheduledTime, setScheduledTime] = useState('');
+    const [privacyLevel, setPrivacyLevel] = useState('SELF_ONLY'); // Default to Private
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        // ... (no change in file handling logic, but need to preserve it if replacing block)
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
             setVideoFile(file);
-
-            // Auto upload on select
             setUploading(true);
             try {
                 const res = await apiService.uploadTikTokVideo(file);
                 if ((res as any).success) {
-                    setUploadedPath((res as any).file_path); // Path returned from backend
+                    setUploadedPath((res as any).file_path);
                     toast.success('Video uploaded successfully');
                 } else {
                     toast.error('Upload failed: ' + (res as any).message);
@@ -40,11 +41,11 @@ const TikTokScheduler: React.FC = () => {
     };
 
     const handleGenerateCaption = async () => {
+        // ... (preserve caption logic)
         if (!topic) {
             toast.error('Please enter a topic for the caption');
             return;
         }
-
         setGenerating(true);
         try {
             const res = await apiService.generateTikTokCaption({ topic, tone });
@@ -71,20 +72,27 @@ const TikTokScheduler: React.FC = () => {
         }
 
         try {
+            let finalScheduledTime = undefined;
+            if (scheduledTime) {
+                const date = new Date(scheduledTime);
+                finalScheduledTime = date.toISOString();
+            }
+
             const res = await apiService.createTikTokPost({
                 caption,
                 video_path: uploadedPath,
-                scheduled_time: scheduledTime || undefined // If empty, it's a draft
+                scheduled_time: finalScheduledTime,
+                privacy_level: privacyLevel // Adding new field
             });
 
             if (res.success) {
                 toast.success('Post scheduled successfully!');
-                // Reset form
                 setVideoFile(null);
                 setUploadedPath(null);
                 setTopic('');
                 setCaption('');
                 setScheduledTime('');
+                setPrivacyLevel('SELF_ONLY');
             }
         } catch (error) {
             console.error(error);
@@ -93,109 +101,146 @@ const TikTokScheduler: React.FC = () => {
     };
 
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h2 className="text-lg font-semibold mb-6 flex items-center gap-2">
-                <CalendarIcon className="w-5 h-5" />
-                Scheduler & Content Creator
-            </h2>
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-100/50 p-6 md:p-8">
+            {/* ... preserve header ... */}
+            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-50">
+                <div className="p-2 bg-black text-white rounded-lg">
+                    <CalendarIcon className="w-5 h-5" />
+                </div>
+                <div>
+                    <h2 className="text-lg font-bold text-slate-800">Smart Scheduler</h2>
+                    <p className="text-xs text-slate-400">Post now or schedule for later</p>
+                </div>
+            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
                 {/* Left Column: Upload */}
                 <div className="space-y-6">
-                    <div className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${uploadedPath ? 'border-green-500 bg-green-50' : 'border-gray-300 hover:border-black'}`}>
-                        <input
-                            type="file"
-                            accept="video/*"
-                            onChange={handleFileChange}
-                            className="hidden"
-                            id="video-upload"
-                        />
-                        <label htmlFor="video-upload" className="cursor-pointer block">
-                            {uploading ? (
-                                <div className="text-gray-500">Uploading...</div>
-                            ) : uploadedPath ? (
-                                <div className="text-green-600 flex flex-col items-center">
-                                    <Check className="w-8 h-8 mb-2" />
-                                    <span className="font-medium">Video Ready</span>
-                                    <span className="text-xs text-gray-400 mt-1">{videoFile?.name}</span>
-                                </div>
-                            ) : (
-                                <div className="text-gray-500 flex flex-col items-center">
-                                    <Upload className="w-8 h-8 mb-2 text-gray-400" />
-                                    <span className="font-medium">Click to Upload Video</span>
-                                    <span className="text-xs text-gray-400 mt-1">MP4, MOV up to 60s</span>
-                                </div>
-                            )}
-                        </label>
+                    {/* ... preserve upload UI ... */}
+                    <div className="group relative">
+                        <div className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all duration-300 ${uploadedPath ? 'border-green-500 bg-green-50/30' : 'border-slate-200 hover:border-black hover:bg-slate-50'}`}>
+                            {/* ... input logic ... */}
+                            <input
+                                type="file"
+                                accept="video/*"
+                                onChange={handleFileChange}
+                                className="hidden"
+                                id="video-upload"
+                            />
+                            <label htmlFor="video-upload" className="cursor-pointer block w-full h-full">
+                                {uploading ? (
+                                    <div className="flex flex-col items-center animate-pulse">
+                                        <div className="w-12 h-12 bg-gray-200 rounded-full mb-3"></div>
+                                        <span className="text-sm font-medium text-gray-500">Uploading to cloud...</span>
+                                    </div>
+                                ) : uploadedPath ? (
+                                    <div className="text-green-600 flex flex-col items-center transition-transform transform group-hover:scale-105">
+                                        <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-3">
+                                            <Check className="w-6 h-6" />
+                                        </div>
+                                        <span className="font-bold text-lg">Video Ready</span>
+                                        <span className="text-xs text-green-600/70 mt-1 max-w-[200px] truncate">{videoFile?.name}</span>
+                                    </div>
+                                ) : (
+                                    <div className="text-slate-500 flex flex-col items-center transition-transform transform group-hover:scale-105">
+                                        <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mb-3 group-hover:bg-white group-hover:shadow-md transition-all">
+                                            <Upload className="w-6 h-6 text-slate-400 group-hover:text-black" />
+                                        </div>
+                                        <span className="font-semibold text-slate-700">Drop Video Here</span>
+                                        <span className="text-xs text-slate-400 mt-2">MP4 or MOV • Max 60s</span>
+                                    </div>
+                                )}
+                            </label>
+                        </div>
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700 block">Schedule Time (Optional)</label>
-                        <div className="relative">
-                            <Clock className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
-                            <input
-                                type="datetime-local"
-                                value={scheduledTime}
-                                onChange={(e) => setScheduledTime(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-black focus:border-transparent outline-none"
-                            />
-                        </div>
-                        <p className="text-xs text-gray-500">Leave blank to save as Draft</p>
+                        {/* ... preserve schedule time input ... */}
+                        <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                            <Clock className="w-4 h-4 text-slate-400" />
+                            Schedule Time <span className="text-xs font-normal text-slate-400">(Optional)</span>
+                        </label>
+                        <input
+                            type="datetime-local"
+                            value={scheduledTime}
+                            onChange={(e) => setScheduledTime(e.target.value)}
+                            className="w-full pl-4 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all text-sm"
+                        />
                     </div>
                 </div>
 
                 {/* Right Column: AI Content */}
                 <div className="space-y-6">
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700 block">Generate "Sheng" Caption</label>
-                        <div className="flex gap-2">
-                            <input
-                                type="text"
-                                placeholder="Topic (e.g. Traffic in Nairobi, New Matatu)"
-                                value={topic}
-                                onChange={(e) => setTopic(e.target.value)}
-                                className="flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-black outline-none"
-                            />
-                            <select
-                                value={tone}
-                                onChange={(e) => setTone(e.target.value)}
-                                className="px-4 py-2 border rounded-lg outline-none bg-gray-50"
-                            >
-                                <option value="funny">Funny</option>
-                                <option value="angry">Hype</option>
-                                <option value="informative">Informative</option>
-                            </select>
+                    {/* ... preserve AI generator ... */}
+                    <div className="bg-gradient-to-br from-pink-50 to-purple-50 p-6 rounded-2xl border border-pink-100">
+                        <div className="flex items-center gap-2 mb-4">
+                            <Sparkles className="w-4 h-4 text-pink-500" />
+                            <h3 className="text-sm font-bold text-slate-800">AI Caption Generator</h3>
                         </div>
-                        <button
-                            onClick={handleGenerateCaption}
-                            disabled={generating}
-                            className="w-full py-2 bg-gradient-to-r from-pink-500 to-red-500 text-white rounded-lg font-medium hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
-                        >
-                            {generating ? 'Cooking...' : (
-                                <>
-                                    <Sparkles className="w-4 h-4" />
-                                    Generate AI Caption
-                                </>
-                            )}
-                        </button>
+
+                        <div className="space-y-3">
+                            <div className="flex flex-col sm:flex-row gap-2">
+                                <input
+                                    type="text"
+                                    placeholder="Topic (e.g. Nairobi Traffic)"
+                                    value={topic}
+                                    onChange={(e) => setTopic(e.target.value)}
+                                    className="w-full sm:flex-1 px-4 py-2.5 bg-white border border-pink-100 rounded-lg text-sm focus:ring-2 focus:ring-pink-500/20 outline-none"
+                                />
+                                <select
+                                    value={tone}
+                                    onChange={(e) => setTone(e.target.value)}
+                                    className="w-full sm:w-auto px-3 py-2.5 bg-white border border-pink-100 rounded-lg text-sm outline-none cursor-pointer"
+                                >
+                                    <option value="funny">Running</option>
+                                    <option value="angry">Hype</option>
+                                    <option value="informative">Info</option>
+                                </select>
+                            </div>
+                            <button
+                                onClick={handleGenerateCaption}
+                                disabled={generating}
+                                className="w-full py-2.5 bg-gradient-to-r from-[#FE2C55] to-[#FF0050] text-white text-sm font-semibold rounded-lg hover:shadow-lg hover:shadow-pink-500/30 transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
+                            >
+                                {generating ? 'Magic in progress...' : 'Generate Caption'}
+                            </button>
+                        </div>
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700 block">Final Caption</label>
+                        <label className="text-sm font-semibold text-slate-700">Final Caption</label>
                         <textarea
                             value={caption}
                             onChange={(e) => setCaption(e.target.value)}
-                            rows={4}
-                            className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-black outline-none resize-none"
-                            placeholder="#Sheng #Nairobi #TikTok..."
+                            rows={5}
+                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent outline-none resize-none text-sm leading-relaxed"
+                            placeholder="Your awesome caption will appear here..."
                         />
+                    </div>
+
+                    {/* New Privacy Selector */}
+                    <div className="space-y-2">
+                        <label className="text-sm font-semibold text-slate-700">Privacy Setting</label>
+                        <select
+                            value={privacyLevel}
+                            onChange={(e) => setPrivacyLevel(e.target.value)}
+                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent outline-none text-sm cursor-pointer"
+                        >
+                            <option value="SELF_ONLY">🔒 Private (Self Only)</option>
+                            <option value="MUTUAL_FOLLOW_FRIENDS">👥 Friends Only</option>
+                            <option value="PUBLIC_TO_EVERYONE">🌍 Public to Everyone</option>
+                        </select>
                     </div>
 
                     <button
                         onClick={handleSchedule}
-                        className="w-full py-3 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
+                        className="w-full py-3.5 bg-black text-white font-bold rounded-xl hover:bg-gray-800 transition-all shadow-lg shadow-gray-200 active:scale-95 flex items-center justify-center gap-2"
                     >
-                        {scheduledTime ? 'Schedule Post' : 'Save Draft'}
+                        {scheduledTime ? (
+                            <><Clock className="w-4 h-4" /> Schedule Post</>
+                        ) : (
+                            'Save & Publish'
+                        )}
                     </button>
                 </div>
             </div>
