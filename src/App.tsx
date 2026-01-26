@@ -29,6 +29,8 @@ import UnifiedDashboard from './pages/UnifiedDashboard';
 import UnifiedInbox from './pages/UnifiedInbox';
 import UnifiedTaskView from './pages/UnifiedTaskView';
 import UnifiedCalendar from './pages/UnifiedCalendar';
+import WhatsAppDashboard from './pages/WhatsAppDashboard';
+import TikTokDashboard from './pages/TikTokDashboard';
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -209,7 +211,27 @@ const AppRoutes: React.FC = () => {
         }
       />
 
+      <Route
+        path="/whatsapp"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <WhatsAppDashboard />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
 
+      <Route
+        path="/tiktok"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <TikTokDashboard />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
 
       <Route
         path="/marketplace"

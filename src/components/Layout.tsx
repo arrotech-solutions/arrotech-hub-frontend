@@ -22,7 +22,10 @@ import {
   Workflow,
   X,
   Zap,
-  LayoutDashboard
+  LayoutDashboard,
+  Share2,
+  Phone,
+  Video
 } from 'lucide-react';
 import logo from '../assets/Logo/icononly_transparent_nobuffer.png';
 import React from 'react';
@@ -118,7 +121,28 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       description: 'AI agents management',
       badge: null
     },
-
+    {
+      name: 'Channels',
+      icon: Share2,
+      description: 'Social & messaging platforms',
+      badge: 'New',
+      children: [
+        {
+          name: 'WhatsApp',
+          href: '/whatsapp',
+          icon: Phone,
+          description: 'WhatsApp Business automation',
+          badge: 'New'
+        },
+        {
+          name: 'TikTok',
+          href: '/tiktok',
+          icon: Video,
+          description: 'Viral content scheduler',
+          badge: 'New'
+        }
+      ]
+    },
     {
       name: 'Marketplace',
       href: '/marketplace',
