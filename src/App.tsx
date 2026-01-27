@@ -73,9 +73,11 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   // If not logged in and not approved, redirect to landing page
   // Exception: Allow reset password page to be accessed without prior approval (e.g. new device)
-  if (!accessApproved && window.location.pathname !== '/reset-password') {
+  // If not logged in and not approved, redirect to landing page
+  // Exception: Allow reset password page to be accessed without prior approval (e.g. new device)
+  /* if (!accessApproved && window.location.pathname !== '/reset-password') {
     return <Navigate to="/" replace />;
-  }
+  } */
 
   return <>{children}</>;
 };
@@ -84,7 +86,9 @@ const AppRoutes: React.FC = () => {
   return (
     <Routes>
       {/* Landing Page / Waitlist */}
-      <Route path="/" element={<RequestAccess />} />
+      {/* Landing Page / Waitlist */}
+      {/* <Route path="/" element={<RequestAccess />} /> */}
+      <Route path="/" element={<Navigate to="/login" replace />} />
 
       {/* Public Routes */}
       <Route

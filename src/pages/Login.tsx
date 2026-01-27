@@ -195,12 +195,12 @@ const Login: React.FC = () => {
                   Create account
                 </Link>
               </p>
-              <p className="text-center text-sm text-gray-600 mt-2">
+              {/* <p className="text-center text-sm text-gray-600 mt-2">
                 Need access?{' '}
                 <Link to="/" className="font-semibold text-blue-600 hover:text-blue-500 transition-colors">
                   Request invite
                 </Link>
-              </p>
+              </p> */}
             </div>
           </div>
         </div>

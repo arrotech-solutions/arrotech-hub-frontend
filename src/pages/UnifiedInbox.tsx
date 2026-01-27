@@ -126,6 +126,17 @@ const UnifiedInbox: React.FC = () => {
             }
 
             const teamsRaw = unwrap(teamsRes);
+
+            // Check connection status
+            // If teamsRaw contains an error message or success: false, treat as disconnected
+            if (!teamsRaw || teamsRaw.success === false || teamsRaw.error) {
+                console.error('Teams Error:', teamsRaw?.error); // Keep this for debugging
+                // Optionally store the error text to show the user
+                if (teamsRaw?.error) {
+                    toast.error(`Teams Error: ${typeof teamsRaw.error === 'string' ? teamsRaw.error : JSON.stringify(teamsRaw.error)}`);
+                }
+            }
+
             const teamsMessages = teamsRaw?.chats || teamsRaw?.messages || teamsRaw?.data?.messages || teamsRaw?.data?.chats || teamsRaw?.data;
             if (teamsMessages && Array.isArray(teamsMessages)) {
                 allMessages.push(...teamsMessages.map((c: any) => ({
