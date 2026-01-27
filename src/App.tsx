@@ -23,7 +23,7 @@ import Settings from './pages/Settings';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import Workflows from './pages/Workflows';
 import Pricing from './pages/Pricing';
-import RequestAccess from './pages/RequestAccess';
+// import RequestAccess from './pages/RequestAccess';
 import AdminDashboard from './pages/AdminDashboard'; // Import AdminDashboard
 import UnifiedDashboard from './pages/UnifiedDashboard';
 import UnifiedInbox from './pages/UnifiedInbox';
@@ -54,7 +54,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 // Public Route Component (redirects to dashboard if already logged in)
 const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading } = useAuth();
-  const accessApproved = localStorage.getItem('access_approved_email');
+  // const accessApproved = localStorage.getItem('access_approved_email');
 
   if (loading) {
     return (
@@ -73,9 +73,11 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   // If not logged in and not approved, redirect to landing page
   // Exception: Allow reset password page to be accessed without prior approval (e.g. new device)
-  if (!accessApproved && window.location.pathname !== '/reset-password') {
+  // If not logged in and not approved, redirect to landing page
+  // Exception: Allow reset password page to be accessed without prior approval (e.g. new device)
+  /* if (!accessApproved && window.location.pathname !== '/reset-password') {
     return <Navigate to="/" replace />;
-  }
+  } */
 
   return <>{children}</>;
 };
@@ -84,7 +86,9 @@ const AppRoutes: React.FC = () => {
   return (
     <Routes>
       {/* Landing Page / Waitlist */}
-      <Route path="/" element={<RequestAccess />} />
+      {/* Landing Page / Waitlist */}
+      {/* <Route path="/" element={<RequestAccess />} /> */}
+      <Route path="/" element={<Navigate to="/login" replace />} />
 
       {/* Public Routes */}
       <Route
