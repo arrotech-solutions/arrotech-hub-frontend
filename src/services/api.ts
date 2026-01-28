@@ -216,6 +216,16 @@ class ApiService {
       data: platformsData
     };
   }
+  // AI Features
+  async getMorningBriefing(): Promise<ApiResponse<any>> {
+    const response = await this.api.get('/ai/morning-briefing');
+    return response.data;
+  }
+
+  async executeBriefingAction(actionId: string): Promise<ApiResponse<any>> {
+    const response = await this.api.post('/ai/action', { action: actionId });
+    return response.data;
+  }
 
   // Google Workspace OAuth endpoints
   async getGoogleWorkspaceAuthUrl(): Promise<{ auth_url: string; state: string }> {
@@ -2297,6 +2307,8 @@ class ApiService {
     });
     return response.data;
   }
+
+
 
   // ========================================
   // WHATSAPP BROADCAST & TEMPLATES

@@ -24,17 +24,28 @@ const CalendarHubTile: React.FC = () => {
         try {
             const now = new Date();
             const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
-            const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59).toISOString();
+            const nextWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 7).toISOString();
 
-            const response = await apiService.executeMCPTool('google_workspace_calendar', {
+            console.log('[CalendarHubTile] Fetching events with params:', {
                 operation: 'list_events',
                 time_min: startOfDay,
-                time_max: endOfDay,
-                max_results: 5 // Limit to 5 for "Up Next" feed feel
+                time_max: nextWeek,
+                max_results: 10
             });
+
+            const response = await apiService.executeTool('google_workspace_calendar', {
+                operation: 'list_events',
+                time_min: startOfDay,
+                time_max: nextWeek,
+                max_results: 10 // Increased limit to find next events
+            });
+
+            console.log('[CalendarHubTile] API Response:', response);
 
             if (response.success && (response.data?.events || response.result?.events)) {
                 const rawEvents = response.data?.events || response.result?.events;
+                console.log('[CalendarHubTile] Raw Events:', rawEvents);
+
                 const mappedEvents: Event[] = rawEvents.map((e: any) => {
                     const startDate = new Date(e.start);
                     const endDate = new Date(e.end);
@@ -64,10 +75,13 @@ const CalendarHubTile: React.FC = () => {
                         color: 'bg-indigo-500',
                     };
                 });
+                console.log('[CalendarHubTile] Mapped Events:', mappedEvents);
                 setEvents(mappedEvents);
+            } else {
+                console.warn('[CalendarHubTile] Fetch failed or no events found. Success:', response.success);
             }
         } catch (err) {
-            console.error('Error fetching calendar events:', err);
+            console.error('[CalendarHubTile] Error fetching calendar events:', err);
         } finally {
             setLoading(false);
         }
