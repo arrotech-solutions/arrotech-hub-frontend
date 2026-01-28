@@ -950,17 +950,17 @@ const UnifiedTaskView: React.FC = () => {
                 </div>
             )}
 
-            {/* Header */}
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between px-4 md:px-8 py-5 bg-white/80 backdrop-blur-sm border-b border-gray-200 shrink-0 z-20 gap-4">
+            {/* Header / Toolbar */}
+            <div className="bg-white border-b border-gray-200 px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 sticky top-0 z-30 unified-tasks-header">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
-                        Unified Tasks
-                        {loading && <Loader2 className="w-5 h-5 animate-spin text-gray-400" />}
+                    <h1 className="text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-2">
+                        <CheckSquare className="w-7 h-7 text-indigo-600" />
+                        Task Hub
                     </h1>
                     <p className="text-sm text-gray-500 mt-1">Manage all your work across varying platforms in one place.</p>
                 </div>
 
-                <div className="flex items-center gap-3 w-full md:w-auto overflow-x-auto">
+                <div className="flex items-center gap-3">
                     <div className="bg-gray-100 p-1 rounded-lg flex items-center shrink-0">
                         <button
                             onClick={() => setViewMode('kanban')}
@@ -982,7 +982,7 @@ const UnifiedTaskView: React.FC = () => {
                         before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/20 before:to-transparent before:opacity-100
                         after:absolute after:inset-0 after:shadow-[inset_0_-2px_4px_rgba(0,0,0,0.3)]
                         shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]
-                        flex items-center gap-2 shrink-0 whitespace-nowrap text-sm group">
+                        flex items-center gap-2 shrink-0 whitespace-nowrap text-sm group create-task-btn">
                         <Plus className="w-4 h-4 relative z-10" />
                         <span className="relative z-10">New Task</span>
                     </button>
@@ -1199,7 +1199,7 @@ const UnifiedTaskView: React.FC = () => {
                     background: rgba(156, 163, 175, 0.5);
                 }
             `}</style>
-        </div>
+        </div >
     );
 };
 

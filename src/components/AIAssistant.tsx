@@ -42,7 +42,7 @@ const AIAssistant: React.FC = () => {
   const [conversationId, setConversationId] = useState<number | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [showQuickActions, setShowQuickActions] = useState(true);
-  
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const location = useLocation();
@@ -50,7 +50,7 @@ const AIAssistant: React.FC = () => {
   // Get context-aware suggestions based on current page
   const getPageContext = useCallback((): string => {
     const path = location.pathname;
-    if (path.includes('/dashboard')) return 'dashboard';
+    if (path.includes('/unified') || path.includes('/dashboard')) return 'workspace';
     if (path.includes('/workflows')) return 'workflows';
     if (path.includes('/agents')) return 'agents';
     if (path.includes('/chat')) return 'chat';
@@ -176,7 +176,7 @@ const AIAssistant: React.FC = () => {
       if (currentConversationId) {
         // Add context to the message
         const contextualPrompt = `[Context: User is on the ${getPageContext()} page of Mini-Hub]\n\n${messageContent}`;
-        
+
         const response = await apiService.sendMessage(currentConversationId, {
           content: contextualPrompt,
         });
@@ -274,11 +274,10 @@ const AIAssistant: React.FC = () => {
       {/* Floating Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`fixed bottom-6 right-6 z-50 p-4 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 ${
-          isOpen
+        className={`fixed bottom-6 right-6 z-50 p-4 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 ${isOpen
             ? 'bg-gray-600 hover:bg-gray-700'
             : 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700'
-        }`}
+          }`}
         aria-label="AI Assistant"
       >
         {isOpen ? (
@@ -294,11 +293,10 @@ const AIAssistant: React.FC = () => {
       {/* Chat Panel */}
       {isOpen && (
         <div
-          className={`fixed z-50 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col transition-all duration-300 ${
-            isExpanded
+          className={`fixed z-50 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col transition-all duration-300 ${isExpanded
               ? 'bottom-4 right-4 left-4 top-4 md:left-auto md:w-[600px] md:h-[80vh]'
               : 'bottom-24 right-6 w-[380px] h-[520px]'
-          }`}
+            }`}
         >
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-purple-600 to-blue-600 rounded-t-2xl">
@@ -385,11 +383,10 @@ const AIAssistant: React.FC = () => {
                 className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[85%] rounded-2xl px-4 py-3 ${
-                    message.role === 'user'
+                  className={`max-w-[85%] rounded-2xl px-4 py-3 ${message.role === 'user'
                       ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white'
                       : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
-                  }`}
+                    }`}
                 >
                   {message.isTyping ? (
                     <div className="flex items-center space-x-2">
