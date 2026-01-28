@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import TutorialButton from './components/TutorialButton';
 import TutorialOverlay from './components/TutorialOverlay';
@@ -31,6 +31,16 @@ import UnifiedTaskView from './pages/UnifiedTaskView';
 import UnifiedCalendar from './pages/UnifiedCalendar';
 import WhatsAppDashboard from './pages/WhatsAppDashboard';
 import TikTokDashboard from './pages/TikTokDashboard';
+
+import { CommandProvider } from './contexts/CommandContext';
+import { useCommand } from './hooks/useCommand';
+import GlobalCommandPalette from './components/GlobalCommandPalette';
+import {
+  LayoutDashboard, Mail, CheckSquare, Calendar, Settings as SettingsIcon, LogOut,
+  GitBranch, Bot, MessageCircle, Video, ShoppingBag, Link, Activity as ActivityIcon, User
+} from 'lucide-react';
+
+
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -368,14 +378,45 @@ const AppRoutes: React.FC = () => {
   );
 };
 
+// Component to register default global commands
+const DefaultGlobalCommands: React.FC = () => {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+
+  useCommand({ id: 'nav-dashboard', name: 'Go to Dashboard', section: 'Navigation', icon: <LayoutDashboard className="w-4 h-4" />, shortcut: ['g', 'd'], action: () => navigate('/dashboard') });
+  useCommand({ id: 'nav-inbox', name: 'Unified Inbox', section: 'Navigation', icon: <Mail className="w-4 h-4" />, shortcut: ['g', 'i'], action: () => navigate('/unified/inbox') });
+  useCommand({ id: 'nav-tasks', name: 'Unified Tasks', section: 'Navigation', icon: <CheckSquare className="w-4 h-4" />, shortcut: ['g', 't'], action: () => navigate('/unified/tasks') });
+  useCommand({ id: 'nav-calendar', name: 'Unified Calendar', section: 'Navigation', icon: <Calendar className="w-4 h-4" />, shortcut: ['g', 'c'], action: () => navigate('/unified/calendar') });
+
+  // Apps & Tools
+  useCommand({ id: 'nav-workflows', name: 'Workflows', section: 'Apps', icon: <GitBranch className="w-4 h-4" />, shortcut: ['g', 'w'], action: () => navigate('/workflows') });
+  useCommand({ id: 'nav-agents', name: 'AI Agents', section: 'Apps', icon: <Bot className="w-4 h-4" />, shortcut: ['g', 'a'], action: () => navigate('/agents') });
+  useCommand({ id: 'nav-whatsapp', name: 'WhatsApp', section: 'Social', icon: <MessageCircle className="w-4 h-4" />, action: () => navigate('/whatsapp') });
+  useCommand({ id: 'nav-tiktok', name: 'TikTok', section: 'Social', icon: <Video className="w-4 h-4" />, action: () => navigate('/tiktok') });
+  useCommand({ id: 'nav-marketplace', name: 'Marketplace', section: 'Apps', icon: <ShoppingBag className="w-4 h-4" />, action: () => navigate('/marketplace') });
+
+  // System
+  useCommand({ id: 'nav-connections', name: 'Connections', section: 'System', icon: <Link className="w-4 h-4" />, action: () => navigate('/connections') });
+  useCommand({ id: 'nav-activity', name: 'Activity Log', section: 'System', icon: <ActivityIcon className="w-4 h-4" />, action: () => navigate('/activity') });
+  useCommand({ id: 'nav-profile', name: 'My Profile', section: 'Account', icon: <User className="w-4 h-4" />, action: () => navigate('/profile') });
+  useCommand({ id: 'nav-settings', name: 'Settings', section: 'System', icon: <SettingsIcon className="w-4 h-4" />, shortcut: ['g', 's'], action: () => navigate('/settings') });
+  useCommand({ id: 'action-logout', name: 'Log Out', section: 'Account', icon: <LogOut className="w-4 h-4" />, action: () => { logout(); navigate('/login'); } });
+
+  return null;
+};
+
 const App: React.FC = () => {
   return (
     <AuthProvider>
-      <TutorialProvider>
-        <AppRoutes />
-        <TutorialButton />
-        <TutorialOverlay />
-      </TutorialProvider>
+      <CommandProvider>
+        <TutorialProvider>
+          <AppRoutes />
+          <GlobalCommandPalette />
+          <DefaultGlobalCommands />
+          <TutorialButton />
+          <TutorialOverlay />
+        </TutorialProvider>
+      </CommandProvider>
     </AuthProvider>
   );
 };
