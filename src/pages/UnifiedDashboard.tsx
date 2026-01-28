@@ -4,7 +4,8 @@ import DashboardHeader from '../components/dashboard/DashboardHeader';
 import CommandPalette from '../components/dashboard/CommandPalette';
 import apiService from '../services/api';
 import { useNavigate } from 'react-router-dom';
-import { MessageSquare, CheckSquare, Calendar, ArrowRight, Mail, Video } from 'lucide-react';
+import { MessageSquare, CheckSquare, Calendar, ArrowRight, Mail, Video, Sun } from 'lucide-react';
+import MorningBriefing from '../components/dashboard/MorningBriefing';
 import { ClickUpLogo, TrelloLogo, JiraLogo, AsanaLogo, OutlookLogo } from '../components/BrandIcons';
 
 interface DashboardItem {
@@ -19,6 +20,7 @@ interface DashboardItem {
 const UnifiedDashboard: React.FC = () => {
     const { user } = useAuth();
     const [isFocusMode, setIsFocusMode] = useState(false);
+    const [showBriefing, setShowBriefing] = useState(false);
 
     const [data, setData] = useState<{
         messages: DashboardItem[],
@@ -81,16 +83,22 @@ const UnifiedDashboard: React.FC = () => {
                 }
 
                 // --- CALENDAR FETCHING ---
-                if (activePlatforms.includes('google_calendar') || activePlatforms.includes('google_workspace')) { // Check platform name
+                if (activePlatforms.includes('google_calendar') || activePlatforms.includes('google_workspace')) {
                     const now = new Date();
                     const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
-                    const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59).toISOString();
+                    const nextWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 7).toISOString();
+
+                    console.log('[UnifiedDashboard] Fetching calendar events:', { time_min: startOfDay, time_max: nextWeek });
+
                     promises.push(apiService.executeMCPTool('google_workspace_calendar', {
                         operation: 'list_events',
                         time_min: startOfDay,
-                        time_max: endOfDay,
+                        time_max: nextWeek,
                         max_results: 10
-                    }).then(res => ({ type: 'calendar', res })));
+                    }).then(res => {
+                        console.log('[UnifiedDashboard] Calendar Response:', res);
+                        return { type: 'calendar', res };
+                    }));
                 }
 
                 // Execute all
@@ -333,13 +341,19 @@ const UnifiedDashboard: React.FC = () => {
             <div className="fixed bottom-0 right-0 w-[500px] h-[500px] bg-blue-100/20 rounded-full blur-3xl pointer-events-none" />
 
             <div className="max-w-7xl mx-auto space-y-8 relative z-10 mt-4">
-                {/* Header */}
-                <div className="mb-8">
+                <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
                     <DashboardHeader
                         userName={user?.name || 'User'}
                         isFocusMode={isFocusMode}
                         onToggleFocusMode={() => setIsFocusMode(!isFocusMode)}
                     />
+                    <button
+                        onClick={() => setShowBriefing(true)}
+                        className="w-full md:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-400 to-pink-500 text-white rounded-lg shadow-lg shadow-orange-200 hover:shadow-xl hover:scale-105 transition-all font-semibold text-sm"
+                    >
+                        <Sun className="w-4 h-4" />
+                        Start Morning Briefing
+                    </button>
                 </div>
 
                 {/* Detailed Overview Grid */}
@@ -388,6 +402,9 @@ const UnifiedDashboard: React.FC = () => {
                 onCreateTask={() => navigate('/unified/tasks')}
                 onComposeMessage={() => navigate('/unified/inbox')}
             />
+
+            {/* Morning Briefing Modal */}
+            {showBriefing && <MorningBriefing onClose={() => setShowBriefing(false)} />}
         </div>
     );
 };

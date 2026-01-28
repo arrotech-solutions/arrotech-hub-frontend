@@ -76,17 +76,13 @@ const UnifiedInbox: React.FC = () => {
             // Helper to extract data from various MCP return structures
             const unwrap = (res: PromiseSettledResult<any>) => {
                 if (res.status === 'fulfilled' && res.value?.success) {
-                    const val = res.value;
-                    // Attempt to find the data payload: could be .data, .result, or nested
-                    if (val.data) return val.data;
-                    if (val.result) return val.result;
-                    return val;
+                    return res.value;
                 }
                 return null;
             };
 
             const gmailRaw = unwrap(gmailRes);
-            const gmailEmails = gmailRaw?.emails || gmailRaw?.data?.emails || gmailRaw?.result?.emails;
+            const gmailEmails = gmailRaw?.emails || gmailRaw?.messages || gmailRaw?.data?.emails || gmailRaw?.result?.emails || gmailRaw?.result?.messages;
             if (gmailEmails) {
                 allMessages.push(...gmailEmails.map((e: any) => ({
                     id: e.id, source: 'gmail' as const,
