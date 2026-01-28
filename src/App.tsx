@@ -9,7 +9,7 @@ import Activity from './pages/Activity';
 import Agents from './pages/Agents';
 import Chat from './pages/Chat';
 import Connections from './pages/Connections';
-import Dashboard from './pages/Dashboard';
+// Dashboard removed - UnifiedDashboard is now the primary landing page
 import ForgotPassword from './pages/ForgotPassword';
 import Login from './pages/Login';
 import Marketplace from './pages/Marketplace';
@@ -78,7 +78,7 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     if (user.email?.toLowerCase() === 'support@arrotechsolutions') {
       return <Navigate to="/admin" replace />;
     }
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/unified" replace />;
   }
 
   // If not logged in and not approved, redirect to landing page
@@ -175,16 +175,8 @@ const AppRoutes: React.FC = () => {
           </ProtectedRoute>
         }
       />
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <Layout>
-              <Dashboard />
-            </Layout>
-          </ProtectedRoute>
-        }
-      />
+      {/* Redirect old /dashboard to /unified */}
+      <Route path="/dashboard" element={<Navigate to="/unified" replace />} />
 
       <Route
         path="/connections"
@@ -383,7 +375,7 @@ const DefaultGlobalCommands: React.FC = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
 
-  useCommand({ id: 'nav-dashboard', name: 'Go to Dashboard', section: 'Navigation', icon: <LayoutDashboard className="w-4 h-4" />, shortcut: ['g', 'd'], action: () => navigate('/dashboard') });
+  useCommand({ id: 'nav-dashboard', name: 'Go to Workspace', section: 'Navigation', icon: <LayoutDashboard className="w-4 h-4" />, shortcut: ['g', 'd'], action: () => navigate('/unified') });
   useCommand({ id: 'nav-inbox', name: 'Unified Inbox', section: 'Navigation', icon: <Mail className="w-4 h-4" />, shortcut: ['g', 'i'], action: () => navigate('/unified/inbox') });
   useCommand({ id: 'nav-tasks', name: 'Unified Tasks', section: 'Navigation', icon: <CheckSquare className="w-4 h-4" />, shortcut: ['g', 't'], action: () => navigate('/unified/tasks') });
   useCommand({ id: 'nav-calendar', name: 'Unified Calendar', section: 'Navigation', icon: <Calendar className="w-4 h-4" />, shortcut: ['g', 'c'], action: () => navigate('/unified/calendar') });

@@ -27,7 +27,7 @@ const RequestAccess: React.FC = () => {
             if (user.email?.toLowerCase() === 'support@arrotechsolutions') {
                 navigate('/admin');
             } else {
-                navigate('/dashboard');
+                navigate('/unified');
             }
         }
     }, [user, navigate]);

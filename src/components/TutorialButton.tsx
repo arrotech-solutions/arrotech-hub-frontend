@@ -54,6 +54,9 @@ const TutorialButton: React.FC = () => {
     creator: 'Creator Profile',
     mcptools: 'MCP Tools',
     pricing: 'Pricing',
+    unifiedInbox: 'Unified Inbox',
+    unifiedTasks: 'Unified Tasks',
+    unifiedCalendar: 'Unified Calendar',
   };
 
   // Get the label for the current page with proper capitalization

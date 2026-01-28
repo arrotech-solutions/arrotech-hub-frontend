@@ -51,7 +51,7 @@ const MorningBriefing: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 'nav-inbox': '/unified/inbox',
                 'nav-profile': '/profile'
             };
-            const route = routes[actionId] || '/dashboard';
+            const route = routes[actionId] || '/unified';
             navigate(route);
             onClose();
             return;

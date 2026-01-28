@@ -455,9 +455,9 @@ const UnifiedInbox: React.FC = () => {
             `}>
                 <div className="h-16 flex items-center px-4 justify-between border-b border-transparent">
                     {(!sidebarCollapsed || mobileMenuOpen) && (
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-3">
                             <div className="w-8 h-8 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-blue-500/30">H</div>
-                            <span className="font-bold text-lg tracking-tight text-slate-900">Hub</span>
+                            <span className="font-bold text-lg tracking-tight text-slate-900 unified-inbox-header">Hub</span>
                         </div>
                     )}
                     <button onClick={() => window.innerWidth < 768 ? setMobileMenuOpen(false) : setSidebarCollapsed(!sidebarCollapsed)} className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-colors">
@@ -638,7 +638,7 @@ const UnifiedInbox: React.FC = () => {
                 .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
                 .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.4); border-radius: 10px; }
             `}</style>
-        </div>
+        </div >
     );
 };
 
