@@ -58,13 +58,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const navigation = [
     {
-      name: 'Dashboard',
-      href: '/dashboard',
-      icon: Home,
-      description: 'Overview and analytics',
-      badge: null
-    },
-    {
       name: 'Workspace',
       icon: LayoutDashboard,
       description: 'Unified view of all apps',
@@ -73,28 +66,28 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         {
           name: 'Overview',
           href: '/unified',
-          icon: Home, // Or another icon for overview
+          icon: Home,
           description: 'Dashboard overview',
           badge: null
         },
         {
           name: 'Inbox',
           href: '/unified/inbox',
-          icon: MessageCircle, // Using MessageCircle as placeholder if Inbox not available
+          icon: MessageCircle,
           description: 'Unified Inbox',
           badge: null
         },
         {
           name: 'Task View',
           href: '/unified/tasks',
-          icon: Workflow, // Using Workflow as placeholder
+          icon: Workflow,
           description: 'Unified Tasks',
           badge: null
         },
         {
           name: 'Calendar',
           href: '/unified/calendar',
-          icon: Activity, // Using Activity as placeholder
+          icon: Activity,
           description: 'Unified Calendar',
           badge: null
         }

@@ -285,7 +285,7 @@ const UnifiedCalendar: React.FC = () => {
             {showSidebar && (
                 <div className="fixed inset-y-0 left-0 z-50 md:relative md:z-0 w-64 flex flex-col border-r border-gray-100 bg-white/95 backdrop-blur-xl md:bg-gray-50/50 shadow-2xl md:shadow-none animate-in slide-in-from-left-4 duration-300">
                     <div className="p-6">
-                        <h1 className="text-xl font-bold tracking-tight flex items-center gap-2">
+                        <h1 className="text-xl font-bold tracking-tight flex items-center gap-2 unified-calendar-header">
                             <CalendarIcon className="w-6 h-6 text-indigo-600" />
                             Calendar
                         </h1>
