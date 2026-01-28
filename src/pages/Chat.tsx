@@ -382,7 +382,7 @@ const Chat: React.FC = () => {
         setSelectedProvider={setSelectedProvider}
         getProviderDisplayName={getProviderDisplayName}
         isProviderAvailable={isProviderAvailable}
-        handleBackToDashboard={() => navigate('/dashboard')}
+        handleBackToDashboard={() => navigate('/unified')}
         hasToolCalls={messages.some(m => m.tools_called && m.tools_called.length > 0)}
         handleOpenWorkflowBuilder={handleOpenWorkflowBuilder}
       />

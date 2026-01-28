@@ -50,7 +50,7 @@ export const useTutorial = () => {
 
 // Page configuration with routes
 const pageConfig: Record<string, string> = {
-  dashboard: '/dashboard',
+  // dashboard removed - workspace (/unified) is now the primary landing
   workspace: '/unified',  // UnifiedDashboard
   chat: '/chat',
   workflows: '/workflows',
@@ -73,47 +73,8 @@ const pageConfig: Record<string, string> = {
 
 // Tutorial steps configuration - using more reliable CSS selectors
 const tutorialSteps: TutorialStep[] = [
-  // Dashboard steps (4 steps)
-  {
-    id: 'dashboard-welcome',
-    title: 'Welcome to Your Command Center',
-    description: 'Your operational nexus for monitoring workflows, agents, connections, and system performance.',
-    target: '.dashboard-header',
-    fallbackTarget: 'main',
-    position: 'bottom',
-    page: 'dashboard',
-    order: 1
-  },
-  {
-    id: 'dashboard-stats',
-    title: 'System Overview',
-    description: 'Real-time metrics for your active connections, workflows, AI agents, and API requests.',
-    target: '.stats-overview',
-    fallbackTarget: '.grid.grid-cols-1.sm\\:grid-cols-2',
-    position: 'bottom',
-    page: 'dashboard',
-    order: 2
-  },
-  {
-    id: 'dashboard-quick-actions',
-    title: 'Quick Commands',
-    description: 'Rapidly create workflows, add connections, browse MCP tools, or manage your AI agents.',
-    target: '.quick-actions',
-    fallbackTarget: 'section',
-    position: 'top',
-    page: 'dashboard',
-    order: 3
-  },
-  {
-    id: 'dashboard-activity',
-    title: 'Live Telemetry',
-    description: 'Monitor recent workflow executions, connection events, agent activity, and tool usage.',
-    target: '.recent-activity',
-    fallbackTarget: '.lg\\:col-span-2',
-    position: 'top',
-    page: 'dashboard',
-    order: 4
-  },
+  // Dashboard steps removed - workspace (UnifiedDashboard) is now the landing page
+  // See workspace-* steps below for the new primary tutorial flow
 
   // Chat page steps (7 steps)
   {
@@ -780,8 +741,8 @@ const tutorialSteps: TutorialStep[] = [
     id: 'inbox-intro',
     title: 'Unified Inbox',
     description: 'All your communications in one place. Switch tabs to filter by provider like Gmail, Slack, or Teams.',
-    target: 'h1',
-    fallbackTarget: 'body',
+    target: '.unified-inbox-header',
+    fallbackTarget: 'h1',
     position: 'bottom',
     page: 'unifiedInbox',
     order: 76
@@ -790,8 +751,8 @@ const tutorialSteps: TutorialStep[] = [
     id: 'inbox-search',
     title: 'Search Messages',
     description: 'Quickly find any message across all connected platforms.',
-    target: 'input[type="text"]',
-    fallbackTarget: 'body',
+    target: '.unified-inbox-search',
+    fallbackTarget: 'input[type="text"]',
     position: 'bottom',
     page: 'unifiedInbox',
     order: 77
@@ -802,8 +763,8 @@ const tutorialSteps: TutorialStep[] = [
     id: 'tasks-intro',
     title: 'Unified Task View',
     description: 'Manage tasks from Jira, Trello, Asana, and ClickUp in a single list.',
-    target: 'h1',
-    fallbackTarget: 'body',
+    target: '.unified-tasks-header',
+    fallbackTarget: 'h1',
     position: 'bottom',
     page: 'unifiedTasks',
     order: 78
@@ -812,8 +773,8 @@ const tutorialSteps: TutorialStep[] = [
     id: 'tasks-new',
     title: 'Create Task',
     description: 'Add a new task directly from here. It will sync back to the source platform.',
-    target: 'button.bg-blue-600',
-    fallbackTarget: 'body',
+    target: '.create-task-btn',
+    fallbackTarget: 'button',
     position: 'left',
     page: 'unifiedTasks',
     order: 79
@@ -824,8 +785,8 @@ const tutorialSteps: TutorialStep[] = [
     id: 'calendar-intro',
     title: 'Unified Calendar',
     description: 'Your aggregated schedule. View events from Google Calendar and Outlook.',
-    target: 'h1',
-    fallbackTarget: 'body',
+    target: '.unified-calendar-header',
+    fallbackTarget: 'h1',
     position: 'bottom',
     page: 'unifiedCalendar',
     order: 80

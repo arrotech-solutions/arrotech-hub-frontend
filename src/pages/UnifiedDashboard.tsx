@@ -246,7 +246,8 @@ const UnifiedDashboard: React.FC = () => {
         color,
         path,
         delay,
-        actionLabel
+        actionLabel,
+        tutorialClass = ''
     }: {
         title: string,
         items: DashboardItem[],
@@ -254,10 +255,11 @@ const UnifiedDashboard: React.FC = () => {
         color: string,
         path: string,
         delay: string,
-        actionLabel: string
+        actionLabel: string,
+        tutorialClass?: string
     }) => (
         <div
-            className={`bg-white rounded-2xl border border-gray-200/60 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden flex flex-col h-[420px] animate-in fade-in slide-in-from-bottom-4 duration-700 ${delay}`}
+            className={`bg-white rounded-2xl border border-gray-200/60 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden flex flex-col h-[420px] animate-in fade-in slide-in-from-bottom-4 duration-700 ${delay} ${tutorialClass}`}
         >
             {/* Header */}
             <div className="p-6 pb-4 flex items-center justify-between border-b border-gray-100">
@@ -367,6 +369,7 @@ const UnifiedDashboard: React.FC = () => {
                         path="/unified/inbox"
                         delay="delay-100"
                         actionLabel="View All Messages"
+                        tutorialClass="unified-inbox-tut"
                     />
 
                     <ListCard
@@ -377,6 +380,7 @@ const UnifiedDashboard: React.FC = () => {
                         path="/unified/tasks"
                         delay="delay-200"
                         actionLabel="View Task Board"
+                        tutorialClass="task-hub-tut"
                     />
 
                     <ListCard
@@ -387,6 +391,7 @@ const UnifiedDashboard: React.FC = () => {
                         path="/unified/calendar"
                         delay="delay-300"
                         actionLabel="Open Calendar"
+                        tutorialClass="calendar-hub-tut"
                     />
 
                 </div>

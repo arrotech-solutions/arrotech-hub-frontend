@@ -92,6 +92,9 @@ const FloatingActionMenu: React.FC = () => {
     creator: 'Creator Profile',
     mcptools: 'MCP Tools',
     pricing: 'Pricing',
+    unifiedInbox: 'Unified Inbox',
+    unifiedTasks: 'Unified Tasks',
+    unifiedCalendar: 'Unified Calendar',
   };
 
   const currentPageLabel = pageLabels[currentPage] || 'This Page';
@@ -276,7 +279,7 @@ const AIAssistantPanel: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   const getPageContext = () => {
     const path = location.pathname;
-    if (path.includes('/dashboard')) return 'dashboard';
+    if (path.includes('/unified') || path.includes('/dashboard')) return 'workspace';
     if (path.includes('/workflows')) return 'workflows';
     if (path.includes('/agents')) return 'agents';
     if (path.includes('/chat')) return 'chat';

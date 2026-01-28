@@ -34,7 +34,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     });
 
     return (
-        <div className="bg-white/40 backdrop-blur-md rounded-3xl border border-white/40 shadow-xl overflow-hidden relative group">
+        <div className="bg-white/40 backdrop-blur-md rounded-3xl border border-white/40 shadow-xl overflow-hidden relative group dashboard-header-tut">
             <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 group-hover:from-indigo-500/10 group-hover:to-purple-500/10 transition-colors duration-500" />
 
             <div className="relative p-6 px-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
