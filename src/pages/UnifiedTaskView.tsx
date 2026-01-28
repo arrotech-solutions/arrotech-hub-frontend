@@ -715,7 +715,7 @@ const UnifiedTaskView: React.FC = () => {
     };
 
     return (
-        <div className="flex flex-col h-screen bg-slate-50 text-gray-800 overflow-hidden relative">
+        <div className="flex flex-col h-screen bg-[conic-gradient(at_top_left,_var(--tw-gradient-stops))] from-slate-50 via-indigo-50/20 to-slate-50 text-slate-900 overflow-hidden relative">
             {/* Create Task Modal */}
             {isCreateModalOpen && (
                 <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
@@ -951,7 +951,7 @@ const UnifiedTaskView: React.FC = () => {
             )}
 
             {/* Header / Toolbar */}
-            <div className="bg-white border-b border-gray-200 px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 sticky top-0 z-30 unified-tasks-header">
+            <div className="bg-white/80 backdrop-blur-xl border-b border-white/50 px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 sticky top-0 z-30 unified-tasks-header shadow-sm">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-2">
                         <CheckSquare className="w-7 h-7 text-indigo-600" />
@@ -1005,7 +1005,7 @@ const UnifiedTaskView: React.FC = () => {
                         <div className="flex overflow-x-auto pb-2 gap-4 mb-6 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:pb-0 sm:overflow-visible custom-scrollbar snap-x snap-mandatory">
                             {/* Summary Cards */}
                             {stats.map((stat, i) => (
-                                <div key={i} className="min-w-[240px] sm:min-w-0 bg-white p-4 rounded-2xl border border-gray-200/60 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow snap-start">
+                                <div key={i} className="min-w-[240px] sm:min-w-0 bg-white/70 backdrop-blur-lg p-5 rounded-2xl border border-white/60 shadow-sm flex items-center justify-between hover:shadow-md hover:scale-[1.02] transition-all snap-start">
                                     <div>
                                         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{stat.label}</p>
                                         <p className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</p>
@@ -1074,7 +1074,7 @@ const UnifiedTaskView: React.FC = () => {
                                     return (
                                         <div
                                             key={col.id}
-                                            className="w-[280px] md:w-[320px] flex flex-col h-full shrink-0"
+                                            className="w-[280px] md:w-[320px] flex flex-col h-full shrink-0 bg-white/30 backdrop-blur-md rounded-3xl border border-white/40 p-3"
                                             onDragOver={handleDragOver}
                                             onDrop={(e) => handleDrop(e, col.id as any)}
                                         >
@@ -1098,7 +1098,7 @@ const UnifiedTaskView: React.FC = () => {
                                                         key={task.id}
                                                         draggable
                                                         onDragStart={(e) => handleDragStart(e, task.id)}
-                                                        className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer group hover:-translate-y-1 relative overflow-hidden"
+                                                        className="bg-white/90 p-4 rounded-2xl border border-white/60 shadow-sm hover:shadow-lg hover:shadow-indigo-500/10 transition-all cursor-pointer group hover:-translate-y-1 relative overflow-hidden backdrop-blur-sm"
                                                     >
                                                         <div className={`absolute left-0 top-0 bottom-0 w-1 ${col.dot}`} />
 
