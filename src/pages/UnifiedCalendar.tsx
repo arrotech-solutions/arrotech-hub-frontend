@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-    Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, RefreshCw,
-    Loader2, Video, MapPin, Search, CheckSquare,
-    MoreHorizontal, LayoutGrid, Menu
+    ChevronLeft, ChevronRight, Plus,
+    Loader2, MapPin, CheckSquare,
+    MoreHorizontal, LayoutGrid, Menu, Sparkles, Clock, Zap,
+    ArrowRight
 } from 'lucide-react';
 import apiService from '../services/api';
 import { ClickUpLogo, TrelloLogo, JiraLogo } from '../components/BrandIcons';
 import CreateEventModal from '../components/dashboard/CreateEventModal';
+import EventDetailsModal from '../components/dashboard/EventDetailsModal';
 
 interface CalendarEvent {
     id: string;
@@ -48,10 +50,15 @@ const UnifiedCalendar: React.FC = () => {
 
     // Modal State
     const [isEventModalOpen, setIsEventModalOpen] = useState(false);
+    const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+
+    // V2 UI States
+    const [focusMode, setFocusMode] = useState(false);
+    const [taskFilter, setTaskFilter] = useState('All');
 
     useEffect(() => {
         const handleResize = () => {
-            if (window.innerWidth < 768) {
+            if (window.innerWidth < 1024) {
                 setShowSidebar(false);
                 setShowTaskTray(false);
             } else {
@@ -65,12 +72,13 @@ const UnifiedCalendar: React.FC = () => {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    // --- FETCHING LOGIC ---
+    // --- FETCHING LOGIC (Preserved) ---
     const fetchData = useCallback(async () => {
         setLoading(true);
         setTaskLoading(true);
         try {
             const connectionsRes = await apiService.getConnections();
+            // Default to empty array if data is missing
             const activePlatforms = connectionsRes.data?.map((c: any) => c.platform) || [];
 
             const eventPromises = [];
@@ -191,8 +199,7 @@ const UnifiedCalendar: React.FC = () => {
         fetchData();
     }, [fetchData]);
 
-    // --- GRID HELPERS ---
-    // Returns (Date | null) array, sparse
+    // --- GRID HELPERS (Preserved) ---
     const getMonthDays = (date: Date) => {
         const year = date.getFullYear();
         const month = date.getMonth();
@@ -201,17 +208,14 @@ const UnifiedCalendar: React.FC = () => {
 
         const days: (Date | null)[] = [];
 
-        // Pad start with nulls (empty cells for previous month)
         for (let i = 0; i < firstDayOfMonth; i++) {
             days.push(null);
         }
 
-        // Add actual days
         for (let i = 1; i <= daysInMonth; i++) {
             days.push(new Date(year, month, i));
         }
 
-        // Pad end to complete the last week row
         const remainingCells = 7 - (days.length % 7);
         if (remainingCells < 7) {
             for (let i = 0; i < remainingCells; i++) {
@@ -264,236 +268,363 @@ const UnifiedCalendar: React.FC = () => {
     };
 
     const getPlatformIcon = (platform: string) => {
-        if (platform === 'clickup') return <ClickUpLogo className="w-3 h-3" />;
-        if (platform === 'jira') return <JiraLogo className="w-3 h-3" />;
-        if (platform === 'trello') return <TrelloLogo className="w-3 h-3" />;
-        return <CheckSquare className="w-3 h-3" />;
+        if (platform === 'clickup') return <ClickUpLogo className="w-3.5 h-3.5" />;
+        if (platform === 'jira') return <JiraLogo className="w-3.5 h-3.5" />;
+        if (platform === 'trello') return <TrelloLogo className="w-3.5 h-3.5" />;
+        return <CheckSquare className="w-3.5 h-3.5" />;
     };
 
     const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-    return (
-        <div className="flex h-screen bg-slate-50 text-gray-900 overflow-hidden font-sans relative">
+    // --- LAYOUT HELPER FOR OVERLAPS ---
+    const calculateEventLayout = (eventsForDay: CalendarEvent[]) => {
+        // 1. Sort by start time, then duration
+        const sortedEvents = [...eventsForDay].sort((a, b) => {
+            const startA = a.date.getHours() * 60 + a.date.getMinutes();
+            const startB = b.date.getHours() * 60 + b.date.getMinutes();
+            if (startA !== startB) return startA - startB;
+            return 0; // Simple sort
+        });
 
+        // 2. Simple column packing (Greedy)
+        const columns: CalendarEvent[][] = [];
+        const layout: { [key: string]: { left: string; width: string } } = {};
+
+        sortedEvents.forEach(event => {
+            const startTime = event.date.getHours() * 60 + event.date.getMinutes();
+
+            // Find first column where this event fits without overlapping
+            let colIndex = -1;
+            for (let i = 0; i < columns.length; i++) {
+                const lastEventInCol = columns[i][columns[i].length - 1];
+                const lastEventStart = lastEventInCol.date.getHours() * 60 + lastEventInCol.date.getMinutes();
+                const lastEventEnd = lastEventStart + 60; // Simplified assumption
+
+                if (startTime >= lastEventEnd) {
+                    colIndex = i;
+                    break;
+                }
+            }
+
+            if (colIndex !== -1) {
+                columns[colIndex].push(event);
+            } else {
+                columns.push([event]);
+                colIndex = columns.length - 1;
+            }
+        });
+
+        // 3. Assign widths based on total columns overlapping at any point (Simplified: Just share space equally based on total columns)
+        // A more robust algo would be distinct clusters, but for now, equal width per column
+        const totalCols = columns.length;
+        sortedEvents.forEach(e => {
+            // Find which column e is in
+            const colIdx = columns.findIndex(col => col.includes(e));
+            if (colIdx !== -1) {
+                layout[e.id] = {
+                    left: `${(colIdx / totalCols) * 100}%`,
+                    width: `${95 / totalCols}%` // Leave a tiny gap
+                };
+            }
+        });
+
+        return layout;
+    };
+
+
+    return (
+        <div className={`flex h-screen bg-slate-50 relative overflow-hidden font-sans transition-colors duration-500 ${focusMode ? 'bg-slate-900 text-white' : 'text-slate-900'}`}>
+            {/* Ambient Background - "Glassmorphism Command Center" Vibe */}
+            <div className={`fixed inset-0 pointer-events-none transition-opacity duration-1000 ${focusMode ? 'opacity-20' : 'opacity-100'}`}>
+                <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-indigo-50/60 to-transparent" />
+                <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-purple-200/30 rounded-full blur-[100px]" />
+                <div className="absolute top-[20%] left-[-10%] w-[500px] h-[500px] bg-indigo-200/30 rounded-full blur-[100px]" />
+            </div>
+
+            {/* Mobile Sidebar Overlay */}
             {(showSidebar || showTaskTray) && (
                 <div
-                    className="md:hidden absolute inset-0 bg-black/50 z-40 backdrop-blur-sm"
+                    className="lg:hidden absolute inset-0 bg-black/50 z-40 backdrop-blur-sm"
                     onClick={() => { setShowSidebar(false); setShowTaskTray(false); }}
                 />
             )}
 
-            {showSidebar && (
-                <div className="fixed inset-y-0 left-0 z-50 md:relative md:z-0 w-64 flex flex-col border-r border-gray-100 bg-white/95 backdrop-blur-xl md:bg-gray-50/50 shadow-2xl md:shadow-none animate-in slide-in-from-left-4 duration-300">
-                    <div className="p-6">
-                        <h1 className="text-xl font-bold tracking-tight flex items-center gap-2 unified-calendar-header">
-                            <CalendarIcon className="w-6 h-6 text-indigo-600" />
-                            Calendar
-                        </h1>
+            {/* MAIN CONTENT AREA */}
+            <div className="flex-1 flex flex-col relative z-10 min-w-0 transition-all duration-300">
+
+                {/* 1. SUPERIOR HEADER (Smart Input & Navigation) */}
+                <div className={`
+                    h-20 px-6 flex items-center justify-between sticky top-0 z-30 transition-all duration-300 overflow-x-auto no-scrollbar gap-4
+                    ${focusMode ? 'bg-slate-900/80 border-b border-slate-800' : 'bg-white/70 border-b border-white/50'}
+                    backdrop-blur-xl
+                `}>
+                    <div className="flex items-center gap-6">
+                        {/* Toggle Sidebar Trigger (Mobile/Desktop) */}
+                        <button onClick={() => setShowSidebar(!showSidebar)} className={`p-2 rounded-xl transition-all ${focusMode ? 'hover:bg-slate-800 text-slate-400' : 'hover:bg-gray-100 text-slate-500'}`}>
+                            <Menu className="w-5 h-5" />
+                        </button>
+
+                        {/* Title & Nav */}
+                        <div className="flex items-center gap-4">
+                            <h2 className={`text-2xl font-bold tracking-tight ${focusMode ? 'text-white' : 'text-slate-900'}`}>
+                                {monthNames[viewDate.getMonth()]} <span className="font-normal opacity-60">{viewDate.getFullYear()}</span>
+                            </h2>
+                            <div className="flex items-center gap-1">
+                                <button onClick={prev} className={`p-1.5 rounded-lg transition-all ${focusMode ? 'hover:bg-slate-800 text-white' : 'hover:bg-gray-100 text-slate-600'}`}><ChevronLeft className="w-5 h-5" /></button>
+                                <button onClick={next} className={`p-1.5 rounded-lg transition-all ${focusMode ? 'hover:bg-slate-800 text-white' : 'hover:bg-gray-100 text-slate-600'}`}><ChevronRight className="w-5 h-5" /></button>
+                            </div>
+                            <button
+                                onClick={() => { setViewDate(new Date()); setViewMode('day'); }}
+                                className={`ml-2 text-xs font-bold px-3 py-1.5 rounded-lg border transition-all ${focusMode ? 'border-slate-700 hover:bg-slate-800 text-slate-300' : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-600 hover:shadow-sm'}`}
+                            >
+                                Today
+                            </button>
+                        </div>
                     </div>
 
-                    <div className="px-6 pb-6 border-b border-gray-100">
-                        <div className="flex items-center justify-between mb-4">
-                            <span className="text-sm font-semibold">{monthNames[viewDate.getMonth()]} {viewDate.getFullYear()}</span>
-                            <div className="flex gap-1">
-                                <button onClick={() => setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() - 1))} className="p-1 hover:bg-gray-200 rounded"><ChevronLeft className="w-4 h-4" /></button>
-                                <button onClick={() => setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() + 1))} className="p-1 hover:bg-gray-200 rounded"><ChevronRight className="w-4 h-4" /></button>
+                    {/* Smart Input Bar - "Command Center" Feature */}
+                    <div className="hidden md:flex flex-1 max-w-xl mx-8 relative group">
+                        <div className={`absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity ${focusMode ? 'opacity-10' : ''}`} />
+                        <div className={`relative flex items-center w-full h-11 px-4 rounded-2xl transition-all border ${focusMode ? 'bg-slate-800/50 border-slate-700 text-white placeholder-slate-500' : 'bg-white/80 border-indigo-100 text-slate-700 placeholder-indigo-300 shadow-sm'}`}>
+                            <Sparkles className={`w-4 h-4 mr-3 ${focusMode ? 'text-indigo-400' : 'text-indigo-500'}`} />
+                            <input
+                                type="text"
+                                placeholder="Ask AI to schedule... 'Lunch with Sarah tomorrow at 12'"
+                                className="w-full bg-transparent border-none focus:outline-none text-sm font-medium"
+                            />
+                            <div className="flex items-center gap-2">
+                                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${focusMode ? 'bg-slate-700 text-slate-400' : 'bg-indigo-50 text-indigo-400'}`}>⌘K</span>
                             </div>
                         </div>
-                        <div className="grid grid-cols-7 gap-y-2 text-center text-xs text-gray-500 mb-2">
-                            {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => <div key={`${d}-${i}`}>{d}</div>)}
+                    </div>
+
+                    {/* View Toggles & Actions */}
+                    <div className="flex items-center gap-3">
+                        <div className={`flex p-1 rounded-xl border ${focusMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-100/50 border-gray-200/50'}`}>
+                            {(['month', 'week', 'day'] as const).map(m => (
+                                <button
+                                    key={m}
+                                    onClick={() => setViewMode(m)}
+                                    className={`
+                                        px-3 py-1.5 text-xs font-semibold rounded-lg capitalize transition-all
+                                        ${viewMode === m
+                                            ? (focusMode ? 'bg-slate-700 text-white shadow-sm' : 'bg-white text-indigo-600 shadow-sm')
+                                            : (focusMode ? 'text-slate-400 hover:text-white' : 'text-gray-500 hover:text-gray-900')}
+                                    `}
+                                >
+                                    {m}
+                                </button>
+                            ))}
                         </div>
-                        <div className="grid grid-cols-7 gap-y-2 text-center text-xs">
-                            {/* Mini Calendar also sparse for consistency */}
-                            {getMonthDays(viewDate).map((d, i) => {
-                                const isDay = !!d;
-                                return (
+
+                        <button
+                            onClick={() => setFocusMode(!focusMode)}
+                            className={`p-2.5 rounded-xl border transition-all ${focusMode ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'bg-white border-gray-200 text-gray-500 hover:text-indigo-600 hover:border-indigo-100'}`}
+                            title="Toggle Focus Mode"
+                        >
+                            <Zap className={`w-4 h-4 ${focusMode ? 'fill-current' : ''}`} />
+                        </button>
+
+                        <button
+                            onClick={() => setShowTaskTray(!showTaskTray)}
+                            className={`p-2.5 rounded-xl border transition-all ${showTaskTray ? (focusMode ? 'bg-slate-800 border-slate-700 text-indigo-400' : 'bg-indigo-50 border-indigo-200 text-indigo-600') : (focusMode ? 'bg-slate-900 border-slate-800 text-slate-500' : 'bg-white border-gray-200 text-gray-500')}`}
+                        >
+                            <LayoutGrid className="w-4 h-4" />
+                        </button>
+
+                        <button
+                            onClick={() => setIsEventModalOpen(true)}
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-semibold shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center gap-2"
+                        >
+                            <Plus className="w-4 h-4" />
+                            <span className="hidden md:inline">Create</span>
+                        </button>
+                    </div>
+                </div>
+
+                {/* 2. CALENDAR GRID AREA */}
+                <div className="flex-1 overflow-hidden relative flex">
+                    {loading && (
+                        <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/50 backdrop-blur-sm">
+                            <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+                        </div>
+                    )}
+                    {/* Left Mini Sidebar (Collapsible) */}
+                    <div className={`
+                        transition-all duration-300 ease-in-out border-r flex-col
+                        ${showSidebar ? 'w-64 opacity-100 translate-x-0' : 'w-0 opacity-0 -translate-x-4 overflow-hidden'}
+                        ${focusMode ? 'bg-slate-900/50 border-slate-800' : 'bg-white/40 border-white/40'}
+                        backdrop-blur-xl hidden lg:flex
+                    `}>
+                        <div className="p-6">
+                            <div className={`text-xs font-bold uppercase tracking-wider mb-4 ${focusMode ? 'text-slate-500' : 'text-gray-400'}`}>Mini Calendar</div>
+                            <div className="grid grid-cols-7 gap-y-3 gap-x-1 text-center text-xs mb-6">
+                                {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => <div key={i} className={`font-medium ${focusMode ? 'text-slate-500' : 'text-gray-400'}`}>{d}</div>)}
+                                {getMonthDays(viewDate).map((d, i) => (
                                     <div key={i}
                                         onClick={() => d && setViewDate(d)}
                                         className={`
-                                        w-6 h-6 flex items-center justify-center rounded-full mx-auto 
-                                        ${isDay ? 'cursor-pointer hover:bg-gray-200' : 'cursor-default'}
-                                        ${d && isToday(d) ? 'bg-indigo-600 text-white font-bold hover:bg-indigo-700' : ''}
-                                        ${!isDay ? '' : 'text-gray-700'}
-                                     `}>
+                                            w-7 h-7 flex items-center justify-center rounded-full mx-auto transition-all
+                                            ${!d ? '' : 'cursor-pointer'}
+                                            ${d && isToday(d) ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20' : ''}
+                                            ${d && !isToday(d) && (focusMode ? 'text-slate-300 hover:bg-slate-800' : 'text-slate-700 hover:bg-indigo-50')}
+                                        `}
+                                    >
                                         {d ? d.getDate() : ''}
                                     </div>
-                                );
-                            })}
-                        </div>
-                    </div>
+                                ))}
+                            </div>
 
-                    <div className="p-6 flex-1 overflow-y-auto">
-                        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">My Calendars</h3>
-                        <div className="space-y-3">
-                            <label className="flex items-center gap-3 text-sm font-medium text-gray-700 cursor-pointer group">
-                                <input
-                                    type="checkbox"
-                                    checked={calendarFilters.google}
-                                    onChange={(e) => setCalendarFilters(prev => ({ ...prev, google: e.target.checked }))}
-                                    className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                                />
-                                <span className={`w-2 h-2 rounded-full bg-indigo-500 ${!calendarFilters.google ? 'opacity-50' : ''}`}></span>
-                                <span className="group-hover:text-gray-900 transition-colors">Work (Google)</span>
-                            </label>
-                            <label className="flex items-center gap-3 text-sm font-medium text-gray-400 cursor-not-allowed group" title="Not connected">
-                                <input type="checkbox" disabled className="w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500 opacity-50" />
-                                <span className="w-2 h-2 rounded-full bg-purple-500 opacity-50"></span>
-                                <span className="transition-colors">Personal (Outlook)</span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-            )}
+                            <div className={`h-px w-full my-6 ${focusMode ? 'bg-slate-800' : 'bg-indigo-50'}`} />
 
-            <div className="flex-1 flex flex-col bg-white relative min-w-0">
-                <div className="h-16 border-b border-gray-100 flex items-center justify-between px-4 md:px-6 bg-white/80 backdrop-blur-sm sticky top-0 z-20 overflow-x-auto custom-scrollbar gap-4">
-                    <div className="flex items-center gap-2 md:gap-4 shrink-0">
-                        <button onClick={() => setShowSidebar(!showSidebar)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-500">
-                            <Menu className="w-5 h-5" />
-                        </button>
-                        <div className="flex items-center gap-2">
-                            <h2 className="text-lg md:text-xl font-semibold text-gray-900 whitespace-nowrap">
-                                {viewMode === 'month' && `${monthNames[viewDate.getMonth()]} ${viewDate.getFullYear()}`}
-                                {viewMode === 'week' && `${monthNames[viewDate.getMonth()]} ${viewDate.getFullYear()}`}
-                                {viewMode === 'day' && `${monthNames[viewDate.getMonth()]} ${viewDate.getDate()}, ${viewDate.getFullYear()}`}
-                            </h2>
-                            <div className="flex items-center gap-1 text-gray-500">
-                                <button onClick={prev} className="p-1 hover:bg-gray-100 rounded"><ChevronLeft className="w-5 h-5" /></button>
-                                <button onClick={next} className="p-1 hover:bg-gray-100 rounded"><ChevronRight className="w-5 h-5" /></button>
+                            <div className={`text-xs font-bold uppercase tracking-wider mb-4 ${focusMode ? 'text-slate-500' : 'text-gray-400'}`}>Calendars</div>
+                            <div className="space-y-3">
+                                <label className="flex items-center gap-3 text-sm font-medium cursor-pointer group">
+                                    <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${calendarFilters.google ? 'bg-indigo-500 border-indigo-500' : (focusMode ? 'border-slate-600' : 'border-gray-300')}`}>
+                                        {calendarFilters.google && <ArrowRight className="w-3 h-3 text-white -rotate-45" />}
+                                    </div>
+                                    <input type="checkbox" checked={calendarFilters.google} onChange={(e) => setCalendarFilters(prev => ({ ...prev, google: e.target.checked }))} className="hidden" />
+                                    <span className={`w-2 h-2 rounded-full bg-indigo-500 ${!calendarFilters.google ? 'opacity-50' : ''}`} />
+                                    <span className={`transition-colors ${focusMode ? 'text-slate-300 group-hover:text-white' : 'text-slate-600 group-hover:text-slate-900'}`}>Work</span>
+                                </label>
+                                <label className="flex items-center gap-3 text-sm font-medium cursor-not-allowed opacity-50">
+                                    <div className={`w-4 h-4 rounded border flex items-center justify-center ${focusMode ? 'border-slate-700 bg-slate-800' : 'border-gray-200 bg-gray-50'}`} />
+                                    <span className="w-2 h-2 rounded-full bg-purple-500" />
+                                    <span className={`${focusMode ? 'text-slate-500' : 'text-gray-400'}`}>Personal</span>
+                                </label>
                             </div>
                         </div>
-                        <div className="flex items-center bg-gray-100/80 p-1 ml-4 shrink-0 rounded-xl border border-gray-200/50">
-                            <button onClick={() => setViewMode('month')} className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-all ${viewMode === 'month' ? 'bg-white shadow-sm text-gray-900 ring-1 ring-black/5' : 'text-gray-500 hover:text-gray-900 hover:bg-white/50'}`}>Month</button>
-                            <button onClick={() => setViewMode('week')} className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-all ${viewMode === 'week' ? 'bg-white shadow-sm text-gray-900 ring-1 ring-black/5' : 'text-gray-500 hover:text-gray-900 hover:bg-white/50'}`}>Week</button>
-                            <button onClick={() => setViewMode('day')} className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-all ${viewMode === 'day' ? 'bg-white shadow-sm text-gray-900 ring-1 ring-black/5' : 'text-gray-500 hover:text-gray-900 hover:bg-white/50'}`}>Day</button>
-                        </div>
                     </div>
 
-                    <div className="flex items-center gap-2 md:gap-3 shrink-0">
-                        <button onClick={() => setIsEventModalOpen(true)} className="relative isolate overflow-hidden rounded-xl px-3 md:px-4 py-2 font-semibold text-white transition-all duration-300
-                            bg-gradient-to-br from-indigo-600 via-violet-600 to-indigo-700
-                            before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/20 before:to-transparent before:opacity-100
-                            after:absolute after:inset-0 after:shadow-[inset_0_-2px_4px_rgba(0,0,0,0.3)]
-                            shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]
-                            flex items-center gap-2 group">
-                            <Plus className="w-4 h-4 relative z-10" />
-                            <span className="hidden md:inline relative z-10">Create Event</span>
-                        </button>
-                        <button onClick={() => { setViewDate(new Date()); setViewMode('day'); }} className="px-3 md:px-4 py-2 border border-gray-200 bg-white rounded-xl text-xs md:text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300 shadow-sm transition-all hover:shadow-md active:scale-[0.98] whitespace-nowrap">
-                            Today
-                        </button>
-                        <button onClick={() => setShowTaskTray(!showTaskTray)} className={`p-2 rounded-xl transition-all border shadow-sm hover:shadow-md active:scale-[0.98] ${showTaskTray ? 'bg-indigo-50 border-indigo-200 text-indigo-600' : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}>
-                            <LayoutGrid className="w-5 h-5" />
-                        </button>
-                        <button onClick={fetchData} className="p-2 bg-white border border-gray-200 text-gray-500 hover:text-blue-600 hover:bg-gray-50 rounded-xl transition-all shadow-sm hover:shadow-md active:scale-[0.98]">
-                            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                        </button>
-                    </div>
-                </div>
-
-                <div className="flex-1 overflow-y-auto custom-scrollbar p-2 md:p-6">
-                    <div className={`
-                        bg-white rounded-2xl border border-gray-200/60 shadow-sm flex flex-col min-w-[600px] md:min-w-0 transition-all
-                        ${viewMode === 'month' ? 'min-h-full' : 'h-full overflow-hidden'}
-                    `}>
-                        {/* MONTH VIEW */}
+                    {/* V2 Calendar Views */}
+                    <div className="flex-1 overflow-y-auto overflow-x-auto custom-scrollbar relative">
+                        {/* MONTH VIEW V2 */}
                         {viewMode === 'month' && (
-                            <>
-                                <div className="grid grid-cols-7 border-b border-gray-200 bg-gray-50/50 rounded-t-xl">
+                            <div className="h-full flex flex-col min-w-[800px] lg:min-w-0">
+                                <div className={`grid grid-cols-7 border-b ${focusMode ? 'bg-slate-900/50 border-slate-800 text-slate-500' : 'bg-white/60 border-indigo-50/50 text-gray-500'} backdrop-blur-sm sticky top-0 z-10`}>
                                     {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
-                                        <div key={d} className="py-2 text-center text-[10px] md:text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                                            {d}
-                                        </div>
+                                        <div key={d} className="py-3 text-center text-xs font-bold uppercase tracking-widest opacity-70">{d}</div>
                                     ))}
                                 </div>
-                                <div className="grid grid-cols-7 auto-rows-fr">
+                                <div className="grid grid-cols-7 flex-1 auto-rows-fr">
                                     {getMonthDays(viewDate).map((date, i) => {
-                                        if (!date) {
-                                            return (
-                                                <div key={i} className={`
-                                                border-b border-r border-gray-100 p-1 md:p-2 min-h-[100px] relative bg-gray-50/10
-                                                ${i % 7 === 6 ? 'border-r-0' : ''}
-                                            `} />
-                                            );
-                                        }
+                                        if (!date) return <div key={i} className={`border-b border-r ${focusMode ? 'border-slate-800/50 bg-slate-800/20' : 'border-indigo-50/30 bg-indigo-50/10'} ${i % 7 === 6 ? 'border-r-0' : ''}`} />;
 
                                         const dayEvents = events.filter(e => e.date.toDateString() === date.toDateString());
+                                        const isCurrentMonth = date.getMonth() === viewDate.getMonth();
 
                                         return (
-                                            <div key={i} className={`
-                                            border-b border-r border-gray-100 p-1 md:p-2 min-h-[100px] relative group hover:bg-gray-50/50 transition-all
-                                            ${i % 7 === 6 ? 'border-r-0' : ''}
-                                        `}>
-                                                <div className="flex justify-between items-start mb-1 h-[24px]">
-                                                    <span className={`text-xs md:text-sm font-semibold w-6 h-6 flex items-center justify-center rounded-full 
-                                                    ${isToday(date) ? 'bg-indigo-600 text-white' : 'text-gray-700'}`}>
-                                                        {date.getDate()}
-                                                    </span>
+                                            <div key={i} onClick={() => date && setViewDate(date)} className={`
+                                                relative border-b border-r p-2 transition-all duration-200 group
+                                                ${focusMode ? 'border-slate-800/50 hover:bg-slate-800/30' : 'border-indigo-50/50 hover:bg-white/80'}
+                                                ${i % 7 === 6 ? 'border-r-0' : ''}
+                                                ${!isCurrentMonth ? 'opacity-40 grayscale' : ''}
+                                            `}>
+                                                <div className={`
+                                                    w-7 h-7 mb-2 flex items-center justify-center rounded-full text-sm font-semibold transition-all
+                                                    ${isToday(date)
+                                                        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/40 scale-110'
+                                                        : (focusMode ? 'text-slate-400 group-hover:text-white' : 'text-slate-700 group-hover:text-indigo-600 group-hover:bg-indigo-50')}
+                                                `}>
+                                                    {date.getDate()}
                                                 </div>
-
-                                                <div className="space-y-1">
+                                                <div className="space-y-1.5">
                                                     {dayEvents.slice(0, 4).map(e => (
-                                                        <div key={e.id} className={`
-                                                        text-[10px] px-1 md:px-2 py-1 rounded md:rounded-md border ${e.color} 
-                                                        cursor-pointer truncate flex items-center gap-1 font-medium shadow-sm hover:shadow-md transition-all
-                                                    `}>
-                                                            {e.isOnline && <Video className="w-2 h-2 text-current opacity-70 hidden md:block" />}
-                                                            <span className="truncate">{e.time.replace(':00 ', ' ')} <span className="hidden md:inline">{e.title}</span></span>
+                                                        <div key={e.id} onClick={(ev) => { ev.stopPropagation(); setSelectedEvent(e); }} className={`
+                                                            group/event flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-all hover:scale-[1.02]
+                                                            ${focusMode ? 'bg-indigo-500/10 text-indigo-300 hover:bg-indigo-500/20 border border-indigo-500/20' : 'bg-indigo-50/80 text-indigo-700 hover:bg-indigo-100 border border-indigo-100 hover:shadow-sm'}
+                                                        `}>
+                                                            <div className={`w-1.5 h-1.5 rounded-full ${focusMode ? 'bg-indigo-400' : 'bg-indigo-500'}`} />
+                                                            <span className="truncate font-semibold">{e.time.replace(':00 ', ' ')}</span>
+                                                            <span className="truncate opacity-80">{e.title}</span>
                                                         </div>
                                                     ))}
+                                                    {dayEvents.length > 4 && (
+                                                        <div className={`text-[10px] font-bold px-2 ${focusMode ? 'text-slate-500' : 'text-slate-400'}`}>+{dayEvents.length - 4} more</div>
+                                                    )}
                                                 </div>
                                             </div>
-                                        )
+                                        );
                                     })}
                                 </div>
-                            </>
+                            </div>
                         )}
 
-                        {/* WEEK VIEW */}
+                        {/* WEEK VIEW V2 */}
                         {viewMode === 'week' && (
-                            <div className="flex flex-col h-full overflow-hidden">
-                                <div className="grid grid-cols-8 border-b border-gray-200 bg-gray-50/50">
-                                    <div className="p-2 text-center text-xs font-semibold text-gray-400 border-r border-gray-200">GMT+3</div>
+                            <div className="flex flex-col h-full min-w-[800px] lg:min-w-0">
+                                <div className={`grid grid-cols-8 border-b sticky top-0 z-20 ${focusMode ? 'bg-slate-900/90 border-slate-800' : 'bg-white/80 border-indigo-50'} backdrop-blur-md`}>
+                                    <div className={`p-4 text-center text-xs font-bold border-r ${focusMode ? 'text-slate-500 border-slate-800' : 'text-slate-400 border-indigo-50'}`}>UTC+3</div>
                                     {getWeekDays(viewDate).map((d, i) => (
-                                        <div key={i} className={`p-2 text-center border-r border-gray-200 ${i === 6 ? 'border-r-0' : ''}`}>
-                                            <div className="text-[10px] uppercase text-gray-500 font-semibold">{['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getDay()]}</div>
-                                            <div className={`text-sm font-bold w-7 h-7 mx-auto flex items-center justify-center rounded-full mt-1 ${isToday(d) ? 'bg-indigo-600 text-white' : 'text-gray-900'}`}>
-                                                {d.getDate()}
-                                            </div>
+                                        <div key={i}
+                                            onClick={() => setViewDate(d)}
+                                            className={`py-3 text-center border-r cursor-pointer transition-colors ${focusMode ? 'border-slate-800 hover:bg-slate-800' : 'border-indigo-50 hover:bg-indigo-50'} ${i === 6 ? 'border-r-0' : ''}`}>
+                                            <div className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${focusMode ? 'text-slate-500' : 'text-indigo-400'}`}>{['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getDay()]}</div>
+                                            <div className={`w-8 h-8 mx-auto flex items-center justify-center rounded-full text-sm font-bold transition-all ${isToday(d) ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30' : (focusMode ? 'text-slate-200' : 'text-slate-800')}`}>{d.getDate()}</div>
                                         </div>
                                     ))}
                                 </div>
-                                <div className="flex-1 overflow-y-auto relative">
+                                <div className="flex-1 overflow-y-auto relative custom-scrollbar">
                                     <div className="grid grid-cols-8 auto-rows-[60px]">
-                                        <div className="col-span-1 border-r border-gray-200 bg-gray-50/20">
+                                        {/* Time Column with Current Time Line Mockup */}
+                                        <div className={`col-span-1 border-r ${focusMode ? 'border-slate-800 bg-slate-800/20' : 'border-indigo-50 bg-indigo-50/30'}`}>
                                             {getHours().map(h => (
-                                                <div key={h} className="h-[60px] border-b border-gray-100 text-[10px] text-gray-400 p-1 text-right relative -top-2">
+                                                <div key={h} className={`h-[60px] text-[10px] font-medium p-2 text-right -mt-2.5 ${focusMode ? 'text-slate-600' : 'text-slate-400'}`}>
                                                     {h === 0 ? '12 AM' : h < 12 ? `${h} AM` : h === 12 ? '12 PM' : `${h - 12} PM`}
                                                 </div>
                                             ))}
                                         </div>
-
+                                        {/* Days Columns */}
                                         {getWeekDays(viewDate).map((d, colIndex) => (
-                                            <div key={colIndex} className="col-span-1 border-r border-gray-100 relative">
+                                            <div key={colIndex} className={`col-span-1 border-r relative group ${focusMode ? 'border-slate-800 hover:bg-white/5' : 'border-indigo-50 hover:bg-indigo-50/30'}`}>
                                                 {getHours().map(h => (
-                                                    <div key={h} className="h-[60px] border-b border-gray-100" />
+                                                    <div key={h} className={`h-[60px] border-b ${focusMode ? 'border-slate-800/50' : 'border-indigo-50/50'}`} />
                                                 ))}
-                                                {events
-                                                    .filter(e => e.date.toDateString() === d.toDateString())
-                                                    .map(e => {
-                                                        const startHour = parseInt(e.time.split(':')[0]) + (e.time.includes('PM') && !e.time.startsWith('12') ? 12 : 0);
-                                                        const top = isNaN(startHour) ? 0 : startHour * 60;
+
+                                                {/* Current Time Indicator for Today */}
+                                                {isToday(d) && (
+                                                    <div className="absolute w-full h-0.5 bg-red-500 z-20 pointer-events-none" style={{ top: '45%' }}>
+                                                        <div className="absolute -left-1 -top-1 w-2.5 h-2.5 rounded-full bg-red-500" />
+                                                    </div>
+                                                )}
+
+                                                {(() => {
+                                                    const dayEvents = events.filter(e => e.date.toDateString() === d.toDateString());
+                                                    const layout = calculateEventLayout(dayEvents);
+
+                                                    return dayEvents.map(e => {
+                                                        const startHour = e.date.getHours();
+                                                        const startMin = e.date.getMinutes();
+                                                        const top = startHour * 60 + startMin;
+                                                        const style = layout[e.id] || { left: '4px', width: '95%' };
+
                                                         return (
                                                             <div key={e.id}
-                                                                className={`absolute left-0.5 right-0.5 p-1 rounded border overflow-hidden text-[10px] ${e.color} z-10 shadow-sm`}
-                                                                style={{ top: `${top}px`, height: '58px' }}
+                                                                onClick={(ev) => { ev.stopPropagation(); setSelectedEvent(e); }}
+                                                                className={`
+                                                                    absolute p-2 rounded-xl border z-10 
+                                                                    cursor-pointer transition-all hover:scale-[1.03] hover:z-20
+                                                                    flex flex-col justify-center overflow-hidden
+                                                                    ${focusMode
+                                                                        ? 'bg-indigo-600/20 border-indigo-500/30 text-indigo-100 hover:bg-indigo-600/30 shadow-lg shadow-black/20'
+                                                                        : 'bg-white/90 border-indigo-100 text-indigo-900 hover:bg-indigo-50 hover:border-indigo-200 shadow-md shadow-indigo-100'}
+                                                                `}
+                                                                style={{
+                                                                    top: `${top}px`,
+                                                                    height: '56px',
+                                                                    left: style.left,
+                                                                    width: style.width
+                                                                }}
                                                             >
-                                                                <div className="font-bold truncate">{e.title}</div>
-                                                                <div className="truncate text-xs opacity-75">{e.time}</div>
+                                                                <div className="font-bold text-xs truncate leading-tight mb-0.5">{e.title}</div>
+                                                                <div className={`text-[10px] truncate flex items-center gap-1 ${focusMode ? 'text-indigo-300' : 'text-indigo-500'}`}>
+                                                                    <Clock className="w-2.5 h-2.5" />
+                                                                    {e.time}
+                                                                </div>
                                                             </div>
-                                                        )
-                                                    })
-                                                }
+                                                        );
+                                                    });
+                                                })()}
                                             </div>
                                         ))}
                                     </div>
@@ -501,129 +632,191 @@ const UnifiedCalendar: React.FC = () => {
                             </div>
                         )}
 
-                        {/* DAY VIEW */}
+                        {/* DAY VIEW V2 */}
                         {viewMode === 'day' && (
-                            <div className="flex flex-col h-full overflow-hidden">
-                                <div className="p-4 border-b border-gray-200 bg-gray-50/50 flex items-center justify-center">
+                            <div className="flex flex-col h-full">
+                                <div className={`p-6 border-b flex items-center justify-center ${focusMode ? 'bg-slate-900/90 border-slate-800' : 'bg-white/80 border-indigo-50'}`}>
                                     <div className="text-center">
-                                        <div className="text-sm uppercase text-gray-500 font-semibold">{['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][viewDate.getDay()]}</div>
-                                        <div className={`text-2xl font-bold inline-flex w-10 h-10 items-center justify-center rounded-full mt-1 ${isToday(viewDate) ? 'bg-indigo-600 text-white' : 'text-gray-900'}`}>
-                                            {viewDate.getDate()}
-                                        </div>
+                                        <div className={`text-sm font-bold uppercase tracking-widest mb-1 ${focusMode ? 'text-slate-500' : 'text-indigo-400'}`}>{['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][viewDate.getDay()]}</div>
+                                        <div className={`text-4xl font-extrabold ${focusMode ? 'text-white' : 'text-slate-900'}`}>{viewDate.getDate()}</div>
                                     </div>
                                 </div>
-                                <div className="flex-1 overflow-y-auto relative">
-                                    <div className="flex relative min-h-[1440px]">
-                                        <div className="w-16 md:w-20 border-r border-gray-200 bg-gray-50/20 shrink-0">
+                                <div className="flex-1 overflow-y-auto relative custom-scrollbar">
+                                    <div className="flex min-h-[1440px]">
+                                        <div className={`w-20 border-r shrink-0 ${focusMode ? 'border-slate-800 bg-slate-800/20' : 'border-indigo-50 bg-indigo-50/30'}`}>
                                             {getHours().map(h => (
-                                                <div key={h} className="h-[60px] border-b border-gray-100 text-xs text-gray-400 p-2 text-right">
+                                                <div key={h} className={`h-[60px] text-xs font-medium p-3 text-right ${focusMode ? 'text-slate-600' : 'text-slate-400'}`}>
                                                     {h === 0 ? '12 AM' : h < 12 ? `${h} AM` : h === 12 ? '12 PM' : `${h - 12} PM`}
                                                 </div>
                                             ))}
                                         </div>
-                                        <div className="flex-1 relative">
+                                        <div className={`flex-1 relative ${focusMode ? 'bg-slate-900' : 'bg-white'}`}>
                                             {getHours().map(h => (
-                                                <div key={h} className="h-[60px] border-b border-gray-100" />
+                                                <div key={h} className={`h-[60px] border-b ${focusMode ? 'border-slate-800/50' : 'border-indigo-50/50'}`} />
                                             ))}
-                                            {events
-                                                .filter(e => e.date.toDateString() === viewDate.toDateString())
-                                                .map(e => {
+                                            {(() => {
+                                                const dayEvents = events.filter(e => e.date.toDateString() === viewDate.toDateString());
+                                                const layout = calculateEventLayout(dayEvents);
+
+                                                return dayEvents.map(e => {
+                                                    const startHour = e.date.getHours();
+                                                    const startMin = e.date.getMinutes();
+                                                    const top = startHour * 60 + startMin;
+                                                    const style = layout[e.id] || { left: '0%', width: '100%' };
+
                                                     return (
                                                         <div key={e.id}
-                                                            className={`absolute left-2 right-2 p-3 rounded-lg border ${e.color} z-10 shadow-md`}
-                                                            style={{ top: '100px', height: '80px' }}
+                                                            onClick={(ev) => { ev.stopPropagation(); setSelectedEvent(e); }}
+                                                            className={`
+                                                                 absolute p-4 rounded-2xl border z-10 shadow-lg cursor-pointer
+                                                                 transition-all hover:scale-[1.01] hover:-translate-y-1
+                                                                 ${focusMode ? 'bg-indigo-600/20 border-indigo-500/40 text-white shadow-indigo-900/20' : 'bg-white border-indigo-100 text-indigo-900 shadow-indigo-100/50'}
+                                                             `}
+                                                            style={{
+                                                                top: `${top}px`,
+                                                                height: '100px',
+                                                                left: `calc(${style.left} + 1rem)`,
+                                                                width: `calc(${style.width} - 2rem)`
+                                                            }}
                                                         >
-                                                            <div className="font-bold">{e.title}</div>
-                                                            <div className="opacity-75">{e.time} - {e.endTime}</div>
-                                                            {e.location && <div className="flex items-center gap-1 mt-1 text-xs opacity-75"><MapPin className="w-3 h-3" /> {e.location}</div>}
+                                                            <div className="flex justify-between items-start">
+                                                                <div>
+                                                                    <h3 className="font-bold text-base mb-1">{e.title}</h3>
+                                                                    <div className={`flex items-center gap-2 text-xs font-medium ${focusMode ? 'text-indigo-300' : 'text-indigo-500'}`}>
+                                                                        <Clock className="w-3.5 h-3.5" />
+                                                                        {e.time} - {e.endTime}
+                                                                    </div>
+                                                                </div>
+                                                                {e.isOnline && (
+                                                                    <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${focusMode ? 'bg-indigo-500/30 text-indigo-200' : 'bg-indigo-50 text-indigo-600'}`}>
+                                                                        Online
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                            {e.location && (
+                                                                <div className={`flex items-center gap-1.5 mt-3 text-xs ${focusMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                                                                    <MapPin className="w-3.5 h-3.5" /> {e.location}
+                                                                </div>
+                                                            )}
                                                         </div>
-                                                    )
-                                                })
-                                            }
+                                                    );
+                                                });
+                                            })()}
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         )}
+                    </div>
+
+                    {/* 3. AMIE-STYLE TASK SIDEBAR (Right) */}
+                    <div className={`
+                         transition-all duration-300 border-l flex flex-col z-20
+                         ${showTaskTray ? 'w-[340px] opacity-100 translate-x-0' : 'w-0 opacity-0 translate-x-4 overflow-hidden'}
+                         ${focusMode ? 'bg-slate-900/50 border-slate-800' : 'bg-white/60 border-indigo-50'}
+                         backdrop-blur-xl hidden lg:flex
+                    `}>
+                        <div className={`p-5 border-b flex items-center justify-between ${focusMode ? 'border-slate-800' : 'border-indigo-50'}`}>
+                            <div className="flex items-center gap-2">
+                                <div className={`p-1.5 rounded-lg ${focusMode ? 'bg-emerald-500/20 text-emerald-400' : 'bg-emerald-50 text-emerald-600'}`}>
+                                    <CheckSquare className="w-4 h-4" />
+                                </div>
+                                <h3 className={`font-bold ${focusMode ? 'text-white' : 'text-slate-900'}`}>Unscheduled Tasks</h3>
+                            </div>
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${focusMode ? 'bg-slate-800 text-slate-400' : 'bg-gray-100 text-gray-500'}`}>{tasks.length}</span>
+                        </div>
+
+                        {/* Task Filters */}
+                        <div className="px-4 py-3 flex gap-2 overflow-x-auto custom-scrollbar">
+                            {['All', 'ClickUp', 'Jira', 'Trello'].map(f => (
+                                <button
+                                    key={f}
+                                    onClick={() => setTaskFilter(f)}
+                                    className={`
+                                   px-3 py-1 rounded-full text-[10px] font-bold border transition-all whitespace-nowrap
+                                   ${taskFilter === f
+                                            ? (focusMode ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-emerald-50 text-emerald-700 border-emerald-200')
+                                            : (focusMode ? 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white' : 'bg-white text-gray-500 border-gray-200 hover:border-emerald-200 hover:text-emerald-600')}
+                               `}>
+                                    {f}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Task List */}
+                        <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
+                            {taskLoading ? (
+                                <div className="flex flex-col items-center justify-center h-40 opacity-50">
+                                    <Loader2 className={`w-6 h-6 animate-spin ${focusMode ? 'text-white' : 'text-indigo-600'}`} />
+                                </div>
+                            ) : (
+                                tasks
+                                    .filter(t => taskFilter === 'All' || t.platform.toLowerCase() === taskFilter.toLowerCase())
+                                    .map(task => (
+                                        <div key={task.id} className={`
+                                        group relative p-4 rounded-2xl border transition-all duration-200 cursor-grab active:cursor-grabbing
+                                        ${focusMode
+                                                ? 'bg-slate-800/40 border-slate-700/50 hover:bg-slate-800 hover:border-emerald-500/30 text-slate-300'
+                                                : 'bg-white/80 border-indigo-50 hover:bg-white hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-100/40'}
+                                    `}>
+                                            <div className="flex justify-between items-start mb-2">
+                                                <div className="flex items-center gap-1.5">
+                                                    {getPlatformIcon(task.platform)}
+                                                    <span className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${focusMode ? 'bg-slate-900 text-slate-500' : 'bg-gray-100 text-gray-400'}`}>
+                                                        {task.platform}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <h4 className={`text-sm font-semibold mb-1 leading-snug line-clamp-2 ${focusMode ? 'text-white group-hover:text-emerald-400' : 'text-slate-800 group-hover:text-emerald-600'}`}>
+                                                {task.title}
+                                            </h4>
+                                            <p className={`text-xs truncate ${focusMode ? 'text-slate-500' : 'text-slate-400'}`}>{task.subtitle}</p>
+
+                                            {/* Drag Handle Visual */}
+                                            <div className={`absolute right-3 top-3 opacity-0 group-hover:opacity-100 transition-opacity ${focusMode ? 'text-slate-600' : 'text-gray-300'}`}>
+                                                <MoreHorizontal className="w-4 h-4" />
+                                            </div>
+                                        </div>
+                                    ))
+                            )}
+
+                            {/* Empty State */}
+                            {!taskLoading && tasks.length === 0 && (
+                                <div className={`text-center py-10 ${focusMode ? 'text-slate-600' : 'text-gray-300'}`}>
+                                    <CheckSquare className="w-10 h-10 mx-auto mb-2 opacity-20" />
+                                    <p className="text-sm font-medium">All caught up!</p>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Task Footer */}
+                        <div className={`p-4 border-t ${focusMode ? 'border-slate-800 bg-slate-900/50' : 'border-indigo-50 bg-gray-50/50'}`}>
+                            <button className={`w-full py-2.5 rounded-xl font-semibold text-xs border border-dashed transition-all flex items-center justify-center gap-2 ${focusMode ? 'border-slate-700 text-slate-400 hover:text-white hover:border-emerald-500/50' : 'border-gray-300 text-gray-500 hover:text-emerald-600 hover:border-emerald-300 hover:bg-emerald-50/30'}`}>
+                                <Plus className="w-3.5 h-3.5" /> Add Task Manually
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            {showTaskTray && (
-                <div className="fixed inset-y-0 right-0 z-50 md:relative md:z-30 w-80 border-l border-gray-200/60 bg-white flex flex-col shadow-2xl md:shadow-none animate-in slide-in-from-right-4 duration-300">
-                    <div className="p-5 border-b border-gray-100 flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                            <CheckSquare className="w-5 h-5 text-emerald-500" />
-                            <h3 className="font-bold text-gray-900">Task Tray</h3>
-                        </div>
-                        <div className="text-xs font-medium text-gray-400 bg-gray-100 px-2 py-1 rounded-full">{tasks.length}</div>
-                    </div>
-
-                    <div className="p-4 bg-gray-50/50 border-b border-gray-100">
-                        <div className="relative">
-                            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                            <input
-                                type="text"
-                                placeholder="Filter tasks..."
-                                className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
-                        {taskLoading ? (
-                            <div className="flex flex-col items-center justify-center py-10 text-gray-400">
-                                <Loader2 className="w-6 h-6 animate-spin mb-2" />
-                                <span className="text-xs">Loading tasks...</span>
-                            </div>
-                        ) : tasks.length === 0 ? (
-                            <div className="text-center py-10 text-gray-400">
-                                <CheckSquare className="w-8 h-8 mx-auto mb-2 opacity-20" />
-                                <p className="text-sm">No active tasks found</p>
-                                <p className="text-xs text-gray-400 mt-1">Check "To Do" or "Open" tasks in your apps</p>
-                            </div>
-                        ) : (
-                            tasks.map(task => (
-                                <div
-                                    key={task.id}
-                                    draggable
-                                    className="bg-white p-3 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-indigo-200 cursor-grab active:cursor-grabbing transition-all group"
-                                >
-                                    <div className="flex items-start justify-between mb-1">
-                                        <div className="flex items-center gap-2">
-                                            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-500 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
-                                                {task.platform}
-                                            </span>
-                                            <span className="text-[10px] font-medium text-gray-400">
-                                                {task.status}
-                                            </span>
-                                        </div>
-                                        <button className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-gray-600 transition-opacity">
-                                            <MoreHorizontal className="w-4 h-4" />
-                                        </button>
-                                    </div>
-                                    <h4 className="text-sm font-semibold text-gray-900 leading-snug mb-1">{task.title}</h4>
-                                    <div className="flex items-center gap-2 text-xs text-gray-500">
-                                        {getPlatformIcon(task.platform)}
-                                        <span className="truncate max-w-[150px]">{task.subtitle}</span>
-                                    </div>
-                                </div>
-                            ))
-                        )}
-                    </div>
-                </div>
-            )}
-
             <style>{`
-                .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+                .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
                 .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-                .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 4px; }
+                .custom-scrollbar::-webkit-scrollbar-thumb { background: ${focusMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'}; border-radius: 10px; }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: ${focusMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'}; }
             `}</style>
 
             <CreateEventModal
                 isOpen={isEventModalOpen}
                 onClose={() => setIsEventModalOpen(false)}
                 onEventCreated={fetchData}
+            />
+
+            <EventDetailsModal
+                isOpen={!!selectedEvent}
+                onClose={() => setSelectedEvent(null)}
+                event={selectedEvent}
+                focusMode={focusMode}
             />
         </div>
     );
