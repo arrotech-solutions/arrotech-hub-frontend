@@ -36,6 +36,22 @@ const FloatingActionMenu: React.FC = () => {
   const [showAssistant, setShowAssistant] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
+  // User preferences from localStorage
+  const [showFloatingMenu, setShowFloatingMenu] = useState(() => localStorage.getItem('showFloatingMenu') !== 'false');
+  const [showTutorials, setShowTutorials] = useState(() => localStorage.getItem('showTutorials') !== 'false');
+  const [showAIAssistant, setShowAIAssistant] = useState(() => localStorage.getItem('showAIAssistant') !== 'false');
+
+  // Listen for storage changes (from Settings page)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setShowFloatingMenu(localStorage.getItem('showFloatingMenu') !== 'false');
+      setShowTutorials(localStorage.getItem('showTutorials') !== 'false');
+      setShowAIAssistant(localStorage.getItem('showAIAssistant') !== 'false');
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
   // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -72,8 +88,8 @@ const FloatingActionMenu: React.FC = () => {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Don't show when not logged in or tutorial is active
-  if (!user || tutorialActive) return null;
+  // Don't show when: not logged in, tutorial is active, or user disabled via settings
+  if (!user || tutorialActive || !showFloatingMenu) return null;
 
   const pageLabels: Record<string, string> = {
     dashboard: 'Dashboard',
@@ -100,8 +116,10 @@ const FloatingActionMenu: React.FC = () => {
   const currentPageLabel = pageLabels[currentPage] || 'This Page';
   const hasCompletedCurrentPage = hasCompletedPage(currentPage);
 
+  // Build menu items based on user preferences
   const menuItems: MenuItem[] = [
-    {
+    // AI Assistant - only show if enabled
+    ...(showAIAssistant ? [{
       id: 'assistant',
       icon: <Bot className="w-5 h-5" />,
       label: 'AI Assistant',
@@ -112,30 +130,33 @@ const FloatingActionMenu: React.FC = () => {
         setShowAssistant(true);
       },
       badge: 'AI',
-    },
-    {
-      id: 'page-tutorial',
-      icon: <BookOpen className="w-5 h-5" />,
-      label: `${currentPageLabel} Tutorial`,
-      description: hasCompletedCurrentPage ? 'Replay tutorial' : 'Learn this page',
-      color: 'from-blue-500 to-cyan-500',
-      onClick: () => {
-        setIsOpen(false);
-        startPageTutorial();
+    }] : []),
+    // Tutorial items - only show if enabled
+    ...(showTutorials ? [
+      {
+        id: 'page-tutorial',
+        icon: <BookOpen className="w-5 h-5" />,
+        label: `${currentPageLabel} Tutorial`,
+        description: hasCompletedCurrentPage ? 'Replay tutorial' : 'Learn this page',
+        color: 'from-blue-500 to-cyan-500',
+        onClick: () => {
+          setIsOpen(false);
+          startPageTutorial();
+        },
+        badge: hasCompletedCurrentPage ? '✓' : 'New',
       },
-      badge: hasCompletedCurrentPage ? '✓' : 'New',
-    },
-    {
-      id: 'full-tutorial',
-      icon: <Sparkles className="w-5 h-5" />,
-      label: 'Full Platform Tour',
-      description: 'Explore all features',
-      color: 'from-amber-500 to-orange-500',
-      onClick: () => {
-        setIsOpen(false);
-        startTutorial();
+      {
+        id: 'full-tutorial',
+        icon: <Sparkles className="w-5 h-5" />,
+        label: 'Full Platform Tour',
+        description: 'Explore all features',
+        color: 'from-amber-500 to-orange-500',
+        onClick: () => {
+          setIsOpen(false);
+          startTutorial();
+        },
       },
-    },
+    ] : []),
   ];
 
   return (

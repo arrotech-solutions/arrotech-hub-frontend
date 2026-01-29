@@ -1,9 +1,9 @@
 import {
-    ChevronLeft,
-    ChevronRight,
-    SkipForward,
-    Sparkles,
-    X
+  ChevronLeft,
+  ChevronRight,
+  SkipForward,
+  Sparkles,
+  X
 } from 'lucide-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
@@ -18,14 +18,14 @@ interface OverlayPosition {
 
 const TutorialOverlay: React.FC = () => {
   const { user } = useAuth();
-  const { 
-    isActive, 
-    currentStep, 
-    currentStepIndex, 
+  const {
+    isActive,
+    currentStep,
+    currentStepIndex,
     totalSteps,
-    nextStep, 
-    previousStep, 
-    skipTutorial, 
+    nextStep,
+    previousStep,
+    skipTutorial,
     completePageTutorial,
     tutorialMode,
     currentPage
@@ -37,12 +37,24 @@ const TutorialOverlay: React.FC = () => {
   const tooltipRef = useRef<HTMLDivElement>(null);
   const animationFrameRef = useRef<number | null>(null);
 
+  // User preference for tutorial guide visibility
+  const [showTutorialGuide, setShowTutorialGuide] = useState(() => localStorage.getItem('showTutorialGuide') !== 'false');
+
+  // Listen for storage changes (from Settings page)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setShowTutorialGuide(localStorage.getItem('showTutorialGuide') !== 'false');
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
   // Function to update positions based on current element location
   const updatePositions = useCallback(() => {
     if (!targetElement) return;
 
     const rect = targetElement.getBoundingClientRect();
-    
+
     // Update highlight position (using viewport coordinates for fixed positioning)
     setOverlayPosition({
       top: rect.top,
@@ -121,20 +133,20 @@ const TutorialOverlay: React.FC = () => {
     if (isActive && currentStep) {
       let retryCount = 0;
       const maxRetries = 10;
-      
+
       // Small delay to let the page render
       const findElement = () => {
         // Try primary target first, then fallback
         let element = document.querySelector(currentStep.target) as HTMLElement;
-        
+
         // If primary target not found, try fallback
         if (!element && (currentStep as any).fallbackTarget) {
           element = document.querySelector((currentStep as any).fallbackTarget) as HTMLElement;
         }
-        
+
         if (element) {
           setTargetElement(element);
-          
+
           // Check if element is in viewport
           const rect = element.getBoundingClientRect();
           const isInViewport = (
@@ -143,7 +155,7 @@ const TutorialOverlay: React.FC = () => {
             rect.bottom <= window.innerHeight &&
             rect.right <= window.innerWidth
           );
-          
+
           // Only scroll if element is not in viewport
           if (!isInViewport) {
             element.scrollIntoView({
@@ -181,7 +193,7 @@ const TutorialOverlay: React.FC = () => {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
-      
+
       // Use requestAnimationFrame for smooth updates
       animationFrameRef.current = requestAnimationFrame(updatePositions);
     };
@@ -201,15 +213,15 @@ const TutorialOverlay: React.FC = () => {
       window.removeEventListener('scroll', handleUpdate, true);
       window.removeEventListener('resize', handleUpdate);
       resizeObserver.disconnect();
-      
+
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
   }, [isActive, targetElement, updatePositions]);
 
-  // Don't show overlay when not logged in or tutorial is not active
-  if (!user || !isActive || !currentStep) return null;
+  // Don't show overlay when not logged in, tutorial is not active, or user disabled it
+  if (!user || !isActive || !currentStep || !showTutorialGuide) return null;
 
   // Check if target element is visible in viewport
   const isTargetVisible = targetElement && overlayPosition.width > 0 && overlayPosition.height > 0;
@@ -217,21 +229,21 @@ const TutorialOverlay: React.FC = () => {
   return (
     <>
       {/* Backdrop with cutout effect */}
-      <div 
+      <div
         className="fixed inset-0 z-[9998] pointer-events-none"
         style={{
-          background: isTargetVisible 
+          background: isTargetVisible
             ? `radial-gradient(ellipse ${overlayPosition.width + 40}px ${overlayPosition.height + 40}px at ${overlayPosition.left + overlayPosition.width / 2}px ${overlayPosition.top + overlayPosition.height / 2}px, transparent 60%, rgba(0, 0, 0, 0.6) 100%)`
             : 'rgba(0, 0, 0, 0.6)'
         }}
       />
-      
+
       {/* Clickable backdrop to prevent interactions */}
-      <div 
-        className="fixed inset-0 z-[9997]" 
+      <div
+        className="fixed inset-0 z-[9997]"
         onClick={(e) => e.stopPropagation()}
       />
-      
+
       {/* Highlight overlay - only show if element is found */}
       {isTargetVisible && (
         <div
@@ -279,9 +291,8 @@ const TutorialOverlay: React.FC = () => {
                     {Array.from({ length: totalSteps }, (_, i) => (
                       <div
                         key={i}
-                        className={`w-2 h-2 rounded-full transition-colors ${
-                          i === currentStepIndex ? 'bg-blue-500' : 'bg-gray-300'
-                        }`}
+                        className={`w-2 h-2 rounded-full transition-colors ${i === currentStepIndex ? 'bg-blue-500' : 'bg-gray-300'
+                          }`}
                       />
                     ))}
                   </div>
@@ -335,7 +346,7 @@ const TutorialOverlay: React.FC = () => {
                 <SkipForward className="w-4 h-4" />
                 <span>Skip</span>
               </button>
-              
+
               <button
                 onClick={() => {
                   if (currentStepIndex === totalSteps - 1) {
@@ -351,8 +362,8 @@ const TutorialOverlay: React.FC = () => {
                 className="flex items-center space-x-2 px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-lg transform hover:scale-105 transition-all duration-200"
               >
                 <span>
-                  {currentStepIndex === totalSteps - 1 
-                    ? (tutorialMode === 'page' ? 'Done' : 'Continue') 
+                  {currentStepIndex === totalSteps - 1
+                    ? (tutorialMode === 'page' ? 'Done' : 'Continue')
                     : 'Next'}
                 </span>
                 {currentStepIndex === totalSteps - 1 ? (
@@ -368,12 +379,11 @@ const TutorialOverlay: React.FC = () => {
         {/* Arrow pointer */}
         {isTargetVisible && (
           <div
-            className={`absolute w-4 h-4 bg-white transform rotate-45 border border-gray-200 ${
-              currentStep.position === 'top' ? 'bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 border-t-0 border-l-0' :
-              currentStep.position === 'bottom' ? 'top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 border-b-0 border-r-0' :
-              currentStep.position === 'left' ? 'right-0 top-1/2 -translate-y-1/2 translate-x-1/2 border-l-0 border-b-0' :
-              'left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 border-r-0 border-t-0'
-            }`}
+            className={`absolute w-4 h-4 bg-white transform rotate-45 border border-gray-200 ${currentStep.position === 'top' ? 'bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 border-t-0 border-l-0' :
+                currentStep.position === 'bottom' ? 'top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 border-b-0 border-r-0' :
+                  currentStep.position === 'left' ? 'right-0 top-1/2 -translate-y-1/2 translate-x-1/2 border-l-0 border-b-0' :
+                    'left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 border-r-0 border-t-0'
+              }`}
           />
         )}
       </div>
