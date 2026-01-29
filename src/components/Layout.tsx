@@ -265,7 +265,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <div key={item.name}>
           <button
             onClick={() => toggleMenu(item.name)}
-            className={`w-full group flex items-center px-4 py-3 rounded-xl transition-all duration-200 ${isActive && !isExpanded
+            className={`w-full group flex items-center ${collapsed && !isMobile ? 'px-2 justify-center' : 'px-4'} py-3 rounded-xl transition-all duration-200 ${isActive && !isExpanded
               ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
               : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
               }`}
@@ -328,7 +328,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <Link
         key={item.name}
         to={item.href}
-        className={`group flex items-center px-4 py-3 rounded-xl transition-all duration-200 ${isActive
+        className={`group flex items-center ${collapsed && !isMobile ? 'px-2 justify-center' : 'px-4'} py-3 rounded-xl transition-all duration-200 ${isActive
           ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
           : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
           }`}
@@ -423,7 +423,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </div>
 
       {/* Desktop sidebar */}
-      <div className={`sidebar hidden lg:fixed lg:inset-y-0 lg:flex lg:flex-col transition-all duration-300 ${collapsed ? 'lg:w-24' : 'lg:w-80'
+      <div className={`sidebar hidden lg:fixed lg:inset-y-0 lg:flex lg:flex-col transition-all duration-300 z-40 ${collapsed ? 'lg:w-24' : 'lg:w-80'
         }`}>
         <div className="flex flex-col h-full bg-white/95 backdrop-blur-xl shadow-xl border-r border-gray-200/50">
           {/* Header */}
