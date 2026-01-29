@@ -18,6 +18,18 @@ const TutorialButton: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
+  // User preference for tutorial guide visibility
+  const [showTutorialGuide, setShowTutorialGuide] = useState(() => localStorage.getItem('showTutorialGuide') !== 'false');
+
+  // Listen for storage changes (from Settings page)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setShowTutorialGuide(localStorage.getItem('showTutorialGuide') !== 'false');
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
   // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -35,8 +47,8 @@ const TutorialButton: React.FC = () => {
     };
   }, [isMenuOpen]);
 
-  // Don't show button when not logged in or tutorial is active
-  if (!user || isActive) return null;
+  // Don't show button when not logged in, tutorial is active, or user disabled it
+  if (!user || isActive || !showTutorialGuide) return null;
 
   const pageLabels: Record<string, string> = {
     dashboard: 'Dashboard',
