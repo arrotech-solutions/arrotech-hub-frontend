@@ -1,26 +1,85 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
-    Mail, MessageCircle, MessageSquare, Search, Inbox,
-    Star, Trash, PenSquare, Paperclip, Reply, Archive, X, Send, Tag,
-    Menu, ArrowLeft
+    Search, Inbox,
+    PenSquare, Paperclip, Reply, Archive, X, Send, Tag,
+    Menu, ArrowLeft, Star, Trash
 } from 'lucide-react';
 import apiService from '../services/api';
-import { OutlookLogo } from '../components/BrandIcons';
 import toast from 'react-hot-toast';
+
+// Brand Assets
+import gmailLogo from '../assets/apps/gmail.png';
+import slackLogo from '../assets/apps/slack.jpg';
+import teamsLogo from '../assets/apps/microsoft_teams.png';
+import outlookLogo from '../assets/apps/outlook.png';
 
 interface Message {
     id: string;
     source: 'gmail' | 'slack' | 'teams' | 'outlook';
     sender: string;
+    senderEmail?: string; // For Gmail/Outlook reply-to
+    channelId?: string; // For Slack channel replies
+    threadTs?: string; // For Slack thread replies
     subject: string;
     preview: string;
     fullContent?: string;
     time: string;
+    timestamp?: number;
     read: boolean;
     starred: boolean;
     avatar?: string;
     labels?: string[];
 }
+
+const parseGmailBody = (payload: any): string => {
+    if (!payload) return '';
+    console.log('🔍 Parsing Payload Structure:', payload.mimeType);
+
+    let htmlBody = '';
+    let plainBody = '';
+
+    const decode = (data: string) => {
+        try {
+            return atob(data.replace(/-/g, '+').replace(/_/g, '/'));
+        } catch (e) {
+            console.error('Base64 decode error', e);
+            return '';
+        }
+    };
+
+    const traverse = (p: any) => {
+        // console.log('➡️ Visiting part:', p.mimeType); // Verbose traversal log
+
+        if (p.mimeType === 'text/html' && p.body?.data) {
+            console.log('✅ Found HTML part. Size:', p.body.size);
+            htmlBody = decode(p.body.data);
+        }
+        else if (p.mimeType === 'text/plain' && p.body?.data) {
+            console.log('📄 Found Plain text part. Size:', p.body.size);
+            if (!plainBody) plainBody = decode(p.body.data);
+        }
+
+        if (p.parts) {
+            p.parts.forEach((part: any) => traverse(part));
+        }
+    };
+
+    traverse(payload);
+
+    // Check root if not found in parts
+    if (!htmlBody && !plainBody) {
+        if (payload.body?.data) {
+            console.log('📦 Found root body data. Mime:', payload.mimeType);
+            const decoded = decode(payload.body.data);
+            if (payload.mimeType === 'text/html') htmlBody = decoded;
+            else if (payload.mimeType === 'text/plain') plainBody = decoded;
+        }
+    }
+
+    const result = htmlBody || plainBody || payload.snippet || '';
+    if (!htmlBody && !plainBody) console.warn('⚠️ No body found, falling back to snippet');
+    return result;
+};
 
 const UnifiedInbox: React.FC = () => {
     // State
@@ -38,12 +97,63 @@ const UnifiedInbox: React.FC = () => {
     // Compose/Reply State
     const [composeChannel, setComposeChannel] = useState<'gmail' | 'slack' | 'teams' | 'outlook'>('gmail');
     const [replyText, setReplyText] = useState('');
+    const replyInputRef = useRef<HTMLTextAreaElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [attachments, setAttachments] = useState<File[]>([]);
     const [composeTo, setComposeTo] = useState('');
     const [composeCc, setComposeCc] = useState('');
     const [composeBcc, setComposeBcc] = useState('');
     const [showCcBcc, setShowCcBcc] = useState(false);
     const [composeSubject, setComposeSubject] = useState('');
+
     const [composeBody, setComposeBody] = useState('');
+
+    // Compose Attachment State
+    const composeFileInputRef = useRef<HTMLInputElement>(null);
+    const [composeAttachments, setComposeAttachments] = useState<File[]>([]);
+
+    // Compose File Handlers
+    const handleComposeFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        console.log('Compose files selected:', files);
+        if (files && files.length > 0) {
+            const newFiles = Array.from(files);
+            console.log('Adding compose files:', newFiles);
+            setComposeAttachments(prev => [...prev, ...newFiles]);
+            // Feedback
+            toast.success(`Attached ${newFiles.length} file(s)`);
+        }
+        if (e.target) e.target.value = '';
+    };
+
+    const removeComposeAttachment = (index: number) => {
+        setComposeAttachments(prev => prev.filter((_, i) => i !== index));
+    };
+
+    // File attachment handler
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        console.log('Files selected:', files);
+        if (files && files.length > 0) {
+            const newFiles = Array.from(files);
+            console.log('Adding files:', newFiles);
+            setAttachments(prev => [...prev, ...newFiles]);
+        }
+        // Reset input so same file can be selected again
+        if (e.target) {
+            e.target.value = '';
+        }
+    };
+
+    const removeAttachment = (index: number) => {
+        setAttachments(prev => prev.filter((_, i) => i !== index));
+    };
+
+    const formatFileSize = (bytes: number) => {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    };
 
     // --- Mock Data & Fetching ---
     const stats = {
@@ -56,10 +166,10 @@ const UnifiedInbox: React.FC = () => {
 
     const tabs = [
         { id: 'all', label: 'All', icon: Inbox, color: 'text-gray-900', bg: 'bg-gray-100' },
-        { id: 'gmail', label: 'Gmail', icon: Mail, color: 'text-rose-500', bg: 'bg-rose-50' },
-        { id: 'slack', label: 'Slack', icon: MessageCircle, color: 'text-purple-500', bg: 'bg-purple-50' },
-        { id: 'teams', label: 'Teams', icon: MessageSquare, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-        { id: 'outlook', label: 'Outlook', icon: OutlookLogo, color: 'text-blue-500', bg: 'bg-blue-50' },
+        { id: 'gmail', label: 'Gmail', logo: gmailLogo, bg: 'bg-white' }, // Logos have their own colors
+        { id: 'slack', label: 'Slack', logo: slackLogo, bg: 'bg-white' },
+        { id: 'teams', label: 'Teams', logo: teamsLogo, bg: 'bg-white' },
+        { id: 'outlook', label: 'Outlook', logo: outlookLogo, bg: 'bg-white' },
     ];
 
     const fetchMessages = async () => {
@@ -84,17 +194,24 @@ const UnifiedInbox: React.FC = () => {
             const gmailRaw = unwrap(gmailRes);
             const gmailEmails = gmailRaw?.emails || gmailRaw?.messages || gmailRaw?.data?.emails || gmailRaw?.result?.emails || gmailRaw?.result?.messages;
             if (gmailEmails) {
-                allMessages.push(...gmailEmails.map((e: any) => ({
-                    id: e.id, source: 'gmail' as const,
-                    sender: e.from?.replace(/<.*>/, '').trim() || 'Unknown',
-                    subject: e.subject || 'No Subject',
-                    preview: e.snippet || '',
-                    fullContent: e.snippet ? e.snippet.repeat(5) : 'No content available.',
-                    time: new Date(e.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                    read: !e.label_ids?.includes('UNREAD'),
-                    starred: e.label_ids?.includes('STARRED'),
-                    avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(e.from || 'U')}&background=random`
-                })));
+                allMessages.push(...gmailEmails.map((e: any) => {
+                    const dateMs = new Date(e.date).getTime() || Date.now();
+                    // Extract email from "Name <email@example.com>" format
+                    const emailMatch = e.from?.match(/<(.+?)>/);
+                    const senderEmail = emailMatch ? emailMatch[1] : e.from?.trim();
+                    return {
+                        id: e.id, source: 'gmail' as const,
+                        sender: e.from?.replace(/<.*>/, '').trim() || 'Unknown',
+                        senderEmail: senderEmail,
+                        subject: e.subject || 'No Subject',
+                        preview: e.snippet || '',
+                        time: new Date(e.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                        timestamp: dateMs,
+                        read: !e.label_ids?.includes('UNREAD'),
+                        starred: e.label_ids?.includes('STARRED'),
+                        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(e.from || 'U')}&background=random`
+                    };
+                }));
             }
 
             const slackRaw = unwrap(slackRes);
@@ -111,6 +228,8 @@ const UnifiedInbox: React.FC = () => {
                         id: ts || Math.random().toString(),
                         source: 'slack' as const,
                         sender: m.user || 'Slack User',
+                        channelId: m.channel || m.channel_id || m.channel_name,
+                        threadTs: m.thread_ts || ts,
                         subject: m.channel ? `#${m.channel}` : 'Direct Message',
                         preview: m.text || '',
                         fullContent: m.text || 'No content.',
@@ -176,7 +295,9 @@ const UnifiedInbox: React.FC = () => {
                     { id: '5', source: 'gmail', sender: 'Stripe', subject: 'Receipt #1923-4421', preview: 'Your subscription has been renewed.', fullContent: 'Your subscription has been renewed. Amount: $29.00', time: 'Yesterday', read: true, starred: false, avatar: 'https://ui-avatars.com/api/?name=Stripe&background=F1F5F9&color=475569' },
                 ] as any;
             }
-            setMessages(allMessages.sort((a, b) => b.time.localeCompare(a.time)));
+            // Sort by timestamp descending (most recent first)
+            allMessages.sort((a: any, b: any) => (b.timestamp || 0) - (a.timestamp || 0));
+            setMessages(allMessages);
         } catch (err) {
             console.error(err);
         } finally {
@@ -207,16 +328,199 @@ const UnifiedInbox: React.FC = () => {
         if (selectedMessage?.id === id) setSelectedMessage(prev => prev ? { ...prev, starred: !prev.starred } : null);
     };
 
-    const handleSelectMessage = (msg: Message) => {
+    const handleSelectMessage = async (msg: Message) => {
+        console.log('👆 Message Selected:', msg); // Debug: Check what was clicked
         if (!msg.read) setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, read: true } : m));
+
+        // Optimistic Set
         setSelectedMessage({ ...msg, read: true });
-        // On mobile, this will trigger the view change via CSS classes
+
+        // Logic handled in useEffect
     };
 
-    const handleSendReply = () => {
-        if (!replyText.trim()) return;
-        setReplyText('');
-        alert('Reply sent! (Mock implementation)');
+    // New state for message specific loading
+    const [messageLoading, setMessageLoading] = useState(false);
+
+    useEffect(() => {
+        const fetchDetails = async () => {
+            console.log('🔄 Effect Triggered. Selected:', selectedMessage?.id, 'Source:', selectedMessage?.source);
+
+            if (!selectedMessage) return;
+            if (selectedMessage.source !== 'gmail') {
+                console.log('⏭️ Skipping fetch for source:', selectedMessage.source);
+                return;
+            }
+
+            // Skip if already loaded
+            if (selectedMessage.fullContent && selectedMessage.fullContent.length > 200) {
+                console.log('✅ Already have full content, skipping fetch');
+                return;
+            }
+
+            console.log('🚀 Fetching details for Gmail message:', selectedMessage.id);
+            setMessageLoading(true);
+
+            try {
+                const res = await apiService.executeMCPTool('google_workspace_gmail', {
+                    operation: 'get_email_details',
+                    message_id: selectedMessage.id
+                }) as any;
+
+                console.log('📧 API Response:', res);
+
+                // API wraps response in 'result' - check both structures
+                const emailData = res.result?.email || res.email;
+
+                if (res && res.success && emailData) {
+                    console.log('📧 Full Email Payload:', emailData.payload);
+                    const fullBody = parseGmailBody(emailData.payload);
+                    console.log('📝 Parsed Body Length:', fullBody?.length);
+                    console.log('📜 FULL BODY CONTENT:', fullBody);
+
+                    if (fullBody && fullBody.length > 0) {
+                        // Use functional update with the message ID to avoid stale closure
+                        const messageId = selectedMessage.id;
+                        setSelectedMessage(prev => {
+                            if (prev && prev.id === messageId) {
+                                console.log('✅ Setting fullContent on selectedMessage');
+                                return { ...prev, fullContent: fullBody };
+                            }
+                            return prev;
+                        });
+                        setMessages(prev => prev.map(m =>
+                            m.id === messageId ? { ...m, fullContent: fullBody } : m
+                        ));
+                    } else {
+                        console.warn('⚠️ Parsed body was empty!');
+                    }
+                } else {
+                    console.error('❌ API call failed or missing email:', res);
+                }
+            } catch (err) {
+                console.error("Failed to fetch full email body", err);
+                toast.error("Could not load full email content");
+            } finally {
+                setMessageLoading(false);
+            }
+        };
+
+        if (selectedMessage?.source === 'gmail') {
+            fetchDetails();
+        }
+    }, [selectedMessage]);
+
+    const [replySending, setReplySending] = useState(false);
+
+    // Helper to convert File to base64
+    const fileToBase64 = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => {
+                // Remove the data URL prefix (e.g., "data:image/png;base64,")
+                const base64 = (reader.result as string).split(',')[1];
+                resolve(base64);
+            };
+            reader.onerror = error => reject(error);
+        });
+    };
+
+    const handleSendReply = async () => {
+        if (!replyText.trim() || !selectedMessage) return;
+
+        setReplySending(true);
+        try {
+            let result: any = null;
+
+            if (selectedMessage.source === 'gmail') {
+                // Gmail reply - use send_email with Re: subject
+                const replyTo = selectedMessage.senderEmail || selectedMessage.sender;
+                const replySubject = selectedMessage.subject?.startsWith('Re:')
+                    ? selectedMessage.subject
+                    : `Re: ${selectedMessage.subject}`;
+
+                // Convert attachments to base64 format
+                let emailAttachments: Array<{ filename: string, content: string }> = [];
+                if (attachments.length > 0) {
+                    emailAttachments = await Promise.all(
+                        attachments.map(async (file) => ({
+                            filename: file.name,
+                            content: await fileToBase64(file)
+                        }))
+                    );
+                }
+
+                result = await apiService.executeMCPTool('google_workspace_gmail', {
+                    operation: 'send_email',
+                    to: replyTo,
+                    subject: replySubject,
+                    body: replyText,
+                    attachments: emailAttachments.length > 0 ? emailAttachments : undefined,
+                });
+            } else if (selectedMessage.source === 'slack') {
+                // Slack reply - send message as thread reply
+                const channel = selectedMessage.channelId ||
+                    selectedMessage.subject?.replace('#', '') ||
+                    'general';
+
+                // Use the message timestamp (threadTs or id) for threaded reply
+                const threadTs = selectedMessage.threadTs || selectedMessage.id;
+
+                // Convert attachments to base64 format for Slack
+                let slackAttachments: Array<{ filename: string, content: string }> = [];
+                if (attachments.length > 0) {
+                    slackAttachments = await Promise.all(
+                        attachments.map(async (file) => ({
+                            filename: file.name,
+                            content: await fileToBase64(file)
+                        }))
+                    );
+                }
+
+                result = await apiService.executeMCPTool('slack_team_communication', {
+                    action: 'send_message',
+                    channel: channel,
+                    message: replyText,
+                    thread_ts: threadTs, // Reply in thread
+                    attachments: slackAttachments.length > 0 ? slackAttachments : undefined,
+                });
+            } else if (selectedMessage.source === 'outlook') {
+                // Outlook reply
+                const replyTo = selectedMessage.senderEmail || selectedMessage.sender;
+                const replySubject = selectedMessage.subject?.startsWith('Re:')
+                    ? selectedMessage.subject
+                    : `Re: ${selectedMessage.subject}`;
+
+                result = await apiService.executeMCPTool('outlook_email_management', {
+                    action: 'send_email',
+                    to_email: replyTo,
+                    subject: replySubject,
+                    content: replyText,
+                });
+            } else if (selectedMessage.source === 'teams') {
+                // Teams reply
+                const channel = selectedMessage.channelId || selectedMessage.subject;
+
+                result = await apiService.executeMCPTool('teams_team_communication', {
+                    action: 'send_message',
+                    channel: channel,
+                    message: replyText,
+                });
+            }
+
+            if (result && (result.success || result.status === 'ok' || result.result)) {
+                toast.success(`Reply sent via ${selectedMessage.source}!` + (attachments.length > 0 ? ` (${attachments.length} file${attachments.length > 1 ? 's' : ''} attached)` : ''));
+                setReplyText('');
+                setAttachments([]);
+            } else {
+                toast.error('Failed to send reply: ' + (result?.error || 'Unknown error'));
+            }
+        } catch (error) {
+            console.error('Reply error:', error);
+            toast.error('An error occurred while sending the reply.');
+        } finally {
+            setReplySending(false);
+        }
     };
 
     const handleSendCompose = async () => {
@@ -235,17 +539,32 @@ const UnifiedInbox: React.FC = () => {
         }
 
         setLoading(true);
+        console.log(`Sending compose message via ${composeChannel} with ${composeAttachments.length} attachments`);
         try {
             let result: any = null;
 
             if (composeChannel === 'gmail') {
+                // Convert attachments to base64 format
+                let emailAttachments: Array<{ filename: string, content: string }> = [];
+                if (composeAttachments.length > 0) {
+                    console.log('Processing Gmail attachments...');
+                    emailAttachments = await Promise.all(
+                        composeAttachments.map(async (file) => ({
+                            filename: file.name,
+                            content: await fileToBase64(file)
+                        }))
+                    );
+                    console.log(`Processed ${emailAttachments.length} Gmail attachments`);
+                }
+
                 result = await apiService.executeMCPTool('google_workspace_gmail', {
                     operation: 'send_email',
                     to: composeTo,
                     subject: composeSubject,
                     body: composeBody,
                     cc: composeCc,
-                    bcc: composeBcc
+                    bcc: composeBcc,
+                    attachments: emailAttachments.length > 0 ? emailAttachments : undefined,
                 });
             } else if (composeChannel === 'outlook') {
                 result = await apiService.executeMCPTool('outlook_email_management', {
@@ -259,10 +578,28 @@ const UnifiedInbox: React.FC = () => {
             } else if (composeChannel === 'slack') {
                 // ComposeTo is treated as Channel Name here
                 // Maps to slack_team_communication tool
+
+                // For Slack, we need to upload files first or with the message
+                // The tool_executor handles attachments for send_message by uploading them
+
+                // Convert attachments to base64 format for Slack
+                let slackAttachments: Array<{ filename: string, content: string }> = [];
+                if (composeAttachments.length > 0) {
+                    console.log('Processing Slack attachments...');
+                    slackAttachments = await Promise.all(
+                        composeAttachments.map(async (file) => ({
+                            filename: file.name,
+                            content: await fileToBase64(file)
+                        }))
+                    );
+                    console.log(`Processed ${slackAttachments.length} Slack attachments`);
+                }
+
                 result = await apiService.executeMCPTool('slack_team_communication', {
                     action: 'send_message',
                     channel: composeTo.replace('#', ''), // ensure no double #
-                    message: composeBody
+                    message: composeBody,
+                    attachments: slackAttachments.length > 0 ? slackAttachments : undefined,
                 });
             } else if (composeChannel === 'teams') {
                 // Maps to teams_team_communication tool
@@ -295,8 +632,9 @@ const UnifiedInbox: React.FC = () => {
                 setShowCcBcc(false);
                 setComposeSubject('');
                 setComposeBody('');
+                setComposeAttachments([]);
                 // Simple success feedback
-                setTimeout(() => toast.success(`Message sent via ${composeChannel}!`), 100);
+                setTimeout(() => toast.success(`Message sent via ${composeChannel}!` + (composeAttachments.length > 0 ? ` (${composeAttachments.length} file${composeAttachments.length > 1 ? 's' : ''} attached)` : '')), 100);
             } else {
                 alert('Failed to send message: ' + (result?.error || JSON.stringify(result) || 'Unknown error'));
             }
@@ -355,10 +693,10 @@ const UnifiedInbox: React.FC = () => {
                                                 : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                                                 }`}
                                         >
-                                            {channel === 'gmail' && <Mail className="w-4 h-4" />}
-                                            {channel === 'slack' && <MessageCircle className="w-4 h-4" />}
-                                            {channel === 'teams' && <MessageSquare className="w-4 h-4" />}
-                                            {channel === 'outlook' && <OutlookLogo className="w-4 h-4" />}
+                                            {channel === 'gmail' && <img src={gmailLogo} alt="Gmail" className="w-4 h-4 object-contain" />}
+                                            {channel === 'slack' && <img src={slackLogo} alt="Slack" className="w-4 h-4 object-contain" />}
+                                            {channel === 'teams' && <img src={teamsLogo} alt="Teams" className="w-4 h-4 object-contain" />}
+                                            {channel === 'outlook' && <img src={outlookLogo} alt="Outlook" className="w-4 h-4 object-contain" />}
                                             <span className="capitalize">{channel}</span>
                                         </button>
                                     ))}
@@ -415,11 +753,81 @@ const UnifiedInbox: React.FC = () => {
                                 placeholder="Write your message..." value={composeBody} onChange={(e) => setComposeBody(e.target.value)}
                                 className="w-full h-48 md:h-64 resize-none focus:outline-none text-slate-700 leading-relaxed placeholder:text-gray-300"
                             />
+
+                            {/* Compose Attachments Preview */}
+                            {composeAttachments.length > 0 && (
+                                <div className="px-3 pb-3 pt-1 border-t border-slate-100 bg-slate-50/30 mx-[-24px] px-[24px]">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <span className="text-xs font-medium text-slate-500">
+                                            📎 {composeAttachments.length} file{composeAttachments.length > 1 ? 's' : ''} ready to send
+                                        </span>
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                        {composeAttachments.map((file, index) => {
+                                            const isImage = file.type.startsWith('image/');
+                                            return (
+                                                <div
+                                                    key={index}
+                                                    className="group relative flex items-center gap-2 p-2 bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md hover:border-indigo-200 transition-all"
+                                                >
+                                                    {isImage ? (
+                                                        <div className="w-10 h-10 rounded-lg overflow-hidden bg-slate-100 flex-shrink-0">
+                                                            <img
+                                                                src={URL.createObjectURL(file)}
+                                                                alt={file.name}
+                                                                className="w-full h-full object-cover"
+                                                            />
+                                                        </div>
+                                                    ) : (
+                                                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center flex-shrink-0">
+                                                            <Paperclip className="w-4 h-4 text-indigo-600" />
+                                                        </div>
+                                                    )}
+
+                                                    <div className="flex flex-col min-w-0 pr-6">
+                                                        <span className="text-xs font-medium text-slate-700 truncate max-w-[100px] md:max-w-[150px]">
+                                                            {file.name}
+                                                        </span>
+                                                        <span className="text-[10px] text-slate-400">
+                                                            {formatFileSize(file.size)}
+                                                        </span>
+                                                    </div>
+
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => removeComposeAttachment(index)}
+                                                        className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm hover:bg-red-600"
+                                                    >
+                                                        <X className="w-3 h-3" />
+                                                    </button>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                         <div className="px-6 py-4 border-t border-gray-100 flex justify-between items-center bg-gray-50/30">
                             <div className="flex gap-2 text-gray-400">
-                                <Paperclip className="w-5 h-5 cursor-pointer hover:text-gray-600" />
-                                <Tag className="w-5 h-5 cursor-pointer hover:text-gray-600" />
+                                <input
+                                    type="file"
+                                    ref={composeFileInputRef}
+                                    onChange={handleComposeFileSelect}
+                                    multiple
+                                    className="hidden"
+                                    accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => composeFileInputRef.current?.click()}
+                                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-400 hover:text-indigo-600"
+                                    title="Attach file"
+                                >
+                                    <Paperclip className="w-5 h-5" />
+                                </button>
+                                <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-400 hover:text-indigo-600">
+                                    <Tag className="w-5 h-5" />
+                                </button>
                             </div>
                             <button
                                 onClick={handleSendCompose}
@@ -451,57 +859,92 @@ const UnifiedInbox: React.FC = () => {
 
             {/* 1. Sidebar (Navigation) */}
             <div className={`
-                absolute md:relative inset-y-0 left-0 z-40 bg-white/80 backdrop-blur-2xl border-r border-indigo-50/50 flex flex-col transition-all duration-300 shadow-2xl md:shadow-none
-                ${sidebarCollapsed ? 'w-20' : 'w-72'}
+                absolute md:relative inset-y-0 left-0 z-40 bg-white/70 backdrop-blur-2xl border-r border-indigo-50/50 flex flex-col transition-all duration-300 shadow-2xl md:shadow-none
+                ${sidebarCollapsed ? 'w-20' : 'w-64'}
                 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
             `}>
                 <div className="h-16 flex items-center px-4 justify-between border-b border-transparent">
-                    {(!sidebarCollapsed || mobileMenuOpen) && (
-                        <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-blue-500/30">H</div>
-                            <span className="font-bold text-lg tracking-tight text-slate-900 unified-inbox-header">Hub</span>
-                        </div>
-                    )}
-                    <button onClick={() => window.innerWidth < 768 ? setMobileMenuOpen(false) : setSidebarCollapsed(!sidebarCollapsed)} className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-colors">
-                        {window.innerWidth < 768 ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                    {/* Header Removed */}
+                    <button
+                        onClick={() => window.innerWidth < 768 ? setMobileMenuOpen(false) : setSidebarCollapsed(!sidebarCollapsed)}
+                        className={`p-2 hover:bg-white/80 rounded-xl text-slate-400 hover:text-indigo-600 transition-all duration-200 border border-transparent hover:border-slate-100/50 hover:shadow-sm ${sidebarCollapsed ? 'mx-auto' : ''}`}
+                    >
+                        {window.innerWidth < 768 ? <X className="w-5 h-5" /> : sidebarCollapsed ? <Menu className="w-5 h-5" /> : <div className="p-0.5"><Menu className="w-4 h-4" /></div>}
                     </button>
                 </div>
 
-                <div className="px-3 flex-1 space-y-1 mt-4 overflow-y-auto">
+                <div className="px-3 flex-1 space-y-1 mt-6 overflow-y-auto custom-scrollbar">
+                    {/* Compose Button */}
                     <button
                         onClick={() => { setIsComposeOpen(true); setMobileMenuOpen(false); }}
-                        className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center h-14 w-14 rounded-full' : 'px-6 py-4 rounded-xl'} mb-8 
-                        relative isolate overflow-hidden font-semibold text-white transition-all duration-300
-                        bg-gradient-to-br from-indigo-600 via-violet-600 to-indigo-700
-                        before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/20 before:to-transparent before:opacity-100
-                        after:absolute after:inset-0 after:shadow-[inset_0_-2px_4px_rgba(0,0,0,0.3)]
-                        shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]
-                        group`}
+                        className={`w-full flex items-center group relative overflow-hidden transition-all duration-300 mb-8
+                        ${sidebarCollapsed
+                                ? 'justify-center h-12 w-12 rounded-2xl mx-auto bg-indigo-600 shadow-lg shadow-indigo-500/30 hover:scale-105 active:scale-95'
+                                : 'px-4 py-3.5 rounded-2xl bg-white shadow-[0_2px_10px_rgba(99,102,241,0.15)] hover:shadow-[0_4px_15px_rgba(99,102,241,0.25)] border border-indigo-50 text-indigo-600 hover:border-indigo-100 hover:-translate-y-0.5'
+                            }`}
                     >
-                        <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 backdrop-blur-sm z-0" />
-                        <PenSquare className="w-5 h-5 flex-shrink-0 relative z-10" />
-                        {!sidebarCollapsed && <span className="ml-3 font-bold text-lg tracking-wide relative z-10">Compose</span>}
+                        {sidebarCollapsed ? (
+                            <PenSquare className="w-5 h-5 text-white" />
+                        ) : (
+                            <>
+                                <div className="w-8 h-8 rounded-xl bg-indigo-50 flex items-center justify-center group-hover:bg-indigo-100 transition-colors">
+                                    <PenSquare className="w-4 h-4 text-indigo-600" />
+                                </div>
+                                <span className="ml-3 font-bold text-[15px] tracking-wide">Compose</span>
+                            </>
+                        )}
                     </button>
 
-                    {tabs.map(tab => (
-                        <button
-                            key={tab.id}
-                            onClick={() => { setActiveTab(tab.id as any); setMobileMenuOpen(false); }}
-                            className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center px-0' : 'px-4 justify-between'} py-3 rounded-2xl transition-all duration-300 group relative ${activeTab === tab.id ? 'bg-white shadow-lg shadow-indigo-500/10 text-slate-900 ring-1 ring-slate-200/50' : 'text-slate-500 hover:bg-white/60 hover:text-slate-900'}`}
-                        >
-                            <div className="flex items-center">
-                                <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${activeTab === tab.id ? tab.bg : 'bg-transparent group-hover:bg-slate-100'}`}>
-                                    <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? tab.color : 'text-slate-400 group-hover:text-slate-600'} transition-colors`} />
-                                </div>
-                                {!sidebarCollapsed && <span className="ml-3 font-semibold text-sm">{tab.label}</span>}
-                            </div>
-                            {!sidebarCollapsed && (stats as any)[tab.id] > 0 && (
-                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${activeTab === tab.id ? 'bg-indigo-100/50 text-indigo-600' : 'bg-slate-100 text-slate-400'}`}>
-                                    {(stats as any)[tab.id]}
-                                </span>
-                            )}
-                        </button>
-                    ))}
+                    {/* Navigation Items */}
+                    <div className="space-y-1.5">
+                        {tabs.map(tab => {
+                            const Icon = (tab as any).icon;
+                            // Update icon color logic for active state
+                            const isActive = activeTab === tab.id;
+
+                            return (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => { setActiveTab(tab.id as any); setMobileMenuOpen(false); }}
+                                    className={`w-full flex items-center transition-all duration-200 group
+                                    ${sidebarCollapsed ? 'justify-center px-0 h-10 w-10 mx-auto rounded-xl' : 'px-3 py-2.5 justify-between rounded-xl'}
+                                    ${isActive
+                                            ? 'bg-white shadow-sm ring-1 ring-slate-100 z-10'
+                                            : 'hover:bg-white/60 hover:ring-1 hover:ring-slate-100/50 text-slate-500 hover:text-slate-900'
+                                        }`}
+                                >
+                                    <div className="flex items-center">
+                                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-300
+                                            ${isActive ? 'bg-indigo-50 scale-100' : 'bg-transparent group-hover:bg-slate-50 scale-95 group-hover:scale-100'}
+                                        `}>
+                                            {(tab as any).logo ? (
+                                                <img src={(tab as any).logo} alt={tab.label} className={`w-4 h-4 object-contain transition-all ${!isActive && 'opacity-70 group-hover:opacity-100 grayscale group-hover:grayscale-0'}`} />
+                                            ) : (
+                                                Icon && <Icon className={`w-4 h-4 transition-colors ${isActive ? 'text-indigo-600' : 'text-slate-400 group-hover:text-slate-600'}`} />
+                                            )}
+                                        </div>
+
+                                        {!sidebarCollapsed && (
+                                            <span className={`ml-3 text-[14px] ${isActive ? 'font-bold text-slate-800' : 'font-medium text-slate-500 group-hover:text-slate-700'}`}>
+                                                {tab.label}
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    {!sidebarCollapsed && (stats as any)[tab.id] > 0 && (
+                                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full transition-colors
+                                            ${isActive
+                                                ? 'bg-indigo-100 text-indigo-700 shadow-sm'
+                                                : 'bg-slate-100 text-slate-400 group-hover:bg-slate-200 group-hover:text-slate-600'
+                                            }
+                                        `}>
+                                            {(stats as any)[tab.id]}
+                                        </span>
+                                    )}
+                                </button>
+                            );
+                        })}
+                    </div>
                 </div>
             </div>
 
@@ -511,75 +954,118 @@ const UnifiedInbox: React.FC = () => {
                 ${selectedMessage ? 'hidden md:flex' : 'flex w-full'} 
                 md:w-[450px] relative z-0
             `}>
-                <div className="h-16 px-4 flex items-center gap-2 border-b border-slate-100 bg-white/50 backdrop-blur-sm sticky top-0 z-10">
-                    <button className="md:hidden p-2 mr-2 text-slate-500 hover:bg-slate-100 rounded-lg" onClick={() => setMobileMenuOpen(true)}>
+                {/* Modern Glass Header */}
+                <div className="h-16 px-4 flex items-center justify-between border-b border-indigo-50/50 bg-white/80 backdrop-blur-xl sticky top-0 z-20 transition-all duration-300">
+                    <button className="md:hidden p-2 -ml-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors" onClick={() => setMobileMenuOpen(true)}>
                         <Menu className="w-5 h-5" />
                     </button>
-                    <div className="relative flex-1 group">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+
+                    <div className="flex-1 relative group max-w-sm mx-auto md:mx-0 md:max-w-none md:w-full">
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors duration-200">
+                            <Search className="w-4 h-4" />
+                        </div>
                         <input
-                            type="text" placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 bg-slate-100/50 border border-transparent focus:bg-white focus:border-blue-200 focus:ring-4 focus:ring-blue-500/10 rounded-xl text-sm transition-all"
+                            type="text"
+                            placeholder="Search inbox..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2 bg-slate-100/60 border-none hover:bg-slate-100 focus:bg-white focus:ring-2 focus:ring-indigo-500/10 focus:shadow-sm rounded-xl text-sm font-medium transition-all duration-200 placeholder:text-slate-400"
                         />
                     </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto custom-scrollbar">
+                <div className="flex-1 overflow-y-auto custom-scrollbar p-2">
                     {loading && filteredMessages.length === 0 ? (
-                        <div className="p-3 space-y-3">
+                        <div className="space-y-2 mt-2">
                             {[1, 2, 3, 4, 5].map((i) => (
-                                <div key={i} className="p-4 rounded-xl border border-slate-100 bg-white animate-pulse">
-                                    <div className="flex justify-between items-start mb-2">
-                                        <div className="flex items-center gap-3 w-full">
-                                            <div className="w-5 h-5 rounded-full bg-slate-200" />
-                                            <div className="h-4 bg-slate-200 rounded w-1/3" />
-                                        </div>
-                                        <div className="h-3 bg-slate-200 rounded w-10" />
+                                <div key={i} className="flex gap-4 p-4 mx-1 rounded-xl bg-white shimmer-effect">
+                                    <div className="w-10 h-10 rounded-full bg-slate-200/50 shrink-0" />
+                                    <div className="flex-1 space-y-2">
+                                        <div className="h-4 bg-slate-200/50 rounded w-1/3" />
+                                        <div className="h-3 bg-slate-200/50 rounded w-3/4" />
                                     </div>
-                                    <div className="h-4 bg-slate-200 rounded w-3/4 mb-2" />
-                                    <div className="h-3 bg-slate-200 rounded w-full mb-1" />
-                                    <div className="h-3 bg-slate-200 rounded w-2/3" />
                                 </div>
                             ))}
                         </div>
                     ) : filteredMessages.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center h-[60vh] text-slate-400 px-6 text-center">
-                            <Inbox className="w-12 h-12 mb-4 text-slate-200" />
-                            <p className="font-medium text-slate-600">All caught up!</p>
+                        <div className="flex flex-col items-center justify-center h-[60vh] text-slate-400">
+                            <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 text-slate-300">
+                                <Inbox className="w-8 h-8" />
+                            </div>
+                            <p className="font-semibold text-slate-600">All caught up!</p>
+                            <p className="text-sm text-slate-400 mt-1">No messages found</p>
                         </div>
                     ) : (
-                        <div className="p-3 space-y-2">
-                            {filteredMessages.map(msg => (
-                                <div
-                                    key={msg.id}
-                                    onClick={() => handleSelectMessage(msg)}
-                                    className={`p-4 mx-2 my-1 rounded-2xl cursor-pointer transition-all duration-200 border relative overflow-hidden group
-                                    ${selectedMessage?.id === msg.id
-                                            ? 'bg-white border-indigo-100 shadow-md shadow-indigo-500/10 ring-1 ring-indigo-500/20'
-                                            : !msg.read
-                                                ? 'bg-white/80 border-slate-200/50 hover:bg-white hover:border-slate-300/50 hover:shadow-md hover:scale-[1.01]'
-                                                : 'bg-transparent border-transparent hover:bg-white/60 hover:border-slate-100'
-                                        }`}
-                                >
-                                    {selectedMessage?.id === msg.id && <div className="absolute left-0 top-3 bottom-3 w-1 rounded-r-full bg-indigo-500" />}
+                        <div className="space-y-1 pb-20 md:pb-2">
+                            {filteredMessages.map(msg => {
+                                // Resolve Source Logo
+                                const sourceLogo =
+                                    msg.source === 'gmail' ? gmailLogo :
+                                        msg.source === 'slack' ? slackLogo :
+                                            msg.source === 'teams' ? teamsLogo :
+                                                msg.source === 'outlook' ? outlookLogo : undefined;
 
-                                    <div className="flex justify-between items-start mb-2">
-                                        <div className="flex items-center gap-3">
-                                            {msg.avatar && <img src={msg.avatar} alt="" className="w-8 h-8 rounded-xl shadow-sm object-cover ring-2 ring-white" />}
-                                            <div className="flex flex-col">
-                                                <h3 className={`text-sm truncate max-w-[140px] leading-tight ${!msg.read ? 'font-bold text-slate-900' : 'font-medium text-slate-700'}`}>{msg.sender}</h3>
-                                                <span className={`text-[10px] items-center gap-1 inline-flex font-bold uppercase tracking-wider ${getSourceStyle(msg.source).split(' ')[0]}`}>{msg.source}</span>
+                                return (
+                                    <div
+                                        key={msg.id}
+                                        onClick={() => handleSelectMessage(msg)}
+                                        className={`group relative p-3 mx-1 rounded-xl cursor-pointer transition-all duration-200 ease-out border border-transparent
+                                        ${selectedMessage?.id === msg.id
+                                                ? 'bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)] ring-1 ring-black/[0.04]'
+                                                : !msg.read
+                                                    ? 'bg-white border-slate-100 shadow-sm hover:shadow-md hover:border-slate-200 hover:-translate-y-0.5'
+                                                    : 'hover:bg-slate-50/80 hover:border-slate-200/50'
+                                            }`}
+                                    >
+                                        {/* Selection Indicator */}
+                                        {selectedMessage?.id === msg.id && (
+                                            <div className="absolute left-0 top-3 bottom-3 w-1 bg-indigo-500 rounded-r-full" />
+                                        )}
+
+                                        {/* Unread Dot */}
+                                        {!msg.read && selectedMessage?.id !== msg.id && (
+                                            <div className="absolute left-2 top-4 w-2 h-2 bg-indigo-500 rounded-full ring-4 ring-white shadow-sm z-10" />
+                                        )}
+
+                                        <div className="flex gap-3 relative pl-3">
+                                            {/* Avatar Area */}
+                                            <div className="relative shrink-0 mt-1">
+                                                {msg.avatar ? (
+                                                    <img src={msg.avatar} alt="" className="w-10 h-10 rounded-full object-cover ring-2 ring-white shadow-sm bg-slate-100" />
+                                                ) : (
+                                                    <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-sm ring-2 ring-white">
+                                                        {msg.sender[0]}
+                                                    </div>
+                                                )}
+                                                {/* App Icon Badge */}
+                                                <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-sm border border-slate-50">
+                                                    <img src={sourceLogo} alt={msg.source} className="w-3.5 h-3.5 object-contain" />
+                                                </div>
+                                            </div>
+
+                                            {/* Content Area */}
+                                            <div className="flex-1 min-w-0 pr-1">
+                                                <div className="flex justify-between items-start mb-0.5">
+                                                    <h3 className={`text-[15px] truncate max-w-[180px] leading-tight ${!msg.read ? 'font-bold text-slate-900' : 'font-medium text-slate-700'}`}>
+                                                        {msg.sender}
+                                                    </h3>
+                                                    <span className={`text-[11px] font-medium whitespace-nowrap ml-2 ${!msg.read ? 'text-indigo-600' : 'text-slate-400'}`}>
+                                                        {msg.time}
+                                                    </span>
+                                                </div>
+
+                                                <p className={`text-[13px] leading-snug truncate mb-0.5 ${!msg.read ? 'text-slate-800 font-medium' : 'text-slate-600'}`}>
+                                                    {msg.subject}
+                                                </p>
+
+                                                <p className="text-[12px] text-slate-400 line-clamp-1 leading-relaxed">
+                                                    {msg.preview}
+                                                </p>
                                             </div>
                                         </div>
-                                        <div className="flex flex-col items-end">
-                                            <span className="text-[10px] text-slate-400 font-medium whitespace-nowrap mb-1">{msg.time}</span>
-                                            {msg.starred && <Star className="w-3 h-3 fill-amber-400 text-amber-400" />}
-                                        </div>
                                     </div>
-                                    <p className={`text-sm mb-1 leading-snug truncate ${!msg.read ? 'text-slate-900 font-semibold' : 'text-slate-600'}`}>{msg.subject}</p>
-                                    <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">{msg.preview}</p>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     )}
                 </div>
@@ -598,12 +1084,18 @@ const UnifiedInbox: React.FC = () => {
                                     <ArrowLeft className="w-5 h-5" />
                                 </button>
                                 <div className="flex items-center bg-white/50 p-1 rounded-xl border border-white/60 shadow-sm">
-                                    <button onClick={() => handleArchive(selectedMessage.id)} className="p-2 text-slate-400 hover:text-slate-700 hover:bg-white rounded-lg transition-all"><Archive className="w-5 h-5" /></button>
-                                    <button onClick={() => handleStar(selectedMessage.id)} className="p-2 text-slate-400 hover:text-amber-500 hover:bg-white rounded-lg transition-all"><Star className={`w-5 h-5 ${selectedMessage.starred ? 'fill-amber-500 text-amber-500' : 'text-amber-500'}`} /></button>
-                                    <button onClick={() => handleDelete(selectedMessage.id)} className="p-2 text-slate-400 hover:text-rose-500 hover:bg-white rounded-lg transition-all"><Trash className="w-5 h-5" /></button>
+                                    <button onClick={() => handleArchive(selectedMessage.id)} className="p-2 text-slate-400 hover:text-slate-700 hover:bg-white rounded-lg transition-all" title="Archive"><Archive className="w-5 h-5" /></button>
+                                    <button onClick={() => handleStar(selectedMessage.id)} className="p-2 text-slate-400 hover:text-amber-500 hover:bg-white rounded-lg transition-all" title="Star"><Star className={`w-5 h-5 ${selectedMessage.starred ? 'fill-amber-500 text-amber-500' : ''}`} /></button>
+                                    <button onClick={() => handleDelete(selectedMessage.id)} className="p-2 text-slate-400 hover:text-rose-500 hover:bg-white rounded-lg transition-all" title="Delete"><Trash className="w-5 h-5" /></button>
                                 </div>
                                 <div className="h-6 w-px bg-slate-200 mx-2 hidden md:block" />
-                                <button className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-white rounded-xl border border-transparent hover:border-slate-100 hover:shadow-sm transition-all"><Reply className="w-5 h-5" /></button>
+                                <button
+                                    onClick={() => {
+                                        replyInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                        setTimeout(() => replyInputRef.current?.focus(), 300);
+                                    }}
+                                    className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-white rounded-xl border border-transparent hover:border-slate-100 hover:shadow-sm transition-all"
+                                ><Reply className="w-5 h-5" /></button>
                             </div>
                             <button onClick={() => setSelectedMessage(null)} className="hidden md:block p-2 text-slate-400 hover:bg-slate-50 rounded-lg"><X className="w-5 h-5" /></button>
                         </div>
@@ -621,22 +1113,174 @@ const UnifiedInbox: React.FC = () => {
                                         <div className="text-sm text-slate-400 font-medium">To: Me • {selectedMessage.time}</div>
                                     </div>
                                 </div>
-                                <div className="prose prose-slate prose-lg max-w-none text-slate-600 leading-relaxed whitespace-pre-wrap">{selectedMessage.fullContent || selectedMessage.preview}</div>
+
+                                {messageLoading ? (
+                                    <div className="flex items-center justify-center py-20">
+                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                                        <span className="ml-3 text-slate-500 font-medium">Loading full message...</span>
+                                    </div>
+                                ) : (
+                                    <div className="prose prose-slate prose-lg max-w-none text-slate-600 leading-relaxed whitespace-pre-wrap">
+                                        {/* Dangerous HTML rendering if source is trusted (Gmail), otherwise text */}
+                                        {['gmail', 'outlook', 'teams'].includes(selectedMessage.source) ? (
+                                            <div dangerouslySetInnerHTML={{ __html: selectedMessage.fullContent || selectedMessage.preview }} />
+                                        ) : (
+                                            selectedMessage.fullContent || selectedMessage.preview
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         </div>
 
-                        <div className="p-4 md:p-6 bg-slate-50 border-t border-slate-200/60 sticky bottom-0">
-                            <div className="max-w-3xl mx-auto flex gap-4">
-                                <div className="flex-1 bg-white border border-slate-200 rounded-2xl shadow-sm focus-within:border-blue-400 overflow-hidden relative">
+                        {/* Modern Reply Input Section */}
+                        <div className="p-3 md:p-5 bg-gradient-to-t from-slate-100 via-slate-50 to-white border-t border-slate-200/60 sticky bottom-0">
+                            <div className="max-w-3xl mx-auto">
+                                {/* Reply Context Badge */}
+                                <div className="flex items-center gap-2 mb-3">
+                                    <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${selectedMessage.source === 'gmail' ? 'bg-red-50 text-red-600' :
+                                        selectedMessage.source === 'slack' ? 'bg-purple-50 text-purple-600' :
+                                            selectedMessage.source === 'outlook' ? 'bg-blue-50 text-blue-600' :
+                                                'bg-green-50 text-green-600'
+                                        }`}>
+                                        <Reply className="w-3 h-3" />
+                                        Replying to {selectedMessage.source === 'slack' ? selectedMessage.subject : selectedMessage.sender}
+                                    </div>
+                                </div>
+
+                                {/* Input Card */}
+                                <div className="bg-white rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-200/80 overflow-hidden transition-all duration-200 focus-within:shadow-xl focus-within:border-indigo-300 focus-within:ring-2 focus-within:ring-indigo-100">
+                                    {/* Textarea */}
                                     <textarea
-                                        placeholder="Reply..."
-                                        value={replyText} onChange={(e) => setReplyText(e.target.value)}
-                                        className="w-full p-4 h-20 resize-none border-none focus:ring-0 text-sm"
+                                        ref={replyInputRef}
+                                        placeholder="Write your reply..."
+                                        value={replyText}
+                                        onChange={(e) => setReplyText(e.target.value)}
+                                        className="w-full px-4 pt-4 pb-2 min-h-[80px] md:min-h-[100px] resize-none border-none focus:ring-0 text-sm md:text-base text-slate-700 placeholder:text-slate-400 bg-transparent leading-relaxed"
+                                        disabled={replySending}
+                                        rows={3}
                                     />
-                                    <div className="flex justify-end px-2 pb-2">
-                                        <button onClick={handleSendReply} className="bg-slate-900 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2">
-                                            Send <Send className="w-3.5 h-3.5" />
-                                        </button>
+
+                                    {/* Attachments Preview */}
+                                    {attachments.length > 0 && (
+                                        <div className="px-3 pb-3 pt-1 border-t border-slate-100 bg-slate-50/30">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <span className="text-xs font-medium text-slate-500">
+                                                    📎 {attachments.length} file{attachments.length > 1 ? 's' : ''} ready to send
+                                                </span>
+                                            </div>
+                                            <div className="flex flex-wrap gap-2">
+                                                {attachments.map((file, index) => {
+                                                    const isImage = file.type.startsWith('image/');
+                                                    return (
+                                                        <div
+                                                            key={index}
+                                                            className="group relative flex items-center gap-2 p-2 bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md hover:border-indigo-200 transition-all"
+                                                        >
+                                                            {/* Image thumbnail or file icon */}
+                                                            {isImage ? (
+                                                                <div className="w-10 h-10 rounded-lg overflow-hidden bg-slate-100 flex-shrink-0">
+                                                                    <img
+                                                                        src={URL.createObjectURL(file)}
+                                                                        alt={file.name}
+                                                                        className="w-full h-full object-cover"
+                                                                    />
+                                                                </div>
+                                                            ) : (
+                                                                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center flex-shrink-0">
+                                                                    <Paperclip className="w-4 h-4 text-indigo-600" />
+                                                                </div>
+                                                            )}
+
+                                                            {/* File info */}
+                                                            <div className="flex flex-col min-w-0 pr-6">
+                                                                <span className="text-xs font-medium text-slate-700 truncate max-w-[100px] md:max-w-[150px]">
+                                                                    {file.name}
+                                                                </span>
+                                                                <span className="text-[10px] text-slate-400">
+                                                                    {formatFileSize(file.size)}
+                                                                </span>
+                                                            </div>
+
+                                                            {/* Remove button */}
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => removeAttachment(index)}
+                                                                className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm hover:bg-red-600"
+                                                            >
+                                                                <X className="w-3 h-3" />
+                                                            </button>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Action Bar */}
+                                    <div className="flex items-center justify-between px-3 py-2.5 bg-slate-50/50 border-t border-slate-100">
+                                        {/* Left Actions */}
+                                        <div className="flex items-center gap-1">
+                                            {/* Hidden file input */}
+                                            <input
+                                                type="file"
+                                                ref={fileInputRef}
+                                                onChange={handleFileSelect}
+                                                multiple
+                                                className="hidden"
+                                                accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => fileInputRef.current?.click()}
+                                                className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all duration-150"
+                                                title="Attach file"
+                                            >
+                                                <Paperclip className="w-4 h-4 md:w-5 md:h-5" />
+                                            </button>
+                                            <div className="hidden sm:block h-4 w-px bg-slate-200 mx-1" />
+                                            <span className="hidden sm:flex items-center text-xs text-slate-400 px-2">
+                                                Press <kbd className="mx-1 px-1.5 py-0.5 bg-slate-100 rounded text-[10px] font-mono border border-slate-200">⌘</kbd> + <kbd className="mx-1 px-1.5 py-0.5 bg-slate-100 rounded text-[10px] font-mono border border-slate-200">↵</kbd> to send
+                                            </span>
+                                        </div>
+
+                                        {/* Right Actions */}
+                                        <div className="flex items-center gap-2">
+                                            {/* Character count */}
+                                            {replyText.length > 0 && (
+                                                <span className="hidden sm:inline text-xs text-slate-400">
+                                                    {replyText.length} chars
+                                                </span>
+                                            )}
+
+                                            {/* Send Button */}
+                                            <button
+                                                onClick={handleSendReply}
+                                                disabled={replySending || !replyText.trim()}
+                                                className={`
+                                                    group relative inline-flex items-center gap-2 px-4 md:px-5 py-2 md:py-2.5 rounded-xl text-sm font-semibold
+                                                    transition-all duration-200 transform
+                                                    ${replyText.trim() && !replySending
+                                                        ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-200 hover:shadow-lg hover:shadow-indigo-300 hover:scale-[1.02] active:scale-[0.98]'
+                                                        : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                                                    }
+                                                `}
+                                            >
+                                                {replySending ? (
+                                                    <>
+                                                        <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                        </svg>
+                                                        <span className="hidden sm:inline">Sending...</span>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <span className="hidden sm:inline">Send</span>
+                                                        <Send className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+                                                    </>
+                                                )}
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
