@@ -331,6 +331,24 @@ const UnifiedCalendar: React.FC = () => {
         return layout;
     };
 
+    const handleReschedule = async (event: any, newStart: Date) => {
+        try {
+            // Default 1 hour duration for simplicity
+            const newEnd = new Date(newStart.getTime() + (60 * 60 * 1000));
+
+            await apiService.executeMCPTool('google_workspace_calendar', {
+                operation: 'update_event',
+                event_id: event.id,
+                start_time: newStart.toISOString(),
+                end_time: newEnd.toISOString()
+            });
+
+            await fetchData();
+        } catch (error) {
+            console.error('Failed to reschedule event:', error);
+        }
+    };
+
 
     return (
         <div className={`flex h-screen bg-slate-50 relative overflow-hidden font-sans transition-colors duration-500 ${focusMode ? 'bg-slate-900 text-white' : 'text-slate-900'}`}>
@@ -350,7 +368,7 @@ const UnifiedCalendar: React.FC = () => {
             )}
 
             {/* MAIN CONTENT AREA */}
-            <div className="flex-1 flex flex-col relative z-10 min-w-0 transition-all duration-300">
+            <div className="flex-1 flex flex-col relative min-w-0 transition-all duration-300">
 
                 {/* 1. SUPERIOR HEADER (Smart Input & Navigation) */}
                 <div className={`
@@ -377,7 +395,8 @@ const UnifiedCalendar: React.FC = () => {
                                 onClick={() => { setViewDate(new Date()); setViewMode('day'); }}
                                 className={`ml-2 text-xs font-bold px-3 py-1.5 rounded-lg border transition-all ${focusMode ? 'border-slate-700 hover:bg-slate-800 text-slate-300' : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-600 hover:shadow-sm'}`}
                             >
-                                Today
+                                <span className="hidden sm:inline">Today</span>
+                                <span className="sm:hidden">T</span>
                             </button>
                         </div>
                     </div>
@@ -451,10 +470,10 @@ const UnifiedCalendar: React.FC = () => {
                     )}
                     {/* Left Mini Sidebar (Collapsible) */}
                     <div className={`
-                        transition-all duration-300 ease-in-out border-r flex-col
-                        ${showSidebar ? 'w-64 opacity-100 translate-x-0' : 'w-0 opacity-0 -translate-x-4 overflow-hidden'}
-                        ${focusMode ? 'bg-slate-900/50 border-slate-800' : 'bg-white/40 border-white/40'}
-                        backdrop-blur-xl hidden lg:flex
+                        transition-all duration-300 ease-in-out border-r flex-col z-50 h-full
+                        ${showSidebar ? 'w-64 max-w-[80vw] opacity-100 translate-x-0' : 'w-0 opacity-0 -translate-x-4 overflow-hidden'}
+                        ${focusMode ? 'bg-slate-900/95 border-slate-800' : 'bg-white/95 border-white/40'}
+                        backdrop-blur-xl flex absolute lg:relative
                     `}>
                         <div className="p-6">
                             <div className={`text-xs font-bold uppercase tracking-wider mb-4 ${focusMode ? 'text-slate-500' : 'text-gray-400'}`}>Mini Calendar</div>
@@ -711,10 +730,10 @@ const UnifiedCalendar: React.FC = () => {
 
                     {/* 3. AMIE-STYLE TASK SIDEBAR (Right) */}
                     <div className={`
-                         transition-all duration-300 border-l flex flex-col z-20
-                         ${showTaskTray ? 'w-[340px] opacity-100 translate-x-0' : 'w-0 opacity-0 translate-x-4 overflow-hidden'}
-                         ${focusMode ? 'bg-slate-900/50 border-slate-800' : 'bg-white/60 border-indigo-50'}
-                         backdrop-blur-xl hidden lg:flex
+                         transition-all duration-300 border-l flex flex-col z-50 h-full right-0
+                         ${showTaskTray ? 'w-[340px] max-w-[85vw] opacity-100 translate-x-0' : 'w-0 opacity-0 translate-x-4 overflow-hidden'}
+                         ${focusMode ? 'bg-slate-900/95 border-slate-800' : 'bg-white/95 border-indigo-50'}
+                         backdrop-blur-xl flex absolute lg:relative
                     `}>
                         <div className={`p-5 border-b flex items-center justify-between ${focusMode ? 'border-slate-800' : 'border-indigo-50'}`}>
                             <div className="flex items-center gap-2">
@@ -817,6 +836,7 @@ const UnifiedCalendar: React.FC = () => {
                 onClose={() => setSelectedEvent(null)}
                 event={selectedEvent}
                 focusMode={focusMode}
+                onReschedule={handleReschedule}
             />
         </div>
     );
