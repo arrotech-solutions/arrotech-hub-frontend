@@ -2377,6 +2377,105 @@ class ApiService {
     const response = await this.api.get('/api/whatsapp/analytics', { params: { days } });
     return response.data;
   }
+
+  // ============================================================================
+  // TikTok Monetization Endpoints (NEW)
+  // ============================================================================
+
+  async getMyPremiumLinks(): Promise<ApiResponse<any[]>> {
+    const response = await this.api.get('/api/tiktok/premium-links/my');
+    return response.data;
+  }
+
+  // Premium Link Purchase Flow (Paystack)
+  async initiateLinkPurchase(linkId: number, email: string, callbackUrl?: string): Promise<ApiResponse<{
+    authorization_url: string;
+    reference: string;
+    amount: number;
+    link_title: string;
+  }>> {
+    const response = await this.api.post(`/api/tiktok/premium-links/${linkId}/purchase`, {
+      email,
+      callback_url: callbackUrl
+    });
+    return response.data;
+  }
+
+  async verifyAndUnlockContent(linkId: number, reference: string): Promise<ApiResponse<{
+    unlocked_url: string;
+    message: string;
+  }>> {
+    const response = await this.api.post(`/api/tiktok/premium-links/${linkId}/verify-and-unlock`, { reference });
+    return response.data;
+  }
+
+  // Public link info (no auth required)
+  async getPublicLinkInfo(linkId: number): Promise<ApiResponse<{
+    id: number;
+    title: string;
+    description: string;
+    price: number;
+    creator: { username: string; display_name: string; avatar_url: string };
+  }>> {
+    const response = await this.api.get(`/api/tiktok/public/link/${linkId}`);
+    return response.data;
+  }
+
+  // Wallet Endpoints
+  async getTikTokWallet(): Promise<ApiResponse<{
+    wallet_balance: number;
+    total_earned: number;
+    mpesa_withdrawal_number: string | null;
+    recent_transactions: Array<{
+      id: number;
+      amount: number;
+      gross: number;
+      created_at: string;
+      fan_email: string;
+    }>;
+  }>> {
+    const response = await this.api.get('/api/tiktok/wallet');
+    return response.data;
+  }
+
+  async setWithdrawalNumber(mpesaNumber: string): Promise<ApiResponse<any>> {
+    const response = await this.api.post('/api/tiktok/wallet/set-withdrawal-number', {
+      mpesa_number: mpesaNumber
+    });
+    return response.data;
+  }
+
+  // Media Kit
+  async getTikTokMediaKit(): Promise<ApiResponse<{
+    username: string;
+    display_name: string;
+    avatar_url: string;
+    follower_count: number;
+    following_count: number;
+    likes_count: number;
+    video_count: number;
+    engagement_rate: string;
+    suggested_rate_range: { min: number; max: number; currency: string };
+    profile_url: string;
+    media_kit_url: string;
+  }>> {
+    const response = await this.api.get('/api/tiktok/media-kit');
+    return response.data;
+  }
+
+  // Withdraw to M-Pesa
+  async withdrawToMpesa(mpesaNumber: string, amount?: number): Promise<ApiResponse<{
+    success: boolean;
+    message: string;
+    transfer_code: string;
+    new_balance: number;
+  }>> {
+    const response = await this.api.post('/api/tiktok/wallet/withdraw', {
+      mpesa_number: mpesaNumber,
+      amount: amount || null  // null = full balance
+    });
+    return response.data;
+  }
 }
 
 export const apiService = new ApiService();
