@@ -31,6 +31,7 @@ import UnifiedTaskView from './pages/UnifiedTaskView';
 import UnifiedCalendar from './pages/UnifiedCalendar';
 import WhatsAppDashboard from './pages/WhatsAppDashboard';
 import TikTokDashboard from './pages/TikTokDashboard';
+import PremiumContentUnlock from './pages/PremiumContentUnlock';
 
 import { CommandProvider } from './contexts/CommandContext';
 import { useCommand } from './hooks/useCommand';
@@ -133,6 +134,9 @@ const AppRoutes: React.FC = () => {
           </PublicRoute>
         }
       />
+
+      {/* Public Premium Content Unlock (no auth required) */}
+      <Route path="/unlock/:linkId" element={<PremiumContentUnlock />} />
 
       {/* Protected Routes */}
       <Route
@@ -362,6 +366,12 @@ const AppRoutes: React.FC = () => {
             <AdminDashboard />
           </ProtectedRoute>
         }
+      />
+
+      {/* Public Premium Link Unlock Page (No Auth Required) */}
+      <Route
+        path="/unlock/:linkId"
+        element={<PremiumContentUnlock />}
       />
 
       {/* Catch all route */}
