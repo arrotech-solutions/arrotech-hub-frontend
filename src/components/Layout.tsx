@@ -9,6 +9,7 @@ import {
   Crown,
   Database,
   Heart,
+  HelpCircle,
   Home,
   LogOut,
   Menu,
@@ -190,6 +191,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       href: '/settings',
       icon: Settings,
       description: 'Account configuration',
+      badge: null
+    },
+    {
+      name: 'Help & Support',
+      href: '/help',
+      icon: HelpCircle,
+      description: 'Get help and contact us',
       badge: null
     },
   ];
@@ -574,6 +582,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     >
                       <Settings className="w-4 h-4 mr-3 text-gray-500" />
                       Settings
+                    </Link>
+
+                    <Link
+                      to="/help"
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                      onClick={() => setUserDropdownOpen(false)}
+                    >
+                      <HelpCircle className="w-4 h-4 mr-3 text-gray-500" />
+                      Help & Support
                     </Link>
 
                     <div className="border-t border-gray-100 my-1"></div>
