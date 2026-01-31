@@ -32,6 +32,7 @@ import UnifiedCalendar from './pages/UnifiedCalendar';
 import WhatsAppDashboard from './pages/WhatsAppDashboard';
 import TikTokDashboard from './pages/TikTokDashboard';
 import PremiumContentUnlock from './pages/PremiumContentUnlock';
+import HelpSupport from './pages/HelpSupport';
 
 import { CommandProvider } from './contexts/CommandContext';
 import { useCommand } from './hooks/useCommand';
@@ -137,6 +138,10 @@ const AppRoutes: React.FC = () => {
 
       {/* Public Premium Content Unlock (no auth required) */}
       <Route path="/unlock/:linkId" element={<PremiumContentUnlock />} />
+
+      {/* Public Help & Support (no auth required) */}
+      <Route path="/help" element={<HelpSupport />} />
+      <Route path="/support" element={<HelpSupport />} />
 
       {/* Protected Routes */}
       <Route
