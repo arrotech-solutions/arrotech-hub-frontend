@@ -2476,6 +2476,17 @@ class ApiService {
     });
     return response.data;
   }
+
+  // Support Ticket
+  async createSupportTicket(data: {
+    name: string;
+    email: string;
+    subject: string;
+    message: string;
+  }): Promise<ApiResponse<{ message: string; ticket_id?: string }>> {
+    const response = await this.api.post('/api/support/ticket', data);
+    return response.data;
+  }
 }
 
 export const apiService = new ApiService();
