@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
     Search, MessageCircle, Mail, Book, ChevronDown, ChevronUp,
     HelpCircle, Zap, CreditCard, Link2, Shield, Users, Send,
@@ -507,11 +508,11 @@ const HelpSupport: React.FC = () => {
                         </a>
                     </p>
                     <div className="flex items-center justify-center gap-6 mt-4 text-sm text-slate-500">
-                        <a href="/privacy" className="hover:text-primary-600">Privacy Policy</a>
+                        <Link to="/privacy" className="hover:text-primary-600">Privacy Policy</Link>
                         <span>•</span>
-                        <a href="/terms" className="hover:text-primary-600">Terms of Service</a>
+                        <Link to="/terms" className="hover:text-primary-600">Terms of Service</Link>
                         <span>•</span>
-                        <a href="/" className="hover:text-primary-600">Back to Home</a>
+                        <Link to="/" className="hover:text-primary-600">Back to Home</Link>
                     </div>
                 </div>
             </div>

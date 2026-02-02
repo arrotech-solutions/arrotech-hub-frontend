@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Shield } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const CookieConsent: React.FC = () => {
     const [isVisible, setIsVisible] = useState(false);
@@ -40,9 +41,9 @@ const CookieConsent: React.FC = () => {
                         <p className="text-gray-600 text-sm leading-relaxed">
                             We use cookies to enhance your browsing experience, serve personalized ads or content, and analyze our traffic.
                             By clicking "Accept All", you consent to our use of cookies.
-                            <a href="/privacy" className="text-blue-600 font-semibold hover:underline ml-1">
+                            <Link to="/privacy" className="text-blue-600 font-semibold hover:underline ml-1">
                                 Read our Privacy Policy
-                            </a>.
+                            </Link>.
                         </p>
                     </div>
                 </div>
