@@ -36,6 +36,8 @@ import HelpSupport from './pages/HelpSupport';
 import TipPage from './pages/TipPage';
 import TipVerify from './pages/TipVerify';
 import MicrosoftCallback from './pages/MicrosoftCallback';
+import LandingPage from './pages/LandingPage';
+import Terms from './pages/Terms';
 
 import { CommandProvider } from './contexts/CommandContext';
 import { useCommand } from './hooks/useCommand';
@@ -100,10 +102,8 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 const AppRoutes: React.FC = () => {
   return (
     <Routes>
-      {/* Landing Page / Waitlist */}
-      {/* Landing Page / Waitlist */}
-      {/* <Route path="/" element={<RequestAccess />} /> */}
-      <Route path="/" element={<Navigate to="/login" replace />} />
+      {/* Landing Page */}
+      <Route path="/" element={<LandingPage />} />
 
       {/* Public Routes */}
       <Route
@@ -333,13 +333,12 @@ const AppRoutes: React.FC = () => {
 
       <Route
         path="/privacy"
-        element={
-          <ProtectedRoute>
-            <Layout>
-              <PrivacyPolicy />
-            </Layout>
-          </ProtectedRoute>
-        }
+        element={<PrivacyPolicy />}
+      />
+
+      <Route
+        path="/terms"
+        element={<Terms />}
       />
 
       <Route

@@ -1,110 +1,138 @@
 import React from 'react';
-import { Shield, Lock, FileText, Globe } from 'lucide-react';
+import { Shield, Lock, FileText, Globe, Scale, BookOpen, Clock, AlertCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const PrivacyPolicy: React.FC = () => {
     return (
         <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div className="bg-gradient-to-r from-blue-900 to-indigo-900 px-8 py-12 text-white">
-                    <div className="flex items-center space-x-3 mb-4">
-                        <Shield className="w-8 h-8 text-blue-300" />
-                        <span className="text-blue-300 font-bold tracking-wider uppercase text-sm">Legal</span>
+                {/* Header Section */}
+                <div className="bg-gradient-to-br from-blue-700 via-indigo-800 to-purple-900 px-8 py-12 text-white relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-8 opacity-10">
+                        <Lock className="w-48 h-48" />
                     </div>
-                    <h1 className="text-4xl font-extrabold mb-4">Privacy Policy</h1>
-                    <p className="text-blue-100 text-lg max-w-2xl">
-                        We are committed to protecting your personal data and ensuring transparency in how we handle it.
-                    </p>
+                    <div className="relative z-10 text-center sm:text-left">
+                        <div className="flex items-center justify-center sm:justify-start space-x-3 mb-6">
+                            <div className="p-2 bg-white/10 rounded-lg backdrop-blur-sm">
+                                <Shield className="w-6 h-6 text-blue-300" />
+                            </div>
+                            <span className="text-blue-300 font-black tracking-widest uppercase text-xs">Arrotech Hub Legal</span>
+                        </div>
+                        <h1 className="text-4xl sm:text-5xl font-black mb-6 tracking-tight">Privacy Policy</h1>
+                        <p className="text-blue-100 text-lg max-w-2xl font-medium leading-relaxed">
+                            Your trust is our most valuable asset. We are committed to protecting your personal data and ensuring total transparency in how we handle your information.
+                        </p>
+                    </div>
                 </div>
 
-                <div className="p-8 space-y-8">
-                    <section>
-                        <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
-                            <Globe className="w-6 h-6 mr-2 text-blue-600" />
+                {/* Content Section */}
+                <div className="p-8 sm:p-12 space-y-12">
+                    <section className="space-y-4">
+                        <h2 className="text-2xl font-black text-gray-900 flex items-center gap-3">
+                            <Globe className="w-6 h-6 text-blue-600" />
                             1. Introduction
                         </h2>
-                        <p className="text-gray-600 leading-relaxed">
-                            Arrotech Hub ("we", "our", or "us") respects your privacy and is committed to protecting your personal data.
-                            This privacy policy will inform you as to how we look after your personal data when you visit our website
-                            (and use our applications) and tell you about your privacy rights and how the law protects you.
+                        <div className="text-gray-600 leading-relaxed font-medium space-y-4">
+                            <p>
+                                At Arrotech Hub ("we", "our", or "us"), we operate as a unified platform for AI automation and tool integration. This Privacy Policy outlines how we collect, use, and safeguard your data when you interact with our platform, services, and applications.
+                            </p>
+                            <p>
+                                By using Arrotech Hub, you agree to the practices described in this policy. We ensure that your data is processed in accordance with global data protection standards (GDPR, CCPA) and best security practices.
+                            </p>
+                        </div>
+                    </section>
+
+                    <section className="space-y-4 pt-8 border-t border-gray-100">
+                        <h2 className="text-2xl font-black text-gray-900 flex items-center gap-3">
+                            <Scale className="w-6 h-6 text-blue-600" />
+                            2. Data Collection
+                        </h2>
+                        <div className="grid sm:grid-cols-2 gap-6 mt-4">
+                            <div className="bg-blue-50/50 p-6 rounded-2xl border border-blue-100">
+                                <h3 className="font-black text-gray-900 mb-2 uppercase text-xs tracking-wider">Identity & Contact</h3>
+                                <p className="text-sm text-gray-600 leading-relaxed font-medium">
+                                    When you create an account, we collect your name, email address, and any profile information provided via third-party providers (Google, Microsoft).
+                                </p>
+                            </div>
+                            <div className="bg-purple-50/50 p-6 rounded-2xl border border-purple-100">
+                                <h3 className="font-black text-gray-900 mb-2 uppercase text-xs tracking-wider">Usage & Technical</h3>
+                                <p className="text-sm text-gray-600 leading-relaxed font-medium">
+                                    We collect information on how you interact with our tools, your IP address, browser type, and device information to optimize your experience.
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section className="space-y-4 pt-8 border-t border-gray-100">
+                        <h2 className="text-2xl font-black text-gray-900 flex items-center gap-3">
+                            <BookOpen className="w-6 h-6 text-blue-600" />
+                            3. Tool Integrations
+                        </h2>
+                        <p className="text-gray-600 leading-relaxed font-medium">
+                            Arrotech Hub allows you to connect third-party applications (Slack, Gmail, etc.). When you connect these tools, we only access the data authorized by you during the OAuth process. We do not store your third-party credentials; we only store encrypted access tokens required to perform automations on your behalf.
                         </p>
                     </section>
 
-                    <section>
-                        <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
-                            <Database className="w-6 h-6 mr-2 text-blue-600" />
-                            2. The Data We Collect
+                    <section className="space-y-4 pt-8 border-t border-gray-100">
+                        <h2 className="text-2xl font-black text-gray-900 flex items-center gap-3">
+                            <AlertCircle className="w-6 h-6 text-blue-600" />
+                            4. Your Data Rights
                         </h2>
-                        <p className="text-gray-600 leading-relaxed mb-4">
-                            We may collect, use, store and transfer different kinds of personal data about you which we have grouped together follows:
-                        </p>
-                        <ul className="list-disc pl-6 space-y-2 text-gray-600">
-                            <li><strong>Identity Data</strong> includes first name, last name, username or similar identifier.</li>
-                            <li><strong>Contact Data</strong> includes email address and telephone numbers.</li>
-                            <li><strong>Technical Data</strong> includes internet protocol (IP) address, your login data, browser type and version.</li>
-                            <li><strong>Usage Data</strong> includes information about how you use our website, products and services.</li>
+                        <ul className="grid gap-3 font-medium">
+                            {[
+                                "Right to access your personal data",
+                                "Right to correct inaccurate information",
+                                "Right to request deletion (Right to be forgotten)",
+                                "Right to data portability",
+                                "Right to withdraw consent at any time"
+                            ].map((right, i) => (
+                                <li key={i} className="flex items-center gap-3 text-gray-600 bg-gray-50 p-3 rounded-xl border border-gray-100">
+                                    <div className="w-2 h-2 bg-blue-600 rounded-full" />
+                                    {right}
+                                </li>
+                            ))}
                         </ul>
                     </section>
 
-                    <section>
-                        <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
-                            <Lock className="w-6 h-6 mr-2 text-blue-600" />
-                            3. Your Legal Rights (GDPR & CCPA)
+                    <section className="space-y-4 pt-8 border-t border-gray-100">
+                        <h2 className="text-2xl font-black text-gray-900 flex items-center gap-3">
+                            <FileText className="w-6 h-6 text-blue-600" />
+                            5. Contact Information
                         </h2>
-                        <p className="text-gray-600 leading-relaxed mb-4">
-                            Under certain circumstances, you have rights under data protection laws in relation to your personal data, including the right to:
-                        </p>
-                        <div className="grid md:grid-cols-2 gap-4">
-                            <div className="bg-gray-50 p-4 rounded-lg">
-                                <h3 className="font-bold text-gray-900 mb-2">Request Access</h3>
-                                <p className="text-sm text-gray-600">Request a copy of the personal data we hold about you.</p>
-                            </div>
-                            <div className="bg-gray-50 p-4 rounded-lg">
-                                <h3 className="font-bold text-gray-900 mb-2">Request Correction</h3>
-                                <p className="text-sm text-gray-600">Correct any incomplete or inaccurate data we hold about you.</p>
-                            </div>
-                            <div className="bg-gray-50 p-4 rounded-lg">
-                                <h3 className="font-bold text-gray-900 mb-2">Request Erasure</h3>
-                                <p className="text-sm text-gray-600">Ask us to delete or remove personal data where there is no good reason for us continuing to process it.</p>
-                            </div>
-                            <div className="bg-gray-50 p-4 rounded-lg">
-                                <h3 className="font-bold text-gray-900 mb-2">Data Portability</h3>
-                                <p className="text-sm text-gray-600">Request the transfer of your personal data to you or to a third party.</p>
-                            </div>
-                        </div>
-                        <p className="mt-4 text-gray-600 text-sm">
-                            You can exercise these rights within your Account Settings or by contacting us.
-                        </p>
-                    </section>
-
-                    <section>
-                        <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
-                            <FileText className="w-6 h-6 mr-2 text-blue-600" />
-                            4. Contact Us
-                        </h2>
-                        <p className="text-gray-600 leading-relaxed">
-                            If you have any questions about this privacy policy or our privacy practices, please contact us at:
-                            <br />
-                            <a href="mailto:privacy@arrotechsolutions.com" className="text-blue-600 font-semibold hover:underline">
+                        <div className="bg-gradient-to-r from-gray-900 to-indigo-900 p-8 rounded-2xl text-white">
+                            <p className="font-medium mb-4 leading-relaxed">
+                                Questions about our Privacy Policy? Our legal team is ready to assist you.
+                            </p>
+                            <a
+                                href="mailto:privacy@arrotechsolutions.com"
+                                className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-full font-black text-sm transition-all"
+                            >
+                                <MailIcon className="w-4 h-4" />
                                 privacy@arrotechsolutions.com
                             </a>
-                        </p>
+                        </div>
                     </section>
                 </div>
 
-                <div className="bg-gray-50 px-8 py-6 border-t border-gray-200">
-                    <p className="text-xs text-gray-500 text-center">
-                        Last Updated: {new Date().toLocaleDateString()}
-                    </p>
+                {/* Footer Section */}
+                <div className="bg-gray-50 px-8 py-10 border-t border-gray-100">
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+                        <div className="flex items-center gap-2 text-gray-400 text-xs font-black uppercase tracking-widest">
+                            <Clock className="w-4 h-4" />
+                            Last Updated: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                        </div>
+                        <div className="flex gap-4">
+                            <Link to="/login" className="text-xs font-black text-blue-600 hover:underline uppercase tracking-tight">Login</Link>
+                            <Link to="/" className="text-xs font-black text-gray-400 hover:text-gray-900 uppercase tracking-tight">Home</Link>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     );
 };
 
-export default PrivacyPolicy;
-
-// Helper component for icon
-function Database(props: any) {
+function MailIcon(props: any) {
     return (
         <svg
             {...props}
@@ -118,9 +146,10 @@ function Database(props: any) {
             strokeLinecap="round"
             strokeLinejoin="round"
         >
-            <ellipse cx="12" cy="5" rx="9" ry="3" />
-            <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
-            <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+            <rect width="20" height="16" x="2" y="4" rx="2" />
+            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
         </svg>
-    );
+    )
 }
+
+export default PrivacyPolicy;
