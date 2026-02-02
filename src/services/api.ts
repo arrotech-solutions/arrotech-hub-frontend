@@ -102,6 +102,16 @@ class ApiService {
     return response.data;
   }
 
+  async googleAuth(credential: string): Promise<ApiResponse<any>> {
+    const response = await this.api.post('/auth/google', { credential });
+    return response.data;
+  }
+
+  async microsoftAuth(accessToken: string): Promise<ApiResponse<any>> {
+    const response = await this.api.post('/auth/microsoft', { access_token: accessToken });
+    return response.data;
+  }
+
   async logout(): Promise<ApiResponse<any>> {
     const response = await this.api.post('/auth/logout');
     return response.data;
@@ -2487,7 +2497,117 @@ class ApiService {
     const response = await this.api.post('/api/support/ticket', data);
     return response.data;
   }
+
+  // ============================================================================
+  // Phase 1: Tip Jar
+  // ============================================================================
+
+  async initiateTip(data: {
+    creator_username: string;
+    email: string;
+    amount: number;
+    name?: string;
+    message?: string;
+    callback_url?: string;
+  }): Promise<ApiResponse<{
+    authorization_url: string;
+    reference: string;
+    tip_id: number;
+    amount: number;
+    creator_display_name: string;
+  }>> {
+    const response = await this.api.post('/api/tiktok/public/tip', data);
+    return response.data;
+  }
+
+  async verifyTip(tipId: number, reference: string): Promise<ApiResponse<{
+    status: string;
+    message: string;
+    amount: number;
+  }>> {
+    const response = await this.api.post(`/api/tiktok/public/tip/${tipId}/verify`, null, {
+      params: { reference }
+    });
+    return response.data;
+  }
+
+  async getMyTips(): Promise<ApiResponse<{
+    tips: Array<{
+      id: number;
+      amount: number;
+      creator_amount: number;
+      fan_name: string;
+      fan_message: string | null;
+      created_at: string;
+    }>;
+    total_tips: number;
+    total_amount: number;
+  }>> {
+    const response = await this.api.get('/api/tiktok/tips');
+    return response.data;
+  }
+
+  // ============================================================================
+  // Phase 1: Link Analytics
+  // ============================================================================
+
+  async trackLinkEvent(linkId: number, eventType: 'view' | 'click', source?: string): Promise<void> {
+    try {
+      await this.api.post(`/api/tiktok/public/link/${linkId}/track`, null, {
+        params: { event_type: eventType, source }
+      });
+    } catch {
+      // Silent fail for analytics
+    }
+  }
+
+  async getLinkAnalytics(linkId: number): Promise<ApiResponse<{
+    link_id: number;
+    title: string;
+    metrics: {
+      total_views: number;
+      total_clicks: number;
+      total_purchases: number;
+      conversion_rate: number;
+      total_revenue: number;
+      views_last_7_days: number;
+    };
+    sources: Record<string, number>;
+  }>> {
+    const response = await this.api.get(`/api/tiktok/links/${linkId}/analytics`);
+    return response.data;
+  }
+
+  // ============================================================================
+  // Phase 1: Fan Contacts
+  // ============================================================================
+
+  async getMyFans(): Promise<ApiResponse<{
+    fans: Array<{
+      id: number;
+      email: string;
+      name: string | null;
+      phone: string | null;
+      source_type: string;
+      total_spent: number;
+      purchase_count: number;
+      created_at: string;
+    }>;
+    total_fans: number;
+    total_lifetime_value: number;
+  }>> {
+    const response = await this.api.get('/api/tiktok/fans');
+    return response.data;
+  }
+
+  async exportFansCSV(): Promise<Blob> {
+    const response = await this.api.get('/api/tiktok/fans/export', {
+      responseType: 'blob'
+    });
+    return response.data;
+  }
 }
+
 
 export const apiService = new ApiService();
 export default apiService;

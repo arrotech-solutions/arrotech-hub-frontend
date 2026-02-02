@@ -33,6 +33,9 @@ import WhatsAppDashboard from './pages/WhatsAppDashboard';
 import TikTokDashboard from './pages/TikTokDashboard';
 import PremiumContentUnlock from './pages/PremiumContentUnlock';
 import HelpSupport from './pages/HelpSupport';
+import TipPage from './pages/TipPage';
+import TipVerify from './pages/TipVerify';
+import MicrosoftCallback from './pages/MicrosoftCallback';
 
 import { CommandProvider } from './contexts/CommandContext';
 import { useCommand } from './hooks/useCommand';
@@ -136,12 +139,19 @@ const AppRoutes: React.FC = () => {
         }
       />
 
+      {/* Microsoft OAuth Callback */}
+      <Route path="/auth/microsoft/callback" element={<MicrosoftCallback />} />
+
       {/* Public Premium Content Unlock (no auth required) */}
       <Route path="/unlock/:linkId" element={<PremiumContentUnlock />} />
 
       {/* Public Help & Support (no auth required) */}
       <Route path="/help" element={<HelpSupport />} />
       <Route path="/support" element={<HelpSupport />} />
+
+      {/* Public Tip Pages (no auth required) */}
+      <Route path="/tip/:username" element={<TipPage />} />
+      <Route path="/tip/:username/verify" element={<TipVerify />} />
 
       {/* Protected Routes */}
       <Route
