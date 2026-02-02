@@ -213,7 +213,7 @@ const Agents: React.FC = () => {
       }
     } catch (error) {
       console.error('Error pausing agent:', error);
-      toast.error('Failed to pause agent');
+      toast.error('Failed to pause agent.');
     }
   };
 
