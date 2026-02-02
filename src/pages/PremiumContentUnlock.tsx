@@ -46,20 +46,35 @@ const PremiumContentUnlock: React.FC = () => {
         }
     }, [linkId]);
 
-    const verifyPayment = useCallback(async (reference: string) => {
+    const verifyPayment = useCallback(async (reference: string, retryCount = 0) => {
         if (!linkId) return;
         setPaymentLoading(true);
+
         try {
             const result = await apiService.verifyAndUnlockContent(parseInt(linkId), reference);
             if ((result as any).unlocked_url) {
                 setUnlocked(true);
                 setUnlockedUrl((result as any).unlocked_url);
+                toast.dismiss('payment-verify');
                 toast.success('Payment verified! Content unlocked.');
+                setPaymentLoading(false); // Ensure loading state is reset on success
             }
         } catch (err: any) {
-            setError('Payment verification failed. Please contact support.');
-        } finally {
-            setPaymentLoading(false);
+            // If payment verification fails and we haven't exceeded retry attempts, retry after delay
+            if (retryCount < 3) {
+                // Wait before retrying: 2s, 4s, 6s
+                const delay = (retryCount + 1) * 2000;
+                toast.loading(`Verifying payment... (${retryCount + 1}/3)`, { id: 'payment-verify' });
+
+                setTimeout(() => {
+                    verifyPayment(reference, retryCount + 1);
+                }, delay);
+            } else {
+                // After 3 retries, show error
+                toast.dismiss('payment-verify');
+                setError('Payment verification failed. Please contact support or refresh the page.');
+                setPaymentLoading(false);
+            }
         }
     }, [linkId]);
 
@@ -71,6 +86,8 @@ const PremiumContentUnlock: React.FC = () => {
         // If returning from Paystack with a reference, verify the payment
         const reference = paystackReference || paystackTrxRef;
         if (reference && linkInfo) {
+            // Show initial loading message
+            toast.loading('Verifying your payment...', { id: 'payment-verify' });
             verifyPayment(reference);
         }
     }, [paystackReference, paystackTrxRef, linkInfo, verifyPayment]);

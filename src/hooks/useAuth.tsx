@@ -7,6 +7,8 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
+  loginWithGoogle: (credential: string) => Promise<void>;
+  loginWithMicrosoft: (accessToken: string) => Promise<void>;
   register: (email: string, password: string, name: string) => Promise<void>;
   logout: () => Promise<void>;
   updateUser: (data: Partial<User>) => Promise<void>;
@@ -96,6 +98,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const loginWithGoogle = async (credential: string) => {
+    try {
+      const response = await apiService.googleAuth(credential);
+      localStorage.setItem('auth_token', response.data.token);
+      setUser(response.data.user);
+      toast.success('Login successful!');
+    } catch (error: any) {
+      toast.error(error.response?.data?.detail || 'Google login failed');
+      throw error;
+    }
+  };
+
+  const loginWithMicrosoft = async (accessToken: string) => {
+    try {
+      const response = await apiService.microsoftAuth(accessToken);
+      localStorage.setItem('auth_token', response.data.token);
+      setUser(response.data.user);
+      toast.success('Login successful!');
+    } catch (error: any) {
+      toast.error(error.response?.data?.detail || 'Microsoft login failed');
+      throw error;
+    }
+  };
+
   const logout = async () => {
     try {
       await apiService.logout();
@@ -164,6 +190,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     user,
     loading,
     login,
+    loginWithGoogle,
+    loginWithMicrosoft,
     register,
     logout,
     updateUser,

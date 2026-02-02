@@ -9,11 +9,43 @@ import {
   Sparkles,
   Zap
 } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from '../assets/Logo/icononly_transparent_nobuffer.png';
 import { useAuth } from '../hooks/useAuth';
+
+// Google Icon SVG component
+const GoogleIcon = () => (
+  <svg className="w-5 h-5" viewBox="0 0 24 24">
+    <path
+      fill="#4285F4"
+      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+    />
+    <path
+      fill="#34A853"
+      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+    />
+    <path
+      fill="#FBBC05"
+      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+    />
+    <path
+      fill="#EA4335"
+      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+    />
+  </svg>
+);
+
+// Microsoft Icon SVG component
+const MicrosoftIcon = () => (
+  <svg className="w-5 h-5" viewBox="0 0 24 24">
+    <path fill="#F25022" d="M1 1h10v10H1z" />
+    <path fill="#00A4EF" d="M1 13h10v10H1z" />
+    <path fill="#7FBA00" d="M13 1h10v10H13z" />
+    <path fill="#FFB900" d="M13 13h10v10H13z" />
+  </svg>
+);
 
 interface LoginFormData {
   email: string;
@@ -21,10 +53,12 @@ interface LoginFormData {
 }
 
 const Login: React.FC = () => {
-  const { login } = useAuth();
+  const { login, loginWithGoogle, loginWithMicrosoft } = useAuth();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isOAuthLoading, setIsOAuthLoading] = useState(false);
+  const [oAuthProvider, setOAuthProvider] = useState<string | null>(null);
   const [rememberMe, setRememberMe] = useState(false);
 
   const {
@@ -54,8 +88,147 @@ const Login: React.FC = () => {
     }
   };
 
+  // Google Sign-In handler
+  const handleGoogleCallback = useCallback(async (response: any) => {
+    setFormError(null);
+    setIsOAuthLoading(true);
+    setOAuthProvider('Google');
+    try {
+      await loginWithGoogle(response.credential);
+      navigate('/');
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.detail || 'Google login failed. Please try again.';
+      setFormError(errorMessage);
+    } finally {
+      setIsOAuthLoading(false);
+      setOAuthProvider(null);
+    }
+  }, [loginWithGoogle, navigate]);
+
+  // Initialize Google Sign-In
+  useEffect(() => {
+    const googleClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+    if (!googleClientId) {
+      console.warn('Google Client ID not configured');
+      return;
+    }
+
+    // Load Google Identity Services script
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+    script.onload = () => {
+      if (window.google) {
+        window.google.accounts.id.initialize({
+          client_id: googleClientId,
+          callback: handleGoogleCallback,
+        });
+        window.google.accounts.id.renderButton(
+          document.getElementById('google-signin-button'),
+          {
+            theme: 'outline',
+            size: 'large',
+            width: '100%',
+            text: 'continue_with',
+            shape: 'rectangular',
+          }
+        );
+      }
+    };
+    document.head.appendChild(script);
+
+    return () => {
+      // Cleanup script on unmount
+      const existingScript = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
+      if (existingScript) {
+        existingScript.remove();
+      }
+    };
+  }, [handleGoogleCallback]);
+
+  // Microsoft Sign-In handler
+  const handleMicrosoftLogin = useCallback(async () => {
+    const msClientId = process.env.REACT_APP_MICROSOFT_CLIENT_ID;
+    if (!msClientId) {
+      setFormError('Microsoft login is not configured');
+      return;
+    }
+
+    try {
+      // Open Microsoft login popup
+      const redirectUri = encodeURIComponent(window.location.origin + '/auth/microsoft/callback');
+      const scope = encodeURIComponent('openid profile email User.Read');
+      const authUrl = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=${msClientId}&response_type=token&redirect_uri=${redirectUri}&scope=${scope}&response_mode=fragment&prompt=select_account`;
+
+      const popup = window.open(authUrl, 'Microsoft Login', 'width=500,height=600,scrollbars=yes');
+
+      if (!popup) {
+        setFormError('Popup blocked. Please allow popups for this site.');
+        return;
+      }
+
+      // Listen for the popup to close and check for token
+      const checkPopup = setInterval(async () => {
+        try {
+          if (popup.closed) {
+            clearInterval(checkPopup);
+            setIsOAuthLoading(false);
+            setOAuthProvider(null);
+            return;
+          }
+
+          // Check if we're on the callback URL
+          if (popup.location.href.includes('/auth/microsoft/callback')) {
+            const hash = popup.location.hash;
+            const params = new URLSearchParams(hash.substring(1));
+            const accessToken = params.get('access_token');
+
+            popup.close();
+            clearInterval(checkPopup);
+
+            if (accessToken) {
+              setIsOAuthLoading(true);
+              setOAuthProvider('Microsoft');
+              await loginWithMicrosoft(accessToken);
+              navigate('/');
+            } else {
+              setFormError('Microsoft login failed. No access token received.');
+              setIsOAuthLoading(false);
+              setOAuthProvider(null);
+            }
+          }
+        } catch (e) {
+          // Cross-origin error - popup is still on Microsoft domain
+        }
+      }, 500);
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.detail || 'Microsoft login failed. Please try again.';
+      setFormError(errorMessage);
+      setIsOAuthLoading(false);
+      setOAuthProvider(null);
+    }
+  }, [loginWithMicrosoft, navigate]);
+
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex relative">
+      {/* OAuth Loading Overlay */}
+      {isOAuthLoading && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="bg-white rounded-2xl p-8 shadow-2xl flex flex-col items-center gap-4 max-w-sm mx-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent"></div>
+            <div className="text-center">
+              <h3 className="text-lg font-semibold text-gray-900">
+                Signing in with {oAuthProvider}...
+              </h3>
+              <p className="text-sm text-gray-500 mt-1">
+                Please wait while we authenticate your account
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Left Side - Form */}
       <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
         <div className="max-w-md w-full space-y-8">
@@ -187,6 +360,53 @@ const Login: React.FC = () => {
                 )}
               </button>
             </form>
+
+            {/* Divider */}
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">Or continue with</span>
+              </div>
+            </div>
+
+            {/* Google Sign-In Button */}
+            <div
+              id="google-signin-button"
+              className="w-full flex justify-center"
+              style={{ minHeight: '44px' }}
+            >
+              {/* Fallback button if Google script doesn't load */}
+              {!process.env.REACT_APP_GOOGLE_CLIENT_ID && (
+                <button
+                  type="button"
+                  disabled
+                  className="w-full flex items-center justify-center gap-3 bg-gray-100 border border-gray-300 rounded-xl py-3 px-6 text-gray-400 cursor-not-allowed"
+                >
+                  <GoogleIcon />
+                  <span className="font-medium">Google Sign-In not configured</span>
+                </button>
+              )}
+            </div>
+
+            {/* Microsoft Sign-In Button */}
+            <button
+              type="button"
+              onClick={handleMicrosoftLogin}
+              disabled={!process.env.REACT_APP_MICROSOFT_CLIENT_ID}
+              className={`w-full flex items-center justify-center gap-3 border rounded-xl py-3 px-6 mt-3 transition-all duration-200 ${process.env.REACT_APP_MICROSOFT_CLIENT_ID
+                ? 'bg-white border-gray-300 hover:bg-gray-50 text-gray-700'
+                : 'bg-gray-100 border-gray-300 text-gray-400 cursor-not-allowed'
+                }`}
+            >
+              <MicrosoftIcon />
+              <span className="font-medium">
+                {process.env.REACT_APP_MICROSOFT_CLIENT_ID
+                  ? 'Continue with Microsoft'
+                  : 'Microsoft Sign-In not configured'}
+              </span>
+            </button>
 
             <div className="mt-8 pt-6 border-t border-gray-200">
               <p className="text-center text-sm text-gray-600">
