@@ -44,8 +44,10 @@ import {
   NotionLogo,
   TrelloLogo,
   JiraLogo,
-  TikTokLogo
+  TikTokLogo,
+  KRALogo
 } from '../components/BrandIcons';
+import KraPinModal from '../components/KraPinModal';
 
 const Integrations: React.FC = () => {
   const navigate = useNavigate();
@@ -64,6 +66,7 @@ const Integrations: React.FC = () => {
     requiredTier: string;
     currentTier: string;
   }>({ isOpen: false, feature: '', requiredTier: '', currentTier: '' });
+  const [isKraModalOpen, setIsKraModalOpen] = useState(false);
 
   // Form State
   const [formData, setFormData] = useState<ConnectionCreate>({
@@ -95,6 +98,7 @@ const Integrations: React.FC = () => {
     if (platformId.includes('notion')) return 'h-full w-auto object-contain';
     if (platformId.includes('trello')) return 'h-full w-auto object-contain';
     if (platformId.includes('jira')) return 'h-full w-auto object-contain';
+    if (platformId.includes('kra')) return 'w-full h-full object-contain';
     // Square default
     return 'w-full h-full object-contain';
   };
@@ -624,6 +628,9 @@ const Integrations: React.FC = () => {
       }
     }
 
+
+    // Handle KRA Portal connection (PIN Entry Modal) - REMOVED
+
     if (existing) {
       setEditingConnection(existing);
       setFormData({
@@ -659,7 +666,38 @@ const Integrations: React.FC = () => {
       setShowCreateModal(false);
       fetchData();
     } catch (error) {
-      toast.error('Failed to save connection');
+    }
+  };
+
+  const handleKraVerify = async (pin: string) => {
+    try {
+      // Create a temporary connection config for testing
+      const result = await apiService.testPlatformConnection('kra_portal', { pin });
+      return {
+        success: result.success,
+        message: result.message || result.error || (result.success ? 'PIN verified' : 'Verification failed'),
+        data: result.data
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        message: error.response?.data?.error || 'PIN verification failed.'
+      };
+    }
+  };
+
+  const handleKraSuccess = async (pin: string, data: any) => {
+    try {
+      await apiService.createConnection({
+        platform: 'kra_portal',
+        name: `KRA: ${data.taxpayer_name || pin}`,
+        config: { pin }
+      });
+      setIsKraModalOpen(false);
+      toast.success('KRA Portal connected successfully!');
+      fetchData();
+    } catch (error) {
+      toast.error('Failed to save KRA connection');
     }
   };
 
@@ -790,6 +828,14 @@ const Integrations: React.FC = () => {
         )}
 
       </div>
+
+      {/* KRA Portal Modal */}
+      <KraPinModal
+        isOpen={isKraModalOpen}
+        onClose={() => setIsKraModalOpen(false)}
+        onVerify={handleKraVerify}
+        onSuccess={handleKraSuccess}
+      />
 
       {/* Configuration Modal */}
       {showCreateModal && selectedPlatform && (

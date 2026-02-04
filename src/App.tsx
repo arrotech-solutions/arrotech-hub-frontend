@@ -38,6 +38,7 @@ import TipVerify from './pages/TipVerify';
 import MicrosoftCallback from './pages/MicrosoftCallback';
 import LandingPage from './pages/LandingPage';
 import Terms from './pages/Terms';
+import KraDashboard from './pages/apps/KraDashboard';
 
 import { CommandProvider } from './contexts/CommandContext';
 import { useCommand } from './hooks/useCommand';
@@ -264,6 +265,17 @@ const AppRoutes: React.FC = () => {
           <ProtectedRoute>
             <Layout>
               <Marketplace />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/apps/kra"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <KraDashboard />
             </Layout>
           </ProtectedRoute>
         }
