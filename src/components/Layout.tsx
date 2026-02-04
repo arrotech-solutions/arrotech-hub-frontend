@@ -26,7 +26,8 @@ import {
   LayoutDashboard,
   Share2,
   Phone,
-  Video
+  Video,
+  Landmark
 } from 'lucide-react';
 import logo from '../assets/Logo/icononly_transparent_nobuffer.png';
 import React from 'react';
@@ -143,6 +144,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       icon: ShoppingBag,
       description: 'Share and discover workflows',
       badge: 'New'
+    },
+    {
+      name: 'KRA GavaConnect',
+      href: '/apps/kra',
+      icon: Landmark,
+      description: 'Tax services portal',
+      badge: 'Beta'
     },
     {
       name: 'Favorites',
