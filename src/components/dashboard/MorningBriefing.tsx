@@ -23,6 +23,15 @@ const MorningBriefing: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     const [processingAction, setProcessingAction] = useState<string | null>(null);
     const [zenMode, setZenMode] = useState(false);
 
+    // Time-aware greeting
+    const getGreetingPrefix = () => {
+        const hour = new Date().getHours();
+        if (hour < 12) return 'Good morning';
+        if (hour < 17) return 'Good afternoon';
+        if (hour < 21) return 'Good evening';
+        return 'Good night';
+    };
+
     useEffect(() => {
         const loadBriefing = async () => {
             try {
@@ -104,10 +113,10 @@ const MorningBriefing: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                                 <div>
                                     <div className="flex items-center gap-2 text-indigo-600 font-bold tracking-wide uppercase text-xs mb-1">
                                         <Sun className="w-4 h-4" />
-                                        <span>Morning Briefing</span>
+                                        <span>My Briefing</span>
                                     </div>
                                     <h1 className={`font-bold text-gray-900 mb-1 ${zenMode ? 'text-4xl' : 'text-3xl'}`}>
-                                        {data?.greeting}, {user?.name?.split(' ')[0] || 'Creator'}.
+                                        {data?.greeting || getGreetingPrefix()}, {user?.name?.split(' ')[0] || 'Creator'}.
                                     </h1>
                                     <p className={`text-gray-500 font-light ${zenMode ? 'text-2xl' : 'text-xl'}`}>
                                         {data?.headline}
