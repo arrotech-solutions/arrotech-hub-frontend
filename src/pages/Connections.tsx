@@ -44,8 +44,7 @@ import {
   NotionLogo,
   TrelloLogo,
   JiraLogo,
-  TikTokLogo,
-  KRALogo
+  TikTokLogo
 } from '../components/BrandIcons';
 import KraPinModal from '../components/KraPinModal';
 
