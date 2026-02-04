@@ -4,8 +4,8 @@ import DashboardHeader from '../components/dashboard/DashboardHeader';
 import CommandPalette from '../components/dashboard/CommandPalette';
 import apiService from '../services/api';
 import { useNavigate } from 'react-router-dom';
-import { MessageSquare, CheckSquare, Calendar, ArrowRight, Mail, Video, Sun } from 'lucide-react';
-import MorningBriefing from '../components/dashboard/MorningBriefing';
+import { MessageSquare, CheckSquare, Calendar, ArrowRight, Mail, Video, Sparkles } from 'lucide-react';
+import EnhancedBriefing from '../components/dashboard/EnhancedBriefing';
 import { ClickUpLogo, TrelloLogo, JiraLogo, AsanaLogo, OutlookLogo } from '../components/BrandIcons';
 
 interface DashboardItem {
@@ -353,8 +353,8 @@ const UnifiedDashboard: React.FC = () => {
                         onClick={() => setShowBriefing(true)}
                         className="w-full md:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-400 to-pink-500 text-white rounded-lg shadow-lg shadow-orange-200 hover:shadow-xl hover:scale-105 transition-all font-semibold text-sm"
                     >
-                        <Sun className="w-4 h-4" />
-                        Start Morning Briefing
+                        <Sparkles className="w-4 h-4" />
+                        Launch My Briefing
                     </button>
                 </div>
 
@@ -408,8 +408,8 @@ const UnifiedDashboard: React.FC = () => {
                 onComposeMessage={() => navigate('/unified/inbox')}
             />
 
-            {/* Morning Briefing Modal */}
-            {showBriefing && <MorningBriefing onClose={() => setShowBriefing(false)} />}
+            {/* My Briefing Modal */}
+            {showBriefing && <EnhancedBriefing onClose={() => setShowBriefing(false)} />}
         </div>
     );
 };

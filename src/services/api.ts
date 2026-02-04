@@ -217,6 +217,11 @@ class ApiService {
     return response.data;
   }
 
+  async testPlatformConnection(platform: string, config: Record<string, any>): Promise<ApiResponse<any>> {
+    const response = await this.api.post('/connections/test', { platform, config });
+    return response.data;
+  }
+
   async getAvailablePlatforms(): Promise<ApiResponse<ConnectionPlatform[]>> {
     const response = await this.api.get('/connections/platforms');
     // Backend returns { success: true, data: { platforms: [...] } }
@@ -227,9 +232,14 @@ class ApiService {
     };
   }
   // AI Features
-  async getMorningBriefing(): Promise<ApiResponse<any>> {
-    const response = await this.api.get('/ai/morning-briefing');
+  async getMyBriefing(): Promise<ApiResponse<any>> {
+    const response = await this.api.get('/ai/my-briefing');
     return response.data;
+  }
+
+  // Backward compatibility alias
+  async getMorningBriefing(): Promise<ApiResponse<any>> {
+    return this.getMyBriefing();
   }
 
   async executeBriefingAction(actionId: string): Promise<ApiResponse<any>> {
@@ -2606,8 +2616,42 @@ class ApiService {
     });
     return response.data;
   }
-}
 
+  // KRA GavaConnect endpoints
+  async checkKraPin(pin: string): Promise<ApiResponse<any>> {
+    const response = await this.api.post('/kra/check-pin', { pin });
+    return response.data;
+  }
+
+  async checkKraId(idNumber: string, taxpayerType: string = 'KE'): Promise<ApiResponse<any>> {
+    const response = await this.api.post('/kra/check-id', {
+      id_number: idNumber,
+      taxpayer_type: taxpayerType
+    });
+    return response.data;
+  }
+
+  async fileKraNilReturn(pin: string, obligationCode: string, month: string, year: string): Promise<ApiResponse<any>> {
+    const response = await this.api.post('/kra/file-nil-return', {
+      pin,
+      obligation_code: obligationCode,
+      month,
+      year
+    });
+    return response.data;
+  }
+  async generateKraPin(idNumber: string, dob: string, mobile: string, email: string, taxpayerType: string = 'KE', isPinWithNoOblig: string = 'Yes'): Promise<ApiResponse<any>> {
+    const response = await this.api.post('/kra/generate-pin', {
+      id_number: idNumber,
+      dob,
+      mobile,
+      email,
+      taxpayer_type: taxpayerType,
+      is_pin_with_no_oblig: isPinWithNoOblig
+    });
+    return response.data;
+  }
+}
 
 export const apiService = new ApiService();
 export default apiService;
