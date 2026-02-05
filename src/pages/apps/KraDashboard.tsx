@@ -9,11 +9,9 @@ import {
     Building2,
     AlertCircle,
     CheckCircle2,
-    ChevronRight,
-    ArrowRight
+    ChevronRight
 } from 'lucide-react';
 import { apiService as api } from '../../services/api';
-import { KRALogo } from '../../components/BrandIcons'; // Assuming this exists from KraPinModal usage, if not I'll fallback
 
 // --- Reusable UI Components ---
 
