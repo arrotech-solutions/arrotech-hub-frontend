@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
     Search, Inbox,
     PenSquare, Paperclip, Reply, Archive, X, Send, Tag,
-    Menu, ArrowLeft, Star, Trash
+    Menu, ArrowLeft, Star, Trash, Clock, Sparkles
 } from 'lucide-react';
 import apiService from '../services/api';
 import toast from 'react-hot-toast';
@@ -30,6 +30,50 @@ interface Message {
     avatar?: string;
     labels?: string[];
 }
+
+// Phase 3: Intelligent Inbox++ Types
+interface EnrichedMessageData {
+    priority: number; // 1-5
+    labels: string[];
+    summary?: string;
+    quick_replies?: string[];
+}
+
+// Priority Badge Component
+const PriorityBadge: React.FC<{ level: number }> = ({ level }) => {
+    const configs: Record<number, { bg: string; text: string; label: string }> = {
+        5: { bg: 'bg-red-500', text: 'text-white', label: 'Critical' },
+        4: { bg: 'bg-orange-500', text: 'text-white', label: 'High' },
+        3: { bg: 'bg-yellow-400', text: 'text-yellow-900', label: 'Medium' },
+        2: { bg: 'bg-green-500', text: 'text-white', label: 'Low' },
+        1: { bg: 'bg-gray-300', text: 'text-gray-700', label: 'Info' }
+    };
+    const config = configs[level] || configs[3];
+    return (
+        <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${config.bg} ${config.text}`}>
+            P{level}
+        </span>
+    );
+};
+
+// Smart Label Component
+const SmartLabel: React.FC<{ label: string }> = ({ label }) => {
+    const styles: Record<string, string> = {
+        'Action Required': 'bg-red-50 text-red-700 border-red-200',
+        'Waiting': 'bg-yellow-50 text-yellow-700 border-yellow-200',
+        'FYI': 'bg-blue-50 text-blue-700 border-blue-200',
+        'Marketing': 'bg-purple-50 text-purple-700 border-purple-200',
+        'Personal': 'bg-green-50 text-green-700 border-green-200',
+        'Financial': 'bg-emerald-50 text-emerald-700 border-emerald-200',
+        'Meeting': 'bg-indigo-50 text-indigo-700 border-indigo-200',
+        'Newsletter': 'bg-gray-50 text-gray-600 border-gray-200'
+    };
+    return (
+        <span className={`px-1.5 py-0.5 rounded border text-[10px] font-medium ${styles[label] || 'bg-gray-50 text-gray-600 border-gray-200'}`}>
+            {label}
+        </span>
+    );
+};
 
 const parseGmailBody = (payload: any): string => {
     if (!payload) return '';
@@ -94,6 +138,13 @@ const UnifiedInbox: React.FC = () => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [isComposeOpen, setIsComposeOpen] = useState(false);
 
+    // Phase 3: Intelligent Inbox++ State
+    const [enrichments, setEnrichments] = useState<Record<string, EnrichedMessageData>>({});
+    const [analyzingMessages, setAnalyzingMessages] = useState(false);
+    const [snoozedMessages, setSnoozedMessages] = useState<Set<string>>(new Set());
+    const [snoozeDropdownOpen, setSnoozeDropdownOpen] = useState<string | null>(null);
+    const searchInputRef = useRef<HTMLInputElement>(null);
+
     // Compose/Reply State
     const [composeChannel, setComposeChannel] = useState<'gmail' | 'slack' | 'teams' | 'outlook'>('gmail');
     const [replyText, setReplyText] = useState('');
@@ -154,6 +205,31 @@ const UnifiedInbox: React.FC = () => {
         if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
         return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
     };
+
+    // --- Actions (Moved & Memoized) ---
+    const handleArchive = useCallback((id: string, e?: React.MouseEvent) => {
+        e?.stopPropagation();
+        setMessages(prev => prev.filter(m => m.id !== id));
+        if (selectedMessage?.id === id) setSelectedMessage(null);
+    }, [selectedMessage]);
+
+    const handleDelete = useCallback((id: string, e?: React.MouseEvent) => {
+        e?.stopPropagation();
+        setMessages(prev => prev.filter(m => m.id !== id));
+        if (selectedMessage?.id === id) setSelectedMessage(null);
+    }, [selectedMessage]);
+
+    const handleStar = useCallback((id: string, e?: React.MouseEvent) => {
+        e?.stopPropagation();
+        setMessages(prev => prev.map(m => m.id === id ? { ...m, starred: !m.starred } : m));
+        if (selectedMessage?.id === id) setSelectedMessage(prev => prev ? { ...prev, starred: !prev.starred } : null);
+    }, [selectedMessage]);
+
+    const handleSelectMessage = useCallback(async (msg: Message) => {
+        console.log('👆 Message Selected:', msg);
+        if (!msg.read) setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, read: true } : m));
+        setSelectedMessage({ ...msg, read: true });
+    }, []);
 
     // --- Mock Data & Fetching ---
     const stats = {
@@ -309,34 +385,147 @@ const UnifiedInbox: React.FC = () => {
         fetchMessages();
     }, []);
 
+    // Phase 3: Analyze messages with AI after fetching
+    useEffect(() => {
+        const analyzeWithAI = async () => {
+            if (messages.length === 0 || analyzingMessages) return;
+
+            // Check if we already have enrichments for most messages
+            const unenrichedCount = messages.filter(m => !enrichments[m.id]).length;
+            if (unenrichedCount === 0) return;
+
+            setAnalyzingMessages(true);
+            try {
+                const toAnalyze = messages.slice(0, 20).map(m => ({
+                    id: m.id,
+                    source: m.source,
+                    sender: m.sender,
+                    subject: m.subject,
+                    preview: m.preview,
+                    full_content: m.fullContent
+                }));
+
+                const result = await apiService.analyzeMessages(toAnalyze);
+                if (result.success && result.enriched) {
+                    setEnrichments(prev => ({ ...prev, ...result.enriched }));
+                }
+            } catch (error) {
+                console.error('AI message analysis failed:', error);
+            } finally {
+                setAnalyzingMessages(false);
+            }
+        };
+
+        // Delay analysis slightly to not block initial render
+        const timer = setTimeout(analyzeWithAI, 500);
+        return () => clearTimeout(timer);
+    }, [messages, analyzingMessages, enrichments]); // Only re-run when message count changes
+
+    // Phase 3: Keyboard Navigation
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            // Don't handle if typing in input/textarea
+            if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+            // Compute filtered list inside handler to avoid hoisting issues
+            const currentMessages = messages
+                .filter(msg => {
+                    const matchTab = activeTab === 'all' || msg.source === activeTab;
+                    const matchSearch = msg.sender.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        msg.subject.toLowerCase().includes(searchTerm.toLowerCase());
+                    return matchTab && matchSearch && !snoozedMessages.has(msg.id);
+                });
+
+            const currentIndex = selectedMessage
+                ? currentMessages.findIndex(m => m.id === selectedMessage.id)
+                : -1;
+
+            switch (e.key) {
+                case 'j': // Next message
+                    e.preventDefault();
+                    if (currentIndex < currentMessages.length - 1) {
+                        handleSelectMessage(currentMessages[currentIndex + 1]);
+                    }
+                    break;
+                case 'k': // Previous message
+                    e.preventDefault();
+                    if (currentIndex > 0) {
+                        handleSelectMessage(currentMessages[currentIndex - 1]);
+                    }
+                    break;
+                case 'r': // Reply
+                    e.preventDefault();
+                    if (selectedMessage) {
+                        replyInputRef.current?.focus();
+                    }
+                    break;
+                case 'a': // Archive
+                    e.preventDefault();
+                    if (selectedMessage) {
+                        handleArchive(selectedMessage.id);
+                    }
+                    break;
+                case 's': // Snooze
+                    e.preventDefault();
+                    if (selectedMessage) {
+                        setSnoozeDropdownOpen(selectedMessage.id);
+                    }
+                    break;
+                case '/': // Search
+                    e.preventDefault();
+                    searchInputRef.current?.focus();
+                    break;
+                case 'Escape':
+                    e.preventDefault();
+                    setSelectedMessage(null);
+                    setSnoozeDropdownOpen(null);
+                    break;
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [selectedMessage, messages, activeTab, searchTerm, snoozedMessages, handleArchive, handleSelectMessage]);
+
+    // Phase 3: Snooze handler
+    const handleSnooze = useCallback((messageId: string, duration: string) => {
+        setSnoozedMessages(prev => new Set(Array.from(prev).concat(messageId)));
+        setSnoozeDropdownOpen(null);
+        if (selectedMessage?.id === messageId) {
+            setSelectedMessage(null);
+        }
+
+        const durationText: Record<string, string> = {
+            '1h': '1 hour',
+            '4h': '4 hours',
+            'tomorrow': 'tomorrow morning',
+            'nextweek': 'next week'
+        };
+        toast.success(`Snoozed until ${durationText[duration] || duration}`, { icon: '😴' });
+
+        // For demo: un-snooze after specified time (in production, this would be server-side)
+        const delays: Record<string, number> = {
+            '1h': 3600000,
+            '4h': 14400000,
+            'tomorrow': 86400000,
+            'nextweek': 604800000
+        };
+        const delay = delays[duration] || 3600000;
+
+        // For demo purposes, use shorter delays
+        const demoDelay = Math.min(delay, 30000); // Max 30s for demo
+        setTimeout(() => {
+            setSnoozedMessages(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(messageId);
+                return newSet;
+            });
+            toast(`Message unsnoozed`, { icon: '📬' });
+        }, demoDelay);
+    }, [selectedMessage]);
+
     // --- Actions ---
-    const handleArchive = (id: string, e?: React.MouseEvent) => {
-        e?.stopPropagation();
-        setMessages(prev => prev.filter(m => m.id !== id));
-        if (selectedMessage?.id === id) setSelectedMessage(null);
-    };
-
-    const handleDelete = (id: string, e?: React.MouseEvent) => {
-        e?.stopPropagation();
-        setMessages(prev => prev.filter(m => m.id !== id));
-        if (selectedMessage?.id === id) setSelectedMessage(null);
-    };
-
-    const handleStar = (id: string, e?: React.MouseEvent) => {
-        e?.stopPropagation();
-        setMessages(prev => prev.map(m => m.id === id ? { ...m, starred: !m.starred } : m));
-        if (selectedMessage?.id === id) setSelectedMessage(prev => prev ? { ...prev, starred: !prev.starred } : null);
-    };
-
-    const handleSelectMessage = async (msg: Message) => {
-        console.log('👆 Message Selected:', msg); // Debug: Check what was clicked
-        if (!msg.read) setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, read: true } : m));
-
-        // Optimistic Set
-        setSelectedMessage({ ...msg, read: true });
-
-        // Logic handled in useEffect
-    };
+    // --- Actions definitions moved to top ---
 
     // New state for message specific loading
     const [messageLoading, setMessageLoading] = useState(false);
@@ -997,75 +1186,140 @@ const UnifiedInbox: React.FC = () => {
                         </div>
                     ) : (
                         <div className="space-y-1 pb-20 md:pb-2">
-                            {filteredMessages.map(msg => {
-                                // Resolve Source Logo
-                                const sourceLogo =
-                                    msg.source === 'gmail' ? gmailLogo :
-                                        msg.source === 'slack' ? slackLogo :
-                                            msg.source === 'teams' ? teamsLogo :
-                                                msg.source === 'outlook' ? outlookLogo : undefined;
+                            {/* AI Analysis Indicator */}
+                            {analyzingMessages && (
+                                <div className="flex items-center gap-2 px-4 py-2 text-xs text-indigo-600 bg-indigo-50 rounded-lg mx-2 mb-2">
+                                    <Sparkles className="w-3.5 h-3.5 animate-pulse" />
+                                    <span>AI analyzing messages...</span>
+                                </div>
+                            )}
 
-                                return (
-                                    <div
-                                        key={msg.id}
-                                        onClick={() => handleSelectMessage(msg)}
-                                        className={`group relative p-3 mx-1 rounded-xl cursor-pointer transition-all duration-200 ease-out border border-transparent
+                            {filteredMessages
+                                .filter(msg => !snoozedMessages.has(msg.id))
+                                .map(msg => {
+                                    // Resolve Source Logo
+                                    const sourceLogo =
+                                        msg.source === 'gmail' ? gmailLogo :
+                                            msg.source === 'slack' ? slackLogo :
+                                                msg.source === 'teams' ? teamsLogo :
+                                                    msg.source === 'outlook' ? outlookLogo : undefined;
+
+                                    // Get AI enrichment data
+                                    const enrichment = enrichments[msg.id];
+
+                                    return (
+                                        <div
+                                            key={msg.id}
+                                            onClick={() => handleSelectMessage(msg)}
+                                            className={`group relative p-3 mx-1 rounded-xl cursor-pointer transition-all duration-200 ease-out border border-transparent
                                         ${selectedMessage?.id === msg.id
-                                                ? 'bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)] ring-1 ring-black/[0.04]'
-                                                : !msg.read
-                                                    ? 'bg-white border-slate-100 shadow-sm hover:shadow-md hover:border-slate-200 hover:-translate-y-0.5'
-                                                    : 'hover:bg-slate-50/80 hover:border-slate-200/50'
-                                            }`}
-                                    >
-                                        {/* Selection Indicator */}
-                                        {selectedMessage?.id === msg.id && (
-                                            <div className="absolute left-0 top-3 bottom-3 w-1 bg-indigo-500 rounded-r-full" />
-                                        )}
+                                                    ? 'bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)] ring-1 ring-black/[0.04]'
+                                                    : !msg.read
+                                                        ? 'bg-white border-slate-100 shadow-sm hover:shadow-md hover:border-slate-200 hover:-translate-y-0.5'
+                                                        : 'hover:bg-slate-50/80 hover:border-slate-200/50'
+                                                }`}
+                                        >
+                                            {/* Selection Indicator */}
+                                            {selectedMessage?.id === msg.id && (
+                                                <div className="absolute left-0 top-3 bottom-3 w-1 bg-indigo-500 rounded-r-full" />
+                                            )}
 
-                                        {/* Unread Dot */}
-                                        {!msg.read && selectedMessage?.id !== msg.id && (
-                                            <div className="absolute left-2 top-4 w-2 h-2 bg-indigo-500 rounded-full ring-4 ring-white shadow-sm z-10" />
-                                        )}
+                                            {/* Unread Dot */}
+                                            {!msg.read && selectedMessage?.id !== msg.id && (
+                                                <div className="absolute left-2 top-4 w-2 h-2 bg-indigo-500 rounded-full ring-4 ring-white shadow-sm z-10" />
+                                            )}
 
-                                        <div className="flex gap-3 relative pl-3">
-                                            {/* Avatar Area */}
-                                            <div className="relative shrink-0 mt-1">
-                                                {msg.avatar ? (
-                                                    <img src={msg.avatar} alt="" className="w-10 h-10 rounded-full object-cover ring-2 ring-white shadow-sm bg-slate-100" />
-                                                ) : (
-                                                    <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-sm ring-2 ring-white">
-                                                        {msg.sender[0]}
+                                            <div className="flex gap-3 relative pl-3">
+                                                {/* Avatar Area */}
+                                                <div className="relative shrink-0 mt-1">
+                                                    {msg.avatar ? (
+                                                        <img src={msg.avatar} alt="" className="w-10 h-10 rounded-full object-cover ring-2 ring-white shadow-sm bg-slate-100" />
+                                                    ) : (
+                                                        <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-sm ring-2 ring-white">
+                                                            {msg.sender[0]}
+                                                        </div>
+                                                    )}
+                                                    {/* App Icon Badge */}
+                                                    <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-sm border border-slate-50">
+                                                        <img src={sourceLogo} alt={msg.source} className="w-3.5 h-3.5 object-contain" />
                                                     </div>
-                                                )}
-                                                {/* App Icon Badge */}
-                                                <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-sm border border-slate-50">
-                                                    <img src={sourceLogo} alt={msg.source} className="w-3.5 h-3.5 object-contain" />
-                                                </div>
-                                            </div>
-
-                                            {/* Content Area */}
-                                            <div className="flex-1 min-w-0 pr-1">
-                                                <div className="flex justify-between items-start mb-0.5">
-                                                    <h3 className={`text-[15px] truncate max-w-[180px] leading-tight ${!msg.read ? 'font-bold text-slate-900' : 'font-medium text-slate-700'}`}>
-                                                        {msg.sender}
-                                                    </h3>
-                                                    <span className={`text-[11px] font-medium whitespace-nowrap ml-2 ${!msg.read ? 'text-indigo-600' : 'text-slate-400'}`}>
-                                                        {msg.time}
-                                                    </span>
                                                 </div>
 
-                                                <p className={`text-[13px] leading-snug truncate mb-0.5 ${!msg.read ? 'text-slate-800 font-medium' : 'text-slate-600'}`}>
-                                                    {msg.subject}
-                                                </p>
+                                                {/* Content Area */}
+                                                <div className="flex-1 min-w-0 pr-1">
+                                                    <div className="flex justify-between items-start mb-0.5">
+                                                        <div className="flex items-center gap-2 min-w-0">
+                                                            <h3 className={`text-[15px] truncate max-w-[140px] leading-tight ${!msg.read ? 'font-bold text-slate-900' : 'font-medium text-slate-700'}`}>
+                                                                {msg.sender}
+                                                            </h3>
+                                                            {/* Priority Badge */}
+                                                            {enrichment && <PriorityBadge level={enrichment.priority} />}
+                                                        </div>
+                                                        <div className="flex items-center gap-1">
+                                                            <span className={`text-[11px] font-medium whitespace-nowrap ${!msg.read ? 'text-indigo-600' : 'text-slate-400'}`}>
+                                                                {msg.time}
+                                                            </span>
+                                                            {/* Snooze Button */}
+                                                            <div className="relative">
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setSnoozeDropdownOpen(snoozeDropdownOpen === msg.id ? null : msg.id);
+                                                                    }}
+                                                                    className="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-600 opacity-0 group-hover:opacity-100 transition-all"
+                                                                    title="Snooze"
+                                                                >
+                                                                    <Clock className="w-3.5 h-3.5" />
+                                                                </button>
 
-                                                <p className="text-[12px] text-slate-400 line-clamp-1 leading-relaxed">
-                                                    {msg.preview}
-                                                </p>
+                                                                {/* Snooze Dropdown */}
+                                                                {snoozeDropdownOpen === msg.id && (
+                                                                    <div className="absolute right-0 top-full mt-1 bg-white rounded-lg shadow-lg border border-slate-200 py-1 z-50 min-w-[140px]">
+                                                                        {[
+                                                                            { id: '1h', label: '1 hour' },
+                                                                            { id: '4h', label: '4 hours' },
+                                                                            { id: 'tomorrow', label: 'Tomorrow' },
+                                                                            { id: 'nextweek', label: 'Next week' }
+                                                                        ].map(opt => (
+                                                                            <button
+                                                                                key={opt.id}
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation();
+                                                                                    handleSnooze(msg.id, opt.id);
+                                                                                }}
+                                                                                className="w-full px-3 py-1.5 text-left text-sm hover:bg-slate-50 text-slate-700"
+                                                                            >
+                                                                                {opt.label}
+                                                                            </button>
+                                                                        ))}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <p className={`text-[13px] leading-snug truncate mb-0.5 ${!msg.read ? 'text-slate-800 font-medium' : 'text-slate-600'}`}>
+                                                        {msg.subject}
+                                                    </p>
+
+                                                    <div className="flex items-center gap-2">
+                                                        <p className="text-[12px] text-slate-400 line-clamp-1 leading-relaxed flex-1">
+                                                            {msg.preview}
+                                                        </p>
+                                                        {/* Smart Labels */}
+                                                        {enrichment?.labels && enrichment.labels.length > 0 && (
+                                                            <div className="flex gap-1 shrink-0">
+                                                                {enrichment.labels.slice(0, 2).map((label, idx) => (
+                                                                    <SmartLabel key={idx} label={label} />
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                );
-                            })}
+                                    );
+                                })}
                         </div>
                     )}
                 </div>
@@ -1146,6 +1400,27 @@ const UnifiedInbox: React.FC = () => {
                                         Replying to {selectedMessage.source === 'slack' ? selectedMessage.subject : selectedMessage.sender}
                                     </div>
                                 </div>
+
+                                {/* Phase 3: Quick Reply Suggestions */}
+                                {enrichments[selectedMessage.id]?.quick_replies && enrichments[selectedMessage.id].quick_replies!.length > 0 && (
+                                    <div className="mb-3">
+                                        <div className="flex items-center gap-2 text-xs text-slate-500 mb-2">
+                                            <Sparkles className="w-3 h-3 text-indigo-500" />
+                                            <span>Quick replies</span>
+                                        </div>
+                                        <div className="flex flex-wrap gap-2">
+                                            {enrichments[selectedMessage.id].quick_replies!.map((reply, idx) => (
+                                                <button
+                                                    key={idx}
+                                                    onClick={() => setReplyText(reply)}
+                                                    className="px-3 py-1.5 text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg border border-indigo-200 transition-colors"
+                                                >
+                                                    {reply}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
 
                                 {/* Input Card */}
                                 <div className="bg-white rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-200/80 overflow-hidden transition-all duration-200 focus-within:shadow-xl focus-within:border-indigo-300 focus-within:ring-2 focus-within:ring-indigo-100">
