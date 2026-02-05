@@ -9,6 +9,7 @@ import apiService from '../services/api';
 import { ClickUpLogo, TrelloLogo, JiraLogo } from '../components/BrandIcons';
 import CreateEventModal from '../components/dashboard/CreateEventModal';
 import EventDetailsModal from '../components/dashboard/EventDetailsModal';
+import SmartScheduler from '../components/calendar/SmartScheduler';
 
 interface CalendarEvent {
     id: string;
@@ -55,6 +56,9 @@ const UnifiedCalendar: React.FC = () => {
     // V2 UI States
     const [focusMode, setFocusMode] = useState(false);
     const [taskFilter, setTaskFilter] = useState('All');
+
+    // Phase 4: Smart Scheduler Modal
+    const [showSmartScheduler, setShowSmartScheduler] = useState(false);
 
     useEffect(() => {
         const handleResize = () => {
@@ -372,19 +376,19 @@ const UnifiedCalendar: React.FC = () => {
 
                 {/* 1. SUPERIOR HEADER (Smart Input & Navigation) */}
                 <div className={`
-                    h-20 px-6 flex items-center justify-between sticky top-0 z-30 transition-all duration-300 overflow-x-auto no-scrollbar gap-4
+                    min-h-[5rem] h-auto py-4 px-4 md:px-6 flex flex-col md:flex-row items-center justify-between sticky top-0 z-30 transition-all duration-300 gap-4
                     ${focusMode ? 'bg-slate-900/80 border-b border-slate-800' : 'bg-white/70 border-b border-white/50'}
                     backdrop-blur-xl
                 `}>
-                    <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-3 md:gap-6 shrink-0">
                         {/* Toggle Sidebar Trigger (Mobile/Desktop) */}
                         <button onClick={() => setShowSidebar(!showSidebar)} className={`p-2 rounded-xl transition-all ${focusMode ? 'hover:bg-slate-800 text-slate-400' : 'hover:bg-gray-100 text-slate-500'}`}>
                             <Menu className="w-5 h-5" />
                         </button>
 
                         {/* Title & Nav */}
-                        <div className="flex items-center gap-4">
-                            <h2 className={`text-2xl font-bold tracking-tight ${focusMode ? 'text-white' : 'text-slate-900'}`}>
+                        <div className="flex items-center gap-2 md:gap-4">
+                            <h2 className={`text-xl md:text-2xl font-bold tracking-tight ${focusMode ? 'text-white' : 'text-slate-900'}`}>
                                 {monthNames[viewDate.getMonth()]} <span className="font-normal opacity-60">{viewDate.getFullYear()}</span>
                             </h2>
                             <div className="flex items-center gap-1">
@@ -393,7 +397,7 @@ const UnifiedCalendar: React.FC = () => {
                             </div>
                             <button
                                 onClick={() => { setViewDate(new Date()); setViewMode('day'); }}
-                                className={`ml-2 text-xs font-bold px-3 py-1.5 rounded-lg border transition-all ${focusMode ? 'border-slate-700 hover:bg-slate-800 text-slate-300' : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-600 hover:shadow-sm'}`}
+                                className={`ml-1 md:ml-2 text-xs font-bold px-2 py-1 md:px-3 md:py-1.5 rounded-lg border transition-all ${focusMode ? 'border-slate-700 hover:bg-slate-800 text-slate-300' : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-600 hover:shadow-sm'}`}
                             >
                                 <span className="hidden sm:inline">Today</span>
                                 <span className="sm:hidden">T</span>
@@ -401,31 +405,43 @@ const UnifiedCalendar: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Smart Input Bar - "Command Center" Feature */}
-                    <div className="hidden md:flex flex-1 max-w-xl mx-8 relative group">
-                        <div className={`absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity ${focusMode ? 'opacity-10' : ''}`} />
-                        <div className={`relative flex items-center w-full h-11 px-4 rounded-2xl transition-all border ${focusMode ? 'bg-slate-800/50 border-slate-700 text-white placeholder-slate-500' : 'bg-white/80 border-indigo-100 text-slate-700 placeholder-indigo-300 shadow-sm'}`}>
-                            <Sparkles className={`w-4 h-4 mr-3 ${focusMode ? 'text-indigo-400' : 'text-indigo-500'}`} />
-                            <input
-                                type="text"
-                                placeholder="Ask AI to schedule... 'Lunch with Sarah tomorrow at 12'"
-                                className="w-full bg-transparent border-none focus:outline-none text-sm font-medium"
-                            />
-                            <div className="flex items-center gap-2">
+                    {/* Smart Input Bar - Mobile: Compact Button, Desktop: Full Bar */}
+                    <div className="flex-1 w-full md:w-auto md:max-w-xl md:mx-4 lg:mx-8 relative group order-3 md:order-2 min-w-0">
+                        {/* Mobile Trigger */}
+                        <button
+                            onClick={() => setShowSmartScheduler(true)}
+                            className={`md:hidden w-full flex items-center justify-center gap-2 p-2 rounded-xl border ${focusMode ? 'bg-slate-800 border-slate-700 text-indigo-400' : 'bg-white border-indigo-100 text-indigo-600 shadow-sm'}`}
+                        >
+                            <Sparkles className="w-4 h-4" />
+                            <span className="text-sm font-medium">Ask AI to schedule...</span>
+                        </button>
+
+                        {/* Desktop Bar */}
+                        <div className={`hidden md:block absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity ${focusMode ? 'opacity-10' : ''}`} />
+                        <button
+                            onClick={() => setShowSmartScheduler(true)}
+                            className={`hidden md:flex relative items-center w-full h-11 px-4 rounded-2xl transition-all border text-left ${focusMode ? 'bg-slate-800/50 border-slate-700 text-white placeholder-slate-500' : 'bg-white/80 border-indigo-100 text-slate-700 placeholder-indigo-300 shadow-sm hover:shadow-md hover:border-indigo-200'}`}
+                        >
+                            <Sparkles className={`w-4 h-4 mr-3 shrink-0 ${focusMode ? 'text-indigo-400' : 'text-indigo-500'}`} />
+                            <span className={`text-sm font-medium truncate ${focusMode ? 'text-slate-400' : 'text-indigo-400'}`}>
+                                <span className="hidden lg:inline">Ask AI to schedule... "Lunch with Sarah tomorrow at 12"</span>
+                                <span className="lg:hidden">Ask AI to schedule...</span>
+                            </span>
+                            <div className="ml-auto flex items-center gap-2">
                                 <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${focusMode ? 'bg-slate-700 text-slate-400' : 'bg-indigo-50 text-indigo-400'}`}>⌘K</span>
                             </div>
-                        </div>
+                        </button>
                     </div>
 
                     {/* View Toggles & Actions */}
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1.5 md:gap-2 lg:gap-3 order-2 md:order-3 shrink-0">
                         <div className={`flex p-1 rounded-xl border ${focusMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-100/50 border-gray-200/50'}`}>
                             {(['month', 'week', 'day'] as const).map(m => (
                                 <button
                                     key={m}
                                     onClick={() => setViewMode(m)}
                                     className={`
-                                        px-3 py-1.5 text-xs font-semibold rounded-lg capitalize transition-all
+                                        px-2 md:px-3 py-1 md:py-1.5 text-[10px] md:text-xs font-semibold rounded-lg capitalize transition-all
                                         ${viewMode === m
                                             ? (focusMode ? 'bg-slate-700 text-white shadow-sm' : 'bg-white text-indigo-600 shadow-sm')
                                             : (focusMode ? 'text-slate-400 hover:text-white' : 'text-gray-500 hover:text-gray-900')}
@@ -438,7 +454,7 @@ const UnifiedCalendar: React.FC = () => {
 
                         <button
                             onClick={() => setFocusMode(!focusMode)}
-                            className={`p-2.5 rounded-xl border transition-all ${focusMode ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'bg-white border-gray-200 text-gray-500 hover:text-indigo-600 hover:border-indigo-100'}`}
+                            className={`flex p-2 md:p-2.5 rounded-xl border transition-all ${focusMode ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'bg-white border-gray-200 text-gray-500 hover:text-indigo-600 hover:border-indigo-100'}`}
                             title="Toggle Focus Mode"
                         >
                             <Zap className={`w-4 h-4 ${focusMode ? 'fill-current' : ''}`} />
@@ -446,14 +462,14 @@ const UnifiedCalendar: React.FC = () => {
 
                         <button
                             onClick={() => setShowTaskTray(!showTaskTray)}
-                            className={`p-2.5 rounded-xl border transition-all ${showTaskTray ? (focusMode ? 'bg-slate-800 border-slate-700 text-indigo-400' : 'bg-indigo-50 border-indigo-200 text-indigo-600') : (focusMode ? 'bg-slate-900 border-slate-800 text-slate-500' : 'bg-white border-gray-200 text-gray-500')}`}
+                            className={`hidden sm:flex p-2 md:p-2.5 rounded-xl border transition-all ${showTaskTray ? (focusMode ? 'bg-slate-800 border-slate-700 text-indigo-400' : 'bg-indigo-50 border-indigo-200 text-indigo-600') : (focusMode ? 'bg-slate-900 border-slate-800 text-slate-500' : 'bg-white border-gray-200 text-gray-500')}`}
                         >
                             <LayoutGrid className="w-4 h-4" />
                         </button>
 
                         <button
                             onClick={() => setIsEventModalOpen(true)}
-                            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-semibold shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center gap-2"
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-2 md:px-4 md:py-2.5 rounded-xl text-xs md:text-sm font-semibold shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center gap-1.5 md:gap-2"
                         >
                             <Plus className="w-4 h-4" />
                             <span className="hidden md:inline">Create</span>
@@ -838,6 +854,25 @@ const UnifiedCalendar: React.FC = () => {
                 focusMode={focusMode}
                 onReschedule={handleReschedule}
             />
+
+            {/* Phase 4: Smart Scheduler Modal */}
+            {showSmartScheduler && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center">
+                    <div
+                        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                        onClick={() => setShowSmartScheduler(false)}
+                    />
+                    <div className="relative z-10 animate-in fade-in zoom-in duration-200 w-full max-w-lg mx-4">
+                        <SmartScheduler
+                            onEventCreated={() => {
+                                fetchData();
+                                setShowSmartScheduler(false);
+                            }}
+                            onClose={() => setShowSmartScheduler(false)}
+                        />
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

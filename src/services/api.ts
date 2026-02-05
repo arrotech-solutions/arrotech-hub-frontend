@@ -247,6 +247,173 @@ class ApiService {
     return response.data;
   }
 
+  async askAI(question: string, context?: string): Promise<{ answer: string; suggestions?: string[] }> {
+    const response = await this.api.post('/ai/ask', { question, context });
+    return response.data;
+  }
+
+  // Phase 3: Intelligent Inbox++ - Message Analysis
+  async analyzeMessages(messages: Array<{
+    id: string;
+    source: string;
+    sender: string;
+    subject: string;
+    preview: string;
+    full_content?: string;
+  }>): Promise<{
+    success: boolean;
+    enriched: Record<string, {
+      id: string;
+      priority: number;
+      labels: string[];
+      summary?: string;
+      quick_replies?: string[];
+    }>;
+  }> {
+    try {
+      const response = await this.api.post('/ai/analyze-messages', { messages });
+      return response.data;
+    } catch (error) {
+      console.error('Failed to analyze messages:', error);
+      return { success: false, enriched: {} };
+    }
+  }
+
+  // ==============================================
+  // Phase 4: Intelligent Scheduling Engine
+  // ==============================================
+
+  /**
+   * Natural language scheduling - parse intent and create/suggest events
+   */
+  async scheduleWithAI(query: string, preferences?: {
+    prefer_morning?: boolean;
+    prefer_afternoon?: boolean;
+    avoid_back_to_back?: boolean;
+  }): Promise<{
+    success: boolean;
+    event?: any;
+    suggestions?: Array<{
+      start: string;
+      end: string;
+      score: number;
+      reason: string;
+    }>;
+    message: string;
+  }> {
+    try {
+      const response = await this.api.post('/ai/schedule', {
+        query,
+        preferences
+      });
+      return response.data;
+    } catch (error) {
+      console.error('AI scheduling failed:', error);
+      return { success: false, message: 'Scheduling failed' };
+    }
+  }
+
+  /**
+   * Find available time slots based on calendar and preferences
+   */
+  async findAvailableSlots(options: {
+    duration_minutes: number;
+    date_range_days?: number;
+    prefer_morning?: boolean;
+    prefer_afternoon?: boolean;
+    avoid_back_to_back?: boolean;
+  }): Promise<{
+    success: boolean;
+    slots: Array<{
+      start: string;
+      end: string;
+      score: number;
+      reason: string;
+    }>;
+  }> {
+    try {
+      const response = await this.api.post('/ai/find-slots', options);
+      return response.data;
+    } catch (error) {
+      console.error('Find slots failed:', error);
+      return { success: false, slots: [] };
+    }
+  }
+
+  /**
+   * Generate focus time blocks to protect deep work
+   */
+  async protectFocusTime(hoursPerWeek: number = 10): Promise<{
+    success: boolean;
+    focus_blocks: Array<{
+      title: string;
+      start: string;
+      end: string;
+      duration_hours: number;
+      description: string;
+    }>;
+    message: string;
+  }> {
+    try {
+      const response = await this.api.post('/ai/protect-focus', {
+        hours_per_week: hoursPerWeek
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Focus time protection failed:', error);
+      return { success: false, focus_blocks: [], message: 'Failed' };
+    }
+  }
+
+  /**
+   * Identify where buffer time should be added between meetings
+   */
+  async addBufferTime(bufferMinutes: number = 15): Promise<{
+    success: boolean;
+    buffer_suggestions: Array<{
+      after_event: string;
+      before_event: string;
+      suggested_buffer_start: string;
+      suggested_buffer_end: string;
+      buffer_minutes: number;
+      reason: string;
+    }>;
+    message: string;
+  }> {
+    try {
+      const response = await this.api.post('/ai/add-buffers', {
+        buffer_minutes: bufferMinutes
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Buffer time analysis failed:', error);
+      return { success: false, buffer_suggestions: [], message: 'Failed' };
+    }
+  }
+
+  /**
+   * Detect conflicts with a proposed time slot
+   */
+  async detectConflicts(start: string, end: string): Promise<{
+    success: boolean;
+    conflicts: Array<{
+      event_id: string;
+      event_title: string;
+      start: string;
+      end: string;
+      overlap_minutes: number;
+    }>;
+    has_conflicts: boolean;
+  }> {
+    try {
+      const response = await this.api.post('/ai/detect-conflicts', { start, end });
+      return response.data;
+    } catch (error) {
+      console.error('Conflict detection failed:', error);
+      return { success: false, conflicts: [], has_conflicts: false };
+    }
+  }
+
   // Google Workspace OAuth endpoints
   async getGoogleWorkspaceAuthUrl(): Promise<{ auth_url: string; state: string }> {
     const response = await this.api.get('/api/google-workspace/auth-url');

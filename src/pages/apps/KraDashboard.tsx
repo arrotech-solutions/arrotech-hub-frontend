@@ -1,89 +1,104 @@
 import React, { useState } from 'react';
 import {
-    Landmark,             // BuildingLibraryIcon replacement
-    CreditCard,           // IdentificationIcon replacement
-    FileCheck,            // DocumentCheckIcon replacement
-    Loader2               // ArrowPath/Spinner replacement
+    Landmark,
+    CreditCard,
+    FileCheck,
+    Loader2,
+    ShieldCheck,
+    UserPlus,
+    Building2,
+    AlertCircle,
+    CheckCircle2,
+    ChevronRight,
+    ArrowRight
 } from 'lucide-react';
 import { apiService as api } from '../../services/api';
+import { KRALogo } from '../../components/BrandIcons'; // Assuming this exists from KraPinModal usage, if not I'll fallback
 
-const KraDashboard: React.FC = () => {
-    const [activeTab, setActiveTab] = useState<'pin' | 'nil-return' | 'self-register' | 'etims'>('pin');
+// --- Reusable UI Components ---
+
+const Card: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = '' }) => (
+    <div className={`bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800 overflow-hidden ${className}`}>
+        {children}
+    </div>
+);
+
+const InputGroup: React.FC<{ label: string; children: React.ReactNode; error?: string }> = ({ label, children, error }) => (
+    <div className="space-y-2">
+        <label className="text-sm font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">{label}</label>
+        {children}
+        {error && <p className="text-xs text-red-500 font-medium flex items-center gap-1"><AlertCircle className="w-3 h-3" /> {error}</p>}
+    </div>
+);
+
+const StyledInput: React.FC<React.InputHTMLAttributes<HTMLInputElement>> = (props) => (
+    <input
+        {...props}
+        className={`
+            w-full px-5 py-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 
+            rounded-2xl text-slate-900 dark:text-white placeholder:text-slate-400 outline-none transition-all
+            focus:ring-2 focus:ring-red-500/20 focus:border-red-500 focus:bg-white dark:focus:bg-slate-800
+            disabled:opacity-60 disabled:cursor-not-allowed
+            ${props.className}
+        `}
+    />
+);
+
+const StyledSelect: React.FC<React.SelectHTMLAttributes<HTMLSelectElement>> = (props) => (
+    <div className="relative">
+        <select
+            {...props}
+            className={`
+                w-full px-5 py-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 
+                rounded-2xl text-slate-900 dark:text-white outline-none transition-all appearance-none cursor-pointer
+                focus:ring-2 focus:ring-red-500/20 focus:border-red-500 focus:bg-white dark:focus:bg-slate-800
+                ${props.className}
+            `}
+        />
+        <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+            <ChevronRight className="w-5 h-5 rotate-90" />
+        </div>
+    </div>
+);
+
+const PrimaryButton: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement> & { loading?: boolean }> = ({ children, loading, className, ...props }) => (
+    <button
+        {...props}
+        className={`
+            relative w-full py-4 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400
+            text-white font-bold rounded-2xl shadow-lg shadow-red-500/30 hover:shadow-red-500/40 
+            transform transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none
+            flex items-center justify-center gap-2
+            ${className}
+        `}
+    >
+        {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : children}
+    </button>
+);
+
+const ResultCard: React.FC<{ title: string; type: 'success' | 'warning' | 'error'; children: React.ReactNode }> = ({ title, type, children }) => {
+    const colors = {
+        success: 'bg-emerald-50 border-emerald-100 text-emerald-900 dark:bg-emerald-900/10 dark:border-emerald-800 dark:text-emerald-100',
+        warning: 'bg-amber-50 border-amber-100 text-amber-900 dark:bg-amber-900/10 dark:border-amber-800 dark:text-amber-100',
+        error: 'bg-red-50 border-red-100 text-red-900 dark:bg-red-900/10 dark:border-red-800 dark:text-red-100'
+    };
 
     return (
-        <div className="p-6 max-w-7xl mx-auto space-y-6">
-            {/* Header */}
-            <div className="flex justify-between items-center">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">KRA GavaConnect</h1>
-                    <p className="text-gray-500 dark:text-gray-400 mt-1">
-                        Access your tax services securely via the Government Developer Portal.
-                    </p>
-                </div>
-                <div className="flex space-x-2">
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                        Sandbox Environment
-                    </span>
-                </div>
+        <div className={`p-6 rounded-2xl border ${colors[type]} animate-in slide-in-from-bottom-2 fade-in duration-300`}>
+            <div className="flex items-center gap-3 mb-4">
+                {type === 'success' && <CheckCircle2 className="w-6 h-6 text-emerald-500" />}
+                {type === 'warning' && <AlertCircle className="w-6 h-6 text-amber-500" />}
+                {type === 'error' && <AlertCircle className="w-6 h-6 text-red-500" />}
+                <h3 className="font-bold text-lg">{title}</h3>
             </div>
-
-            {/* Tabs */}
-            <div className="border-b border-gray-200 dark:border-gray-700">
-                <nav className="-mb-px flex space-x-8" aria-label="Tabs">
-                    <button
-                        onClick={() => setActiveTab('pin')}
-                        className={`${activeTab === 'pin'
-                            ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
-                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
-                            } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
-                    >
-                        <CreditCard className="w-5 h-5 mr-2" />
-                        PIN Checker
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('nil-return')}
-                        className={`${activeTab === 'nil-return'
-                            ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
-                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
-                            } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
-                    >
-                        <FileCheck className="w-5 h-5 mr-2" />
-                        NIL Return Filing
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('self-register')}
-                        className={`${activeTab === 'self-register'
-                            ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
-                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
-                            } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
-                    >
-                        {/* You might want to import UserPlus icon if available, or use another icon */}
-                        <FileCheck className="w-5 h-5 mr-2" />
-                        Self Register
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('etims')}
-                        className={`${activeTab === 'etims'
-                            ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
-                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
-                            } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
-                    >
-                        <Landmark className="w-5 h-5 mr-2" />
-                        eTIMS
-                    </button>
-                </nav>
-            </div>
-
-            {/* Content */}
-            <div className="mt-6">
-                {activeTab === 'pin' && <PinChecker />}
-                {activeTab === 'nil-return' && <NilFiling />}
-                {activeTab === 'self-register' && <PinGeneration />}
-                {activeTab === 'etims' && <EtimsPlaceholder />}
+            <div className="space-y-2 opacity-90">
+                {children}
             </div>
         </div>
     );
 };
+
+// --- Sub-Components ---
 
 const PinChecker: React.FC = () => {
     const [pin, setPin] = useState('');
@@ -93,13 +108,6 @@ const PinChecker: React.FC = () => {
     const [error, setError] = useState('');
     const [mode, setMode] = useState<'pin' | 'id'>('pin');
     const [taxpayerType, setTaxpayerType] = useState('KE');
-
-    const taxpayerTypes = [
-        { value: 'KE', label: 'Kenyan Resident' },
-        { value: 'NKE', label: 'Non-Kenyan Resident' },
-        { value: 'NKENR', label: 'Non-Kenyan Non-Resident' },
-        { value: 'COMP', label: 'Company (Non-Individual)' }
-    ];
 
     const handleCheck = async () => {
         setLoading(true);
@@ -116,11 +124,8 @@ const PinChecker: React.FC = () => {
             const data = response.data;
             if (data?.ErrorCode || data?.ErrorMessage) {
                 setError(data.ErrorMessage || `Error: ${data.ErrorCode}`);
-                setResult(null);
             } else if (data?.Status === 'NOK' || (data?.ResponseCode && !['23000', '30000'].includes(data.ResponseCode))) {
-                // 23000 = Valid PIN (PIN Check), 30000 = Success (ID Check)
                 setError(data.Message || 'Validation failed');
-                setResult(null);
             } else {
                 setResult(response);
             }
@@ -132,102 +137,97 @@ const PinChecker: React.FC = () => {
     };
 
     return (
-        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 max-w-2xl">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Validate Taxpayer PIN</h3>
+        <Card className="max-w-2xl mx-auto">
+            <div className="p-8 border-b border-slate-100 dark:border-slate-800">
+                <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+                        <ShieldCheck className="w-6 h-6 text-red-500" />
+                        Taxpayer Validation
+                    </h3>
+                    <div className="p-1 bg-slate-100 dark:bg-slate-800 rounded-xl flex gap-1">
+                        <button
+                            onClick={() => setMode('pin')}
+                            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${mode === 'pin' ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                        >
+                            By PIN
+                        </button>
+                        <button
+                            onClick={() => setMode('id')}
+                            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${mode === 'id' ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                        >
+                            By ID
+                        </button>
+                    </div>
+                </div>
 
-            <div className="flex space-x-4 mb-4">
-                <label className="inline-flex items-center">
-                    <input type="radio" className="form-radio" checked={mode === 'pin'} onChange={() => setMode('pin')} />
-                    <span className="ml-2 text-gray-700 dark:text-gray-300">By PIN</span>
-                </label>
-                <label className="inline-flex items-center">
-                    <input type="radio" className="form-radio" checked={mode === 'id'} onChange={() => setMode('id')} />
-                    <span className="ml-2 text-gray-700 dark:text-gray-300">By National ID</span>
-                </label>
-            </div>
+                <div className="space-y-6">
+                    {mode === 'id' && (
+                        <InputGroup label="Taxpayer Type">
+                            <StyledSelect
+                                value={taxpayerType}
+                                onChange={(e) => setTaxpayerType(e.target.value)}
+                            >
+                                <option value="KE">Kenyan Resident</option>
+                                <option value="NKE">Non-Kenyan Resident</option>
+                                <option value="NKENR">Non-Kenyan Non-Resident</option>
+                                <option value="COMP">Company</option>
+                            </StyledSelect>
+                        </InputGroup>
+                    )}
 
-            <div className="space-y-4">
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        {mode === 'pin' ? 'KRA PIN' : 'National ID Number'}
-                    </label>
-                    <div className="mt-1 flex rounded-md shadow-sm">
-                        <input
+                    <InputGroup label={mode === 'pin' ? 'KRA PIN' : 'National ID Number'}>
+                        <StyledInput
                             type="text"
                             value={mode === 'pin' ? pin : idNumber}
                             onChange={(e) => mode === 'pin' ? setPin(e.target.value.toUpperCase()) : setIdNumber(e.target.value)}
-                            className="flex-1 min-w-0 block w-full px-3 py-2 rounded-md border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                             placeholder={mode === 'pin' ? "A00..." : "12345678"}
                         />
-                    </div>
+                    </InputGroup>
+
+                    <PrimaryButton onClick={handleCheck} disabled={loading || (mode === 'pin' ? !pin : !idNumber)} loading={loading}>
+                        Verify Taxpayer
+                    </PrimaryButton>
                 </div>
-
-                {mode === 'id' && (
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Taxpayer Type
-                        </label>
-                        <div className="mt-1">
-                            <select
-                                value={taxpayerType}
-                                onChange={(e) => setTaxpayerType(e.target.value)}
-                                className="block w-full px-3 py-2 rounded-md border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            >
-                                {taxpayerTypes.map((type) => (
-                                    <option key={type.value} value={type.value}>
-                                        {type.label}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                    </div>
-                )}
-
-                <button
-                    onClick={handleCheck}
-                    disabled={loading || (mode === 'pin' ? !pin : !idNumber)}
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
-                >
-                    {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                    Verify
-                </button>
             </div>
 
-            {error && (
-                <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-md">
-                    {error}
-                </div>
-            )}
+            {(result || error) && (
+                <div className="p-8 bg-slate-50/50 dark:bg-slate-800/20">
+                    {error && (
+                        <ResultCard title="Validation Failed" type="error">
+                            <p className="break-words">{error}</p>
+                        </ResultCard>
+                    )}
 
-            {result && (
-                <div className="mt-6 border-t border-gray-200 dark:border-gray-700 pt-4">
-                    <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Result</h4>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-gray-50 dark:bg-gray-700/50 p-3 rounded">
-                            <span className="block text-xs text-gray-500 dark:text-gray-400">PIN</span>
-                            <span className="block font-medium text-gray-900 dark:text-white">
-                                {result.data?.PINDATA?.KRAPIN || result.data?.pin || result.data?.TaxpayerPIN}
-                            </span>
-                        </div>
-                        <div className="bg-gray-50 dark:bg-gray-700/50 p-3 rounded">
-                            <span className="block text-xs text-gray-500 dark:text-gray-400">Status</span>
-                            <span className={`block font-medium ${(result.data?.PINDATA?.StatusOfPIN || result.data?.status) === 'Active' || ['30000', '23000'].includes(result.data?.ResponseCode)
-                                ? 'text-green-600 dark:text-green-400'
-                                : 'text-yellow-600 dark:text-yellow-400'
-                                }`}>
-                                {result.data?.PINDATA?.StatusOfPIN || result.data?.status || (['30000', '23000'].includes(result.data?.ResponseCode) ? 'Active' : 'Unknown')}
-                            </span>
-                        </div>
-                        <div className="col-span-2 bg-gray-50 dark:bg-gray-700/50 p-3 rounded">
-                            <span className="block text-xs text-gray-500 dark:text-gray-400">Taxpayer Name</span>
-                            <span className="block font-medium text-gray-900 dark:text-white">
-                                {result.data?.PINDATA?.Name || result.data?.taxpayer_name || result.data?.TaxpayerName}
-                            </span>
-                        </div>
-                    </div>
+                    {result && (
+                        <ResultCard
+                            title={(['30000', '23000'].includes(result.data?.ResponseCode) || (result.data?.PINDATA?.StatusOfPIN || result.data?.status) === 'Active') ? "Valid Taxpayer" : "Taxpayer Found"}
+                            type={(['30000', '23000'].includes(result.data?.ResponseCode) || (result.data?.PINDATA?.StatusOfPIN || result.data?.status) === 'Active') ? "success" : "warning"}
+                        >
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
+                                <div className="p-3 bg-white/50 dark:bg-slate-800/50 rounded-xl">
+                                    <span className="text-xs text-slate-500 uppercase font-bold">PIN</span>
+                                    <p className="text-lg font-mono font-semibold text-slate-900 dark:text-white break-all">
+                                        {result.data?.PINDATA?.KRAPIN || result.data?.pin || result.data?.TaxpayerPIN}
+                                    </p>
+                                </div>
+                                <div className="p-3 bg-white/50 dark:bg-slate-800/50 rounded-xl">
+                                    <span className="text-xs text-slate-500 uppercase font-bold">Name</span>
+                                    <p className="text-lg font-semibold text-slate-900 dark:text-white break-words">
+                                        {result.data?.PINDATA?.Name || result.data?.taxpayer_name || result.data?.TaxpayerName}
+                                    </p>
+                                </div>
+                                <div className="p-3 bg-white/50 dark:bg-slate-800/50 rounded-xl col-span-1 sm:col-span-2">
+                                    <span className="text-xs text-slate-500 uppercase font-bold">Status</span>
+                                    <p className="font-medium text-slate-900 dark:text-white break-words">
+                                        {result.data?.PINDATA?.StatusOfPIN || result.data?.status || 'Active'}
+                                    </p>
+                                </div>
+                            </div>
+                        </ResultCard>
+                    )}
                 </div>
             )}
-        </div>
+        </Card>
     );
 };
 
@@ -244,17 +244,13 @@ const NilFiling: React.FC = () => {
         setLoading(true);
         setError('');
         setResult(null);
-
         try {
             const response = await api.fileKraNilReturn(pin, obligationCode, month, year);
             const data = response.data;
-
             if (data?.ErrorCode || data?.ErrorMessage) {
                 setError(data.ErrorMessage || `Error: ${data.ErrorCode}`);
-                setResult(null);
             } else if (data?.RESPONSE?.Status === 'NOK' || (data?.RESPONSE?.ResponseCode && data.RESPONSE.ResponseCode.trim() !== '82000')) {
                 setError(data?.RESPONSE?.Message || 'Filing failed');
-                setResult(null);
             } else {
                 setResult(data?.RESPONSE || data);
             }
@@ -266,145 +262,108 @@ const NilFiling: React.FC = () => {
     };
 
     return (
-        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 max-w-2xl">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">File NIL Return</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-                Submit a NIL return for Income Tax - Resident Individual.
-            </p>
-
-            <div className="space-y-4">
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">KRA PIN</label>
-                    <input
-                        type="text"
-                        value={pin}
-                        onChange={(e) => setPin(e.target.value.toUpperCase())}
-                        className="mt-1 block w-full px-3 py-2 rounded-md border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                        placeholder="P00..."
-                    />
+        <Card className="max-w-2xl mx-auto">
+            <div className="p-8 border-b border-slate-100 dark:border-slate-800">
+                <div className="mb-8">
+                    <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+                        <FileCheck className="w-6 h-6 text-red-500" />
+                        File NIL Return
+                    </h3>
+                    <p className="mt-2 text-slate-500 dark:text-slate-400">
+                        Submit a nil return for periods with no taxable transactions.
+                    </p>
                 </div>
 
-                {/* Obligation code selector */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Obligation</label>
-                    <div className="mt-1">
-                        <select
+                <div className="space-y-6">
+                    <InputGroup label="KRA PIN">
+                        <StyledInput
+                            value={pin}
+                            onChange={(e) => setPin(e.target.value.toUpperCase())}
+                            placeholder="P00..."
+                        />
+                    </InputGroup>
+
+                    <InputGroup label="Tax Obligation">
+                        <StyledSelect
                             value={obligationCode}
                             onChange={(e) => setObligationCode(e.target.value)}
-                            className="block w-full px-3 py-2 rounded-md border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                         >
                             <option value="1">Income Tax - Individual Resident</option>
                             <option value="2">Income Tax - Individual Non-Resident</option>
-                            <option value="3">Income Tax - Individual Partnership</option>
-                            <option value="4">Income Tax - Company</option>
                             <option value="5">Value Added Tax (VAT)</option>
                             <option value="6">Income Tax - PAYE</option>
-                            <option value="7">Excise</option>
                             <option value="8">Income Tax - Rent Income (MRI)</option>
-                        </select>
-                    </div>
-                </div>
+                        </StyledSelect>
+                    </InputGroup>
 
-                {/* Month and Year selectors */}
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Month</label>
-                        <input
-                            type="text"
-                            value={month}
-                            onChange={(e) => setMonth(e.target.value)}
-                            placeholder="MM"
-                            maxLength={2}
-                            className="mt-1 block w-full px-3 py-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white sm:text-sm"
-                        />
+                    <div className="grid grid-cols-2 gap-6">
+                        <InputGroup label="Month">
+                            <StyledInput
+                                value={month}
+                                onChange={(e) => setMonth(e.target.value)}
+                                placeholder="MM"
+                                maxLength={2}
+                            />
+                        </InputGroup>
+                        <InputGroup label="Year">
+                            <StyledInput
+                                value={year}
+                                onChange={(e) => setYear(e.target.value)}
+                                placeholder="YYYY"
+                                maxLength={4}
+                            />
+                        </InputGroup>
                     </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Year</label>
-                        <input
-                            type="text"
-                            value={year}
-                            onChange={(e) => setYear(e.target.value)}
-                            placeholder="YYYY"
-                            maxLength={4}
-                            className="mt-1 block w-full px-3 py-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white sm:text-sm"
-                        />
-                    </div>
-                </div>
 
-                <button
-                    onClick={handleFiling}
-                    disabled={loading || !pin || !month || !year}
-                    className="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
-                >
-                    {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                    Submit NIL Return
-                </button>
+                    <PrimaryButton onClick={handleFiling} disabled={loading || !pin || !month || !year} loading={loading}>
+                        Submit NIL Return
+                    </PrimaryButton>
+                </div>
             </div>
 
-            {error && (
-                <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-md">
-                    {error}
+            {(result || error) && (
+                <div className="p-8 bg-slate-50/50 dark:bg-slate-800/20">
+                    {error && (
+                        <ResultCard title="Filing Failed" type="error">
+                            <p className="break-words">{error}</p>
+                        </ResultCard>
+                    )}
+                    {result && (
+                        <ResultCard title="Return Filed Successfully" type="success">
+                            <p className="font-medium break-all">Acknowledgement Number: {result.AckNumber}</p>
+                            <p className="text-sm opacity-80 break-words">{result.Message}</p>
+                        </ResultCard>
+                    )}
                 </div>
             )}
-
-            {result && (
-                <div className="mt-6 bg-green-50 dark:bg-green-900/20 p-4 rounded-md border border-green-200 dark:border-green-800">
-                    <div className="flex">
-                        <FileCheck className="h-5 w-5 text-green-400" aria-hidden="true" />
-                        <div className="ml-3">
-                            <h3 className="text-sm font-medium text-green-800 dark:text-green-200">
-                                {result.Message || 'Return Filed Successfully'}
-                            </h3>
-                            <div className="mt-2 text-sm text-green-700 dark:text-green-300">
-                                <p>Ack Number: {result.AckNumber}</p>
-                                <p>Status: {result.Status}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-        </div>
+        </Card>
     );
 };
-
-
 
 const PinGeneration: React.FC = () => {
     const [idNumber, setIdNumber] = useState('');
     const [dob, setDob] = useState('');
     const [mobile, setMobile] = useState('');
     const [email, setEmail] = useState('');
-    const [taxpayerType, setTaxpayerType] = useState('KE'); // [NEW] State for Taxpayer Type
-    const [isPinWithNoOblig, setIsPinWithNoOblig] = useState('Yes'); // Default: Register without obligations (Yes = No Obligations)
+    const [taxpayerType, setTaxpayerType] = useState('KE');
+    const [isPinWithNoOblig, setIsPinWithNoOblig] = useState('Yes');
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState<any>(null);
     const [error, setError] = useState('');
-
-    const taxpayerTypes = [
-        { value: 'KE', label: 'Kenyan Resident' },
-        { value: 'NKE', label: 'Non-Kenyan Resident' },
-        { value: 'NKENR', label: 'Non-Kenyan Non-Resident' },
-        { value: 'COMP', label: 'Company (Non-Individual)' }
-    ];
 
     const handleRegister = async () => {
         setLoading(true);
         setError('');
         setResult(null);
-
         try {
-            // Ensure DOB is DD/MM/YYYY
             const formattedDob = new Date(dob).toLocaleDateString('en-GB');
             const response = await api.generateKraPin(idNumber, formattedDob, mobile, email, taxpayerType, isPinWithNoOblig);
-
-
             const data = response.data;
+
             if (data?.ErrorCode || data?.ErrorMessage) {
                 setError(data.ErrorMessage || `Error: ${data.ErrorCode}`);
-                setResult(null);
             } else if (data?.RESPONSE?.ResponseCode && data.RESPONSE.ResponseCode !== '80000') {
                 setError(data.RESPONSE.Message || 'Registration failed');
-                setResult(null);
             } else {
                 setResult(data?.RESPONSE);
             }
@@ -416,100 +375,207 @@ const PinGeneration: React.FC = () => {
     };
 
     return (
-        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 max-w-2xl">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Generate KRA PIN</h3>
-            <div className="space-y-4">
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Taxpayer Type</label>
-                    <select
-                        value={taxpayerType}
-                        onChange={(e) => setTaxpayerType(e.target.value)}
-                        className="mt-1 block w-full px-3 py-2 rounded-md border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                    >
-                        {taxpayerTypes.map((type) => (
-                            <option key={type.value} value={type.value}>{type.label}</option>
-                        ))}
-                    </select>
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">National ID</label>
-                    <input type="text" value={idNumber} onChange={(e) => setIdNumber(e.target.value)} className="mt-1 block w-full px-3 py-2 rounded-md border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Date of Birth</label>
-                    <input type="date" value={dob} onChange={(e) => setDob(e.target.value)} className="mt-1 block w-full px-3 py-2 rounded-md border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Mobile Number</label>
-                    <input type="text" value={mobile} onChange={(e) => setMobile(e.target.value)} placeholder="0700000000" className="mt-1 block w-full px-3 py-2 rounded-md border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email Address</label>
-                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1 block w-full px-3 py-2 rounded-md border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
-                </div>
-
-                <div>
-                    <span className="block text-sm font-medium text-gray-700 dark:text-gray-300">Register with Tax Obligations?</span>
-                    <div className="mt-2 flex space-x-4">
-                        <label className="inline-flex items-center">
-                            <input
-                                type="radio"
-                                className="form-radio text-indigo-600"
-                                name="obligation"
-                                checked={isPinWithNoOblig === 'No'}
-                                onChange={() => setIsPinWithNoOblig('No')}
-                            />
-                            <span className="ml-2 text-gray-700 dark:text-gray-300">Yes (With Obligations)</span>
-                        </label>
-                        <label className="inline-flex items-center">
-                            <input
-                                type="radio"
-                                className="form-radio text-indigo-600"
-                                name="obligation"
-                                checked={isPinWithNoOblig === 'Yes'}
-                                onChange={() => setIsPinWithNoOblig('Yes')}
-                            />
-                            <span className="ml-2 text-gray-700 dark:text-gray-300">No (Without Obligations)</span>
-                        </label>
-                    </div>
-                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                        {isPinWithNoOblig === 'Yes'
-                            ? "PIN will be generated WITHOUT specific tax obligations."
-                            : "PIN will be generated WITH applicable tax obligations."}
+        <Card className="max-w-2xl mx-auto">
+            <div className="p-8 border-b border-slate-100 dark:border-slate-800">
+                <div className="mb-8">
+                    <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+                        <UserPlus className="w-6 h-6 text-red-500" />
+                        iTax Registration
+                    </h3>
+                    <p className="mt-2 text-slate-500 dark:text-slate-400">
+                        Generate a new KRA PIN for individuals or companies.
                     </p>
                 </div>
 
-                <button onClick={handleRegister} disabled={loading || !idNumber || !dob || !mobile || !email} className="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50">
-                    {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                    Register PIN
-                </button>
+                <div className="space-y-6">
+                    <InputGroup label="Taxpayer Type">
+                        <StyledSelect value={taxpayerType} onChange={(e) => setTaxpayerType(e.target.value)}>
+                            <option value="KE">Kenyan Resident</option>
+                            <option value="NKE">Non-Kenyan Resident</option>
+                            <option value="COMP">Company (Non-Individual)</option>
+                        </StyledSelect>
+                    </InputGroup>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <InputGroup label="National ID / Cert No">
+                            <StyledInput value={idNumber} onChange={(e) => setIdNumber(e.target.value)} />
+                        </InputGroup>
+                        <InputGroup label="Date of Birth / Reg">
+                            <StyledInput type="date" value={dob} onChange={(e) => setDob(e.target.value)} />
+                        </InputGroup>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <InputGroup label="Mobile Number">
+                            <StyledInput value={mobile} onChange={(e) => setMobile(e.target.value)} placeholder="0712345678" />
+                        </InputGroup>
+                        <InputGroup label="Email Address">
+                            <StyledInput type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                        </InputGroup>
+                    </div>
+
+                    <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700">
+                        <span className="block text-sm font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-3">
+                            Tax Obligations
+                        </span>
+                        <div className="flex gap-6">
+                            <label className="flex items-center cursor-pointer">
+                                <input
+                                    type="radio"
+                                    className="w-5 h-5 text-red-600 border-slate-300 focus:ring-red-500"
+                                    name="obligation"
+                                    checked={isPinWithNoOblig === 'No'}
+                                    onChange={() => setIsPinWithNoOblig('No')}
+                                />
+                                <span className="ml-3 font-medium text-slate-700 dark:text-slate-300">With Obligations</span>
+                            </label>
+                            <label className="flex items-center cursor-pointer">
+                                <input
+                                    type="radio"
+                                    className="w-5 h-5 text-red-600 border-slate-300 focus:ring-red-500"
+                                    name="obligation"
+                                    checked={isPinWithNoOblig === 'Yes'}
+                                    onChange={() => setIsPinWithNoOblig('Yes')}
+                                />
+                                <span className="ml-3 font-medium text-slate-700 dark:text-slate-300">No Obligations</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <PrimaryButton onClick={handleRegister} disabled={loading || !idNumber || !dob || !mobile || !email} loading={loading}>
+                        Generate PIN
+                    </PrimaryButton>
+                </div>
             </div>
 
-            {error && (
-                <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-md">{error}</div>
-            )}
-
-            {result && (
-                <div className="mt-6 bg-green-50 dark:bg-green-900/20 p-4 rounded-md border border-green-200 dark:border-green-800">
-                    <h3 className="text-sm font-medium text-green-800 dark:text-green-200">{result.Message}</h3>
-                    <p className="mt-2 text-lg font-bold text-green-700 dark:text-green-300">PIN: {result.PIN}</p>
+            {(result || error) && (
+                <div className="p-8 bg-slate-50/50 dark:bg-slate-800/20">
+                    {error && (
+                        <ResultCard title="Registration Failed" type="error">
+                            <p className="break-words">{error}</p>
+                        </ResultCard>
+                    )}
+                    {result && (
+                        <ResultCard title={result.Message} type="success">
+                            <div className="mt-2 p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-center">
+                                <p className="text-sm text-slate-500 uppercase">Generated PIN</p>
+                                <p className="text-3xl font-mono font-bold text-slate-900 dark:text-white tracking-widest mt-1 break-all">{result.PIN}</p>
+                            </div>
+                        </ResultCard>
+                    )}
                 </div>
             )}
-        </div>
+        </Card>
     );
 };
 
-const EtimsPlaceholder: React.FC = () => (
-    <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-12 text-center">
-        <Landmark className="mx-auto h-12 w-12 text-gray-400" />
-        <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">eTIMS Management</h3>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Manage your virtual ETR, invoices, and stock.</p>
-        <div className="mt-6">
-            <button disabled className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 opacity-50 cursor-not-allowed">
-                Coming Soon
-            </button>
+// --- Main Page Component ---
+
+const KraDashboard: React.FC = () => {
+    const [activeTab, setActiveTab] = useState<'pin' | 'nil-return' | 'self-register' | 'etims'>('pin');
+
+    const tabs = [
+        { id: 'pin', label: 'PIN Checker', icon: CreditCard },
+        { id: 'nil-return', label: 'File Return', icon: FileCheck },
+        { id: 'self-register', label: 'Register', icon: UserPlus },
+        { id: 'etims', label: 'eTIMS', icon: Landmark },
+    ];
+
+    return (
+        <div className="min-h-screen bg-slate-50 dark:bg-black font-sans selection:bg-red-500/20">
+            {/* Banner Background */}
+            <div className="absolute top-0 left-0 w-full h-[400px] bg-gradient-to-b from-slate-200 to-slate-50 dark:from-slate-900 dark:to-black overflow-hidden pointer-events-none">
+                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-40 mix-blend-overlay"></div>
+                <div className="absolute -top-[200px] -right-[200px] w-[500px] h-[500px] bg-red-500/10 blur-[100px] rounded-full"></div>
+                <div className="absolute top-[100px] -left-[100px] w-[300px] h-[300px] bg-amber-500/10 blur-[80px] rounded-full"></div>
+            </div>
+
+            <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                {/* Header Section */}
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12 animate-in slide-in-from-top-4 fade-in duration-700">
+                    <div>
+                        <div className="flex items-center gap-3 mb-2">
+                            {/* Fallback to simple icon if KRALogo not available, but user said it works in modal */}
+                            <div className="p-2 bg-red-600 rounded-lg text-white shadow-lg shadow-red-600/20">
+                                <Landmark className="w-6 h-6" />
+                            </div>
+                            <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
+                                GavaConnect <span className="text-slate-400 font-light">Portal</span>
+                            </h1>
+                        </div>
+                        <p className="text-slate-500 dark:text-slate-400 max-w-lg text-lg">
+                            Secure, unified access to Kenya Revenue Authority services. Validated by GovConnect Protocol.
+                        </p>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        <div className="px-4 py-2 bg-white/50 dark:bg-white/5 backdrop-blur-md rounded-full border border-slate-200 dark:border-slate-800 flex items-center gap-2">
+                            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                            <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">System Online</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Styled Tab Navigation */}
+                <div className="flex flex-col md:flex-row gap-8">
+                    {/* Sidebar Tabs for Desktop / Top Scroll for Mobile */}
+                    <nav className="w-full md:w-64 flex-shrink-0 z-30">
+                        <div className="md:sticky md:top-8 space-y-2 p-2 bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl rounded-2xl border border-slate-200 dark:border-slate-800">
+                            {tabs.map((tab) => (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id as any)}
+                                    className={`
+                                        w-full flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200 group
+                                        ${activeTab === tab.id
+                                            ? 'bg-red-600 text-white shadow-lg shadow-red-600/30'
+                                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                                        }
+                                    `}
+                                >
+                                    <tab.icon className={`w-5 h-5 ${activeTab === tab.id ? 'text-white' : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200'}`} />
+                                    <span className="font-semibold">{tab.label}</span>
+                                    {activeTab === tab.id && <ChevronRight className="w-4 h-4 ml-auto opacity-60" />}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Help / Support box */}
+                        <div className="mt-8 p-6 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl text-white shadow-xl hidden md:block">
+                            <h4 className="font-bold text-lg mb-2">Need Help?</h4>
+                            <p className="text-indigo-100 text-sm mb-4 leading-relaxed">
+                                Not sure which obligation to file? Consult the digital tax assistant.
+                            </p>
+                            <button className="text-sm font-bold bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-colors w-full">
+                                Ask Assistant
+                            </button>
+                        </div>
+                    </nav>
+
+                    {/* Main Content Area */}
+                    <div className="flex-1 min-w-0 animate-in fade-in slide-in-from-right-4 duration-500">
+                        {activeTab === 'pin' && <PinChecker />}
+                        {activeTab === 'nil-return' && <NilFiling />}
+                        {activeTab === 'self-register' && <PinGeneration />}
+                        {activeTab === 'etims' && (
+                            <Card className="h-[400px] flex flex-col items-center justify-center p-12 text-center">
+                                <div className="w-20 h-20 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-6">
+                                    <Building2 className="w-10 h-10 text-slate-400" />
+                                </div>
+                                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">eTIMS Hub</h3>
+                                <p className="text-slate-500 max-w-md mx-auto mb-8">
+                                    Manage your virtual ETR, generate invoices, and track stock usage directly from the hub.
+                                </p>
+                                <button disabled className="px-6 py-3 bg-slate-100 dark:bg-slate-800 text-slate-400 font-semibold rounded-xl cursor-not-allowed">
+                                    Module Coming Soon
+                                </button>
+                            </Card>
+                        )}
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
-);
+    );
+};
 
 export default KraDashboard;
