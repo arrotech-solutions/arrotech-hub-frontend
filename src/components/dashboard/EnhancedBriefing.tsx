@@ -50,11 +50,11 @@ interface ConversationItem {
 }
 
 interface WeeklyPulse {
-    tasksCompleted: number;
-    meetingsAttended: number;
+    score: number;
+    trend: 'up' | 'down' | 'stable' | 'neutral';
+    completedTasks: number;
     focusHours: number;
-    productivityScore: number;
-    trend: 'up' | 'down' | 'stable';
+    meetingHours: number;
 }
 
 interface EnhancedBriefingData {
@@ -93,6 +93,8 @@ const EnhancedBriefing: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     const [activeTab, setActiveTab] = useState<TabId>('overview');
     const [aiQuestion, setAiQuestion] = useState('');
     const [askingAI, setAskingAI] = useState(false);
+    const [aiResponse, setAiResponse] = useState<{ answer: string; suggestions?: string[] } | null>(null);
+    const [showFullReport, setShowFullReport] = useState(false);
 
     // Time-aware greeting
     const getGreetingPrefix = () => {
@@ -144,6 +146,11 @@ const EnhancedBriefing: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     if (briefingData.urgent_emails) {
                         briefingData.emails = parseEmails(briefingData.urgent_emails);
                     }
+                    // Map backend 'calendar_events' to frontend 'calendar'
+                    // The API returns 'calendar_events', but our interface expects 'calendar'
+                    if ((briefingData as any).calendar_events) {
+                        briefingData.calendar = (briefingData as any).calendar_events;
+                    }
 
                     setData(briefingData);
                 }
@@ -189,30 +196,79 @@ const EnhancedBriefing: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
     const handleItemAction = (itemId: string, action: string) => {
         setProcessingAction(`${itemId}-${action}`);
-        // Simulate action then clear
+
+        // Handle specific actions
+        if (action === 'join') {
+            // Find the calendar item and open its meeting link
+            const calendarItem = data?.calendar?.find(c => c.id === itemId);
+            if (calendarItem?.meetingLink) {
+                window.open(calendarItem.meetingLink, '_blank');
+                setProcessingAction(null);
+                return;
+            } else {
+                alert('No meeting link available for this event.');
+                setProcessingAction(null);
+                return;
+            }
+        }
+
+        if (action === 'complete') {
+            // TODO: Call backend to mark task complete in Jira/ClickUp/etc.
+            // For now, show success feedback
+            setTimeout(() => {
+                setProcessingAction(null);
+                alert('Task marked as complete! (Backend integration coming in Phase 3)');
+            }, 500);
+            return;
+        }
+
+        if (action === 'reply') {
+            setProcessingAction(null);
+            navigate('/unified/inbox');
+            onClose();
+            return;
+        }
+
+        if (action === 'view') {
+            // Navigate to the appropriate view based on item type
+            setProcessingAction(null);
+            navigate('/unified/tasks');
+            onClose();
+            return;
+        }
+
+        if (action === 'archive') {
+            // TODO: Call backend to archive email
+            setTimeout(() => {
+                setProcessingAction(null);
+                alert('Email archived! (Backend integration coming in Phase 3)');
+            }, 500);
+            return;
+        }
+
+        // Default: clear processing state after delay
         setTimeout(() => {
             setProcessingAction(null);
-            // Handle specific actions
-            if (action === 'complete') {
-                alert(`Task marked as complete!`);
-            } else if (action === 'reply') {
-                navigate('/unified/inbox');
-                onClose();
-            } else if (action === 'join') {
-                alert('Opening meeting link...');
-            }
-        }, 1000);
+        }, 500);
     };
 
     const handleAskAI = async () => {
         if (!aiQuestion.trim()) return;
         setAskingAI(true);
-        // TODO: Implement AI follow-up endpoint
-        setTimeout(() => {
-            alert(`AI would respond to: "${aiQuestion}"`);
+        setAiResponse(null);
+
+        try {
+            // Pass the current summary as context
+            const context = data?.summary || '';
+            const result = await apiService.askAI(aiQuestion, context);
+            setAiResponse(result);
             setAiQuestion('');
+        } catch (error) {
+            console.error('Ask AI failed:', error);
+            setAiResponse({ answer: 'Sorry, I had trouble processing your question. Please try again.' });
+        } finally {
             setAskingAI(false);
-        }, 1500);
+        }
     };
 
     // Define tabs with counts
@@ -264,6 +320,18 @@ const EnhancedBriefing: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         actions: c.meetingLink ? [
             { label: 'Join', action: 'join', variant: 'primary' as const },
         ] : [],
+    }));
+
+    // Convert conversations to BriefingCardItems
+    const conversationItems: BriefingCardItem[] = (data?.conversations || []).map(c => ({
+        id: c.id,
+        title: c.sender,
+        subtitle: c.preview,
+        badge: c.unreadCount ? { text: `${c.unreadCount} new`, color: 'blue' as const } : undefined,
+        meta: `${c.platform} • ${c.time || 'Today'}`,
+        actions: [
+            { label: 'Reply', action: 'reply', variant: 'primary' as const },
+        ],
     }));
 
     if (!data && !loading) return null;
@@ -469,22 +537,81 @@ const EnhancedBriefing: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                                     )}
 
                                     {/* Weekly Pulse Teaser */}
-                                    <div className="bg-gradient-to-r from-gray-900 to-gray-800 p-5 rounded-xl text-white">
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center">
-                                                    <BarChart3 className="w-5 h-5" />
+                                    {data?.weekly_pulse && (
+                                        <div className="bg-gradient-to-r from-gray-900 to-gray-800 p-5 rounded-xl text-white">
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center relative">
+                                                        <BarChart3 className="w-6 h-6" />
+                                                        {data.weekly_pulse.trend === 'up' && (
+                                                            <div className="absolute top-1 right-1 w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="font-semibold text-lg">Weekly Pulse: {data.weekly_pulse.score}</h3>
+                                                        <div className="flex gap-4 text-gray-400 text-sm mt-0.5">
+                                                            <span>✨ {data.weekly_pulse.completedTasks} Tasks Done</span>
+                                                            <span>🧠 {data.weekly_pulse.focusHours}h Focus Time</span>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <h3 className="font-semibold">Weekly Productivity Pulse</h3>
-                                                    <p className="text-gray-400 text-sm">Track your progress and streaks</p>
-                                                </div>
+                                                <button
+                                                    onClick={() => setShowFullReport(!showFullReport)}
+                                                    className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                                                >
+                                                    {showFullReport ? 'Hide' : 'Full Report'} <ChevronRight className={`w-4 h-4 transition-transform ${showFullReport ? 'rotate-90' : ''}`} />
+                                                </button>
                                             </div>
-                                            <button className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
-                                                View Stats <ChevronRight className="w-4 h-4" />
-                                            </button>
+
+                                            {/* Expanded Full Report Section */}
+                                            {showFullReport && (
+                                                <div className="mt-4 p-4 bg-white/5 rounded-xl border border-white/10 animate-in fade-in slide-in-from-top-2 duration-300">
+                                                    <h4 className="font-semibold text-white mb-4">📊 Weekly Productivity Report</h4>
+
+                                                    {/* Stats Grid */}
+                                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                                                        <div className="p-3 bg-white/5 rounded-lg text-center">
+                                                            <div className="text-2xl font-bold text-green-400">{data.weekly_pulse.completedTasks}</div>
+                                                            <div className="text-xs text-gray-400">Tasks Completed</div>
+                                                        </div>
+                                                        <div className="p-3 bg-white/5 rounded-lg text-center">
+                                                            <div className="text-2xl font-bold text-blue-400">{data.weekly_pulse.focusHours}h</div>
+                                                            <div className="text-xs text-gray-400">Focus Time</div>
+                                                        </div>
+                                                        <div className="p-3 bg-white/5 rounded-lg text-center">
+                                                            <div className="text-2xl font-bold text-orange-400">{data.weekly_pulse.meetingHours}h</div>
+                                                            <div className="text-xs text-gray-400">In Meetings</div>
+                                                        </div>
+                                                        <div className="p-3 bg-white/5 rounded-lg text-center">
+                                                            <div className="text-2xl font-bold text-purple-400">{data.weekly_pulse.score}</div>
+                                                            <div className="text-xs text-gray-400">Productivity Score</div>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Progress Bar */}
+                                                    <div className="mb-3">
+                                                        <div className="flex justify-between text-xs text-gray-400 mb-1">
+                                                            <span>Weekly Goal Progress</span>
+                                                            <span>{data.weekly_pulse.score}%</span>
+                                                        </div>
+                                                        <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                                                            <div
+                                                                className="h-full bg-gradient-to-r from-green-500 to-emerald-400 rounded-full transition-all duration-500"
+                                                                style={{ width: `${Math.min(data.weekly_pulse.score, 100)}%` }}
+                                                            />
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Insights */}
+                                                    <div className="text-xs text-gray-400 space-y-1">
+                                                        <p>🎯 You're {data.weekly_pulse.score >= 80 ? 'crushing it!' : data.weekly_pulse.score >= 60 ? 'on track!' : 'building momentum!'}</p>
+                                                        <p>📈 {data.weekly_pulse.focusHours > data.weekly_pulse.meetingHours ? 'Great focus-to-meeting ratio!' : 'Consider blocking more focus time.'}</p>
+                                                        <p className="text-gray-500 italic mt-2">Full analytics dashboard coming in Phase 5</p>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
-                                    </div>
+                                    )}
                                 </>
                             )}
 
@@ -529,11 +656,15 @@ const EnhancedBriefing: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
                             {/* Conversations Tab */}
                             {activeTab === 'conversations' && (
-                                <div className="text-center py-12 text-gray-400">
-                                    <MessageSquare className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                                    <p className="font-medium">Coming Soon</p>
-                                    <p className="text-sm">Slack & Teams message summaries</p>
-                                </div>
+                                <BriefingCard
+                                    title="Recent Messages"
+                                    icon={MessageSquare}
+                                    iconColor="text-pink-500"
+                                    items={conversationItems}
+                                    emptyMessage="No recent conversations."
+                                    onItemAction={handleItemAction}
+                                    processingAction={processingAction}
+                                />
                             )}
                         </div>
                     )}
@@ -542,6 +673,39 @@ const EnhancedBriefing: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 {/* Footer with AI Ask + Actions */}
                 {!zenMode && !loading && (
                     <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex-shrink-0">
+                        {/* AI Response Display */}
+                        {aiResponse && (
+                            <div className="mb-4 p-4 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl border border-indigo-100">
+                                <div className="flex items-start gap-3">
+                                    <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center flex-shrink-0">
+                                        <Sparkles className="w-4 h-4 text-indigo-600" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-sm text-indigo-900 leading-relaxed">{aiResponse.answer}</p>
+                                        {aiResponse.suggestions && aiResponse.suggestions.length > 0 && (
+                                            <div className="flex flex-wrap gap-2 mt-3">
+                                                {aiResponse.suggestions.map((suggestion, i) => (
+                                                    <button
+                                                        key={i}
+                                                        onClick={() => setAiQuestion(suggestion)}
+                                                        className="px-3 py-1.5 text-xs bg-white border border-indigo-200 text-indigo-700 rounded-full hover:bg-indigo-50 transition-colors"
+                                                    >
+                                                        {suggestion}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <button
+                                        onClick={() => setAiResponse(null)}
+                                        className="text-gray-400 hover:text-gray-600"
+                                    >
+                                        <X className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
                         <div className="flex flex-col sm:flex-row gap-4">
                             {/* Ask AI Input */}
                             <div className="flex-1 flex gap-2">
