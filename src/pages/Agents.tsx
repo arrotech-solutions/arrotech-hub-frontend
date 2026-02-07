@@ -10,6 +10,7 @@ import {
   Languages,
   LayoutDashboard,
   List,
+  Mail,
   Pause,
   Play,
   Plus,
@@ -24,7 +25,8 @@ import {
   Truck,
   Zap,
   ArrowRight,
-  XCircle
+  XCircle,
+  RefreshCw,
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -55,7 +57,7 @@ const Agents: React.FC = () => {
     paused: 0,
     completed: 0
   });
-  const [activeTab, setActiveTab] = useState<'discover' | 'managed'>('discover');
+  const [activeTab, setActiveTab] = useState<'discover' | 'managed' | 'autonomous'>('discover');
   const [hubSearch, setHubSearch] = useState('');
   const navigate = useNavigate();
   const { currentStep, isActive: isTutorialActive } = useTutorial();
@@ -462,6 +464,16 @@ const Agents: React.FC = () => {
             <Bot className="w-5 h-5" />
             <span className="uppercase tracking-widest">Managed Agents</span>
           </button>
+          <button
+            onClick={() => setActiveTab('autonomous')}
+            className={`flex items-center space-x-3 px-8 py-4 rounded-[18px] text-sm font-black transition-all duration-300 ${activeTab === 'autonomous'
+              ? 'bg-white text-purple-600 shadow-lg'
+              : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'
+              }`}
+          >
+            <Zap className="w-5 h-5" />
+            <span className="uppercase tracking-widest">Autonomous</span>
+          </button>
         </div>
 
         {activeTab === 'discover' ? (
@@ -534,7 +546,7 @@ const Agents: React.FC = () => {
               ))}
             </div>
           </div>
-        ) : (
+        ) : activeTab === 'managed' ? (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Stats Grid */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 agents-stats">
@@ -609,6 +621,134 @@ const Agents: React.FC = () => {
               </div>
             )}
           </div>
+        ) : (
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            {/* Autonomous Productivity Agents */}
+
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6 bg-white/50 backdrop-blur-md p-8 rounded-[32px] border border-gray-100 shadow-sm">
+              <div>
+                <h2 className="text-3xl font-black text-gray-900 tracking-tight mb-2">Autonomous Hub</h2>
+                <p className="text-gray-500 font-medium text-lg">Your fleet of specialized AI agents working 24/7.</p>
+              </div>
+              <button
+                onClick={() => toast.success('Agents are running in the background')}
+                className="flex items-center space-x-2 bg-white text-gray-700 px-6 py-4 rounded-2xl font-bold border border-gray-200 shadow-sm hover:shadow-md hover:bg-gray-50 transition-all active:scale-95"
+              >
+                <RefreshCw className="w-5 h-5 text-purple-600" />
+                <span>Refresh Status</span>
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-20">
+              {[
+                {
+                  id: 'meeting-prep',
+                  name: 'Meeting Prep Agent',
+                  description: 'Prepares detailed briefing materials and attendee insights 30 mins before every calendar event.',
+                  icon: <List className="w-6 h-6" />,
+                  color: 'from-blue-500 to-indigo-600',
+                  bg: 'bg-blue-50',
+                  text: 'text-blue-700',
+                  status: 'active',
+                  metrics: { lastRun: '2h ago', success: '98.5%', frequency: 'Event-based' }
+                },
+                {
+                  id: 'deadline-guardian',
+                  name: 'Deadline Guardian',
+                  description: 'Proactively monitors project boards and alerts you 24h before tasks trickle into the danger zone.',
+                  icon: <Clock className="w-6 h-6" />,
+                  color: 'from-amber-500 to-orange-600',
+                  bg: 'bg-amber-50',
+                  text: 'text-amber-700',
+                  status: 'active',
+                  metrics: { lastRun: '1h ago', success: '99.1%', frequency: 'Daily 9AM' }
+                },
+                {
+                  id: 'follow-up',
+                  name: 'Follow-Up Captain',
+                  description: 'Analyzes email threads and meetings to identify and schedule missed follow-ups automatically.',
+                  icon: <Share2 className="w-6 h-6" />,
+                  color: 'from-pink-500 to-rose-600',
+                  bg: 'bg-pink-50',
+                  text: 'text-pink-700',
+                  status: 'active',
+                  metrics: { lastRun: '4h ago', success: '100%', frequency: 'Daily 5PM' }
+                },
+                {
+                  id: 'inbox-coach',
+                  name: 'Inbox Zero Coach',
+                  description: 'Gamified email management that bundles newsletters and drafts quick replies for you.',
+                  icon: <Mail className="w-6 h-6" />,
+                  color: 'from-emerald-500 to-teal-600',
+                  bg: 'bg-emerald-50',
+                  text: 'text-emerald-700',
+                  status: 'paused',
+                  metrics: { lastRun: '1d ago', success: '95%', frequency: 'Hourly' }
+                },
+                {
+                  id: 'weekly-digest',
+                  name: 'Weekly Digest',
+                  description: 'Compiles a comprehensive Friday report of all your achievements, blockers, and upcoming focus areas.',
+                  icon: <BarChart3 className="w-6 h-6" />,
+                  color: 'from-violet-500 to-purple-600',
+                  bg: 'bg-violet-50',
+                  text: 'text-violet-700',
+                  status: 'active',
+                  metrics: { lastRun: '3d ago', success: '100%', frequency: 'Weekly' }
+                }
+              ].map((agent) => (
+                <div key={agent.id} className="group relative bg-white rounded-[32px] p-8 border border-gray-100 shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 overflow-hidden">
+                  <div className={`absolute top-0 right-0 w-40 h-40 bg-gradient-to-br ${agent.color} opacity-[0.03] rounded-bl-[100px] group-hover:scale-110 transition-transform duration-700`} />
+
+                  <div className="relative z-10">
+                    <div className="flex items-start justify-between mb-6">
+                      <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${agent.color} flex items-center justify-center text-white shadow-lg shadow-gray-200 group-hover:scale-110 transition-transform duration-500`}>
+                        {agent.icon}
+                      </div>
+                      <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${agent.status === 'active' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-yellow-50 text-yellow-600 border-yellow-100'}`}>
+                        {agent.status}
+                      </span>
+                    </div>
+
+                    <h3 className="text-2xl font-black text-gray-900 mb-3 group-hover:text-purple-600 transition-colors">
+                      {agent.name}
+                    </h3>
+                    <p className="text-gray-500 font-medium leading-relaxed mb-8 h-20">
+                      {agent.description}
+                    </p>
+
+                    <div className="grid grid-cols-3 gap-2 mb-8 bg-gray-50/80 rounded-2xl p-4 border border-gray-100">
+                      <div className="text-center">
+                        <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Last Run</p>
+                        <p className="font-bold text-gray-900 text-xs">{agent.metrics.lastRun}</p>
+                      </div>
+                      <div className="text-center border-l border-gray-200">
+                        <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Success</p>
+                        <p className="font-bold text-gray-900 text-xs text-green-600">{agent.metrics.success}</p>
+                      </div>
+                      <div className="text-center border-l border-gray-200">
+                        <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Schedule</p>
+                        <p className="font-bold text-gray-900 text-xs truncate px-1">{agent.metrics.frequency}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center space-x-3">
+                      <button
+                        onClick={() => toast.success(`Running ${agent.name}...`)}
+                        className="flex-1 flex items-center justify-center space-x-2 bg-gray-900 text-white py-4 rounded-2xl font-bold hover:bg-purple-600 transition-all shadow-lg active:scale-95 group/btn"
+                      >
+                        <Zap className="w-4 h-4 group-hover/btn:fill-current" />
+                        <span>Run Trigger</span>
+                      </button>
+                      <button className="p-4 bg-gray-100 text-gray-500 rounded-2xl hover:bg-gray-200 transition-all active:scale-95">
+                        <Settings className="w-5 h-5" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
 
         {/* Modals */}
@@ -655,7 +795,7 @@ const Agents: React.FC = () => {
           </div>
         )}
 
-        {/* Agent Details Modal (Simplified for brevity but fixed) */}
+        {/* Agent Details Modal */}
         {selectedAgent && (
           <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-[40px] p-10 w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-100">
@@ -696,7 +836,7 @@ const Agents: React.FC = () => {
           </div>
         )}
       </div>
-    </div>
+    </div >
   );
 };
 
