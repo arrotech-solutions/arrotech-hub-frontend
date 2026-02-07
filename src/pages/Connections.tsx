@@ -246,6 +246,7 @@ const Integrations: React.FC = () => {
     if (code && state) {
       processedCallback.current = true;
       const handleCallback = async () => {
+        console.log('OAuth Callback Debug:', { code, state });
         const toastId = toast.loading('Finalizing connection...');
         try {
           if (state.startsWith('user_')) {
@@ -263,6 +264,9 @@ const Integrations: React.FC = () => {
               }
             }
 
+          } else if (state === 'asana_connection' || state.includes('asana_connection')) {
+            await apiService.getAsanaCallback(code, state);
+            toast.success('Asana connected successfully!', { id: toastId });
           } else {
             // Handle other callbacks if any
             toast.error('Unknown connection type', { id: toastId });
@@ -502,6 +506,20 @@ const Integrations: React.FC = () => {
         } else {
           toast.error('Failed to initiate connection');
         }
+        return;
+      }
+    }
+
+    // Redirect to Asana Auth
+    if (platform.id === 'asana' && !existing) {
+      try {
+        toast.loading('Redirecting to Asana...', { id: 'oauth-redirect' });
+        const { url } = await apiService.getAsanaAuthUrl();
+        window.location.href = url;
+        return;
+      } catch (error: any) {
+        toast.dismiss('oauth-redirect');
+        toast.error('Failed to initiate connection');
         return;
       }
     }

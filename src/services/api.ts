@@ -686,6 +686,17 @@ class ApiService {
     return response.data;
   }
 
+  // Asana OAuth endpoints
+  async getAsanaAuthUrl(): Promise<{ url: string }> {
+    const response = await this.api.get('/auth/asana/url');
+    return response.data;
+  }
+
+  async getAsanaCallback(code: string, state: string): Promise<{ status: string; message: string }> {
+    const response = await this.api.get(`/auth/asana/callback?code=${code}&state=${state}`);
+    return response.data;
+  }
+
   // Dynamic Tool Registry endpoints
   async getDynamicTools(): Promise<ApiResponse<ToolInfo[]>> {
     const response = await this.api.get('/mcp/tools/dynamic');
