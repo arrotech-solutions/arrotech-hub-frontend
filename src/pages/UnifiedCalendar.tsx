@@ -32,7 +32,9 @@ interface Task {
     subtitle: string;
     platform: 'clickup' | 'jira' | 'trello' | 'asana';
     status: string;
+    dueDate?: string;
 }
+
 
 const UnifiedCalendar: React.FC = () => {
     const [viewDate, setViewDate] = useState(new Date());
@@ -162,7 +164,15 @@ const UnifiedCalendar: React.FC = () => {
                         data.tasks.forEach((t: any) => {
                             const status = (t.status?.status || '').toLowerCase();
                             if (!status.includes('closed') && !status.includes('done') && !status.includes('complete')) {
-                                newTasks.push({ id: t.id, title: t.name, subtitle: t.list?.name || 'ClickUp', platform: 'clickup', status: t.status.status });
+                                newTasks.push({
+                                    id: t.id,
+                                    title: t.name,
+                                    subtitle: t.list?.name || 'ClickUp',
+                                    platform: 'clickup',
+                                    status: t.status.status,
+                                    dueDate: t.due_date ? new Date(parseInt(t.due_date)).toLocaleDateString() : undefined
+                                });
+
                             }
                         });
                     } else if (type === 'jira') {
@@ -172,7 +182,15 @@ const UnifiedCalendar: React.FC = () => {
                             const statusRaw = i.status || '';
                             const statusLower = statusRaw.toLowerCase();
                             if (!statusLower.includes('done') && !statusLower.includes('complete') && !statusLower.includes('closed') && !statusLower.includes('resolved')) {
-                                newTasks.push({ id: i.key, title: i.summary || 'Issue', subtitle: i.project || 'Jira', platform: 'jira', status: i.status || 'Open' });
+                                newTasks.push({
+                                    id: i.key,
+                                    title: i.summary || 'Issue',
+                                    subtitle: i.project || 'Jira',
+                                    platform: 'jira',
+                                    status: i.status || 'Open',
+                                    dueDate: (i.due_date || i.duedate) ? new Date(i.due_date || i.duedate).toLocaleDateString() : (i.created ? new Date(i.created).toLocaleDateString() : undefined)
+                                });
+
                             }
                         });
                     } else if (type === 'trello') {
@@ -181,7 +199,15 @@ const UnifiedCalendar: React.FC = () => {
                             // Use UnifiedTaskView mapping logic
                             const listName = (c.list?.name || c.listName || '').toLowerCase();
                             if (!listName.includes('done') && !listName.includes('complete') && !listName.includes('closed')) {
-                                newTasks.push({ id: c.id, title: c.name, subtitle: c.board?.name || 'Trello', platform: 'trello', status: c.listName || c.list?.name || 'Card' });
+                                newTasks.push({
+                                    id: c.id,
+                                    title: c.name,
+                                    subtitle: c.board?.name || 'Trello',
+                                    platform: 'trello',
+                                    status: c.listName || c.list?.name || 'Card',
+                                    dueDate: c.due ? new Date(c.due).toLocaleDateString() : undefined
+                                });
+
                             }
                         });
                     }
@@ -805,7 +831,15 @@ const UnifiedCalendar: React.FC = () => {
                                             <h4 className={`text-sm font-semibold mb-1 leading-snug line-clamp-2 ${focusMode ? 'text-white group-hover:text-emerald-400' : 'text-slate-800 group-hover:text-emerald-600'}`}>
                                                 {task.title}
                                             </h4>
-                                            <p className={`text-xs truncate ${focusMode ? 'text-slate-500' : 'text-slate-400'}`}>{task.subtitle}</p>
+
+                                            <div className="flex items-center justify-between mt-2">
+                                                <p className={`text-[10px] truncate ${focusMode ? 'text-slate-500' : 'text-slate-400'}`}>{task.subtitle}</p>
+                                                <div className={`flex items-center gap-1 text-[10px] font-medium ${focusMode ? (task.dueDate ? 'text-emerald-400' : 'text-slate-500') : (task.dueDate ? 'text-emerald-600' : 'text-slate-400')}`}>
+                                                    <Clock className="w-2.5 h-2.5" />
+                                                    {task.dueDate || "set due date"}
+                                                </div>
+                                            </div>
+
 
                                             {/* Drag Handle Visual */}
                                             <div className={`absolute right-3 top-3 opacity-0 group-hover:opacity-100 transition-opacity ${focusMode ? 'text-slate-600' : 'text-gray-300'}`}>

@@ -39,6 +39,7 @@ import MicrosoftCallback from './pages/MicrosoftCallback';
 import LandingPage from './pages/LandingPage';
 import Terms from './pages/Terms';
 import KraDashboard from './pages/apps/KraDashboard';
+import ProductivityStats from './pages/ProductivityStats';
 
 import { CommandProvider } from './contexts/CommandContext';
 import { useCommand } from './hooks/useCommand';
@@ -232,6 +233,17 @@ const AppRoutes: React.FC = () => {
           <ProtectedRoute>
             <Layout>
               <Agents />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/productivity"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <ProductivityStats />
             </Layout>
           </ProtectedRoute>
         }
