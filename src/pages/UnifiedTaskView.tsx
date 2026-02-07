@@ -920,7 +920,6 @@ const UnifiedTaskView: React.FC = () => {
                     'review': 'In Review',
                     'done': 'Done'
                 };
-                const priorityMap: any = { 'high': 'High', 'medium': 'Medium', 'low': 'Low', 'urgent': 'High' };
                 result = await apiService.executeMCPTool('jira_issue_tracking', {
                     action: 'update_issue',
                     issue_key: taskId,
