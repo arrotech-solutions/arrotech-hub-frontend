@@ -70,7 +70,11 @@ const UnifiedTaskView: React.FC = () => {
 
             // Asana
             if (activePlatforms.includes('asana')) {
-                promises.push(apiService.executeMCPTool('asana_task_management', { operation: 'list', limit: 20 }));
+                promises.push(apiService.executeMCPTool('asana_task_management', {
+                    operation: 'list',
+                    limit: 20,
+                    opt_fields: ['name', 'completed', 'due_on', 'projects.name']
+                }));
             } else { promises.push(Promise.resolve(null)); }
 
             const results = await Promise.allSettled(promises);
@@ -420,7 +424,7 @@ const UnifiedTaskView: React.FC = () => {
                         targets = res.result.data.boards.map((b: any) => ({ id: b.id, name: b.name }));
                     }
                 } else if (newTask.platform === 'asana') {
-                    const res = await apiService.executeMCPTool('asana_list_projects', {});
+                    const res = await apiService.executeMCPTool('asana_task_management', { operation: 'list_projects' });
                     console.log('Asana projects:', res);
                     if (res && res.result && res.result.data && res.result.data.data) {
                         targets = res.result.data.data.map((p: any) => ({ id: p.gid || p.id, name: p.name }));
@@ -654,7 +658,7 @@ const UnifiedTaskView: React.FC = () => {
                         original: m
                     }));
                 } else if (newTask.platform === 'asana') {
-                    const res: any = await apiService.executeMCPTool('asana_get_users', {});
+                    const res: any = await apiService.executeMCPTool('asana_task_management', { operation: 'get_users' });
                     if (res?.result?.data?.data) users = res.result.data.data;
                     else if (res?.data?.data) users = res.data.data;
                 }
@@ -746,7 +750,7 @@ const UnifiedTaskView: React.FC = () => {
                         }));
                     }
                 } else if (editingTask.platform === 'asana') {
-                    const res: any = await apiService.executeMCPTool('asana_get_users', {});
+                    const res: any = await apiService.executeMCPTool('asana_task_management', { operation: 'get_users' });
                     if (res?.result?.data?.data) users = res.result.data.data;
                     else if (res?.data?.data) users = res.data.data;
                 }
@@ -829,10 +833,14 @@ const UnifiedTaskView: React.FC = () => {
                     start_date: newTask.startDate ? new Date(newTask.startDate).getTime() : undefined
                 });
             } else if (newTask.platform === 'asana') {
-                result = await apiService.executeMCPTool('asana_create_task', {
-                    project_id: newTask.targetId,
+                result = await apiService.executeMCPTool('asana_task_management', {
+                    operation: 'create_task',
+                    workspace_id: newTask.targetId, // Note: Creating task in project usually requires project ID, but for now assuming targetId is project ID or workspace ID
+                    projects: [newTask.targetId],
                     name: newTask.title,
-                    notes: newTask.description
+                    notes: newTask.description,
+                    assignee: newTask.assignee || undefined,
+                    due_date: newTask.dueDate || undefined
                 });
             }
 

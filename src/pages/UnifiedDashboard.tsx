@@ -79,7 +79,11 @@ const UnifiedDashboard: React.FC = () => {
                     promises.push(apiService.executeMCPTool('trello_project_management', { action: 'search_cards', query: 'is:open' }).then(res => ({ type: 'trello', res })));
                 }
                 if (activePlatforms.includes('asana')) {
-                    promises.push(apiService.executeMCPTool('asana_task_management', { operation: 'list', limit: 20 }).then(res => ({ type: 'asana', res })));
+                    promises.push(apiService.executeMCPTool('asana_task_management', {
+                        operation: 'list',
+                        limit: 20,
+                        opt_fields: ['name', 'completed']
+                    }).then(res => ({ type: 'asana', res })));
                 }
 
                 // --- CALENDAR FETCHING ---
