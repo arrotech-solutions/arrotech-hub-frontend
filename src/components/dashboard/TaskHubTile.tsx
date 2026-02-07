@@ -128,16 +128,15 @@ const TaskHubTile: React.FC<TaskHubTileProps> = ({ onCreateTask }) => {
             // Jira Processing
             if (isSuccess(jiraRes)) {
                 const data = getData(jiraRes);
-                console.log("Jira Data:", data);
                 const rawIssues = data?.issues || [];
                 if (Array.isArray(rawIssues)) {
                     allTasks.push(...rawIssues.map((i: any): Task => ({
                         id: i.key,
-                        description: i.fields?.summary || 'Jira Issue',
-                        project: i.fields?.project?.name || 'Jira Project',
+                        description: i.summary || 'Jira Issue',
+                        project: i.project || 'Jira Project',
                         platform: 'jira',
-                        status: (i.fields?.status?.name.toLowerCase() === 'done' ? 'done' : 'in_progress') as Task['status'],
-                        dueDate: i.fields?.duedate ? new Date(i.fields.duedate).toLocaleDateString() : 'No Date'
+                        status: (i.status?.toLowerCase().includes('done') ? 'done' : 'in_progress') as Task['status'],
+                        dueDate: (i.due_date || i.duedate) ? new Date(i.due_date || i.duedate).toLocaleDateString() : (i.created ? new Date(i.created).toLocaleDateString() : 'No Date')
                     })));
                 }
             }
