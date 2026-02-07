@@ -2,22 +2,27 @@ import React, { useState, useEffect } from 'react';
 import {
     CheckSquare, Plus, Search, MoreHorizontal, Calendar,
     RefreshCw, Loader2, Clock, AlertCircle, LayoutGrid, List as ListIcon,
-    X
+    X, Flag
 } from 'lucide-react';
 import apiService from '../services/api';
 import { ClickUpLogo, TrelloLogo, JiraLogo, AsanaLogo } from '../components/BrandIcons';
 import { PieChart, Pie, Cell } from 'recharts';
+import toast from 'react-hot-toast';
 
 interface Task {
     id: string;
-    description: string;
+    description: string; // This maps to Title/Summary
+    fullDescription?: string; // This maps to the detailed description
     project: string;
     platform: 'clickup' | 'jira' | 'trello' | 'asana';
     status: 'todo' | 'in_progress' | 'review' | 'done';
     dueDate: string;
     assignee?: string;
-    priority?: 'high' | 'medium' | 'low';
+    priority?: 'urgent' | 'high' | 'medium' | 'low';
+    priorityColor?: string; // ClickUp priority color hex
     boardId?: string; // For Trello
+    listId?: string; // For ClickUp/Trello
+    startDate?: string;
 }
 
 const UnifiedTaskView: React.FC = () => {
@@ -96,14 +101,45 @@ const UnifiedTaskView: React.FC = () => {
                             mapStatus = 'todo';
                         }
 
+                        // Map ClickUp priority (1=urgent, 2=high, 3=normal, 4=low) to our format
+                        // Note: priority.id is a STRING not number
+                        let mappedPriority: 'urgent' | 'high' | 'medium' | 'low' = 'medium';
+                        const priorityId = String(t.priority?.id || '');
+                        const priorityName = t.priority?.priority || '';
+                        const priorityColor = t.priority?.color || '';
+
+                        if (priorityId === '1' || priorityName === 'urgent') {
+                            mappedPriority = 'urgent';
+                        } else if (priorityId === '2' || priorityName === 'high') {
+                            mappedPriority = 'high';
+                        } else if (priorityId === '3' || priorityName === 'normal') {
+                            mappedPriority = 'medium';
+                        } else if (priorityId === '4' || priorityName === 'low') {
+                            mappedPriority = 'low';
+                        }
+
+                        // Get first assignee ID if available
+                        const assigneeId = t.assignees && t.assignees.length > 0
+                            ? String(t.assignees[0].id || t.assignees[0])
+                            : '';
+
+                        // Parse dates - keep raw timestamps for form, format for display
+                        const dueDateRaw = t.due_date ? new Date(parseInt(t.due_date)).toISOString().split('T')[0] : '';
+                        const startDateRaw = t.start_date ? new Date(parseInt(t.start_date)).toISOString().split('T')[0] : '';
+
                         return {
                             id: t.id,
                             description: t.name,
+                            fullDescription: t.description || t.text_content || '',
                             project: t.list?.name || 'ClickUp',
                             platform: 'clickup',
                             status: mapStatus,
-                            dueDate: t.due_date ? new Date(parseInt(t.due_date)).toLocaleDateString() : 'No Date',
-                            priority: t.priority?.priority === 'high' ? 'high' : 'medium'
+                            dueDate: dueDateRaw || 'No Date',
+                            startDate: startDateRaw,
+                            priority: mappedPriority,
+                            priorityColor: priorityColor,
+                            assignee: assigneeId,
+                            listId: t.list?.id
                         };
                     }));
                 }
@@ -130,12 +166,14 @@ const UnifiedTaskView: React.FC = () => {
                         return {
                             id: c.id,
                             description: c.name,
+                            fullDescription: c.desc || '',
                             project: c.board?.name || 'Trello',
                             platform: 'trello',
                             status: mapStatus,
                             dueDate: c.due ? new Date(c.due).toLocaleDateString() : 'No Date',
                             priority: 'medium',
-                            boardId: c.board_id
+                            boardId: c.board_id,
+                            listId: c.list_id
                         };
                     }));
                 }
@@ -164,14 +202,18 @@ const UnifiedTaskView: React.FC = () => {
                             mapStatus = 'todo';
                         }
 
+                        console.log(`Jira issue ${i.key} assignee raw:`, i.assignee);
+
                         return {
                             id: i.key,
                             description: i.summary || 'Issue',
+                            fullDescription: i.description || '',
                             project: i.project || 'Jira',
                             platform: 'jira',
                             status: mapStatus,
-                            dueDate: i.created ? new Date(i.created).toLocaleDateString() : 'No Date',
-                            priority: i.priority === 'High' ? 'high' : 'medium'
+                            dueDate: (i.due_date || i.duedate) ? new Date(i.due_date || i.duedate).toLocaleDateString() : (i.created ? new Date(i.created).toLocaleDateString() : 'No Date'),
+                            priority: i.priority === 'High' || i.priority === 'Highest' ? 'high' : (i.priority === 'Low' || i.priority === 'Lowest' ? 'low' : 'medium'),
+                            assignee: i.assignee?.accountId || i.assignee?.name // specific for Jira
                         };
                     }));
                 }
@@ -219,15 +261,35 @@ const UnifiedTaskView: React.FC = () => {
         }
     }
 
-    const PriorityBadge = ({ priority }: { priority?: string }) => {
+    const PriorityBadge = ({ priority, color }: { priority?: string, color?: string }) => {
         const colors = {
-            high: 'bg-red-100 text-red-700 border-red-200',
-            medium: 'bg-orange-100 text-orange-700 border-orange-200',
-            low: 'bg-green-100 text-green-700 border-green-200'
+            urgent: 'bg-red-100 text-red-800 border-red-300',
+            high: 'bg-red-50 text-red-700 border-red-200',
+            medium: 'bg-orange-50 text-orange-700 border-orange-200',
+            low: 'bg-green-50 text-green-700 border-green-200'
         };
-        const colorClass = (colors as any)[priority || 'medium'];
+
+        // If custom color provided (from ClickUp)
+        if (color) {
+            return (
+                <span
+                    className="text-[10px] font-bold px-1.5 py-0.5 rounded border uppercase flex items-center gap-1"
+                    style={{
+                        backgroundColor: color,
+                        color: '#fff',
+                        borderColor: color
+                    }}
+                >
+                    <Flag className="w-3 h-3 fill-current" />
+                    {priority || 'normal'}
+                </span>
+            );
+        }
+
+        const colorClass = (colors as any)[priority || 'medium'] || colors.medium;
         return (
-            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border uppercase ${colorClass}`}>
+            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border uppercase flex items-center gap-1 ${colorClass}`}>
+                <Flag className="w-3 h-3 fill-current" />
                 {priority || 'normal'}
             </span>
         );
@@ -254,33 +316,84 @@ const UnifiedTaskView: React.FC = () => {
         { name: 'Done', value: tasks.filter(t => t.status === 'done').length, color: '#22c55e' },
     ];
 
+
+
+    // Create Modal State
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [creating, setCreating] = useState(false);
     const [newTask, setNewTask] = useState({
-        platform: 'jira',
+        platform: 'jira' as 'jira' | 'trello' | 'clickup' | 'asana',
         title: '',
         description: '',
-        targetId: '', // Board/Project/Team ID
-        subTargetId: '', // List ID (for Trello)
+        targetId: '', // Project ID or Key
+        subTargetId: '', // List ID (Trello)
         dueDate: '',
-        // Jira specific
         jiraIssueType: 'Task',
         jiraStatus: 'To Do',
-        // ClickUp specific
         clickupSpaceId: '',
         clickupFolderId: '',
-        clickupListId: ''
+        clickupListId: '',
+        assignee: '',
+        priority: 'medium',
+        startDate: ''
     });
+
+    // Edit Modal State
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [editingTask, setEditingTask] = useState<Task | null>(null);
+    const [editForm, setEditForm] = useState({
+        description: '', // Title
+        fullDescription: '',
+        status: '' as Task['status'],
+        dueDate: '',
+        assignee: '',
+        priority: 'medium',
+        startDate: ''
+    });
+    const [updating, setUpdating] = useState(false);
 
     const [availableTargets, setAvailableTargets] = useState<{ id: string, name: string }[]>([]);
     const [availableSubTargets, setAvailableSubTargets] = useState<{ id: string, name: string }[]>([]);
     const [loadingTargets, setLoadingTargets] = useState(false);
+
+    // Assignee State
+    const [availableAssignees, setAvailableAssignees] = useState<{ id: string, name: string, avatarUrl?: string, initials?: string }[]>([]);
+    const [loadingAssignees, setLoadingAssignees] = useState(false);
+    const [assigneeDropdownOpen, setAssigneeDropdownOpen] = useState(false);
+
+    // Edit Modal Assignees
+    const [availableEditAssignees, setAvailableEditAssignees] = useState<{ id: string, name: string, avatarUrl?: string, initials?: string }[]>([]);
+    const [loadingEditAssignees, setLoadingEditAssignees] = useState(false);
+    const [editAssigneeDropdownOpen, setEditAssigneeDropdownOpen] = useState(false);
 
     // ClickUp specific dropdowns
     const [clickupSpaces, setClickupSpaces] = useState<{ id: string, name: string }[]>([]);
     const [clickupFolders, setClickupFolders] = useState<{ id: string, name: string }[]>([]);
     const [clickupLists, setClickupLists] = useState<{ id: string, name: string }[]>([]);
     const [loadingClickup, setLoadingClickup] = useState(false);
+
+    const LoadingView = () => (
+        <div className="flex-1 overflow-y-auto px-4 md:px-8 pb-8 custom-scrollbar">
+            <div className="space-y-4 mt-2 max-w-5xl mx-auto">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                    <div key={i} className="flex gap-4 p-5 rounded-2xl bg-white border border-gray-100 shimmer-effect shadow-sm">
+                        <div className="w-10 h-10 rounded-xl bg-gray-100 shrink-0" />
+                        <div className="flex-1 space-y-3">
+                            <div className="flex justify-between items-start">
+                                <div className="h-4 bg-gray-100 rounded w-1/4" />
+                                <div className="h-3 bg-gray-100 rounded w-16" />
+                            </div>
+                            <div className="h-3 bg-gray-100 rounded w-3/4" />
+                            <div className="flex gap-2 pt-2">
+                                <div className="h-4 bg-gray-100 rounded w-20" />
+                                <div className="h-4 bg-gray-100 rounded w-20" />
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
 
     useEffect(() => {
         if (!isCreateModalOpen) return;
@@ -479,17 +592,197 @@ const UnifiedTaskView: React.FC = () => {
         fetchClickupLists();
     }, [newTask.clickupFolderId, newTask.clickupSpaceId, newTask.platform]);
 
+    // Fetch Assignees when Platform or Target changes
+    useEffect(() => {
+        const fetchAssignees = async () => {
+            if (!newTask.platform || !newTask.targetId) {
+                setAvailableAssignees([]);
+                return;
+            }
+
+            setLoadingAssignees(true);
+            try {
+                let users: any[] = [];
+                console.log(`Fetching assignees for ${newTask.platform} target ${newTask.targetId}...`);
+
+                if (newTask.platform === 'jira') {
+                    const res: any = await apiService.executeMCPTool('jira_issue_tracking', {
+                        action: 'get_users',
+                        project_key: newTask.targetId
+                    });
+                    console.log('Jira get_users RAW response:', res);
+
+                    // Try multiple response paths for Jira users
+                    if (res?.result?.data?.users) users = res.result.data.users;
+                    else if (res?.data?.users) users = res.data.users;
+                    else if (res?.users) users = res.users;
+                    else if (Array.isArray(res?.result)) users = res.result;
+                    else if (Array.isArray(res?.data)) users = res.data;
+
+                    console.log('Jira extracted users:', users);
+                } else if (newTask.platform === 'trello') {
+                    const res: any = await apiService.executeMCPTool('trello_project_management', {
+                        action: 'get_board_members',
+                        board_id: newTask.targetId
+                    });
+                    if (res?.result?.data?.members) users = res.result.data.members;
+                    else if (res?.data?.members) users = res.data.members;
+                } else if (newTask.platform === 'clickup') {
+                    const res: any = await apiService.executeMCPTool('clickup_task_management', {
+                        operation: 'get_team_members',
+                        team_id: newTask.targetId
+                    });
+                    console.log('ClickUp get_team_members RAW response:', res);
+
+                    // ClickUp returns members at result.teams[0].members OR result.members
+                    let members: any[] = [];
+                    if (res?.result?.teams?.[0]?.members) {
+                        members = res.result.teams[0].members;
+                    } else if (res?.result?.members) {
+                        members = res.result.members;
+                    } else if (res?.data?.members) {
+                        members = res.data.members;
+                    }
+
+                    console.log('ClickUp extracted members:', members);
+
+                    users = members.map((m: any) => ({
+                        id: m.user ? m.user.id : m.id,
+                        name: m.user ? m.user.username : m.username,
+                        avatarUrl: m.user ? m.user.profilePicture : m.profilePicture,
+                        initials: m.user ? m.user.initials : m.initials,
+                        original: m
+                    }));
+                } else if (newTask.platform === 'asana') {
+                    const res: any = await apiService.executeMCPTool('asana_get_users', {});
+                    if (res?.result?.data?.data) users = res.result.data.data;
+                    else if (res?.data?.data) users = res.data.data;
+                }
+
+                console.log('Fetched Users:', users);
+
+                setAvailableAssignees(users.map((u: any) => ({
+                    id: u.accountId || u.id || u.key || u.gid, // Normalize ID
+                    name: u.displayName || u.fullName || u.name || u.username,
+                    avatarUrl: u.avatarUrl || u.avatarHash || u.photo?.image_60x60,
+                    initials: u.initials || (u.name || u.username || '').split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
+                })));
+
+            } catch (e) {
+                console.error("Error fetching assignees", e);
+            } finally {
+                setLoadingAssignees(false);
+            }
+        };
+
+        fetchAssignees();
+    }, [newTask.platform, newTask.targetId]);
+
+    // Fetch Edit Modal Assignees
+    useEffect(() => {
+        const fetchEditAssignees = async () => {
+            if (!editingTask || !isEditModalOpen) return;
+            setLoadingEditAssignees(true);
+            setAvailableEditAssignees([]);
+
+            try {
+                let users: any[] = [];
+                console.log(`Fetching edit assignees for ${editingTask.platform} task ${editingTask.id}...`);
+
+                if (editingTask.platform === 'jira') {
+                    // Extract project key from issue ID (e.g. PROJ-123 -> PROJ)
+                    const projectKey = editingTask.id.split('-')[0];
+                    if (projectKey) {
+                        const res: any = await apiService.executeMCPTool('jira_issue_tracking', {
+                            action: 'get_users',
+                            project_key: projectKey
+                        });
+                        console.log('Jira Edit get_users RAW response:', res);
+
+                        // Try multiple response paths for Jira users
+                        if (res?.result?.data?.users) users = res.result.data.users;
+                        else if (res?.data?.users) users = res.data.users;
+                        else if (res?.users) users = res.users;
+                        else if (Array.isArray(res?.result)) users = res.result;
+                        else if (Array.isArray(res?.data)) users = res.data;
+
+                        console.log('Jira Edit extracted users:', users);
+                    }
+                } else if (editingTask.platform === 'trello') {
+                    // Use boardId if available
+                    if (editingTask.boardId) {
+                        const res: any = await apiService.executeMCPTool('trello_project_management', {
+                            action: 'get_board_members',
+                            board_id: editingTask.boardId
+                        });
+                        if (res?.result?.data?.members) users = res.result.data.members;
+                        else if (res?.data?.members) users = res.data.members;
+                    }
+                } else if (editingTask.platform === 'clickup') {
+                    // Use listId to find team effectively? Or just use generic team fetch
+                    const res: any = await apiService.executeMCPTool('clickup_task_management', { operation: 'get_teams' });
+                    // Default to first team
+                    const teams = res.data?.teams || res.result?.teams || [];
+                    if (teams.length > 0) {
+                        const teamId = teams[0].id;
+                        const uRes: any = await apiService.executeMCPTool('clickup_task_management', {
+                            operation: 'get_team_members',
+                            team_id: teamId
+                        });
+                        // Extract members from correct path
+                        let members: any[] = [];
+                        if (uRes?.result?.teams?.[0]?.members) {
+                            members = uRes.result.teams[0].members;
+                        } else if (uRes?.result?.members) {
+                            members = uRes.result.members;
+                        } else if (uRes?.data?.members) {
+                            members = uRes.data.members;
+                        }
+                        users = members.map((m: any) => ({
+                            id: m.user ? m.user.id : m.id,
+                            name: m.user ? m.user.username : m.username,
+                            avatarUrl: m.user ? m.user.profilePicture : m.profilePicture,
+                            initials: m.user ? m.user.initials : m.initials
+                        }));
+                    }
+                } else if (editingTask.platform === 'asana') {
+                    const res: any = await apiService.executeMCPTool('asana_get_users', {});
+                    if (res?.result?.data?.data) users = res.result.data.data;
+                    else if (res?.data?.data) users = res.data.data;
+                }
+
+                console.log('Fetched Edit Users:', users);
+                setAvailableEditAssignees(users.map((u: any) => ({
+                    id: u.accountId || u.id || u.key || u.gid,
+                    name: u.displayName || u.fullName || u.name || u.username,
+                    avatarUrl: u.avatarUrl || u.avatarHash || u.photo?.image_60x60,
+                    initials: u.initials || (u.name || u.username || '').split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
+                })));
+
+            } catch (e) {
+                console.error("Error fetching edit assignees", e);
+            } finally {
+                setLoadingEditAssignees(false);
+            }
+        }
+        fetchEditAssignees();
+    }, [editingTask, isEditModalOpen]);
+
     const handleCreateTask = async () => {
         setCreating(true);
         try {
             let result;
             if (newTask.platform === 'jira') {
+                const priorityMap: any = { 'high': 'High', 'medium': 'Medium', 'low': 'Low', 'urgent': 'High' };
                 console.log('Creating Jira issue with:', {
                     project_key: newTask.targetId,
                     summary: newTask.title,
                     description: newTask.description,
                     issuetype: newTask.jiraIssueType,
-                    status: newTask.jiraStatus
+                    status: newTask.jiraStatus,
+                    assignee_id: newTask.assignee,
+                    priority: priorityMap[newTask.priority || 'medium'],
+                    duedate: newTask.dueDate
                 });
                 result = await apiService.executeMCPTool('jira_issue_tracking', {
                     action: 'create_issue',
@@ -497,12 +790,15 @@ const UnifiedTaskView: React.FC = () => {
                     summary: newTask.title,
                     description: newTask.description,
                     issuetype: newTask.jiraIssueType,
-                    status: newTask.jiraStatus
+                    status: newTask.jiraStatus,
+                    assignee_id: newTask.assignee,
+                    priority: priorityMap[newTask.priority || 'medium'],
+                    duedate: newTask.dueDate
                 });
                 console.log('Jira create_issue response:', result);
             } else if (newTask.platform === 'trello') {
                 if (!newTask.subTargetId) {
-                    alert('Please select a List');
+                    toast.error('Please select a Trello List');
                     setCreating(false);
                     return;
                 }
@@ -511,19 +807,26 @@ const UnifiedTaskView: React.FC = () => {
                     list_id: newTask.subTargetId,
                     name: newTask.title,
                     desc: newTask.description,
-                    due: newTask.dueDate
+                    due: newTask.dueDate,
+                    start: newTask.startDate,
+                    idMembers: newTask.assignee
                 });
             } else if (newTask.platform === 'clickup') {
                 if (!newTask.clickupListId) {
-                    alert('Please select a List');
+                    toast.error('Please select a ClickUp List');
                     setCreating(false);
                     return;
                 }
+                const priorityMap: any = { 'urgent': 1, 'high': 2, 'medium': 3, 'low': 4 };
                 result = await apiService.executeMCPTool('clickup_task_management', {
                     operation: 'create_task',
                     list_id: newTask.clickupListId,
                     name: newTask.title,
-                    description: newTask.description
+                    description: newTask.description,
+                    assignees: (newTask.assignee && newTask.assignee !== 'me' && !isNaN(Number(newTask.assignee))) ? [parseInt(newTask.assignee)] : [],
+                    priority: priorityMap[newTask.priority || 'medium'],
+                    due_date: newTask.dueDate ? new Date(newTask.dueDate).getTime() : undefined,
+                    start_date: newTask.startDate ? new Date(newTask.startDate).getTime() : undefined
                 });
             } else if (newTask.platform === 'asana') {
                 result = await apiService.executeMCPTool('asana_create_task', {
@@ -548,19 +851,49 @@ const UnifiedTaskView: React.FC = () => {
             const hasError = result?.error || result?.result?.error || result?.result?.data?.error;
 
             if (isSuccess && !hasError) {
+                toast.success('Task created successfully!');
+
+                // Instant Update: Prepend to tasks
+                // We need to extract the ID from the result to make it usable immediately
+                let newId = 'temp-' + Date.now();
+                const resData = result?.data || result?.result || result?.result?.data || result;
+                if (resData.id) newId = resData.id;
+                else if (resData.key) newId = resData.key; // Jira
+                else if (resData.issue?.key) newId = resData.issue.key;
+                else if (resData.card?.id) newId = resData.card.id; // Trello
+
+                const createdTaskObj: Task = {
+                    id: newId,
+                    description: newTask.title,
+                    fullDescription: newTask.description,
+                    project: newTask.platform, // Ideally map to project name but this is fine for now
+                    platform: newTask.platform as any,
+                    status: 'todo', // Default
+                    dueDate: newTask.dueDate || 'No Date',
+                    startDate: newTask.startDate,
+                    priority: (newTask.priority || 'medium') as any,
+                    listId: newTask.clickupListId || newTask.subTargetId
+                };
+
+                setTasks(prev => [createdTaskObj, ...prev]);
+
+                // Delay closing to let user see the success message
+                await new Promise(resolve => setTimeout(resolve, 800));
+
                 setIsCreateModalOpen(false);
-                setNewTask({ platform: 'jira', title: '', description: '', targetId: '', subTargetId: '', dueDate: '', jiraIssueType: 'Task', jiraStatus: 'To Do', clickupSpaceId: '', clickupFolderId: '', clickupListId: '' });
-                fetchTasks(); // Refresh list
-                alert('Task created successfully!');
+                setNewTask({ platform: 'jira', title: '', description: '', targetId: '', subTargetId: '', dueDate: '', jiraIssueType: 'Task', jiraStatus: 'To Do', clickupSpaceId: '', clickupFolderId: '', clickupListId: '', assignee: '', priority: 'medium', startDate: '' });
+                // We don't fetchTasks() here anymore to avoid overwriting the instant update with stale data immediately
+                // However, we might want to fetch strictly in background? 
+                // For now let's rely on the instant update. 
             } else {
                 const errorMsg = result?.error || result?.result?.error || result?.result?.data?.error || 'Unknown error';
-                alert('Failed to create task: ' + errorMsg);
                 console.error('Task creation failed:', result);
+                toast.error(`Failed to create task: ${errorMsg}`);
             }
 
         } catch (error) {
             console.error('Create task error:', error);
-            alert('Error creating task');
+            toast.error('Error creating task. Please try again.');
         } finally {
             setCreating(false);
         }
@@ -625,8 +958,7 @@ const UnifiedTaskView: React.FC = () => {
                 }
 
                 // Find target list based on name matching
-                // "To Do", "In Progress", "In Review", "Done"
-                const targetStatusLower = newStatus.toLowerCase(); // 'todo', 'in_progress', 'review', 'done'
+                const targetStatusLower = newStatus.toLowerCase();
 
                 let targetListId = '';
 
@@ -650,30 +982,10 @@ const UnifiedTaskView: React.FC = () => {
                     }
                 }
 
-                // If no direct match is found, fallback?
-                // Maybe if "To Do", pick first list? if "Done", pick last?
-                // For now, if not found, we can't move.
                 if (!targetListId) {
-                    console.warn(`Could not find a matching list for status ${newStatus} on board ${task.boardId}`);
-                    // Try strict exact matches if fuzzy failed? Or just error.
-                    // Let's try to map "todo" to the first list if we really can't find one? 
-                    // No, that's risky.
-                    throw new Error(`No list found on board matching "${newStatus}"`);
+                    throw new Error(`Could not find a matching list for status ${newStatus}`);
                 }
 
-                console.log(`Found target list ${targetListId} for status ${newStatus}`);
-
-                result = await apiService.executeMCPTool('tool_executor', {
-                    tool_name: 'trello_project_management',
-                    arguments: {
-                        action: 'update_card',
-                        card_id: taskId,
-                        list_id: targetListId
-                    }
-                });
-                // Note: executeMCPTool usually takes toolName + args directly. 
-                // My apiService usage in this file is `executeMCPTool('tool_name', args)`
-                // So:
                 result = await apiService.executeMCPTool('trello_project_management', {
                     action: 'update_card',
                     card_id: taskId,
@@ -682,16 +994,141 @@ const UnifiedTaskView: React.FC = () => {
             }
 
             console.log('Move result:', result);
-            if (result && !result.success && !result.result?.success) {
-                throw new Error('Backend reported failure');
-            }
+
+            // Show success toast for drag-and-drop move too
+            toast.success('Status updated!');
 
         } catch (error) {
             console.error('Failed to move task:', error);
             // Revert on failure
             updatedTasks[taskIndex] = { ...updatedTasks[taskIndex], status: oldStatus };
             setTasks([...updatedTasks]);
-            alert('Failed to update task status');
+
+            toast.error('Failed to update status');
+        }
+    };
+
+    const openEditModal = (task: Task) => {
+        setEditingTask(task);
+
+        // Try to parse existing date for input[type="date"]
+        let isoDate = '';
+        if (task.dueDate && task.dueDate !== 'No Date') {
+            try {
+                const d = new Date(task.dueDate);
+                if (!isNaN(d.getTime())) {
+                    isoDate = d.toISOString().split('T')[0];
+                }
+            } catch (e) { }
+        }
+
+        setEditForm({
+            description: task.description,
+            fullDescription: task.fullDescription || '',
+            status: task.status,
+            dueDate: isoDate,
+            assignee: task.assignee || '',
+            priority: task.priority || 'medium',
+            startDate: task.startDate || ''
+        });
+        setIsEditModalOpen(true);
+    };
+
+    const handleUpdateTask = async () => {
+        if (!editingTask) return;
+        setUpdating(true);
+
+        try {
+            let result;
+            const platform = editingTask.platform;
+
+            if (platform === 'jira') {
+                const statusMap: Record<string, string> = {
+                    'todo': 'To Do',
+                    'in_progress': 'In Progress',
+                    'review': 'In Review',
+                    'done': 'Done'
+                };
+                const priorityMap: any = { 'high': 'High', 'medium': 'Medium', 'low': 'Low', 'urgent': 'High' };
+                result = await apiService.executeMCPTool('jira_issue_tracking', {
+                    action: 'update_issue',
+                    issue_key: editingTask.id,
+                    summary: editForm.description,
+                    description: editForm.fullDescription,
+                    status: statusMap[editForm.status],
+                    due_date: editForm.dueDate || undefined,
+                    assignee_id: editForm.assignee || undefined,
+                    priority: priorityMap[editForm.priority || 'medium']
+                });
+            } else if (platform === 'trello') {
+                result = await apiService.executeMCPTool('trello_project_management', {
+                    action: 'update_card',
+                    card_id: editingTask.id,
+                    name: editForm.description,
+                    desc: editForm.fullDescription,
+                    due: editForm.dueDate || undefined,
+                    start: editForm.startDate || undefined,
+                    idMembers: editForm.assignee || undefined
+                });
+            } else if (platform === 'clickup') {
+                const statusMap: Record<string, string> = {
+                    'todo': 'to do',
+                    'in_progress': 'in progress',
+                    'review': 'review',
+                    'done': 'complete'
+                };
+                const priorityMap: any = { 'urgent': 1, 'high': 2, 'medium': 3, 'low': 4 };
+                result = await apiService.executeMCPTool('clickup_task_management', {
+                    operation: 'update_task',
+                    task_id: editingTask.id,
+                    name: editForm.description,
+                    description: editForm.fullDescription,
+                    status: statusMap[editForm.status],
+                    start_date: editForm.startDate ? new Date(editForm.startDate).getTime() : undefined,
+                    due_date: editForm.dueDate ? new Date(editForm.dueDate).getTime() : undefined,
+                    assignees: editForm.assignee ? [parseInt(editForm.assignee)] : [],
+                    priority: priorityMap[editForm.priority || 'medium']
+                });
+            }
+
+            console.log('Update result:', result);
+
+            if (result && (result.success || (result as any).id || (result as any).key)) {
+                toast.success('Task updated successfully!');
+
+                // Delay closing to let user see the success message
+                await new Promise(resolve => setTimeout(resolve, 800));
+
+                // Instant Update
+                setTasks(prevTasks => prevTasks.map(t => {
+                    if (t.id === editingTask.id) {
+                        return {
+                            ...t,
+                            description: editForm.description,
+                            fullDescription: editForm.fullDescription,
+                            status: editForm.status,
+                            dueDate: editForm.dueDate || t.dueDate,
+                            startDate: editForm.startDate || t.startDate,
+                            priority: (editForm.priority || t.priority) as any
+                            // Assignee logic is complex to update optimally without full user object, 
+                            // so we skip updating assignee in UI for now unless we store it in Task.
+                        };
+                    }
+                    return t;
+                }));
+
+                setIsEditModalOpen(false);
+                // fetchTasks(); // Disable fetch to use instant update
+            } else {
+                const errorMsg = result?.error || 'Failed to update task';
+                console.error('Update failed:', errorMsg);
+                toast.error(`Error: ${errorMsg}`);
+            }
+        } catch (error) {
+            console.error('Update task error:', error);
+            toast.error('Failed to update task. Please check your connection.');
+        } finally {
+            setUpdating(false);
         }
     };
 
@@ -734,7 +1171,7 @@ const UnifiedTaskView: React.FC = () => {
                                     {['jira', 'trello', 'clickup', 'asana'].map(p => (
                                         <button
                                             key={p}
-                                            onClick={() => setNewTask({ ...newTask, platform: p, targetId: '', subTargetId: '', jiraIssueType: 'Task', jiraStatus: 'To Do', clickupSpaceId: '', clickupFolderId: '', clickupListId: '' })}
+                                            onClick={() => setNewTask({ ...newTask, platform: p as any, targetId: '', subTargetId: '', jiraIssueType: 'Task', jiraStatus: 'To Do', clickupSpaceId: '', clickupFolderId: '', clickupListId: '' })}
                                             className={`flex flex-col items-center justify-center p-2 rounded-xl border transition-all ${newTask.platform === p ? 'bg-gray-900 text-white border-gray-900 ring-2 ring-gray-900 ring-offset-2' : 'bg-white text-gray-400 border-gray-200 hover:border-gray-300 hover:bg-gray-50'}`}
                                         >
                                             {getPlatformIcon(p)}
@@ -919,14 +1356,137 @@ const UnifiedTaskView: React.FC = () => {
                                 />
                             </div>
 
-                            <div>
-                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Due Date (Optional)</label>
-                                <input
-                                    type="date"
-                                    value={newTask.dueDate}
-                                    onChange={e => setNewTask({ ...newTask, dueDate: e.target.value })}
-                                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
-                                />
+                            {/* Additional Fields (Assignee/Priority) */}
+                            <div className={`grid gap-3 ${newTask.platform !== 'trello' ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                                {/* Priority - hide for Trello (no priority support) */}
+                                {newTask.platform !== 'trello' && (
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Priority</label>
+                                        <select
+                                            value={newTask.priority}
+                                            onChange={e => setNewTask({ ...newTask, priority: e.target.value })}
+                                            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                                        >
+                                            <option value="urgent">Urgent</option>
+                                            <option value="high">High</option>
+                                            <option value="medium">Normal</option>
+                                            <option value="low">Low</option>
+                                        </select>
+                                    </div>
+                                )}
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Assignee</label>
+                                    <div className="relative">
+                                        {/* Custom Dropdown Trigger */}
+                                        <button
+                                            type="button"
+                                            onClick={() => setAssigneeDropdownOpen(!assigneeDropdownOpen)}
+                                            disabled={loadingAssignees}
+                                            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-left flex items-center gap-2"
+                                        >
+                                            {newTask.assignee ? (
+                                                (() => {
+                                                    const selected = availableAssignees.find(u => String(u.id) === String(newTask.assignee));
+                                                    if (selected) {
+                                                        return (
+                                                            <>
+                                                                {selected.avatarUrl ? (
+                                                                    <img src={selected.avatarUrl} alt={selected.name} className="w-6 h-6 rounded-full object-cover" />
+                                                                ) : (
+                                                                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold">
+                                                                        {selected.initials || selected.name?.slice(0, 2).toUpperCase()}
+                                                                    </div>
+                                                                )}
+                                                                <span className="text-gray-900">{selected.name}</span>
+                                                            </>
+                                                        );
+                                                    }
+                                                    return <span className="text-gray-500">Select assignee...</span>;
+                                                })()
+                                            ) : (
+                                                <span className="text-gray-500">Unassigned</span>
+                                            )}
+                                            <div className="ml-auto">
+                                                {loadingAssignees ? (
+                                                    <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+                                                ) : (
+                                                    <MoreHorizontal className="w-4 h-4 text-gray-400" />
+                                                )}
+                                            </div>
+                                        </button>
+
+                                        {/* Dropdown List */}
+                                        {assigneeDropdownOpen && (
+                                            <div className="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                                                {/* Unassigned Option */}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setNewTask({ ...newTask, assignee: '' });
+                                                        setAssigneeDropdownOpen(false);
+                                                    }}
+                                                    className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 transition-colors"
+                                                >
+                                                    <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-gray-400 text-xs">
+                                                        —
+                                                    </div>
+                                                    <span className="text-gray-500">Unassigned</span>
+                                                </button>
+
+                                                {/* User List */}
+                                                {availableAssignees.map(u => (
+                                                    <button
+                                                        key={u.id}
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setNewTask({ ...newTask, assignee: String(u.id) });
+                                                            setAssigneeDropdownOpen(false);
+                                                        }}
+                                                        className={`w-full px-3 py-2 text-left text-sm hover:bg-blue-50 flex items-center gap-2 transition-colors ${String(newTask.assignee) === String(u.id) ? 'bg-blue-50' : ''}`}
+                                                    >
+                                                        {u.avatarUrl ? (
+                                                            <img src={u.avatarUrl} alt={u.name} className="w-6 h-6 rounded-full object-cover" />
+                                                        ) : (
+                                                            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold">
+                                                                {u.initials || u.name?.slice(0, 2).toUpperCase()}
+                                                            </div>
+                                                        )}
+                                                        <span className="text-gray-900">{u.name}</span>
+                                                    </button>
+                                                ))}
+
+                                                {availableAssignees.length === 0 && !loadingAssignees && (
+                                                    <div className="px-3 py-2 text-sm text-gray-400 text-center">No assignees available</div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Dates */}
+                            <div className={`grid gap-3 ${newTask.platform !== 'jira' ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                                {/* Start Date - hide for Jira (not supported) */}
+                                {newTask.platform !== 'jira' && (
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Start Date</label>
+                                        <input
+                                            type="date"
+                                            value={newTask.startDate}
+                                            onChange={e => setNewTask({ ...newTask, startDate: e.target.value })}
+                                            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                                        />
+                                    </div>
+                                )}
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Due Date</label>
+                                    <input
+                                        type="date"
+                                        value={newTask.dueDate}
+                                        onChange={e => setNewTask({ ...newTask, dueDate: e.target.value })}
+                                        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                                    />
+                                </div>
                             </div>
                         </div>
 
@@ -945,6 +1505,214 @@ const UnifiedTaskView: React.FC = () => {
                                 {creating && <Loader2 className="w-4 h-4 animate-spin" />}
                                 {creating ? 'Creating...' : 'Create Task'}
                             </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Edit Task Modal */}
+            {isEditModalOpen && editingTask && (
+                <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
+                        <div className="px-4 py-3 md:px-6 md:py-4 border-b border-gray-100 flex items-center justify-between shrink-0">
+                            <h3 className="text-lg font-bold text-gray-900">Edit Task</h3>
+                            <button onClick={() => setIsEditModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <div className="p-4 md:p-6 space-y-4 overflow-y-auto custom-scrollbar">
+                            <div className="flex items-center gap-2 mb-2">
+                                {getPlatformIcon(editingTask.platform)}
+                                <span className="text-xs font-semibold uppercase tracking-wider text-gray-400">{editingTask.platform} Task</span>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Title / Summary</label>
+                                <input
+                                    type="text"
+                                    value={editForm.description}
+                                    onChange={e => setEditForm({ ...editForm, description: e.target.value })}
+                                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                                    placeholder="Task title"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Description</label>
+                                <textarea
+                                    value={editForm.fullDescription}
+                                    onChange={e => setEditForm({ ...editForm, fullDescription: e.target.value })}
+                                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all min-h-[100px] resize-none"
+                                    placeholder="Detailed description..."
+                                />
+                            </div>
+
+                            {/* Edit Modal Additional Fields */}
+                            <div className={`grid gap-3 ${editingTask.platform !== 'trello' ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                                {/* Priority - hide for Trello (no priority support) */}
+                                {editingTask.platform !== 'trello' && (
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Priority</label>
+                                        <select
+                                            value={editForm.priority || 'medium'}
+                                            onChange={e => setEditForm({ ...editForm, priority: e.target.value as any })}
+                                            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                                        >
+                                            <option value="urgent">Urgent</option>
+                                            <option value="high">High</option>
+                                            <option value="medium">Normal</option>
+                                            <option value="low">Low</option>
+                                        </select>
+                                    </div>
+                                )}
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Assignee</label>
+                                    <div className="relative">
+                                        {/* Custom Dropdown Trigger */}
+                                        <button
+                                            type="button"
+                                            onClick={() => setEditAssigneeDropdownOpen(!editAssigneeDropdownOpen)}
+                                            disabled={loadingEditAssignees}
+                                            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-left flex items-center gap-2"
+                                        >
+                                            {editForm.assignee ? (
+                                                (() => {
+                                                    const selected = availableEditAssignees.find(u => String(u.id) === String(editForm.assignee));
+                                                    if (selected) {
+                                                        return (
+                                                            <>
+                                                                {selected.avatarUrl ? (
+                                                                    <img src={selected.avatarUrl} alt={selected.name} className="w-6 h-6 rounded-full object-cover" />
+                                                                ) : (
+                                                                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold">
+                                                                        {selected.initials || selected.name?.slice(0, 2).toUpperCase()}
+                                                                    </div>
+                                                                )}
+                                                                <span className="text-gray-900">{selected.name}</span>
+                                                            </>
+                                                        );
+                                                    }
+                                                    return <span className="text-gray-500">Select assignee...</span>;
+                                                })()
+                                            ) : (
+                                                <span className="text-gray-500">Unassigned</span>
+                                            )}
+                                            <div className="ml-auto">
+                                                {loadingEditAssignees ? (
+                                                    <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+                                                ) : (
+                                                    <MoreHorizontal className="w-4 h-4 text-gray-400" />
+                                                )}
+                                            </div>
+                                        </button>
+
+                                        {/* Dropdown List */}
+                                        {editAssigneeDropdownOpen && (
+                                            <div className="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                                                {/* Unassigned Option */}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setEditForm({ ...editForm, assignee: '' });
+                                                        setEditAssigneeDropdownOpen(false);
+                                                    }}
+                                                    className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 transition-colors"
+                                                >
+                                                    <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-gray-400 text-xs">
+                                                        —
+                                                    </div>
+                                                    <span className="text-gray-500">Unassigned</span>
+                                                </button>
+
+                                                {/* User List */}
+                                                {availableEditAssignees.map(u => (
+                                                    <button
+                                                        key={u.id}
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setEditForm({ ...editForm, assignee: String(u.id) });
+                                                            setEditAssigneeDropdownOpen(false);
+                                                        }}
+                                                        className={`w-full px-3 py-2 text-left text-sm hover:bg-blue-50 flex items-center gap-2 transition-colors ${String(editForm.assignee) === String(u.id) ? 'bg-blue-50' : ''}`}
+                                                    >
+                                                        {u.avatarUrl ? (
+                                                            <img src={u.avatarUrl} alt={u.name} className="w-6 h-6 rounded-full object-cover" />
+                                                        ) : (
+                                                            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold">
+                                                                {u.initials || u.name?.slice(0, 2).toUpperCase()}
+                                                            </div>
+                                                        )}
+                                                        <span className="text-gray-900">{u.name}</span>
+                                                    </button>
+                                                ))}
+
+                                                {availableEditAssignees.length === 0 && !loadingEditAssignees && (
+                                                    <div className="px-3 py-2 text-sm text-gray-400 text-center">No assignees available</div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className={`grid gap-3 ${editingTask.platform !== 'jira' ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                                {/* Start Date - hide for Jira (not supported) */}
+                                {editingTask.platform !== 'jira' && (
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Start Date</label>
+                                        <input
+                                            type="date"
+                                            value={editForm.startDate || ''}
+                                            onChange={e => setEditForm({ ...editForm, startDate: e.target.value })}
+                                            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                                        />
+                                    </div>
+                                )}
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Due Date</label>
+                                    <input
+                                        type="date"
+                                        value={editForm.dueDate || ''}
+                                        onChange={e => setEditForm({ ...editForm, dueDate: e.target.value })}
+                                        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                                    />
+                                </div>
+                            </div>
+
+
+                            <div>
+                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Status</label>
+                                <div className="grid grid-cols-2 gap-2">
+                                    {columns.map(col => (
+                                        <button
+                                            key={col.id}
+                                            onClick={() => setEditForm({ ...editForm, status: col.id as Task['status'] })}
+                                            className={`flex items-center gap-2 px-3 py-2 rounded-xl border transition-all ${editForm.status === col.id ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-gray-50 text-gray-600 border-gray-100 hover:border-gray-200'}`}
+                                        >
+                                            <div className={`w-2 h-2 rounded-full ${editForm.status === col.id ? 'bg-white' : col.dot}`} />
+                                            <span className="text-xs font-medium">{col.label}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex items-center justify-between shrink-0">
+                                <button
+                                    onClick={() => setIsEditModalOpen(false)}
+                                    className="px-4 py-2 text-sm font-semibold text-gray-500 hover:text-gray-700"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleUpdateTask}
+                                    disabled={updating || !editForm.description}
+                                    className="px-6 py-2 bg-gray-900 hover:bg-black text-white text-sm font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                >
+                                    {updating && <Loader2 className="w-4 h-4 animate-spin" />}
+                                    {updating ? 'Updating...' : 'Save Changes'}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1065,120 +1833,142 @@ const UnifiedTaskView: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Kanban Board */}
-                    {viewMode === 'kanban' && (
-                        <div className="flex-1 overflow-x-auto custom-scrollbar px-4 md:px-8 pb-8">
-                            <div className="flex gap-4 md:gap-6 h-full min-w-max">
-                                {columns.map(col => {
-                                    const colTasks = filteredTasks.filter(t => t.status === col.id);
-                                    return (
-                                        <div
-                                            key={col.id}
-                                            className="w-[280px] md:w-[320px] flex flex-col h-full shrink-0 bg-white/30 backdrop-blur-md rounded-3xl border border-white/40 p-3"
-                                            onDragOver={handleDragOver}
-                                            onDrop={(e) => handleDrop(e, col.id as any)}
-                                        >
-                                            <div className="flex items-center justify-between mb-4">
-                                                <div className="flex items-center gap-2">
-                                                    <span className={`w-2 h-2 rounded-full ${col.dot}`} />
-                                                    <h3 className="font-bold text-gray-700 text-sm">{col.label}</h3>
-                                                    <span className="bg-gray-200 text-gray-600 text-[10px] font-bold px-1.5 py-0.5 rounded-md">{colTasks.length}</span>
+                    {/* Main Content Area */}
+                    {loading && filteredTasks.length === 0 ? (
+                        <LoadingView />
+                    ) : (
+                        <>
+                            {viewMode === 'kanban' && (
+                                <div className="flex-1 overflow-x-auto custom-scrollbar px-4 md:px-8 pb-8">
+                                    <div className="flex gap-4 md:gap-6 h-full min-w-max">
+                                        {columns.map(col => {
+                                            const colTasks = filteredTasks.filter(t => t.status === col.id);
+                                            return (
+                                                <div
+                                                    key={col.id}
+                                                    className="w-[280px] md:w-[320px] flex flex-col h-full shrink-0 bg-white/30 backdrop-blur-md rounded-3xl border border-white/40 p-3"
+                                                    onDragOver={handleDragOver}
+                                                    onDrop={(e) => handleDrop(e, col.id as any)}
+                                                >
+                                                    <div className="flex items-center justify-between mb-4">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className={`w-2 h-2 rounded-full ${col.dot}`} />
+                                                            <h3 className="font-bold text-gray-700 text-sm">{col.label}</h3>
+                                                            <span className="bg-gray-200 text-gray-600 text-[10px] font-bold px-1.5 py-0.5 rounded-md">{colTasks.length}</span>
+                                                        </div>
+                                                        <button className="text-gray-400 hover:text-gray-600"><MoreHorizontal className="w-4 h-4" /></button>
+                                                    </div>
+
+                                                    <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-3 pb-4">
+                                                        {colTasks.length === 0 && (
+                                                            <div className="border-2 border-dashed border-gray-100 rounded-xl h-24 flex items-center justify-center text-gray-300 text-xs font-medium">
+                                                                No Tasks
+                                                            </div>
+                                                        )}
+                                                        {colTasks.map(task => (
+                                                            <div
+                                                                key={task.id}
+                                                                draggable
+                                                                onDragStart={(e) => handleDragStart(e, task.id)}
+                                                                onClick={() => openEditModal(task)}
+                                                                className="bg-white/90 p-4 rounded-2xl border border-white/60 shadow-sm hover:shadow-lg hover:shadow-indigo-500/10 transition-all cursor-pointer group hover:-translate-y-1 relative overflow-hidden backdrop-blur-sm"
+                                                            >
+                                                                <div className={`absolute left-0 top-0 bottom-0 w-1 ${col.dot}`} />
+
+                                                                <div className="flex justify-between items-start mb-2 pl-2">
+                                                                    <div className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-500 bg-gray-50 px-2 py-0.5 rounded-md border border-gray-100">
+                                                                        {getPlatformIcon(task.platform)}
+                                                                        <span className="capitalize">{task.platform}</span>
+                                                                    </div>
+                                                                    <button
+                                                                        onClick={(e) => { e.stopPropagation(); openEditModal(task); }}
+                                                                        className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-blue-600 transition-all p-1 hover:bg-blue-50 rounded-lg"
+                                                                        title="Edit Task"
+                                                                    >
+                                                                        <MoreHorizontal className="w-3.5 h-3.5" />
+                                                                    </button>
+                                                                </div>
+
+                                                                <h4 className={`text-sm font-bold text-gray-800 mb-1 pl-2 leading-snug ${task.status === 'done' ? 'line-through text-gray-400' : ''}`}>{task.description}</h4>
+
+                                                                <div className="flex items-center gap-2 mb-3 pl-2">
+                                                                    <span className="text-[11px] font-medium text-gray-500 truncate max-w-[120px]">{task.project}</span>
+                                                                </div>
+
+                                                                <div className="flex items-center justify-between pl-2 pt-2 border-t border-gray-50">
+                                                                    <div className="flex items-center gap-1.5 text-xs text-gray-400 font-medium">
+                                                                        <Calendar className="w-3.5 h-3.5" />
+                                                                        {task.dueDate}
+                                                                    </div>
+                                                                    {task.priority && <PriorityBadge priority={task.priority} color={task.priorityColor} />}
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
                                                 </div>
-                                                <button className="text-gray-400 hover:text-gray-600"><MoreHorizontal className="w-4 h-4" /></button>
-                                            </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
 
-                                            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-3 pb-4">
-                                                {colTasks.length === 0 && (
-                                                    <div className="border-2 border-dashed border-gray-100 rounded-xl h-24 flex items-center justify-center text-gray-300 text-xs font-medium">
-                                                        No Tasks
-                                                    </div>
-                                                )}
-                                                {colTasks.map(task => (
-                                                    <div
-                                                        key={task.id}
-                                                        draggable
-                                                        onDragStart={(e) => handleDragStart(e, task.id)}
-                                                        className="bg-white/90 p-4 rounded-2xl border border-white/60 shadow-sm hover:shadow-lg hover:shadow-indigo-500/10 transition-all cursor-pointer group hover:-translate-y-1 relative overflow-hidden backdrop-blur-sm"
-                                                    >
-                                                        <div className={`absolute left-0 top-0 bottom-0 w-1 ${col.dot}`} />
-
-                                                        <div className="flex justify-between items-start mb-2 pl-2">
-                                                            <div className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-500 bg-gray-50 px-2 py-0.5 rounded-md border border-gray-100">
+                            {viewMode === 'list' && (
+                                <div className="flex-1 overflow-y-auto px-4 md:px-8 pb-8 custom-scrollbar overflow-x-auto">
+                                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden min-w-[600px]">
+                                        <table className="w-full text-left text-sm text-gray-600">
+                                            <thead className="bg-gray-50/50 text-xs uppercase font-semibold text-gray-500">
+                                                <tr>
+                                                    <th className="px-6 py-4">Task</th>
+                                                    <th className="px-6 py-4">Platform</th>
+                                                    <th className="px-6 py-4">Status</th>
+                                                    <th className="px-6 py-4">Due Date</th>
+                                                    <th className="px-6 py-4">Priority</th>
+                                                    <th className="px-6 py-4 text-right">Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-gray-50">
+                                                {filteredTasks.map(task => (
+                                                    <tr key={task.id} onClick={() => openEditModal(task)} className="hover:bg-gray-50/50 transition-colors group cursor-pointer">
+                                                        <td className="px-6 py-4 font-medium text-gray-900">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className={`w-1.5 h-1.5 rounded-full ${columns.find(c => c.id === task.status)?.dot}`} />
+                                                                <span className={task.status === 'done' ? 'line-through text-gray-400' : ''}>{task.description}</span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-4">
+                                                            <div className="flex items-center gap-2">
                                                                 {getPlatformIcon(task.platform)}
-                                                                <span className="capitalize">{task.platform}</span>
+                                                                <span className="capitalize text-xs font-semibold bg-gray-100 px-2 py-0.5 rounded-md">{task.platform}</span>
                                                             </div>
-                                                            <button className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-gray-600 transition-opacity"><MoreHorizontal className="w-3.5 h-3.5" /></button>
-                                                        </div>
-
-                                                        <h4 className={`text-sm font-bold text-gray-800 mb-1 pl-2 leading-snug ${task.status === 'done' ? 'line-through text-gray-400' : ''}`}>{task.description}</h4>
-
-                                                        <div className="flex items-center gap-2 mb-3 pl-2">
-                                                            <span className="text-[11px] font-medium text-gray-500 truncate max-w-[120px]">{task.project}</span>
-                                                        </div>
-
-                                                        <div className="flex items-center justify-between pl-2 pt-2 border-t border-gray-50">
-                                                            <div className="flex items-center gap-1.5 text-xs text-gray-400 font-medium">
-                                                                <Calendar className="w-3.5 h-3.5" />
-                                                                {task.dueDate}
-                                                            </div>
-                                                            {task.priority && <PriorityBadge priority={task.priority} />}
-                                                        </div>
-                                                    </div>
+                                                        </td>
+                                                        <td className="px-6 py-4">
+                                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${task.status === 'done' ? 'bg-green-100 text-green-700' :
+                                                                task.status === 'in_progress' ? 'bg-blue-100 text-blue-700' :
+                                                                    task.status === 'review' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-700'
+                                                                }`}>
+                                                                {task.status.replace('_', ' ')}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-6 py-4 font-mono text-xs">{task.dueDate}</td>
+                                                        <td className="px-6 py-4">
+                                                            <PriorityBadge priority={task.priority} color={task.priorityColor} />
+                                                        </td>
+                                                        <td className="px-6 py-4 text-right">
+                                                            <button
+                                                                onClick={(e) => { e.stopPropagation(); openEditModal(task); }}
+                                                                className="text-gray-400 hover:text-blue-600 transition-colors p-1.5 hover:bg-blue-50 rounded-lg"
+                                                            >
+                                                                <MoreHorizontal className="w-4 h-4" />
+                                                            </button>
+                                                        </td>
+                                                    </tr>
                                                 ))}
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    )}
-
-                    {viewMode === 'list' && (
-                        <div className="flex-1 overflow-y-auto px-4 md:px-8 pb-8 custom-scrollbar overflow-x-auto">
-                            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden min-w-[600px]">
-                                <table className="w-full text-left text-sm text-gray-600">
-                                    <thead className="bg-gray-50/50 text-xs uppercase font-semibold text-gray-500">
-                                        <tr>
-                                            <th className="px-6 py-4">Task</th>
-                                            <th className="px-6 py-4">Platform</th>
-                                            <th className="px-6 py-4">Status</th>
-                                            <th className="px-6 py-4">Due Date</th>
-                                            <th className="px-6 py-4 text-right">Priority</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-50">
-                                        {filteredTasks.map(task => (
-                                            <tr key={task.id} className="hover:bg-gray-50/50 transition-colors group cursor-pointer">
-                                                <td className="px-6 py-4 font-medium text-gray-900">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className={`w-1.5 h-1.5 rounded-full ${columns.find(c => c.id === task.status)?.dot}`} />
-                                                        <span className={task.status === 'done' ? 'line-through text-gray-400' : ''}>{task.description}</span>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <div className="flex items-center gap-2">
-                                                        {getPlatformIcon(task.platform)}
-                                                        <span className="capitalize text-xs font-semibold bg-gray-100 px-2 py-0.5 rounded-md">{task.platform}</span>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${task.status === 'done' ? 'bg-green-100 text-green-700' :
-                                                        task.status === 'in_progress' ? 'bg-blue-100 text-blue-700' :
-                                                            task.status === 'review' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-700'
-                                                        }`}>
-                                                        {task.status.replace('_', ' ')}
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4 font-mono text-xs">{task.dueDate}</td>
-                                                <td className="px-6 py-4 text-right">
-                                                    <PriorityBadge priority={task.priority} />
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            )}
+                        </>
                     )}
                 </div>
             </div>
@@ -1198,8 +1988,44 @@ const UnifiedTaskView: React.FC = () => {
                 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
                     background: rgba(156, 163, 175, 0.5);
                 }
+                
+                .shimmer-effect {
+                    position: relative;
+                    overflow: hidden;
+                }
+                .shimmer-effect::after {
+                    content: "";
+                    position: absolute;
+                    top: 0;
+                    right: 0;
+                    bottom: 0;
+                    left: 0;
+                    transform: translateX(-100%);
+                    background-image: linear-gradient(
+                        90deg,
+                        rgba(255, 255, 255, 0) 0,
+                        rgba(255, 255, 255, 0.2) 20%,
+                        rgba(255, 255, 255, 0.5) 60%,
+                        rgba(255, 255, 255, 0)
+                    );
+                    animation: shimmer 2s infinite;
+                }
+                @keyframes shimmer {
+                    100% {
+                        transform: translateX(100%);
+                    }
+                }
+
+                @keyframes spin-slow {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+
+                .animate-spin-slow {
+                    animation: spin-slow 2s linear infinite;
+                }
             `}</style>
-        </div >
+        </div>
     );
 };
 

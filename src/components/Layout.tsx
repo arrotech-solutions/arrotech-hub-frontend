@@ -27,7 +27,8 @@ import {
   Share2,
   Phone,
   Video,
-  Landmark
+  Landmark,
+  BarChart3
 } from 'lucide-react';
 import logo from '../assets/Logo/icononly_transparent_nobuffer.png';
 import React from 'react';
@@ -115,6 +116,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       icon: Bot,
       description: 'AI agents management',
       badge: null
+    },
+    {
+      name: 'Analytics',
+      href: '/productivity',
+      icon: BarChart3,
+      description: 'Productivity stats & insights',
+      badge: 'New'
     },
     {
       name: 'Channels',
