@@ -70,10 +70,9 @@ const UnifiedTaskView: React.FC = () => {
 
             // Asana
             if (activePlatforms.includes('asana')) {
-                promises.push(apiService.executeMCPTool('asana_task_management', {
-                    operation: 'list',
+                promises.push(apiService.executeMCPTool('asana_list_tasks', {
                     limit: 20,
-                    opt_fields: ['name', 'completed', 'due_on', 'projects.name']
+                    opt_fields: ['gid', 'name', 'completed', 'due_on', 'projects.name', 'memberships.section.name']
                 }));
             } else { promises.push(Promise.resolve(null)); }
 
@@ -222,16 +221,63 @@ const UnifiedTaskView: React.FC = () => {
                     }));
                 }
             }
+
             if (isSuccess(asanaRes)) {
-                const raw = getData(asanaRes)?.data || [];
-                if (Array.isArray(raw)) {
-                    allTasks.push(...raw.map((t: any): Task => ({
-                        id: t.gid, description: t.name, project: t.projects?.[0]?.name || 'Asana', platform: 'asana',
-                        status: (t.completed ? 'done' : 'todo'),
+                console.log('[Asana Debug] Raw Response:', asanaRes);
+                const dataObj = getData(asanaRes);
+                console.log('[Asana Debug] Data Object:', dataObj);
+                const raw = dataObj?.data || [];
+                console.log('[Asana Debug] Raw Tasks Array:', raw);
+
+                // Helper to map Asana task to our Task interface
+                const mapAsanaTask = (t: any): Task => {
+                    let mapStatus: 'todo' | 'in_progress' | 'review' | 'done' = 'todo';
+
+                    if (t.completed) {
+                        mapStatus = 'done';
+                    } else {
+                        // Check ALL memberships for section names
+                        if (t.memberships && Array.isArray(t.memberships)) {
+                            for (const m of t.memberships) {
+                                const sectionName = m.section?.name?.toLowerCase() || '';
+                                if (!sectionName) continue;
+
+                                if (sectionName.includes('done') || sectionName.includes('complete')) {
+                                    mapStatus = 'done';
+                                    break;
+                                } else if (sectionName.includes('progress') || sectionName.includes('doing') || sectionName.includes('active') || sectionName.includes('working')) {
+                                    mapStatus = 'in_progress';
+                                    break;
+                                } else if (sectionName.includes('review') || sectionName.includes('qa') || sectionName.includes('testing') || sectionName.includes('verify')) {
+                                    mapStatus = 'review';
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    return {
+                        id: t.gid,
+                        description: t.name,
+                        project: t.projects?.[0]?.name || 'Asana',
+                        platform: 'asana',
+                        status: mapStatus,
                         dueDate: t.due_on ? new Date(t.due_on).toLocaleDateString() : 'No Date',
                         priority: 'medium'
-                    })));
+                    };
+                };
+
+                // Inspect 'raw'. If it's an object with a 'data' array, unwrap it.
+                if (!Array.isArray(raw) && raw?.data && Array.isArray(raw.data)) {
+                    // It was nested one level deeper { data: [ ... ] }
+                    allTasks.push(...raw.data.map(mapAsanaTask));
+                } else if (Array.isArray(raw)) {
+                    allTasks.push(...raw.map(mapAsanaTask));
+                } else {
+                    console.error('[Asana Debug] Raw tasks is not an array:', raw);
                 }
+            } else {
+                console.error('[Asana Debug] Request failed:', asanaRes);
             }
 
             // Process results
@@ -424,7 +470,7 @@ const UnifiedTaskView: React.FC = () => {
                         targets = res.result.data.boards.map((b: any) => ({ id: b.id, name: b.name }));
                     }
                 } else if (newTask.platform === 'asana') {
-                    const res = await apiService.executeMCPTool('asana_task_management', { operation: 'list_projects' });
+                    const res = await apiService.executeMCPTool('asana_list_projects', {});
                     console.log('Asana projects:', res);
                     if (res && res.result && res.result.data && res.result.data.data) {
                         targets = res.result.data.data.map((p: any) => ({ id: p.gid || p.id, name: p.name }));
@@ -658,7 +704,7 @@ const UnifiedTaskView: React.FC = () => {
                         original: m
                     }));
                 } else if (newTask.platform === 'asana') {
-                    const res: any = await apiService.executeMCPTool('asana_task_management', { operation: 'get_users' });
+                    const res: any = await apiService.executeMCPTool('asana_get_users', {});
                     if (res?.result?.data?.data) users = res.result.data.data;
                     else if (res?.data?.data) users = res.data.data;
                 }
@@ -750,7 +796,7 @@ const UnifiedTaskView: React.FC = () => {
                         }));
                     }
                 } else if (editingTask.platform === 'asana') {
-                    const res: any = await apiService.executeMCPTool('asana_task_management', { operation: 'get_users' });
+                    const res: any = await apiService.executeMCPTool('asana_get_users', {});
                     if (res?.result?.data?.data) users = res.result.data.data;
                     else if (res?.data?.data) users = res.data.data;
                 }
@@ -833,9 +879,7 @@ const UnifiedTaskView: React.FC = () => {
                     start_date: newTask.startDate ? new Date(newTask.startDate).getTime() : undefined
                 });
             } else if (newTask.platform === 'asana') {
-                result = await apiService.executeMCPTool('asana_task_management', {
-                    operation: 'create_task',
-                    workspace_id: newTask.targetId, // Note: Creating task in project usually requires project ID, but for now assuming targetId is project ID or workspace ID
+                result = await apiService.executeMCPTool('asana_create_task', {
                     projects: [newTask.targetId],
                     name: newTask.title,
                     notes: newTask.description,

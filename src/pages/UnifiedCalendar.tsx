@@ -6,7 +6,7 @@ import {
     ArrowRight
 } from 'lucide-react';
 import apiService from '../services/api';
-import { ClickUpLogo, TrelloLogo, JiraLogo } from '../components/BrandIcons';
+import { ClickUpLogo, TrelloLogo, JiraLogo, AsanaLogo } from '../components/BrandIcons';
 import CreateEventModal from '../components/dashboard/CreateEventModal';
 import EventDetailsModal from '../components/dashboard/EventDetailsModal';
 import SmartScheduler from '../components/calendar/SmartScheduler';
@@ -122,6 +122,12 @@ const UnifiedCalendar: React.FC = () => {
             if (activePlatforms.includes('trello')) {
                 taskPromises.push(apiService.executeMCPTool('trello_project_management', { action: 'search_cards', query: 'is:open' }).then(res => ({ type: 'trello', res })));
             }
+            if (activePlatforms.includes('asana')) {
+                taskPromises.push(apiService.executeMCPTool('asana_list_tasks', {
+                    limit: 50,
+                    opt_fields: ['gid', 'name', 'completed', 'due_on', 'projects.name', 'memberships.section.name']
+                }).then(res => ({ type: 'asana', res })));
+            }
 
             const [eventResults, taskResults] = await Promise.all([
                 Promise.allSettled(eventPromises),
@@ -208,6 +214,44 @@ const UnifiedCalendar: React.FC = () => {
                                     dueDate: c.due ? new Date(c.due).toLocaleDateString() : undefined
                                 });
 
+                            }
+                        });
+                    } else if (type === 'asana') {
+                        // Handle Asana response
+                        let tasks = [];
+                        if (Array.isArray(data)) {
+                            tasks = data;
+                        } else if (data.data && Array.isArray(data.data)) {
+                            tasks = data.data;
+                        } else if (data.data && data.data.data && Array.isArray(data.data.data)) {
+                            tasks = data.data.data;
+                        }
+
+                        tasks.forEach((t: any) => {
+                            if (!t.completed) {
+                                // Determine status from sections
+                                let status = 'To Do';
+                                if (t.memberships && Array.isArray(t.memberships)) {
+                                    for (const m of t.memberships) {
+                                        const sectionName = m.section?.name?.toLowerCase() || '';
+                                        if (sectionName.includes('progress') || sectionName.includes('doing') || sectionName.includes('active')) {
+                                            status = 'In Progress';
+                                            break;
+                                        } else if (sectionName.includes('review') || sectionName.includes('qa')) {
+                                            status = 'Review';
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                newTasks.push({
+                                    id: t.gid,
+                                    title: t.name,
+                                    subtitle: 'Asana',
+                                    platform: 'asana',
+                                    status: status,
+                                    dueDate: t.due_on ? new Date(t.due_on).toLocaleDateString() : undefined
+                                });
                             }
                         });
                     }
@@ -301,6 +345,7 @@ const UnifiedCalendar: React.FC = () => {
         if (platform === 'clickup') return <ClickUpLogo className="w-3.5 h-3.5" />;
         if (platform === 'jira') return <JiraLogo className="w-3.5 h-3.5" />;
         if (platform === 'trello') return <TrelloLogo className="w-3.5 h-3.5" />;
+        if (platform === 'asana') return <AsanaLogo className="w-3.5 h-3.5" />;
         return <CheckSquare className="w-3.5 h-3.5" />;
     };
 
@@ -789,7 +834,7 @@ const UnifiedCalendar: React.FC = () => {
 
                         {/* Task Filters */}
                         <div className="px-4 py-3 flex gap-2 overflow-x-auto custom-scrollbar">
-                            {['All', 'ClickUp', 'Jira', 'Trello'].map(f => (
+                            {['All', 'ClickUp', 'Jira', 'Trello', 'Asana'].map(f => (
                                 <button
                                     key={f}
                                     onClick={() => setTaskFilter(f)}
