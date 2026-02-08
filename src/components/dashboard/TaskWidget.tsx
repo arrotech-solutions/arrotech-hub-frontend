@@ -79,8 +79,70 @@ const TaskWidget: React.FC<TaskWidgetProps> = ({ openModalTrigger }) => {
             console.error('Failed to fetch ClickUp tasks', err);
             // Don't fail entire widget if one integration fails
           }
+        } else if (conn.platform.toLowerCase() === 'asana') {
+          try {
+            console.log('DEBUG: Fetching Asana tasks...');
+            const result = await apiService.executeMCPTool('asana_list_tasks', {
+              limit: 10,
+              opt_fields: ['gid', 'name', 'completed', 'due_on', 'projects.name', 'memberships.section.name']
+            });
+            console.log('DEBUG: Asana Result:', result);
+
+            // Handle nested data structure: result.data.data -> array
+            let rawTasks = [];
+            if (result.data && Array.isArray(result.data)) {
+              rawTasks = result.data;
+            } else if (result.data && result.data.data && Array.isArray(result.data.data)) {
+              rawTasks = result.data.data;
+            } else if (result.data && result.data.data && typeof result.data.data === 'object' && result.data.data.data && Array.isArray(result.data.data.data)) {
+              // Ultra-defensive: AsanaService wrapper -> ToolExecutor wrapper -> potentially extra nesting
+              rawTasks = result.data.data.data;
+            }
+
+            if (rawTasks.length > 0) {
+              const asanaTasks = rawTasks.map((t: any) => {
+                let mapStatus = 'todo';
+                if (t.completed) {
+                  mapStatus = 'done';
+                } else {
+                  // Check ALL memberships
+                  if (t.memberships && Array.isArray(t.memberships)) {
+                    for (const m of t.memberships) {
+                      const sectionName = m.section?.name?.toLowerCase() || '';
+                      if (!sectionName) continue;
+
+                      if (sectionName.includes('done') || sectionName.includes('complete')) {
+                        mapStatus = 'done';
+                        break;
+                      } else if (sectionName.includes('progress') || sectionName.includes('doing') || sectionName.includes('active')) {
+                        mapStatus = 'in_progress';
+                        break;
+                      } else if (sectionName.includes('review') || sectionName.includes('qa')) {
+                        mapStatus = 'review';
+                        break;
+                      }
+                    }
+                  }
+                }
+
+                return {
+                  id: t.gid,
+                  title: t.name,
+                  description: t.notes || '',
+                  platform: 'asana',
+                  status: mapStatus,
+                  priority: 'medium',
+                  dueDate: t.due_on ? new Date(t.due_on).toLocaleDateString() : 'No due date',
+                  url: t.permalink_url,
+                  originalData: t
+                };
+              });
+              allTasks.push(...asanaTasks);
+            }
+          } catch (err) {
+            console.error('Failed to fetch Asana tasks', err);
+          }
         }
-        // Add other platforms here (Asana, etc.)
       }
 
       setTasks(allTasks);
