@@ -79,11 +79,13 @@ const UnifiedDashboard: React.FC = () => {
                     promises.push(apiService.executeMCPTool('trello_project_management', { action: 'search_cards', query: 'is:open' }).then(res => ({ type: 'trello', res })));
                 }
                 if (activePlatforms.includes('asana')) {
-                    promises.push(apiService.executeMCPTool('asana_task_management', {
-                        operation: 'list',
+                    promises.push(apiService.executeMCPTool('asana_list_tasks', {
                         limit: 20,
-                        opt_fields: ['name', 'completed']
-                    }).then(res => ({ type: 'asana', res })));
+                        opt_fields: ['gid', 'name', 'completed', 'projects.name', 'memberships.section.name']
+                    }).then(res => {
+                        console.log('[UnifiedDashboard] Asana Response:', res);
+                        return { type: 'asana', res };
+                    }));
                 }
 
                 // --- CALENDAR FETCHING ---
@@ -115,7 +117,10 @@ const UnifiedDashboard: React.FC = () => {
                 for (const result of results) {
                     if (result.status === 'fulfilled' && result.value) {
                         const { type, res } = result.value;
-                        if (!res || (!res.success && !res.data && !res.result)) continue;
+                        if (!res || (!res.success && !res.data && !res.result)) {
+                            console.warn(`[UnifiedDashboard] Failed or empty response for ${type}`, res);
+                            continue;
+                        }
 
                         const data = res.data || res.result || res;
 
@@ -177,15 +182,38 @@ const UnifiedDashboard: React.FC = () => {
                                 }
                             });
                         } else if (type === 'asana') {
-                            const tasks = data.data || [];
+                            console.log('[UnifiedDashboard] Processing Asana tasks:', data);
+                            // Handle nested structure if present (ToolExecutor usually unwraps, but let's be safe)
+                            let tasks = [];
+                            if (Array.isArray(data)) {
+                                tasks = data;
+                            } else if (data.data && Array.isArray(data.data)) {
+                                tasks = data.data;
+                            } else if (data.data && data.data.data && Array.isArray(data.data.data)) {
+                                tasks = data.data.data;
+                            }
+
+                            console.log('[UnifiedDashboard] Asana Task List:', tasks);
+
                             tasks.forEach((t: any) => {
-                                if (!t.completed) { // Asana list endpoint is simple, assume incomplete = todo/in-progress
-                                    // Asana doesn't give status name easily in list view without extra calls, 
-                                    // but we can just show them. Or maybe filter if we had section info.
-                                    // For now, include all incomplete.
-                                    newTasks.push({
-                                        id: t.gid, title: t.name, subtitle: 'Asana', platform: 'asana'
-                                    });
+                                if (!t.completed) {
+                                    // Check if status is "In Progress" via section name
+                                    let isInProgress = false;
+                                    if (t.memberships && Array.isArray(t.memberships)) {
+                                        for (const m of t.memberships) {
+                                            const sectionName = m.section?.name?.toLowerCase() || '';
+                                            if (sectionName.includes('progress') || sectionName.includes('doing') || sectionName.includes('active') || sectionName.includes('working')) {
+                                                isInProgress = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+
+                                    if (isInProgress) {
+                                        newTasks.push({
+                                            id: t.gid, title: t.name, subtitle: 'Asana', platform: 'asana'
+                                        });
+                                    }
                                 }
                             });
                         } else if (type === 'calendar') {
