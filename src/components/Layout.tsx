@@ -37,6 +37,7 @@ import { useAuth } from '../hooks/useAuth';
 import FloatingActionMenu from './FloatingActionMenu';
 import NotificationsDropdown from './NotificationsDropdown';
 import CookieConsent from './CookieConsent';
+import UsageWarningBanner from './UsageWarningBanner';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -187,13 +188,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       icon: CreditCard,
       description: 'Billing and subscriptions',
       badge: null
-    },
-    {
-      name: 'Pricing',
-      href: '/pricing',
-      icon: Sparkles,
-      description: 'Upgrade your plan',
-      badge: 'New'
     },
     {
       name: 'Activity',
@@ -627,6 +621,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             </div>
           </div>
         </div>
+
+        {/* Usage Warning Banner - shows when at 80%+ usage */}
+        <UsageWarningBanner />
 
         {/* Page content */}
         <main className="min-h-screen">

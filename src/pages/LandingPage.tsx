@@ -10,7 +10,8 @@ import {
     GitBranch,
     Layers,
     TrendingUp,
-    LayoutDashboard
+    LayoutDashboard,
+    CreditCard
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import logo from '../assets/Logo/fulllogo_transparent.png';
@@ -107,6 +108,10 @@ const LandingPage: React.FC = () => {
 
                         <div className="hidden md:flex items-center gap-8">
                             <a href="#how-it-works" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">How It Works</a>
+                            <Link to="/pricing" className="text-gray-600 hover:text-gray-900 font-medium transition-colors flex items-center gap-1">
+                                <CreditCard className="w-4 h-4" />
+                                Pricing
+                            </Link>
                             {user ? (
                                 <Link
                                     to="/unified"
@@ -143,6 +148,10 @@ const LandingPage: React.FC = () => {
                     <div className="md:hidden bg-white/95 backdrop-blur-xl border-t border-gray-200">
                         <div className="px-4 py-6 space-y-4">
                             <a href="#how-it-works" className="block text-gray-600 hover:text-gray-900 py-2">How It Works</a>
+                            <Link to="/pricing" className="block text-gray-600 hover:text-gray-900 py-2 flex items-center gap-2">
+                                <CreditCard className="w-4 h-4" />
+                                Pricing
+                            </Link>
                             <div className="pt-4 border-t border-gray-200 space-y-3">
                                 {user ? (
                                     <Link to="/unified" className="block text-center bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 rounded-full font-medium">
