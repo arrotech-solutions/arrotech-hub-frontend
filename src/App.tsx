@@ -331,16 +331,8 @@ const AppRoutes: React.FC = () => {
         }
       />
 
-      <Route
-        path="/pricing"
-        element={
-          <ProtectedRoute>
-            <Layout>
-              <Pricing />
-            </Layout>
-          </ProtectedRoute>
-        }
-      />
+      {/* Public Pricing Page (no auth required) */}
+      <Route path="/pricing" element={<Pricing />} />
 
 
 

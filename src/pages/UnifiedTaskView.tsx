@@ -1204,7 +1204,7 @@ const UnifiedTaskView: React.FC = () => {
     };
 
     return (
-        <div className="flex flex-col h-screen bg-[conic-gradient(at_top_left,_var(--tw-gradient-stops))] from-slate-50 via-indigo-50/20 to-slate-50 text-slate-900 overflow-hidden relative">
+        <div className="flex flex-col h-screen bg-[conic-gradient(at_top_left,_var(--tw-gradient-stops))] from-slate-50 via-indigo-50/20 to-slate-50 text-slate-900 overflow-y-auto md:overflow-hidden relative">
             {/* Create Task Modal */}
             {isCreateModalOpen && (
                 <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
@@ -1771,7 +1771,7 @@ const UnifiedTaskView: React.FC = () => {
             )}
 
             {/* Header / Toolbar */}
-            <div className="bg-white/80 backdrop-blur-xl border-b border-white/50 px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 sticky top-0 z-30 unified-tasks-header shadow-sm">
+            <div className="bg-white/80 backdrop-blur-xl border-b border-white/50 px-4 md:px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 sticky top-0 z-30 unified-tasks-header shadow-sm">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-2">
                         <CheckSquare className="w-7 h-7 text-indigo-600" />
@@ -1816,7 +1816,7 @@ const UnifiedTaskView: React.FC = () => {
             </div>
 
             {/* Main Content Area */}
-            <div className="flex-1 flex overflow-hidden">
+            <div className={`flex-1 flex ${viewMode === 'kanban' ? 'overflow-visible md:overflow-hidden' : 'overflow-hidden'}`}>
                 {/* Sidebar / Filters (Optional - Inline for now) */}
 
                 <div className="flex-1 flex flex-col min-w-0">
@@ -1891,14 +1891,14 @@ const UnifiedTaskView: React.FC = () => {
                     ) : (
                         <>
                             {viewMode === 'kanban' && (
-                                <div className="flex-1 overflow-x-auto custom-scrollbar px-4 md:px-8 pb-8">
-                                    <div className="flex gap-4 md:gap-6 h-full min-w-max">
+                                <div className="flex-1 overflow-visible md:overflow-x-auto custom-scrollbar px-4 md:px-8 pb-8">
+                                    <div className="flex flex-col md:flex-row gap-6 md:gap-6 h-auto md:h-full md:min-w-max md:overflow-y-hidden pb-20 md:pb-0">
                                         {columns.map(col => {
                                             const colTasks = filteredTasks.filter(t => t.status === col.id);
                                             return (
                                                 <div
                                                     key={col.id}
-                                                    className="w-[280px] md:w-[320px] flex flex-col h-full shrink-0 bg-white/30 backdrop-blur-md rounded-3xl border border-white/40 p-3"
+                                                    className="w-full md:w-[320px] flex flex-col h-auto md:h-full shrink-0 bg-white/30 backdrop-blur-md rounded-3xl border border-white/40 p-3"
                                                     onDragOver={handleDragOver}
                                                     onDrop={(e) => handleDrop(e, col.id as any)}
                                                 >
@@ -1911,7 +1911,7 @@ const UnifiedTaskView: React.FC = () => {
                                                         <button className="text-gray-400 hover:text-gray-600"><MoreHorizontal className="w-4 h-4" /></button>
                                                     </div>
 
-                                                    <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-3 pb-4">
+                                                    <div className="flex-1 md:overflow-y-auto pr-0 md:pr-2 custom-scrollbar space-y-3 pb-4">
                                                         {colTasks.length === 0 && (
                                                             <div className="border-2 border-dashed border-gray-100 rounded-xl h-24 flex items-center justify-center text-gray-300 text-xs font-medium">
                                                                 No Tasks
@@ -1965,8 +1965,9 @@ const UnifiedTaskView: React.FC = () => {
                             )}
 
                             {viewMode === 'list' && (
-                                <div className="flex-1 overflow-y-auto px-4 md:px-8 pb-8 custom-scrollbar overflow-x-auto">
-                                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden min-w-[600px]">
+                                <div className="flex-1 overflow-y-auto px-4 md:px-8 pb-8 custom-scrollbar">
+                                    {/* Desktop Table View */}
+                                    <div className="hidden md:block bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden min-w-[600px]">
                                         <table className="w-full text-left text-sm text-gray-600">
                                             <thead className="bg-gray-50/50 text-xs uppercase font-semibold text-gray-500">
                                                 <tr>
@@ -2017,6 +2018,52 @@ const UnifiedTaskView: React.FC = () => {
                                                 ))}
                                             </tbody>
                                         </table>
+                                    </div>
+
+                                    {/* Mobile Card View */}
+                                    <div className="md:hidden space-y-3 pb-20">
+                                        {filteredTasks.map(task => (
+                                            <div
+                                                key={task.id}
+                                                onClick={() => openEditModal(task)}
+                                                className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 space-y-3 active:scale-[0.99] transition-transform"
+                                            >
+                                                <div className="flex items-start justify-between gap-3">
+                                                    <div className="flex items-center gap-2 min-w-0">
+                                                        <div className={`w-2 h-2 rounded-full shrink-0 ${columns.find(c => c.id === task.status)?.dot}`} />
+                                                        <h4 className={`font-semibold text-gray-900 text-sm truncate ${task.status === 'done' ? 'line-through text-gray-400' : ''}`}>
+                                                            {task.description}
+                                                        </h4>
+                                                    </div>
+                                                    <PriorityBadge priority={task.priority} color={task.priorityColor} />
+                                                </div>
+
+                                                <p className="text-xs text-gray-500 line-clamp-2">
+                                                    {task.fullDescription || 'No description provided.'}
+                                                </p>
+
+                                                <div className="flex items-center justify-between text-xs text-gray-500 pt-2 border-t border-gray-50">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="flex items-center gap-1.5">
+                                                            {getPlatformIcon(task.platform)}
+                                                            <span className="capitalize">{task.platform}</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-1.5">
+                                                            <Calendar className="w-3.5 h-3.5" />
+                                                            {task.dueDate}
+                                                        </div>
+                                                    </div>
+
+                                                    <span className={`px-2 py-0.5 rounded-full capitalize text-[10px] font-medium ${task.status === 'done' ? 'bg-green-100 text-green-700' :
+                                                        task.status === 'in_progress' ? 'bg-blue-100 text-blue-700' :
+                                                            task.status === 'review' ? 'bg-purple-100 text-purple-700' :
+                                                                'bg-gray-100 text-gray-700'
+                                                        }`}>
+                                                        {task.status.replace('_', ' ')}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
                             )}
