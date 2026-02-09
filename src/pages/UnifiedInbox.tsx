@@ -697,12 +697,20 @@ const UnifiedInbox: React.FC = () => {
                 });
             }
 
-            if (result && (result.success || result.status === 'ok' || result.result)) {
+
+            // Check for blocked operation (upgrade required)
+            const innerResult = result?.result;
+            if (innerResult?.upgrade_required || innerResult?.success === false) {
+                toast.error(innerResult?.error || 'This feature requires an upgrade. Please upgrade your plan.');
+                return;
+            }
+
+            if (result && (result.success || result.status === 'ok' || (innerResult && innerResult.success !== false))) {
                 toast.success(`Reply sent via ${selectedMessage.source}!` + (attachments.length > 0 ? ` (${attachments.length} file${attachments.length > 1 ? 's' : ''} attached)` : ''));
                 setReplyText('');
                 setAttachments([]);
             } else {
-                toast.error('Failed to send reply: ' + (result?.error || 'Unknown error'));
+                toast.error('Failed to send reply: ' + (innerResult?.error || result?.error || 'Unknown error'));
             }
         } catch (error) {
             console.error('Reply error:', error);
@@ -799,7 +807,14 @@ const UnifiedInbox: React.FC = () => {
                 });
             }
 
-            if (result && (result.success || result.status === 'ok')) {
+            // Check for blocked operation (upgrade required)
+            const innerResult = result?.result;
+            if (innerResult?.upgrade_required || innerResult?.success === false) {
+                toast.error(innerResult?.error || 'This feature requires an upgrade. Please upgrade your plan.');
+                return;
+            }
+
+            if (result && (result.success || result.status === 'ok' || (innerResult && innerResult.success !== false))) {
                 // Optimistic UI update
                 setMessages(prev => [{
                     id: Date.now().toString(),
@@ -825,7 +840,7 @@ const UnifiedInbox: React.FC = () => {
                 // Simple success feedback
                 setTimeout(() => toast.success(`Message sent via ${composeChannel}!` + (composeAttachments.length > 0 ? ` (${composeAttachments.length} file${composeAttachments.length > 1 ? 's' : ''} attached)` : '')), 100);
             } else {
-                alert('Failed to send message: ' + (result?.error || JSON.stringify(result) || 'Unknown error'));
+                toast.error('Failed to send message: ' + (innerResult?.error || result?.error || 'Unknown error'));
             }
         } catch (error) {
             console.error(error);

@@ -69,12 +69,19 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose, on
                 location: location
             });
 
-            if (result.success || (result.data && result.data.success)) {
+            // Check for blocked operation (upgrade required)
+            const innerResult = result?.result;
+            if (innerResult?.upgrade_required || innerResult?.success === false) {
+                toast.error(innerResult?.error || 'Creating calendar events requires an upgrade. Please upgrade your plan.');
+                return;
+            }
+
+            if ((result.success || (result.data && result.data.success)) && innerResult?.success !== false) {
                 toast.success('Event created successfully!');
                 onEventCreated();
                 onClose();
             } else {
-                toast.error('Failed to create event: ' + (result.error || 'Unknown error'));
+                toast.error('Failed to create event: ' + (innerResult?.error || result.error || 'Unknown error'));
             }
         } catch (error) {
             console.error(error);

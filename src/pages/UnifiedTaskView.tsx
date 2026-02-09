@@ -899,10 +899,17 @@ const UnifiedTaskView: React.FC = () => {
                 result.result?.data?.success === true
             );
 
+            // Check for blocked operation (upgrade required)
+            const innerResult = result?.result;
+            if (innerResult?.upgrade_required || innerResult?.success === false) {
+                toast.error(innerResult?.error || 'Creating tasks requires an upgrade. Please upgrade your plan.');
+                return;
+            }
+
             // Check for hidden errors
             const hasError = result?.error || result?.result?.error || result?.result?.data?.error;
 
-            if (isSuccess && !hasError) {
+            if (isSuccess && !hasError && innerResult?.success !== false) {
                 toast.success('Task created successfully!');
 
                 // Instant Update: Prepend to tasks
@@ -1047,6 +1054,16 @@ const UnifiedTaskView: React.FC = () => {
 
             console.log('Move result:', result);
 
+            // Check for blocked operation (upgrade required)
+            const innerResult = result?.result;
+            if (innerResult?.upgrade_required || innerResult?.success === false) {
+                // Revert the optimistic update
+                updatedTasks[taskIndex] = { ...updatedTasks[taskIndex], status: oldStatus };
+                setTasks([...updatedTasks]);
+                toast.error(innerResult?.error || 'Moving tasks requires an upgrade. Please upgrade your plan.');
+                return;
+            }
+
             // Show success toast for drag-and-drop move too
             toast.success('Status updated!');
 
@@ -1145,7 +1162,14 @@ const UnifiedTaskView: React.FC = () => {
 
             console.log('Update result:', result);
 
-            if (result && (result.success || (result as any).id || (result as any).key)) {
+            // Check for blocked operation (upgrade required)
+            const innerResult = result?.result;
+            if (innerResult?.upgrade_required || innerResult?.success === false) {
+                toast.error(innerResult?.error || 'Updating tasks requires an upgrade. Please upgrade your plan.');
+                return;
+            }
+
+            if (result && (result.success || (result as any).id || (result as any).key) && innerResult?.success !== false) {
                 toast.success('Task updated successfully!');
 
                 // Delay closing to let user see the success message

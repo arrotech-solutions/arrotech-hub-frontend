@@ -411,12 +411,20 @@ const UnifiedCalendar: React.FC = () => {
             // Default 1 hour duration for simplicity
             const newEnd = new Date(newStart.getTime() + (60 * 60 * 1000));
 
-            await apiService.executeMCPTool('google_workspace_calendar', {
+            const result = await apiService.executeMCPTool('google_workspace_calendar', {
                 operation: 'update_event',
                 event_id: event.id,
                 start_time: newStart.toISOString(),
                 end_time: newEnd.toISOString()
             });
+
+            // Check for blocked operation (upgrade required)
+            const innerResult = result?.result;
+            if (innerResult?.upgrade_required || innerResult?.success === false) {
+                // Import toast if needed - using alert as fallback
+                alert(innerResult?.error || 'Editing calendar events requires an upgrade. Please upgrade your plan.');
+                return;
+            }
 
             await fetchData();
         } catch (error) {
