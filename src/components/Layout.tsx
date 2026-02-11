@@ -38,6 +38,7 @@ import FloatingActionMenu from './FloatingActionMenu';
 import NotificationsDropdown from './NotificationsDropdown';
 import CookieConsent from './CookieConsent';
 import UsageWarningBanner from './UsageWarningBanner';
+import NoIndex from './NoIndex';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -380,6 +381,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
+      <NoIndex />
       {/* Mobile sidebar */}
       <div className={`fixed inset-0 z-50 lg:hidden ${sidebarOpen ? 'block' : 'hidden'}`}>
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />

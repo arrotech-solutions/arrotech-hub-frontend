@@ -11,7 +11,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import logo from '../assets/Logo/icononly_transparent_nobuffer.png';
+import SEO from '../components/SEO';
+import logo from '../assets/Logo/fulllogo_transparent.png';
 
 // Microsoft Icon SVG component
 const MicrosoftIcon = () => (
@@ -125,7 +126,13 @@ const Register: React.FC = () => {
   }, [loginWithMicrosoft, navigate]);
 
   return (
-    <div className="min-h-screen flex relative bg-gray-50">
+    <div className="min-h-screen flex relative bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+      <SEO
+        title="Create Your Account"
+        description="Get started with Arrotech Hub for free. Connect your apps, automate workflows, and boost your productivity with our unified workspace."
+        url="/register"
+        keywords={['Sign Up', 'Register', 'Create Account', 'Arrotech Hub', 'Free Workspace']}
+      />
       {isOAuthLoading && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center">
           <div className="bg-white p-6 rounded-xl shadow-2xl flex flex-col items-center gap-3">
@@ -139,7 +146,7 @@ const Register: React.FC = () => {
         <div className="max-w-md w-full">
           <div className="text-center mb-3">
             <Link to="/" className="inline-block hover:scale-110 transition-transform mb-2">
-              <img src={logo} alt="Arrotech Hub" className="w-8 h-8 object-contain" />
+              <img src={logo} alt="Arrotech Hub" className="h-12 w-auto object-contain" />
             </Link>
             <h1 className="text-xl font-black text-gray-900 mb-0.5">Join Arrotech Hub</h1>
             <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Create Account</p>

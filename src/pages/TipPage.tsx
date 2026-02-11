@@ -3,6 +3,7 @@ import { Heart, Loader, Shield, Sparkles } from 'lucide-react';
 import apiService from '../services/api';
 import toast from 'react-hot-toast';
 import { useParams } from 'react-router-dom';
+import SEO from '../components/SEO';
 
 const TipPage: React.FC = () => {
     const { username } = useParams<{ username: string }>();
@@ -43,6 +44,12 @@ const TipPage: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-white relative overflow-hidden">
+            <SEO
+                title={`Support @${username}`}
+                description={`Send a tip to @${username}. Support your favorite creators securely with M-Pesa or Card on Arrotech Hub.`}
+                url={`/tip/${username}`}
+                keywords={['Tip Creator', 'Support Creator', 'M-Pesa Tipping', 'Arrotech Hub', username || 'Creator']}
+            />
             {/* Animated background blobs */}
             <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-pink-400/30 to-purple-400/30 rounded-full blur-3xl animate-pulse"></div>
             <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-br from-purple-400/30 to-pink-400/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>

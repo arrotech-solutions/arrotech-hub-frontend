@@ -1,16 +1,16 @@
 {
-  "short_name": "ArroTech Hub",
-  "name": "ArroTech Hub - AI-Powered Marketing Automation",
+  "short_name": "Arrotech Hub",
+  "name": "Arrotech Hub — Unified Workspace Platform",
   "icons": [
     {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
+      "src": "favicon.png",
+      "sizes": "512x512",
+      "type": "image/png"
     }
   ],
   "start_url": "./",
   "display": "standalone",
-  "theme_color": "#000000",
+  "theme_color": "#7C3AED",
   "background_color": "#ffffff",
-  "description": "Connect AI models to marketing tools with real-time automation"
+  "description": "Connect your apps, automate workflows, and manage everything in one unified workspace."
 }

@@ -15,7 +15,6 @@ import {
     Bot,
     Headphones,
     ChevronDown,
-    Menu,
     Star,
     TrendingUp,
     Globe,
@@ -25,7 +24,7 @@ import { useAuth } from '../hooks/useAuth';
 import toast from 'react-hot-toast';
 import apiService from '../services/api';
 import { PaystackButton } from 'react-paystack';
-import logo from '../assets/Logo/icononly_transparent_nobuffer.png';
+import SEO from '../components/SEO';
 
 // ============================================================================
 // PLAN DEFINITIONS - Matches Master Implementation Prompt (Kenya-first KES)
@@ -288,6 +287,26 @@ const FEATURE_COMPARISON = [
     }
 ];
 
+const FAQS = [
+    {
+        question: "Can I cancel my subscription at any time?",
+        answer: "Yes, you can cancel your subscription at any time from your account settings. Your access will continue until the end of your current billing period."
+    },
+    {
+        question: "How does the M-Pesa payment work?",
+        answer: "Select your preferred plan, choose M-Pesa as the payment method, and enter your phone number. You'll receive a prompt on your phone to complete the transaction securely."
+    },
+    {
+        question: "Is there a free trial for paid plans?",
+        answer: "Yes, all paid plans come with a 14-day free trial. You won't be charged until the trial period ends."
+    },
+    {
+        question: "What happens if I downgrade my plan?",
+        answer: "If you downgrade, you'll retain your current features until the end of your billing cycle. Afterwards, your account will revert to the limits of the new plan."
+    }
+];
+
+
 const Pricing: React.FC = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
@@ -295,7 +314,7 @@ const Pricing: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [showComparison, setShowComparison] = useState(false);
     const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
 
     // Fetch Paystack public key on mount - ONLY if user is logged in
     // This prevents 401 redirects for unauthenticated visitors viewing pricing
@@ -369,104 +388,35 @@ const Pricing: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30">
+            <SEO
+                title="Pricing | Flexible Plans for Teams"
+                description="Explore Arrotech Hub pricing. Start for free, upgrade to Pro or Enterprise. The most affordable unified workspace with M-Pesa support. Flexible plans for every team size."
+                url="/pricing"
+                keywords={[
+                    'Arrotech Hub Pricing',
+                    'Unified Workspace Plans',
+                    'Business Automation Pricing',
+                    'M-Pesa Payment Subscription',
+                    'Affordable Workspace',
+                    'Free Plan'
+                ]}
+                schema={{
+                    "@context": "https://schema.org",
+                    "@type": "FAQPage",
+                    "mainEntity": FAQS.map(faq => ({
+                        "@type": "Question",
+                        "name": faq.question,
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": faq.answer
+                        }
+                    }))
+                }}
+            />
             {/* ================================================================ */}
             {/* HEADER - Standalone Navigation */}
             {/* ================================================================ */}
-            <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-200/50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-between h-16 md:h-20">
-                        {/* Logo */}
-                        <Link to="/" className="flex items-center gap-3 group">
-                            <img src={logo} alt="Arrotech Hub" className="w-10 h-10 object-contain group-hover:scale-105 transition-transform" />
-                            <div className="hidden sm:block">
-                                <h1 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-blue-600 bg-clip-text text-transparent">
-                                    Arrotech Hub
-                                </h1>
-                                <p className="text-[10px] text-gray-500 -mt-1">AI-Powered Platform</p>
-                            </div>
-                        </Link>
 
-                        {/* Desktop Navigation */}
-                        <nav className="hidden md:flex items-center gap-8">
-                            <Link to="/" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
-                                Home
-                            </Link>
-                            <a href="/#how-it-works" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
-                                How It Works
-                            </a>
-                            <Link to="/pricing" className="text-indigo-600 font-semibold flex items-center gap-1">
-                                <CreditCard className="w-4 h-4" />
-                                Pricing
-                            </Link>
-                            <Link to="/help" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
-                                Support
-                            </Link>
-                        </nav>
-
-                        {/* Auth Buttons */}
-                        <div className="hidden md:flex items-center gap-3">
-                            {user ? (
-                                <Link
-                                    to="/unified"
-                                    className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-indigo-500/25 transition-all"
-                                >
-                                    Go to Dashboard
-                                    <ArrowRight className="w-4 h-4" />
-                                </Link>
-                            ) : (
-                                <>
-                                    <Link
-                                        to="/login"
-                                        className="px-5 py-2.5 text-gray-700 font-medium hover:text-gray-900 transition-colors"
-                                    >
-                                        Sign In
-                                    </Link>
-                                    <Link
-                                        to="/register"
-                                        className="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-indigo-500/25 transition-all"
-                                    >
-                                        Get Started Free
-                                    </Link>
-                                </>
-                            )}
-                        </div>
-
-                        {/* Mobile Menu Button */}
-                        <button
-                            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                            className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
-                        >
-                            <Menu className="w-6 h-6 text-gray-700" />
-                        </button>
-                    </div>
-
-                    {/* Mobile Menu */}
-                    {mobileMenuOpen && (
-                        <div className="md:hidden py-4 border-t border-gray-100 animate-in slide-in-from-top-2">
-                            <nav className="flex flex-col gap-2">
-                                <Link to="/" className="px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg">Home</Link>
-                                <a href="/#how-it-works" className="px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg">How It Works</a>
-                                <Link to="/pricing" className="px-4 py-2 text-indigo-600 font-semibold bg-indigo-50 rounded-lg">Pricing</Link>
-                                <Link to="/help" className="px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg">Support</Link>
-                                <div className="border-t border-gray-100 mt-2 pt-2 space-y-2">
-                                    {user ? (
-                                        <Link to="/unified" className="block px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-center rounded-xl font-semibold">
-                                            Go to Dashboard
-                                        </Link>
-                                    ) : (
-                                        <>
-                                            <Link to="/login" className="block px-4 py-2 text-center text-gray-700 font-medium">Sign In</Link>
-                                            <Link to="/register" className="block px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-center rounded-xl font-semibold">
-                                                Get Started Free
-                                            </Link>
-                                        </>
-                                    )}
-                                </div>
-                            </nav>
-                        </div>
-                    )}
-                </div>
-            </header>
 
             {/* ================================================================ */}
             {/* HERO SECTION */}
@@ -822,23 +772,7 @@ const Pricing: React.FC = () => {
             {/* ================================================================ */}
             {/* FOOTER */}
             {/* ================================================================ */}
-            <footer className="bg-gray-900 text-gray-400 py-12">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                        <div className="flex items-center gap-3">
-                            <img src={logo} alt="Arrotech Hub" className="w-8 h-8 object-contain opacity-80" />
-                            <span className="text-white font-semibold">Arrotech Hub</span>
-                        </div>
-                        <div className="flex flex-wrap items-center justify-center gap-6 text-sm">
-                            <Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
-                            <Link to="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
-                            <Link to="/help" className="hover:text-white transition-colors">Help & Support</Link>
-                            <a href="mailto:support@arrotechsolutions.com" className="hover:text-white transition-colors">Contact</a>
-                        </div>
-                        <p className="text-sm">© 2024 Arrotech Solutions. All rights reserved.</p>
-                    </div>
-                </div>
-            </footer>
+
         </div>
     );
 };

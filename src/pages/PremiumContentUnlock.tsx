@@ -3,6 +3,7 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import { Lock, Loader, CheckCircle, AlertCircle, Smartphone } from 'lucide-react';
 import apiService from '../services/api';
 import toast from 'react-hot-toast';
+import SEO from '../components/SEO';
 
 interface LinkInfo {
     id: number;
@@ -170,6 +171,11 @@ const PremiumContentUnlock: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-black flex items-center justify-center p-4">
+            <SEO
+                title={linkInfo ? `${linkInfo.title} | Unlock Premium Content` : 'Unlock Premium Content'}
+                description={linkInfo ? `Unlock "${linkInfo.title}" by @${linkInfo.creator.username}. Exclusive premium content available on Arrotech Hub.` : 'Securely unlock premium content with M-Pesa.'}
+                keywords={['Premium Content', 'Unlock Link', 'M-Pesa Payment', 'Digital Content', 'Arrotech Hub']}
+            />
             {/* Decorative blurs */}
             <div className="fixed top-0 right-0 w-96 h-96 bg-[#FE2C55] rounded-full blur-3xl opacity-10"></div>
             <div className="fixed bottom-0 left-0 w-96 h-96 bg-[#25F4EE] rounded-full blur-3xl opacity-10"></div>
