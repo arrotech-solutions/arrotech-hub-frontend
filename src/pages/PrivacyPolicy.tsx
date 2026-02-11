@@ -1,10 +1,17 @@
 import React from 'react';
 import { Shield, Lock, FileText, Globe, Scale, BookOpen, Clock, AlertCircle } from 'lucide-react';
+import SEO from '../components/SEO';
 import { Link } from 'react-router-dom';
 
 const PrivacyPolicy: React.FC = () => {
     return (
         <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+            <SEO
+                title="Privacy Policy"
+                description="Read our Privacy Policy to understand how we collect, use, and protect your data at Arrotech Hub."
+                url="/privacy"
+                keywords={['Privacy Policy', 'Data Protection', 'GDPR', 'Arrotech Hub Privacy']}
+            />
             <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 {/* Header Section */}
                 <div className="bg-gradient-to-br from-blue-700 via-indigo-800 to-purple-900 px-8 py-12 text-white relative overflow-hidden">
