@@ -1,11 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import {
     ArrowRight,
     ChevronRight,
     Play,
-    Menu,
-    X,
     Sparkles,
     GitBranch,
     Layers,
@@ -14,7 +12,7 @@ import {
     CreditCard
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
-import logo from '../assets/Logo/fulllogo_transparent.png';
+import SEO from '../components/SEO';
 
 // Import integration logos
 import slackLogo from '../assets/apps/slack.jpg';
@@ -35,17 +33,7 @@ import tiktokLogo from '../assets/apps/tiktok.png';
 import outlookLogo from '../assets/apps/outlook.png';
 
 const LandingPage: React.FC = () => {
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [scrolled, setScrolled] = useState(false);
     const { user } = useAuth();
-
-    useEffect(() => {
-        const handleScroll = () => {
-            setScrolled(window.scrollY > 50);
-        };
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
 
     const integrations = [
         { name: 'Slack', logo: slackLogo },
@@ -88,88 +76,32 @@ const LandingPage: React.FC = () => {
     ];
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 text-gray-900 overflow-x-hidden">
-            {/* Animated Background */}
-            <div className="fixed inset-0 z-0">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-purple-50" />
-                <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-purple-200/30 rounded-full blur-[120px] animate-pulse" />
-                <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-blue-200/30 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-cyan-100/20 rounded-full blur-[150px]" />
-            </div>
-
-            {/* Navigation */}
-            <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/80 backdrop-blur-xl border-b border-gray-200' : ''}`}>
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-between h-20">
-                        <Link to="/" className="flex items-center gap-2 group">
-                            <img src={logo} alt="Arrotech Hub" className="h-40 w-auto absolute top-0 -translate-y-4 group-hover:scale-105 transition-transform" />
-                            <div className="w-40 h-20"></div>
-                        </Link>
-
-                        <div className="hidden md:flex items-center gap-8">
-                            <a href="#how-it-works" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">How It Works</a>
-                            <Link to="/pricing" className="text-gray-600 hover:text-gray-900 font-medium transition-colors flex items-center gap-1">
-                                <CreditCard className="w-4 h-4" />
-                                Pricing
-                            </Link>
-                            {user ? (
-                                <Link
-                                    to="/unified"
-                                    className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white px-6 py-2.5 rounded-full font-medium transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/25 flex items-center gap-2"
-                                >
-                                    <LayoutDashboard className="w-4 h-4" />
-                                    Go to Dashboard
-                                </Link>
-                            ) : (
-                                <>
-                                    <Link to="/login" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">Sign In</Link>
-                                    <Link
-                                        to="/register"
-                                        className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white px-6 py-2.5 rounded-full font-medium transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/25"
-                                    >
-                                        Get Started Free
-                                    </Link>
-                                </>
-                            )}
-                        </div>
-
-                        {/* Mobile Menu Button */}
-                        <button
-                            className="md:hidden p-2 text-gray-600 hover:text-gray-900"
-                            onClick={() => setIsMenuOpen(!isMenuOpen)}
-                        >
-                            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-                        </button>
-                    </div>
-                </div>
-
-                {/* Mobile Menu */}
-                {isMenuOpen && (
-                    <div className="md:hidden bg-white/95 backdrop-blur-xl border-t border-gray-200">
-                        <div className="px-4 py-6 space-y-4">
-                            <a href="#how-it-works" className="block text-gray-600 hover:text-gray-900 py-2">How It Works</a>
-                            <Link to="/pricing" className="block text-gray-600 hover:text-gray-900 py-2 flex items-center gap-2">
-                                <CreditCard className="w-4 h-4" />
-                                Pricing
-                            </Link>
-                            <div className="pt-4 border-t border-gray-200 space-y-3">
-                                {user ? (
-                                    <Link to="/unified" className="block text-center bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 rounded-full font-medium">
-                                        Go to Dashboard
-                                    </Link>
-                                ) : (
-                                    <>
-                                        <Link to="/login" className="block text-center text-gray-600 hover:text-gray-900 py-2">Sign In</Link>
-                                        <Link to="/register" className="block text-center bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 rounded-full font-medium">
-                                            Get Started Free
-                                        </Link>
-                                    </>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                )}
-            </nav>
+        <div className="text-gray-900 overflow-x-hidden">
+            <SEO
+                title="Unified Inbox & Workspace Platform"
+                description="Manage emails, messages, and workflows in one unified workspace. Connect Slack, Gmail, M-Pesa, and 50+ apps with AI-powered automation. Built for modern teams."
+                url="/"
+                keywords={[
+                    'Unified Workspace',
+                    'Unified Inbox',
+                    'Workflow Automation',
+                    'M-Pesa Integration',
+                    'Productivity Tool',
+                    'Team Collaboration'
+                ]}
+                schema={{
+                    "@context": "https://schema.org",
+                    "@type": "WebApplication",
+                    "name": "Arrotech Hub",
+                    "applicationCategory": "ProductivitySoftware",
+                    "operatingSystem": "Web",
+                    "offers": {
+                        "@type": "Offer",
+                        "price": "0",
+                        "priceCurrency": "USD"
+                    }
+                }}
+            />
 
             {/* Hero Section */}
             <section className="relative z-10 pt-32 pb-20 px-4 sm:px-6 lg:px-8">
@@ -243,6 +175,48 @@ const LandingPage: React.FC = () => {
                         ))}
                         <div className="bg-gradient-to-r from-purple-100 to-blue-100 border border-purple-300 rounded-2xl px-4 py-3 backdrop-blur-sm">
                             <span className="text-sm font-medium text-purple-700">+40 more</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+            {/* Features Section */}
+            <section id="features" className="relative z-10 py-24 px-4 sm:px-6 lg:px-8 bg-white/50 backdrop-blur-sm">
+                <div className="max-w-7xl mx-auto">
+                    <div className="text-center mb-16">
+                        <span className="text-purple-600 font-bold uppercase tracking-wider text-sm mb-2 block">POWERFUL FEATURES</span>
+                        <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+                            Everything you need to <span className="text-blue-600">run your business</span>
+                        </h2>
+                        <p className="text-gray-600 max-w-2xl mx-auto">
+                            Stop switching between tabs. Manage your entire workflow from one intelligent dashboard.
+                        </p>
+                    </div>
+
+                    <div className="grid md:grid-cols-3 gap-8">
+                        <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-lg hover:shadow-xl transition-all hover:border-purple-200 group">
+                            <div className="w-14 h-14 bg-purple-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                <LayoutDashboard className="w-7 h-7 text-purple-600" />
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-900 mb-3">Unified Dashboard</h3>
+                            <p className="text-gray-600">View all your tasks, events, and messages in one central hub. Customizable widgets give you total control.</p>
+                        </div>
+
+                        <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-lg hover:shadow-xl transition-all hover:border-blue-200 group">
+                            <div className="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                <CreditCard className="w-7 h-7 text-blue-600" />
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-900 mb-3">Seamless Payments</h3>
+                            <p className="text-gray-600">Integrate M-Pesa and Stripe directly into your workflow. Automated invoicing and payment tracking.</p>
+                        </div>
+
+                        <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-lg hover:shadow-xl transition-all hover:border-pink-200 group">
+                            <div className="w-14 h-14 bg-pink-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                <TrendingUp className="w-7 h-7 text-pink-600" />
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-900 mb-3">Smart Automation</h3>
+                            <p className="text-gray-600">Build complex workflows in minutes. Let AI handle data entry, follow-ups, and repetitive tasks.</p>
                         </div>
                     </div>
                 </div>
@@ -341,19 +315,6 @@ const LandingPage: React.FC = () => {
                     </div>
                 </div>
             </section>
-
-            {/* Footer */}
-            <footer className="relative z-10 border-t border-gray-200 py-12 px-4 sm:px-6 lg:px-8">
-                <div className="max-w-7xl mx-auto">
-                    <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12 text-gray-600 text-sm text-center">
-                        <p>© 2026 Arrotech Solutions. All rights reserved.</p>
-                        <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8">
-                            <Link to="/privacy" className="hover:text-gray-900 transition-colors">Privacy Policy</Link>
-                            <Link to="/terms" className="hover:text-gray-900 transition-colors">Terms of Service</Link>
-                        </div>
-                    </div>
-                </div>
-            </footer>
         </div>
     );
 };
