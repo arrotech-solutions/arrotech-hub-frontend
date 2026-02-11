@@ -1,6 +1,8 @@
 import React from 'react';
+import { HelmetProvider } from 'react-helmet-async';
 import { Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 import Layout from './components/Layout';
+import PublicLayout from './components/PublicLayout'; // New shared layout
 import TutorialButton from './components/TutorialButton';
 import TutorialOverlay from './components/TutorialOverlay';
 import { AuthProvider, useAuth } from './hooks/useAuth';
@@ -19,6 +21,10 @@ import Payments from './pages/Payments';
 import Profile from './pages/Profile';
 import Register from './pages/Register';
 import ResetPassword from './pages/ResetPassword';
+import ComparisonPage from './pages/ComparisonPage';
+import IntegrationPage from './pages/IntegrationPage';
+import Blog from './pages/Blog';
+import BlogPost from './pages/BlogPost';
 import Settings from './pages/Settings';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import Workflows from './pages/Workflows';
@@ -105,41 +111,67 @@ const AppRoutes: React.FC = () => {
   return (
     <Routes>
       {/* Landing Page */}
-      <Route path="/" element={<LandingPage />} />
+      <Route path="/" element={
+        <PublicRoute>
+          <PublicLayout>
+            <LandingPage />
+          </PublicLayout>
+        </PublicRoute>
+      } />
+      <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+      <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+      <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
+      <Route path="/pricing" element={
+        <PublicRoute>
+          <PublicLayout>
+            <Pricing />
+          </PublicLayout>
+        </PublicRoute>
+      } />
+      <Route path="/help" element={
+        <PublicRoute>
+          <PublicLayout>
+            <HelpSupport />
+          </PublicLayout>
+        </PublicRoute>
+      } />
+      <Route path="/privacy" element={
+        <PublicRoute>
+          <PublicLayout>
+            <PrivacyPolicy />
+          </PublicLayout>
+        </PublicRoute>
+      } />
+      <Route path="/terms" element={
+        <PublicRoute>
+          <PublicLayout>
+            <Terms />
+          </PublicLayout>
+        </PublicRoute>
+      } />
+      <Route path="/reset-password" element={<PublicRoute><ResetPassword /></PublicRoute>} />
 
-      {/* Public Routes */}
-      <Route
-        path="/login"
-        element={
-          <PublicRoute>
-            <Login />
-          </PublicRoute>
-        }
-      />
-      <Route
-        path="/register"
-        element={
-          <PublicRoute>
-            <Register />
-          </PublicRoute>
-        }
-      />
-      <Route
-        path="/forgot-password"
-        element={
-          <PublicRoute>
-            <ForgotPassword />
-          </PublicRoute>
-        }
-      />
-      <Route
-        path="/reset-password"
-        element={
-          <PublicRoute>
-            <ResetPassword />
-          </PublicRoute>
-        }
-      />
+      {/* SEO Growth Pages - Wrapped in PublicLayout */}
+      <Route path="/vs/:competitor" element={
+        <PublicLayout>
+          <ComparisonPage />
+        </PublicLayout>
+      } />
+      <Route path="/integrations/:slug" element={
+        <PublicLayout>
+          <IntegrationPage />
+        </PublicLayout>
+      } />
+      <Route path="/blog" element={
+        <PublicLayout>
+          <Blog />
+        </PublicLayout>
+      } />
+      <Route path="/blog/:slug" element={
+        <PublicLayout>
+          <BlogPost />
+        </PublicLayout>
+      } />
 
       {/* Microsoft OAuth Callback */}
       <Route path="/auth/microsoft/callback" element={<MicrosoftCallback />} />
@@ -439,17 +471,19 @@ const DefaultGlobalCommands: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <AuthProvider>
-      <CommandProvider>
-        <TutorialProvider>
-          <AppRoutes />
-          <GlobalCommandPalette />
-          <DefaultGlobalCommands />
-          <TutorialButton />
-          <TutorialOverlay />
-        </TutorialProvider>
-      </CommandProvider>
-    </AuthProvider>
+    <HelmetProvider>
+      <AuthProvider>
+        <CommandProvider>
+          <TutorialProvider>
+            <AppRoutes />
+            <GlobalCommandPalette />
+            <DefaultGlobalCommands />
+            <TutorialButton />
+            <TutorialOverlay />
+          </TutorialProvider>
+        </CommandProvider>
+      </AuthProvider>
+    </HelmetProvider>
   );
 };
 

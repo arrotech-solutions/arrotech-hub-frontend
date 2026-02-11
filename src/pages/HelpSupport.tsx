@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import apiService from '../services/api';
+import SEO from '../components/SEO';
 
 // FAQ Data organized by category
 const faqCategories = [
@@ -237,6 +238,26 @@ const HelpSupport: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+            <SEO
+                title="Help Center"
+                description="Get help with Arrotech Hub. Browse FAQs, contact support, or join our community. We're here to help you succeed."
+                url="/help"
+                keywords={['Help Center', 'Support', 'FAQ', 'Arrotech Hub Support', 'Contact Us']}
+                schema={{
+                    "@context": "https://schema.org",
+                    "@type": "FAQPage",
+                    "mainEntity": faqCategories.flatMap(category =>
+                        category.faqs.map(faq => ({
+                            "@type": "Question",
+                            "name": faq.question,
+                            "acceptedAnswer": {
+                                "@type": "Answer",
+                                "text": faq.answer
+                            }
+                        }))
+                    )
+                }}
+            />
             {/* Hero Section */}
             <div className="bg-gradient-to-r from-primary-600 to-primary-700 text-white">
                 <div className="max-w-5xl mx-auto px-4 py-16 text-center">

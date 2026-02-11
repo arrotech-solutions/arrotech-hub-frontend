@@ -9,23 +9,9 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import apiService from '../services/api';
-import { Connection, ConnectionCreate, ConnectionPlatform } from '../types';
+import { Connection, ConnectionPlatform } from '../types';
 import {
   GoogleLogo,
-  SlackLogo,
-  HubSpotLogo,
-  WhatsAppLogo,
-  AnalyticsLogo,
-  ShopifyLogo,
-  MPesaLogo,
-  AirtelLogo,
-  JumiaLogo,
-  SalesforceLogo,
-  FacebookLogo,
-  InstagramLogo,
-  TwitterLogo,
-  LinkedInLogo,
-  StripeLogo,
   MicrosoftTeamsLogo,
   ZoomLogo,
   AsanaLogo,
@@ -51,84 +37,26 @@ import KraPinModal from '../components/KraPinModal';
 const Integrations: React.FC = () => {
   const navigate = useNavigate();
 
+
   // State
   const [connections, setConnections] = useState<Connection[]>([]);
   const [platforms, setPlatforms] = useState<ConnectionPlatform[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [isKraModalOpen, setIsKraModalOpen] = useState(false);
+  const [upgradeModal, setUpgradeModal] = useState({ isOpen: false, feature: '', requiredTier: '', currentTier: '' });
   const [selectedPlatform, setSelectedPlatform] = useState<ConnectionPlatform | null>(null);
+  const [formData, setFormData] = useState({ platform: '', name: '', config: {} as any });
+  const [editingConnection, setEditingConnection] = useState<Connection | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
-  const [upgradeModal, setUpgradeModal] = useState<{
-    isOpen: boolean;
-    feature: string;
-    requiredTier: string;
-    currentTier: string;
-  }>({ isOpen: false, feature: '', requiredTier: '', currentTier: '' });
-  const [isKraModalOpen, setIsKraModalOpen] = useState(false);
-
-  // Form State
-  const [formData, setFormData] = useState<ConnectionCreate>({
-    platform: '',
-    name: '',
-    config: {}
-  });
-  const [editingConnection, setEditingConnection] = useState<Connection | null>(null);
-
-  // Computed State
   const processedCallback = useRef(false);
 
-  // Logo Mapping
-  const getPlatformLogoStyle = (platformId: string) => {
-    // Tailored sizing to prevent distortion or "too small" look
-    if (platformId.includes('hubspot')) return 'h-full w-auto object-contain';
-    if (platformId.includes('shopify')) return 'h-full w-auto object-contain';
-    if (platformId.includes('mpesa')) return 'h-full w-auto object-contain';
-    if (platformId.includes('airtel')) return 'h-full w-auto object-contain';
-    if (platformId.includes('jumia')) return 'h-full w-auto object-contain';
-    if (platformId.includes('stripe')) return 'h-full w-auto object-contain';
-    if (platformId.includes('equity')) return 'h-full w-auto object-contain';
-    if (platformId.includes('pesapal')) return 'h-full w-auto object-contain';
-    if (platformId.includes('sendy')) return 'h-full w-auto object-contain';
-    if (platformId.includes('kilimall')) return 'h-full w-auto object-contain';
-    if (platformId.includes('zoho')) return 'h-full w-auto object-contain';
-    if (platformId.includes('quick_books')) return 'h-full w-auto object-contain';
-    if (platformId.includes('outlook')) return 'h-full w-auto object-contain';
-    if (platformId.includes('notion')) return 'h-full w-auto object-contain';
-    if (platformId.includes('trello')) return 'h-full w-auto object-contain';
-    if (platformId.includes('jira')) return 'h-full w-auto object-contain';
-    if (platformId.includes('kra')) return 'w-full h-full object-contain';
-    // Square default
-    return 'w-full h-full object-contain';
-  };
-
-  const getPlatformLogo = (platformId: string) => {
-    const className = getPlatformLogoStyle(platformId);
-    const props = { className };
-    switch (platformId) {
-      case 'google_workspace': return <GoogleLogo {...props} />;
-      case 'slack': return <SlackLogo {...props} />;
-      case 'hubspot': return <HubSpotLogo {...props} />;
-      case 'whatsapp':
-      case 'whatsapp_business': return <WhatsAppLogo {...props} />;
-      case 'google_analytics':
-      case 'ga4': return <AnalyticsLogo {...props} />;
-      case 'shopify': return <ShopifyLogo {...props} />;
-      case 'mpesa': return <MPesaLogo {...props} />;
-      case 'airtel':
-      case 'airtel_money': return <AirtelLogo {...props} />;
-      case 'jumia': return <JumiaLogo {...props} />;
-      case 'salesforce': return <SalesforceLogo {...props} />;
-      case 'facebook':
-      case 'facebook_marketing': return <FacebookLogo {...props} />;
-      case 'instagram':
-      case 'instagram_graph': return <InstagramLogo {...props} />;
-      case 'twitter':
-      case 'twitter_ads': return <TwitterLogo {...props} />;
-      case 'linkedin':
-      case 'linkedin_ads': return <LinkedInLogo {...props} />;
-      case 'stripe': return <StripeLogo {...props} />;
-      case 'teams':
+  const getPlatformLogo = (id: string) => {
+    const props = { className: "w-full h-full object-contain" };
+    switch (id) {
+      case 'google_workspace':
+      case 'google': return <GoogleLogo {...props} />;
       case 'microsoft_teams': return <MicrosoftTeamsLogo {...props} />;
       case 'zoom': return <ZoomLogo {...props} />;
       case 'asana': return <AsanaLogo {...props} />;
@@ -178,7 +106,25 @@ const Integrations: React.FC = () => {
         apiService.getAvailablePlatforms()
       ]);
       setConnections(connsRes.data || []);
-      setPlatforms(platsRes.data || []);
+
+      const excludedApps = [
+        'KRA Portal', 'Zuku', 'Safaricom Biz', 'Nairobi Water', 'Kenya Power',
+        'Ilara Health', 'Penda', 'Penda Health', 'MyDawa', 'Farmdrive', 'M Farm', 'Iprocure',
+        'Apollo Agriculture', 'Sunculture', 'DigiFarm', 'ShambaSmart', 'Rescue',
+        'BambooHR', 'Bitrix24', 'SeamlessHR', 'WorkPay', 'G4S', 'Fargo Courier',
+        'Busybee', 'Sendy', 'Lori Systems', 'Amitruck', 'Vyapar', 'Sasapay',
+        'Lipabiz', 'Zoho Books', 'Xero', 'Quickbooks', 'KRA iTax', 'Sky Garden',
+        'Wasoko', 'Twiga Foods', 'Copia', 'Masoko', 'Jiji', 'Kilimall', 'Jumia',
+        'Little Pay', 'Ipay', 'Pesapal', 'Cellulant', 'Kopo Kopo', 'Paystack',
+        'Flutterwave', 'Equity Jenga', 'Logistics Hub', 'Business Intelligence',
+        'Lead Intelligence', 'HR Hub', 'M-Pesa Business', 'T-Kash', 'Airtel Money', 'System'
+      ];
+
+      const filteredPlatforms = (platsRes.data || []).filter((p: ConnectionPlatform) =>
+        !excludedApps.includes(p.name)
+      );
+
+      setPlatforms(filteredPlatforms);
     } catch (error) {
       console.error('Failed to load integrations:', error);
       toast.error('Failed to load integrations');
@@ -725,125 +671,227 @@ const Integrations: React.FC = () => {
     return searchMatch && catMatch;
   });
 
+  // --- Render ---
+
+  // Helper to get connected account info
+  const getConnectedAccount = (platformId: string) => {
+    return connections.find(c => c.platform.toLowerCase() === platformId.toLowerCase());
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+          <p className="text-slate-500 font-medium animate-pulse">Loading secure integrations...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20 font-sans">
-      {/* Hero Section */}
-      <div className="bg-white border-b border-gray-200 connections-header">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-16">
-          <div className="max-w-3xl">
-            <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight sm:text-5xl mb-4">
-              Integrations
-            </h1>
-            <p className="text-xl text-gray-500 leading-relaxed">
-              Supercharge your workflow by connecting your favorite tools.
-              Seamlessly sync data, automate tasks, and extend your capabilities.
-            </p>
+    <div className="min-h-screen bg-slate-50/50 pb-20 font-sans selection:bg-indigo-100 selection:text-indigo-900">
+      {/* 1. HERO SECTION - Lighter Variant */}
+      <div className="relative overflow-hidden bg-white border-b border-slate-200 pb-12">
+        {/* Subtle Background Pattern */}
+        <div className="absolute inset-0 z-0 opacity-40">
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-50/50 rounded-full blur-[100px]"></div>
+          <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-slate-50/50 rounded-full blur-[100px]"></div>
+        </div>
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 md:pt-16 pb-8">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div className="max-w-2xl">
+              <div className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 text-[10px] font-bold uppercase tracking-wider mb-4 shadow-sm">
+                Integration Marketplace
+              </div>
+              <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900 mb-3">
+                Connect your tools
+              </h1>
+              <p className="text-base text-slate-500 max-w-xl leading-relaxed">
+                Supercharge your workflow by syncing data across apps. Secure, reliable, and setup in seconds.
+              </p>
+            </div>
+
+            {/* Stats - Compact */}
+            <div className="flex gap-8 border-l border-slate-100 pl-8">
+              <div>
+                <div className="text-2xl font-bold text-slate-900 mb-0.5">{connections.filter(c => c.status === 'active').length}</div>
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Active</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-slate-900 mb-0.5">{platforms.length}</div>
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Available</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Search Bar - Compact */}
+          <div className="mt-8 relative max-w-xl">
+            <div className="relative bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md hover:border-indigo-300 transition-all flex items-center p-1.5 focus-within:ring-2 focus-within:ring-indigo-100 focus-within:border-indigo-400">
+              <Search className="w-5 h-5 text-slate-400 ml-3 shrink-0" />
+              <input
+                type="text"
+                placeholder="Search apps..."
+                className="w-full bg-transparent border-none text-slate-900 placeholder-slate-400 px-3 py-2 focus:ring-0 text-sm font-medium"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <div className="hidden md:flex items-center gap-2 px-3 text-[10px] text-slate-400 font-bold border-l border-slate-100 ml-1">
+                <kbd className="px-1.5 py-0.5 rounded bg-slate-50 border border-slate-200 font-sans">⌘K</kbd>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* 2. CONNECTED APPS BANNER - Overlapping */}
+      {connections.length > 0 && (
+        <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 mb-8">
+          <div className="bg-white border border-slate-200 shadow-sm rounded-xl p-3 flex items-center gap-4">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap px-2">Your Stack</span>
+            <div className="w-px h-6 bg-slate-100 shrink-0"></div>
+            <div className="flex-1 overflow-x-auto no-scrollbar flex items-center gap-2">
+              {connections.filter(c => c.status === 'active').map(conn => (
+                <div key={conn.id} className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg pl-1 pr-3 py-1 hover:border-indigo-300 hover:bg-white transition-all cursor-pointer group" onClick={() => handleConnect({ id: conn.platform, name: conn.name } as any)}>
+                  <div className="w-5 h-5 rounded-md bg-white flex items-center justify-center overflow-hidden border border-slate-100 shadow-sm">
+                    {getPlatformLogo(conn.platform)}
+                  </div>
+                  <span className="text-xs font-semibold text-slate-700 max-w-[80px] truncate">{conn.name}</span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
-        {/* Controls */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10 connections-filters">
-
-          {/* Categories */}
-          <div className="flex overflow-x-auto pb-2 md:pb-0 gap-2 no-scrollbar">
-            {['All', 'Communication', 'CRM', 'Marketing', 'Analytics', 'E-commerce', 'Payment', 'Social', 'Productivity'].map((cat) => (
+      {/* 3. CATEGORY NAVIGATION - Sticky */}
+      <div className="sticky top-0 z-30 bg-slate-50/90 backdrop-blur-xl border-b border-slate-200/60 shadow-sm transition-all">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-3" style={{ WebkitOverflowScrolling: 'touch' }}>
+            {[
+              { id: 'All', icon: Zap },
+              { id: 'Communication', icon: Zap },
+              { id: 'CRM', icon: Zap },
+              { id: 'Marketing', icon: Zap },
+              { id: 'Analytics', icon: Zap },
+              { id: 'E-commerce', icon: Zap },
+              { id: 'Payment', icon: Zap },
+              { id: 'Social', icon: Zap },
+              { id: 'Productivity', icon: Zap }
+            ].map((cat) => (
               <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap
-                  ${activeCategory === cat
-                    ? 'bg-orange-600 text-white shadow-md shadow-orange-200'
-                    : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+                key={cat.id}
+                onClick={() => setActiveCategory(cat.id)}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap border
+                  ${activeCategory === cat.id
+                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
+                    : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:border-slate-300'
                   }`}
               >
-                {cat}
+                {cat.id}
+                {cat.id !== 'All' && (
+                  <span className={`text-[10px] px-1 py-px rounded ml-1.5 ${activeCategory === cat.id ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}`}>
+                    {platforms.filter(p => getPlatformCategory(p.id) === cat.id).length}
+                  </span>
+                )}
               </button>
             ))}
           </div>
+        </div>
+      </div>
 
-          {/* Search */}
-          <div className="relative w-full md:w-72 group">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-5 w-5 text-gray-400 group-focus-within:text-orange-500 transition-colors" />
+      {/* 4. MAIN GRID CONTENT */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {filteredPlatforms.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-24 bg-white rounded-2xl border border-dashed border-slate-200">
+            <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+              <Search className="h-8 w-8 text-slate-300" />
             </div>
-            <input
-              type="text"
-              placeholder="Search integrations..."
-              className="block w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-shadow shadow-sm"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+            <h3 className="text-lg font-bold text-slate-900 mb-1">No integrations found</h3>
+            <p className="text-sm text-slate-500">Try adjusting your filters.</p>
+            <button onClick={() => { setSearchTerm(''); setActiveCategory('All'); }} className="mt-4 text-indigo-600 text-sm font-semibold hover:underline">
+              Clear filters
+            </button>
           </div>
-        </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {filteredPlatforms.map(platform => {
+              const connectedAccount = getConnectedAccount(platform.id);
+              const isConnected = !!connectedAccount;
 
-        {/* Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 available-platforms">
-          {filteredPlatforms.map(platform => {
-            const isConnected = connections.some(c => c.platform.toLowerCase() === platform.id.toLowerCase());
-            const connection = connections.find(c => c.platform.toLowerCase() === platform.id.toLowerCase());
-            const hasError = connection?.status === 'error';
+              // Mock capabilities for UI demo
+              const capabilities = ['Sync'];
+              if (platform.id.includes('mail') || platform.id.includes('outlook') || platform.id.includes('google')) capabilities.push('Email');
+              if (platform.id.includes('crm') || platform.id.includes('salesforce') || platform.id.includes('hubspot')) capabilities.push('CRM');
 
-            return (
-              <div
-                key={platform.id}
-                className="group bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col h-full"
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="w-10 h-10 flex items-center justify-center shrink-0 rounded-lg p-0.5 overflow-hidden">
-                    {getPlatformLogo(platform.id)}
-                  </div>
+              return (
+                <div
+                  key={platform.id}
+                  className={`group relative bg-white rounded-xl border transition-all duration-200 flex flex-col overflow-hidden hover:shadow-lg hover:-translate-y-0.5
+                    ${isConnected
+                      ? 'border-emerald-200 shadow-sm shadow-emerald-50/50'
+                      : 'border-slate-200 shadow-sm hover:border-indigo-200'
+                    }`}
+                >
                   {isConnected && (
-                    <div className={`w-2 h-2 rounded-full ${hasError ? 'bg-red-500' : 'bg-green-500'}`} title={hasError ? 'Error' : 'Connected'} />
+                    <div className="absolute top-3 right-3 z-10">
+                      <div className="w-2 h-2 rounded-full bg-emerald-500 ring-4 ring-emerald-50"></div>
+                    </div>
                   )}
-                </div>
 
-                <div className="flex-1 mb-3">
-                  <h3 className="text-sm font-semibold text-gray-900 mb-1 group-hover:text-orange-600 transition-colors">
-                    {platform.name}
-                  </h3>
-                  <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">
-                    {platform.description}
-                  </p>
-                </div>
+                  <div className="p-4 flex flex-col h-full">
+                    {/* Header */}
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center p-1.5 transition-all group-hover:scale-105 border shadow-sm shrink-0
+                         ${isConnected ? 'bg-emerald-50/50 border-emerald-100' : 'bg-white border-slate-100'}`}>
+                        {getPlatformLogo(platform.id)}
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="text-sm font-bold text-slate-900 truncate group-hover:text-indigo-600 transition-colors">
+                          {platform.name}
+                        </h3>
+                        <div className="flex gap-1 mt-0.5">
+                          {capabilities.slice(0, 2).map((tag, i) => (
+                            <span key={i} className="text-[9px] font-semibold text-slate-400 uppercase tracking-wide bg-slate-50 px-1 rounded border border-slate-100">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
 
-                <div className="mt-auto">
-                  <button
-                    onClick={() => handleConnect(platform)}
-                    className={`w-full flex items-center justify-center px-3 py-1.5 rounded-md text-xs font-medium transition-colors duration-200 ${isConnected
-                      ? 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900'
-                      : 'bg-black text-white border border-transparent hover:bg-gray-800'
-                      }`}
-                  >
-                    {isConnected ? 'Manage' : 'Connect'}
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+                    {/* Content */}
+                    <div className="flex-1 mb-4">
+                      <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                        {platform.description}
+                      </p>
+                    </div>
 
-        {/* Empty State */}
-        {filteredPlatforms.length === 0 && (
-          <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200 mt-8">
-            <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Search className="h-8 w-8 text-gray-400" />
-            </div>
-            <h3 className="text-lg font-medium text-gray-900">No integrations found</h3>
-            <p className="mt-2 text-gray-500">Try adjusting your search or filter criteria.</p>
+                    {/* Footer / CTA */}
+                    <div className="mt-auto">
+                      <button
+                        onClick={() => handleConnect(platform)}
+                        className={`w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200
+                          ${isConnected
+                            ? 'bg-white border border-slate-200 text-slate-700 hover:border-indigo-300 hover:text-indigo-600'
+                            : 'bg-slate-900 text-white border border-transparent hover:bg-indigo-600 hover:shadow-md hover:shadow-indigo-500/20'
+                          }`}
+                      >
+                        {isConnected ? (
+                          <>Configure</>
+                        ) : (
+                          <>Connect</>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
-
       </div>
 
       {/* KRA Portal Modal */}
@@ -854,96 +902,139 @@ const Integrations: React.FC = () => {
         onSuccess={handleKraSuccess}
       />
 
-      {/* Configuration Modal */}
+      {/* CONFIG DRAWER (Replaces Modal) */}
       {showCreateModal && selectedPlatform && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm transition-opacity">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden transform transition-all">
-            <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-              <h3 className="text-lg font-bold text-gray-900 flex items-center">
-                <Settings className="w-5 h-5 mr-2 text-gray-500" />
-                Configure {selectedPlatform.name}
-              </h3>
-              <button
-                onClick={() => setShowCreateModal(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <span className="sr-only">Close</span>
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
+        <div className="fixed inset-0 z-50 overflow-hidden">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onClick={() => setShowCreateModal(false)} />
 
-            <div className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Connection Name
-                </label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500 transition-shadow"
-                  placeholder="My Connection"
-                />
-              </div>
+          <div className="absolute inset-y-0 right-0 max-w-full flex pl-10 pointer-events-none">
+            <div className="w-screen max-w-md pointer-events-auto">
+              <div className="h-full flex flex-col bg-white shadow-2xl animate-in slide-in-from-right duration-300">
 
-              {/* Dynamic Config Fields */}
-              {Object.keys(selectedPlatform.config_schema || {}).map(key => (
-                <div key={key} className="text-xs text-blue-600 bg-blue-50 p-2 rounded">
-                  Requires: {key}
-                </div>
-              ))}
-
-              {!selectedPlatform.id.includes('oauth') && (
-                <div className="space-y-2">
-                  <p className="text-xs text-gray-500">
-                    This integration requires API keys or other credentials.
-                  </p>
-                  {/* Placeholder for complex config forms */}
-                  <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 text-sm text-center text-gray-500">
-                    Configuration form coming soon for {selectedPlatform.name}
+                {/* Drawer Header */}
+                <div className="px-6 py-6 border-b border-slate-100 bg-slate-50/50 flex items-start justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-white border border-slate-200 shadow-sm p-2 flex items-center justify-center">
+                      {getPlatformLogo(selectedPlatform.id)}
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-bold text-slate-900">{selectedPlatform.name}</h2>
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <div className={`w-2 h-2 rounded-full ${editingConnection ? 'bg-emerald-500' : 'bg-slate-300'}`}></div>
+                        <span className="text-xs font-medium text-slate-500">
+                          {editingConnection ? 'Connected' : 'Setup Required'}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              )}
-
-              {/* Custom handling for manual integrations if needed */}
-              {editingConnection && (
-                <div className="pt-4 border-t border-gray-100">
-                  <button
-                    onClick={async () => {
-                      if (!window.confirm('Are you sure you want to disconnect?')) return;
-                      try {
-                        await apiService.deleteConnection(editingConnection.id);
-                        toast.success('Disconnected');
-                        setShowCreateModal(false);
-                        fetchData();
-                      } catch (e) {
-                        toast.error('Failed to disconnect');
-                      }
-                    }}
-                    className="w-full flex items-center justify-center px-4 py-2 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors font-medium text-sm"
-                  >
-                    <Zap className="w-4 h-4 mr-2" />
-                    Disconnect
+                  <button onClick={() => setShowCreateModal(false)} className="text-slate-400 hover:text-slate-600 rounded-full p-1 hover:bg-slate-100 transition-colors">
+                    <span className="sr-only">Close</span>
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                   </button>
                 </div>
-              )}
-            </div>
 
-            <div className="px-6 py-4 bg-gray-50 flex justify-end gap-3">
-              <button
-                onClick={() => setShowCreateModal(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSaveConnection}
-                className="px-4 py-2 text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 rounded-lg shadow-sm hover:shadow transition-all"
-              >
-                {editingConnection ? 'Save Changes' : 'Connect'}
-              </button>
+                {/* Drawer Body - Scrollable */}
+                <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-1.5">Connection Name</label>
+                      <input
+                        type="text"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        className="block w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all shadow-sm"
+                        placeholder="My Workspace"
+                      />
+                      <p className="mt-1.5 text-xs text-slate-500">Give this connection a friendly name to identify it later.</p>
+                    </div>
+
+                    {/* Dynamic Fields */}
+                    {Object.keys(selectedPlatform.config_schema || {}).map(key => (
+                      <div key={key} className="bg-indigo-50 border border-indigo-100 rounded-xl p-3 flex items-start gap-3">
+                        <div className="p-1 bg-indigo-100 rounded text-indigo-600 mt-0.5">
+                          <Settings className="w-3.5 h-3.5" />
+                        </div>
+                        <div>
+                          <h4 className="text-xs font-bold text-indigo-900 uppercase tracking-wide mb-0.5">Requirement</h4>
+                          <p className="text-sm text-indigo-700">This integration needs <span className="font-semibold">{key}</span> configuration.</p>
+                        </div>
+                      </div>
+                    ))}
+
+                    {!selectedPlatform.id.includes('oauth') && (
+                      <div className="p-6 bg-slate-50 border border-slate-100 rounded-2xl text-center">
+                        <Database className="w-8 h-8 text-slate-300 mx-auto mb-3" />
+                        <h4 className="text-sm font-semibold text-slate-900 mb-1">Manual Configuration</h4>
+                        <p className="text-xs text-slate-500 mb-4 px-4">
+                          We are rolling out secure credential forms for {selectedPlatform.name} soon.
+                        </p>
+                        <button className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-600 shadow-sm" disabled>
+                          Unavailable
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Info Box */}
+                    {editingConnection && (
+                      <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4">
+                        <h4 className="text-sm font-bold text-emerald-800 mb-2 flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                          System Status
+                        </h4>
+                        <div className="grid grid-cols-2 gap-4 text-xs">
+                          <div>
+                            <span className="block text-emerald-600/70 mb-0.5">Last Synced</span>
+                            <span className="font-mono text-emerald-900">Just now</span>
+                          </div>
+                          <div>
+                            <span className="block text-emerald-600/70 mb-0.5">Health</span>
+                            <span className="font-mono text-emerald-900">100% Operational</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Drawer Footer */}
+                <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex flex-col gap-3">
+                  <button
+                    onClick={handleSaveConnection}
+                    className="w-full flex justify-center items-center py-3.5 px-4 border border-transparent rounded-xl shadow-lg shadow-indigo-500/20 text-sm font-bold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all transform active:scale-[0.98]"
+                  >
+                    {editingConnection ? 'Save Changes' : 'Connect Integration'}
+                  </button>
+
+                  {editingConnection && (
+                    <button
+                      onClick={async () => {
+                        if (!window.confirm('Are you sure you want to disconnect? This will stop all related automations.')) return;
+                        try {
+                          await apiService.deleteConnection(editingConnection.id);
+                          toast.success('Disconnected successfully');
+                          setShowCreateModal(false);
+                          fetchData();
+                        } catch (e) {
+                          toast.error('Failed to disconnect');
+                        }
+                      }}
+                      className="w-full flex justify-center items-center py-2.5 px-4 border border-rose-200 rounded-xl text-sm font-semibold text-rose-600 hover:bg-rose-50 hover:border-rose-300 focus:outline-none transition-colors"
+                    >
+                      Disconnect Service
+                    </button>
+                  )}
+
+                  <button
+                    onClick={() => setShowCreateModal(false)}
+                    className="mt-2 text-xs font-medium text-slate-400 hover:text-slate-600 text-center"
+                  >
+                    Cancel
+                  </button>
+                </div>
+
+              </div>
             </div>
           </div>
         </div>
@@ -958,6 +1049,7 @@ const Integrations: React.FC = () => {
         currentTier={upgradeModal.currentTier}
       />
     </div>
+
   );
 };
 

@@ -10,7 +10,8 @@ import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import logo from '../assets/Logo/icononly_transparent_nobuffer.png';
+import SEO from '../components/SEO';
+import logo from '../assets/Logo/fulllogo_transparent.png';
 
 interface ResetPasswordFormData {
   newPassword: string;
@@ -72,7 +73,7 @@ const ResetPassword: React.FC = () => {
 
   if (isValidating) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-4">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 px-4 py-4">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent mx-auto mb-2"></div>
           <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Validating...</p>
@@ -83,11 +84,11 @@ const ResetPassword: React.FC = () => {
 
   if (!isValidToken) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-4">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 px-4 py-4">
         <div className="max-w-md w-full">
           <div className="text-center mb-4">
             <Link to="/" className="inline-block hover:scale-110 transition-transform mb-2">
-              <img src={logo} alt="Arrotech Hub" className="w-8 h-8 object-contain" />
+              <img src={logo} alt="Arrotech Hub" className="h-12 w-auto object-contain" />
             </Link>
             <h1 className="text-xl font-black text-gray-900 mb-0.5 text-red-600">Link Invalid</h1>
             <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Expired or Broken</p>
@@ -115,11 +116,17 @@ const ResetPassword: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 px-4 py-4">
+      <SEO
+        title="Reset Password"
+        description="Create a new password for your Arrotech Hub account."
+        url="/reset-password"
+        noindex={true}
+      />
       <div className="max-w-md w-full">
         <div className="text-center mb-4">
           <Link to="/" className="inline-block hover:scale-110 transition-transform mb-2">
-            <img src={logo} alt="Arrotech Hub" className="w-8 h-8 object-contain" />
+            <img src={logo} alt="Arrotech Hub" className="h-12 w-auto object-contain" />
           </Link>
           <h1 className="text-xl font-black text-gray-900 mb-0.5">New Password</h1>
           <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Secure Your Account</p>
