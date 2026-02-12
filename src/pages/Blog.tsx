@@ -135,7 +135,7 @@ const Blog: React.FC = () => {
                                     </Link>
                                 </div>
 
-                                <div className="hidden lg:block">
+                                <div className="mt-10 lg:mt-0 lg:block">
                                     {featuredPost.cover_image ? (
                                         <div className="relative group">
                                             <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl blur-lg opacity-40 group-hover:opacity-60 transition-opacity" />
@@ -161,7 +161,7 @@ const Blog: React.FC = () => {
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="flex flex-col sm:flex-row items-center gap-4 py-4">
                             {/* Category pills */}
-                            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar flex-1 pb-1">
+                            <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto sm:flex-1 pb-2">
                                 {BLOG_CATEGORIES.map(cat => (
                                     <button
                                         key={cat.slug}

@@ -251,37 +251,63 @@ const BlogPostPage: React.FC = () => {
 
                 {/* ── Main Content Area ── */}
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                    <div className="grid lg:grid-cols-[1fr_280px] gap-12">
+                    <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-12">
                         {/* Article body */}
                         <article className="max-w-none">
+                            {/* Mobile TOC */}
+                            <div className="lg:hidden mb-8">
+                                <details className="group bg-white rounded-xl border border-gray-200/80 p-4 open:shadow-lg transition-all duration-300">
+                                    <summary className="flex items-center justify-between font-semibold text-gray-900 cursor-pointer list-none">
+                                        <span>Table of Contents</span>
+                                        <ChevronRight size={16} className="transition-transform group-open:rotate-90 text-gray-400" />
+                                    </summary>
+                                    <nav className="mt-4 pt-4 border-t border-gray-100 space-y-1">
+                                        {headings.length > 0 ? headings.map((h, idx) => (
+                                            <a
+                                                key={idx}
+                                                href={`#${h.id}`}
+                                                className={`block text-sm py-1.5 text-gray-600 hover:text-purple-600 ${h.level > 1 ? 'pl-4' : ''}`}
+                                            >
+                                                {h.text}
+                                            </a>
+                                        )) : <p className="text-sm text-gray-400 italic">No headings found in this article.</p>}
+                                    </nav>
+                                </details>
+                            </div>
+
                             <div
-                                className="prose-custom bg-white rounded-2xl border border-gray-200/80 p-8 sm:p-12 shadow-sm"
+                                className="prose-custom bg-white rounded-2xl border border-gray-200/80 p-6 sm:p-10 lg:p-12 shadow-sm"
                                 dangerouslySetInnerHTML={{ __html: htmlContent }}
                             />
 
                             {/* Share bar */}
-                            <div className="flex items-center gap-4 mt-8 p-5 bg-white rounded-2xl border border-gray-200/80">
-                                <Share2 size={18} className="text-gray-500" />
-                                <span className="text-sm text-gray-600 font-medium">Share this article</span>
-                                <div className="flex-1" />
-                                <button
-                                    onClick={handleCopyLink}
-                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                                >
-                                    {copied ? <><Check size={12} className="text-green-500" /> Copied!</> : <><Copy size={12} /> Copy Link</>}
-                                </button>
-                                <button
-                                    onClick={handleShareTwitter}
-                                    className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                                >
-                                    𝕏 / Twitter
-                                </button>
-                                <button
-                                    onClick={handleShareLinkedIn}
-                                    className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                                >
-                                    LinkedIn
-                                </button>
+                            {/* Share bar */}
+                            <div className="flex flex-col sm:flex-row items-center gap-4 mt-8 p-5 bg-white rounded-2xl border border-gray-200/80">
+                                <div className="flex items-center gap-2 w-full sm:w-auto">
+                                    <Share2 size={18} className="text-gray-500" />
+                                    <span className="text-sm text-gray-600 font-medium">Share this article</span>
+                                </div>
+                                <div className="flex-1 hidden sm:block" />
+                                <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto no-scrollbar pb-1">
+                                    <button
+                                        onClick={handleCopyLink}
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors whitespace-nowrap"
+                                    >
+                                        {copied ? <><Check size={12} className="text-green-500" /> Copied!</> : <><Copy size={12} /> Copy Link</>}
+                                    </button>
+                                    <button
+                                        onClick={handleShareTwitter}
+                                        className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors whitespace-nowrap"
+                                    >
+                                        𝕏 / Twitter
+                                    </button>
+                                    <button
+                                        onClick={handleShareLinkedIn}
+                                        className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors whitespace-nowrap"
+                                    >
+                                        LinkedIn
+                                    </button>
+                                </div>
                             </div>
 
                             {/* Author card */}
@@ -344,7 +370,7 @@ const BlogPostPage: React.FC = () => {
                     <section className="bg-white border-t border-gray-200/80 py-16">
                         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                             <h2 className="text-2xl font-bold text-gray-900 mb-8">Related Articles</h2>
-                            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                                 {relatedPosts.map(rp => (
                                     <Link
                                         key={rp.slug}
