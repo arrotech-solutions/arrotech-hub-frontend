@@ -6,9 +6,12 @@ import { User } from '../types';
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
-  loginWithGoogle: (credential: string) => Promise<void>;
-  loginWithMicrosoft: (accessToken: string) => Promise<void>;
+  isAdmin: boolean;
+  isEmployee: boolean;
+  hasPermission: (perm: string) => boolean;
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<any>;
+  loginWithGoogle: (credential: string) => Promise<any>;
+  loginWithMicrosoft: (accessToken: string) => Promise<any>;
   register: (email: string, password: string, name: string) => Promise<void>;
   logout: () => Promise<void>;
   updateUser: (data: Partial<User>) => Promise<void>;
@@ -80,6 +83,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       setUser(response.data.user);
       toast.success('Login successful!');
+      return response.data.user;
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Login failed');
       throw error;
@@ -104,6 +108,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem('auth_token', response.data.token);
       setUser(response.data.user);
       toast.success('Login successful!');
+      return response.data.user;
     } catch (error: any) {
       toast.error(error.response?.data?.detail || 'Google login failed');
       throw error;
@@ -116,6 +121,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem('auth_token', response.data.token);
       setUser(response.data.user);
       toast.success('Login successful!');
+      return response.data.user;
     } catch (error: any) {
       toast.error(error.response?.data?.detail || 'Microsoft login failed');
       throw error;
@@ -186,9 +192,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const isAdmin = user?.role === 'admin';
+  const isEmployee = user?.role === 'employee' || user?.role === 'admin';
+  const hasPermission = (perm: string): boolean => {
+    if (user?.role === 'admin') return true;
+    return !!(user?.permissions && user.permissions[perm]);
+  };
+
   const value: AuthContextType = {
     user,
     loading,
+    isAdmin,
+    isEmployee,
+    hasPermission,
     login,
     loginWithGoogle,
     loginWithMicrosoft,

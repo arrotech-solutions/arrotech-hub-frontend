@@ -30,7 +30,8 @@ import PrivacyPolicy from './pages/PrivacyPolicy';
 import Workflows from './pages/Workflows';
 import Pricing from './pages/Pricing';
 // import RequestAccess from './pages/RequestAccess';
-import AdminDashboard from './pages/AdminDashboard'; // Import AdminDashboard
+import AdminDashboard from './pages/AdminDashboard';
+import EmployeeHub from './pages/EmployeeHub';
 import UnifiedDashboard from './pages/UnifiedDashboard';
 import UnifiedInbox from './pages/UnifiedInbox';
 import UnifiedTaskView from './pages/UnifiedTaskView';
@@ -90,8 +91,11 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   }
 
   if (user) {
-    if (user.email?.toLowerCase() === 'support@arrotechsolutions') {
+    if (user.role === 'admin') {
       return <Navigate to="/admin" replace />;
+    }
+    if (user.role === 'employee') {
+      return <Navigate to="/employee" replace />;
     }
     return <Navigate to="/unified" replace />;
   }
@@ -426,6 +430,16 @@ const AppRoutes: React.FC = () => {
         element={
           <ProtectedRoute>
             <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Employee Hub Route */}
+      <Route
+        path="/employee"
+        element={
+          <ProtectedRoute>
+            <EmployeeHub />
           </ProtectedRoute>
         }
       />
