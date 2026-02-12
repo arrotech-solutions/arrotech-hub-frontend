@@ -49,9 +49,11 @@ const Login: React.FC = () => {
     setIsLoading(true);
     setFormError(null);
     try {
-      await login(data.email, data.password, rememberMe);
-      if (data.email.toLowerCase() === 'support@arrotechsolutions') {
+      const loggedInUser = await login(data.email, data.password, rememberMe);
+      if (loggedInUser?.role === 'admin') {
         navigate('/admin');
+      } else if (loggedInUser?.role === 'employee') {
+        navigate('/employee');
       } else {
         navigate('/unified');
       }
@@ -70,8 +72,14 @@ const Login: React.FC = () => {
     setIsOAuthLoading(true);
     setOAuthProvider('Google');
     try {
-      await loginWithGoogle(response.credential);
-      navigate('/unified');
+      const loggedInUser = await loginWithGoogle(response.credential);
+      if (loggedInUser?.role === 'admin') {
+        navigate('/admin');
+      } else if (loggedInUser?.role === 'employee') {
+        navigate('/employee');
+      } else {
+        navigate('/unified');
+      }
     } catch (error: any) {
       const errorMessage = error.response?.data?.detail || 'Google login failed. Please try again.';
       setFormError(errorMessage);
@@ -166,8 +174,14 @@ const Login: React.FC = () => {
             if (accessToken) {
               setIsOAuthLoading(true);
               setOAuthProvider('Microsoft');
-              await loginWithMicrosoft(accessToken);
-              navigate('/unified');
+              const msUser = await loginWithMicrosoft(accessToken);
+              if (msUser?.role === 'admin') {
+                navigate('/admin');
+              } else if (msUser?.role === 'employee') {
+                navigate('/employee');
+              } else {
+                navigate('/unified');
+              }
             } else {
               setFormError('Microsoft login failed. No access token received.');
               setIsOAuthLoading(false);
