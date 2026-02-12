@@ -8,6 +8,8 @@ export interface User {
   api_key?: string;
   stripe_customer_id?: string;
   phone_number?: string;
+  role?: 'user' | 'employee' | 'admin';
+  permissions?: Record<string, boolean>;
   created_at: string;
   updated_at: string;
 }

@@ -2829,6 +2829,80 @@ class ApiService {
     });
     return response.data;
   }
+
+  // ── Blog Service ──────────────────────────────────────
+
+  async getBlogPosts(params?: { page?: number; per_page?: number; category?: string; search?: string; featured?: boolean }): Promise<any> {
+    const response = await this.api.get('/api/blog/posts', { params });
+    return response.data;
+  }
+
+  async getBlogPost(slug: string): Promise<any> {
+    const response = await this.api.get(`/api/blog/posts/${slug}`);
+    return response.data;
+  }
+
+  async getBlogCategories(): Promise<any> {
+    const response = await this.api.get('/api/blog/categories');
+    return response.data;
+  }
+
+  async getFeaturedPosts(): Promise<any> {
+    const response = await this.api.get('/api/blog/posts/featured');
+    return response.data;
+  }
+
+  async createBlogPost(data: any): Promise<any> {
+    const response = await this.api.post('/api/blog/posts', data);
+    return response.data;
+  }
+
+  async updateBlogPost(id: number, data: any): Promise<any> {
+    const response = await this.api.put(`/api/blog/posts/${id}`, data);
+    return response.data;
+  }
+
+  async deleteBlogPost(id: number): Promise<any> {
+    const response = await this.api.delete(`/api/blog/posts/${id}`);
+    return response.data;
+  }
+
+  async seedBlogPosts(): Promise<any> {
+    const response = await this.api.post('/api/blog/seed');
+    return response.data;
+  }
+
+  // ── Employee & Admin Management ────────────────────────
+
+  async getEmployees(): Promise<any> {
+    const response = await this.api.get('/admin/employees');
+    return response.data;
+  }
+
+  async promoteEmployee(email: string): Promise<any> {
+    const response = await this.api.post('/admin/employees/promote', { email });
+    return response.data;
+  }
+
+  async updateEmployeePermissions(userId: number, permissions: Record<string, boolean>): Promise<any> {
+    const response = await this.api.put(`/admin/employees/${userId}/permissions`, { permissions });
+    return response.data;
+  }
+
+  async demoteEmployee(userId: number): Promise<any> {
+    const response = await this.api.delete(`/admin/employees/${userId}/demote`);
+    return response.data;
+  }
+
+  async getSubscribers(params?: { page?: number; per_page?: number; tier?: string; search?: string }): Promise<any> {
+    const response = await this.api.get('/admin/subscribers', { params });
+    return response.data;
+  }
+
+  async getMyPosts(): Promise<any> {
+    const response = await this.api.get('/admin/my-posts');
+    return response.data;
+  }
 }
 
 export const apiService = new ApiService();
