@@ -26,7 +26,7 @@ declare global {
 
 const Chat: React.FC = () => {
   useAuth();
-  const { canUseFeature, usage, limits, tier, refreshUsage } = useSubscription();
+  const { canUseFeature, usage, limits, tier, refreshUsage, isAiActionsAtLimit } = useSubscription();
   const navigate = useNavigate();
 
   // -- State --
@@ -215,8 +215,8 @@ const Chat: React.FC = () => {
       return;
     }
 
-    if (!canUseFeature('max_ai_messages_daily')) {
-      toast.error(`Daily AI message limit reached for the ${tier} plan. Please upgrade to continue.`);
+    if (isAiActionsAtLimit) {
+      toast.error(`Monthly AI message limit reached for the ${tier} plan. Please upgrade to continue.`);
       navigate('/pricing');
       return;
     }
