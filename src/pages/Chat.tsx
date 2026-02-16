@@ -26,7 +26,7 @@ declare global {
 
 const Chat: React.FC = () => {
   useAuth();
-  const { canUseFeature, usage, limits, tier, refreshUsage, isAiActionsAtLimit } = useSubscription();
+  const { usage, limits, tier, refreshUsage } = useSubscription();
   const navigate = useNavigate();
 
   // -- State --
