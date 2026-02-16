@@ -43,10 +43,10 @@ const ChatInput: React.FC<ChatInputProps> = ({
     usage,
     limits,
 }) => {
-    const dailyLimit = limits?.max_ai_messages_daily || 0;
-    const dailyUsage = usage?.daily_messages || 0;
-    const remaining = Math.max(0, dailyLimit - dailyUsage);
-    const isAtLimit = remaining <= 0 && dailyLimit > 0;
+    const aiActionsLimit = usage?.ai_actions?.limit || limits?.ai_actions_monthly || 0;
+    const aiActionsUsed = usage?.ai_actions?.used || 0;
+    const remaining = Math.max(0, aiActionsLimit - aiActionsUsed);
+    const isAtLimit = usage?.ai_actions?.at_limit || false;
     return (
         <div className={`mt-auto px-6 pb-8 pt-4 w-full max-w-4xl mx-auto z-20`}>
             <div className={`relative flex flex-col w-full rounded-2xl border transition-all duration-300 shadow-2xl chat-input-container
@@ -122,7 +122,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
                         )}
                         <div className="flex items-center space-x-1 border-l pl-3 border-gray-300 dark:border-gray-700">
                             <span className={`text-[10px] font-black uppercase tracking-tight ${remaining <= 2 && remaining > 0 ? 'text-amber-500' : remaining === 0 ? 'text-red-500' : 'text-gray-500'}`}>
-                                {remaining} / {dailyLimit} Messages Left Today
+                                {remaining} / {aiActionsLimit} AI Actions Left
                             </span>
                         </div>
                     </div>
