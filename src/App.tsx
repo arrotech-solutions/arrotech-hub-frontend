@@ -126,32 +126,24 @@ const AppRoutes: React.FC = () => {
       <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
       <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
       <Route path="/pricing" element={
-        <PublicRoute>
-          <PublicLayout>
-            <Pricing />
-          </PublicLayout>
-        </PublicRoute>
+        <PublicLayout>
+          <Pricing />
+        </PublicLayout>
       } />
       <Route path="/help" element={
-        <PublicRoute>
-          <PublicLayout>
-            <HelpSupport />
-          </PublicLayout>
-        </PublicRoute>
+        <PublicLayout>
+          <HelpSupport />
+        </PublicLayout>
       } />
       <Route path="/privacy" element={
-        <PublicRoute>
-          <PublicLayout>
-            <PrivacyPolicy />
-          </PublicLayout>
-        </PublicRoute>
+        <PublicLayout>
+          <PrivacyPolicy />
+        </PublicLayout>
       } />
       <Route path="/terms" element={
-        <PublicRoute>
-          <PublicLayout>
-            <Terms />
-          </PublicLayout>
-        </PublicRoute>
+        <PublicLayout>
+          <Terms />
+        </PublicLayout>
       } />
       <Route path="/reset-password" element={<PublicRoute><ResetPassword /></PublicRoute>} />
 
@@ -367,8 +359,7 @@ const AppRoutes: React.FC = () => {
         }
       />
 
-      {/* Public Pricing Page (no auth required) */}
-      <Route path="/pricing" element={<Pricing />} />
+
 
 
 
@@ -383,15 +374,7 @@ const AppRoutes: React.FC = () => {
         }
       />
 
-      <Route
-        path="/privacy"
-        element={<PrivacyPolicy />}
-      />
 
-      <Route
-        path="/terms"
-        element={<Terms />}
-      />
 
       <Route
         path="/settings"

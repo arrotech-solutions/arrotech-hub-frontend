@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Zap, Activity, Clock, RefreshCw, ChevronDown, ChevronRight, Copy, Check, Lock, Globe } from 'lucide-react';
+import { Zap, Activity, Clock, RefreshCw, ChevronDown, ChevronRight, Copy, Check, Lock, Globe, Eye, EyeOff } from 'lucide-react';
 import { APISettings } from '../../types';
 import toast from 'react-hot-toast';
 
@@ -12,6 +12,62 @@ interface APISettingsProps {
     apiKey?: string;
     onRegenerateKey?: () => Promise<void>;
 }
+
+const APIKeyInput = ({
+    label,
+    value,
+    onChange,
+    placeholder
+}: {
+    label: string;
+    value: string;
+    onChange: (value: string) => void;
+    placeholder: string;
+}) => {
+    const [showKey, setShowKey] = useState(false);
+    const [copied, setCopied] = useState(false);
+
+    const handleCopy = () => {
+        if (value) {
+            navigator.clipboard.writeText(value);
+            setCopied(true);
+            toast.success(`${label} copied to clipboard`);
+            setTimeout(() => setCopied(false), 2000);
+        }
+    };
+
+    return (
+        <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+            <div className="relative">
+                <input
+                    type={showKey ? "text" : "password"}
+                    value={value || ''}
+                    onChange={(e) => onChange(e.target.value)}
+                    placeholder={placeholder}
+                    className="w-full pl-3 pr-20 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                />
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center space-x-1">
+                    <button
+                        onClick={() => setShowKey(!showKey)}
+                        className="p-1.5 hover:bg-gray-100 rounded-md transition-colors text-gray-400 hover:text-gray-600"
+                        title={showKey ? "Hide API Key" : "Show API Key"}
+                    >
+                        {showKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                    <button
+                        onClick={handleCopy}
+                        className="p-1.5 hover:bg-gray-100 rounded-md transition-colors text-gray-400 hover:text-gray-600"
+                        title="Copy API Key"
+                        disabled={!value}
+                    >
+                        {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 const APISettingsTab: React.FC<APISettingsProps> = ({
     settings,
@@ -113,64 +169,44 @@ const APISettingsTab: React.FC<APISettingsProps> = ({
 
                         <div className="space-y-4">
                             {/* OpenAI */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">OpenAI API Key</label>
-                                <input
-                                    type="password"
-                                    value={localSettings.openai_api_key || ''}
-                                    onChange={(e) => handleChange('openai_api_key', e.target.value)}
-                                    placeholder="sk-..."
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
-                                />
-                            </div>
+                            <APIKeyInput
+                                label="OpenAI API Key"
+                                value={localSettings.openai_api_key || ''}
+                                onChange={(value) => handleChange('openai_api_key', value)}
+                                placeholder="sk-..."
+                            />
 
                             {/* Anthropic */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Anthropic API Key</label>
-                                <input
-                                    type="password"
-                                    value={localSettings.anthropic_api_key || ''}
-                                    onChange={(e) => handleChange('anthropic_api_key', e.target.value)}
-                                    placeholder="sk-ant-..."
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
-                                />
-                            </div>
+                            <APIKeyInput
+                                label="Anthropic API Key"
+                                value={localSettings.anthropic_api_key || ''}
+                                onChange={(value) => handleChange('anthropic_api_key', value)}
+                                placeholder="sk-ant-..."
+                            />
 
                             {/* Gemini */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Google Gemini API Key</label>
-                                <input
-                                    type="password"
-                                    value={localSettings.gemini_api_key || ''}
-                                    onChange={(e) => handleChange('gemini_api_key', e.target.value)}
-                                    placeholder="AIza..."
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
-                                />
-                            </div>
+                            <APIKeyInput
+                                label="Google Gemini API Key"
+                                value={localSettings.gemini_api_key || ''}
+                                onChange={(value) => handleChange('gemini_api_key', value)}
+                                placeholder="AIza..."
+                            />
 
                             {/* Hugging Face */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Hugging Face API Key</label>
-                                <input
-                                    type="password"
-                                    value={localSettings.huggingface_api_key || ''}
-                                    onChange={(e) => handleChange('huggingface_api_key', e.target.value)}
-                                    placeholder="hf_..."
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
-                                />
-                            </div>
+                            <APIKeyInput
+                                label="Hugging Face API Key"
+                                value={localSettings.huggingface_api_key || ''}
+                                onChange={(value) => handleChange('huggingface_api_key', value)}
+                                placeholder="hf_..."
+                            />
 
                             {/* Together AI */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Together AI API Key</label>
-                                <input
-                                    type="password"
-                                    value={localSettings.together_api_key || ''}
-                                    onChange={(e) => handleChange('together_api_key', e.target.value)}
-                                    placeholder="xxxxxxxx..."
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
-                                />
-                            </div>
+                            <APIKeyInput
+                                label="Together AI API Key"
+                                value={localSettings.together_api_key || ''}
+                                onChange={(value) => handleChange('together_api_key', value)}
+                                placeholder="xxxxxxxx..."
+                            />
                         </div>
                     </div>
 

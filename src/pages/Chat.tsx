@@ -26,7 +26,7 @@ declare global {
 
 const Chat: React.FC = () => {
   useAuth();
-  const { canUseFeature, usage, limits, tier, refreshUsage } = useSubscription();
+  const { usage, limits, tier, refreshUsage } = useSubscription();
   const navigate = useNavigate();
 
   // -- State --
@@ -159,9 +159,15 @@ const Chat: React.FC = () => {
       const response = await apiService.getLLMProviders();
       if (response.success) {
         setProviders(response.data);
-        const defaultProvider = response.data.default ||
-          response.data.providers[0] ||
-          (response.data.all_providers?.find(p => p.available)?.id);
+        // Pick default: prefer backend default if available, then first available provider
+        const backendDefault = response.data.default;
+        const availableProviders = response.data.providers || [];
+        const firstAvailable = response.data.all_providers?.find((p: any) => p.available)?.id;
+
+        const defaultProvider =
+          (availableProviders.includes(backendDefault) ? backendDefault : null) ||
+          availableProviders[0] ||
+          firstAvailable;
         setSelectedProvider(defaultProvider || 'ollama');
       }
     } catch (error) {
@@ -215,8 +221,8 @@ const Chat: React.FC = () => {
       return;
     }
 
-    if (!canUseFeature('max_ai_messages_daily')) {
-      toast.error(`Daily AI message limit reached for the ${tier} plan. Please upgrade to continue.`);
+    if (usage?.ai_actions?.at_limit) {
+      toast.error(`AI action limit reached for the ${tier} plan. Please upgrade to continue.`);
       navigate('/pricing');
       return;
     }
