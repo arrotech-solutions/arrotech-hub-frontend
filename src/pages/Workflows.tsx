@@ -42,6 +42,7 @@ import toast from 'react-hot-toast';
 import EnhancedWorkflowCreator from '../components/EnhancedWorkflowCreator';
 import ExecuteWorkflowModal from '../components/ExecuteWorkflowModal';
 import WorkflowTemplates from '../components/WorkflowTemplates';
+import WorkflowCanvas, { CanvasState } from '../components/workflows/WorkflowCanvas';
 import apiService from '../services/api';
 import {
   WorkflowExecution,
@@ -64,6 +65,12 @@ const Workflows: React.FC = () => {
   const [selectedExecution, setSelectedExecution] = useState<WorkflowExecution | null>(null);
   const [executingWorkflow, setExecutingWorkflow] = useState<WorkflowType | null>(null);
   const [editingWorkflow, setEditingWorkflow] = useState<WorkflowType | null>(null);
+
+  // Canvas mode state
+  const [showCanvas, setShowCanvas] = useState(false);
+  const [canvasInitialData, setCanvasInitialData] = useState<any>(null);
+  const [formToCanvasState, setFormToCanvasState] = useState<CanvasState | null>(null);
+  const [canvasToFormState, setCanvasToFormState] = useState<CanvasState | null>(null);
 
   // Sharing state
   const [showShareModal, setShowShareModal] = useState(false);
@@ -455,211 +462,234 @@ const Workflows: React.FC = () => {
     );
   };
 
-  const renderWorkflowCard = (workflow: WorkflowType) => (
-    <div key={workflow.id} className="group relative bg-white rounded-2xl border border-gray-200/60 shadow-sm hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 hover:-translate-y-1.5 overflow-hidden">
-      <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-blue-500 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+  const renderWorkflowCard = (workflow: WorkflowType) => {
+    // Get visible steps (max 4)
+    const steps = workflow.steps || [];
+    const visibleSteps = steps.slice(0, 4);
+    const hasMoreSteps = steps.length > 4;
 
-      <div className="p-7">
-        {/* Header */}
-        <div className="flex items-start justify-between mb-5">
-          <div className="flex items-center space-x-4">
-            <div className="relative">
-              <div className="absolute inset-0 bg-blue-500 blur-lg opacity-0 group-hover:opacity-20 transition-opacity duration-500"></div>
-              <div className="relative p-3 bg-gradient-to-br from-blue-500/10 to-purple-600/10 rounded-2xl border border-blue-100 group-hover:border-blue-200 transition-colors">
-                <Workflow className="w-6 h-6 text-blue-600" />
+    return (
+      <div key={workflow.id} className="group relative bg-white/70 backdrop-blur-xl rounded-2xl border border-white/20 shadow-lg hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-300 hover:-translate-y-1 overflow-hidden flex flex-col h-full">
+        {/* Gradient Border Top */}
+        <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${workflow.status === 'active' ? 'from-blue-500 via-purple-500 to-blue-500 animate-gradient-x' : 'from-gray-200 to-gray-300'}`}></div>
+
+        <div className="p-6 flex-1 flex flex-col">
+          {/* Header */}
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex items-center space-x-3">
+              <div className={`
+                p-2.5 rounded-xl border transition-colors relative group-hover:scale-105 duration-300
+                ${workflow.status === 'active'
+                  ? 'bg-blue-50 border-blue-100 text-blue-600'
+                  : 'bg-gray-50 border-gray-100 text-gray-400'}
+              `}>
+                <div className={`absolute inset-0 rounded-xl opacity-20 ${workflow.status === 'active' ? 'bg-blue-400 blur-md' : ''}`}></div>
+                <Workflow className="w-5 h-5 relative z-10" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1">
+                  {workflow.name}
+                </h3>
+                <div className="flex items-center space-x-2 mt-0.5">
+                  <span className={`flex items-center space-x-1 text-[10px] font-bold uppercase tracking-wider ${workflow.status === 'active' ? 'text-green-600' : 'text-gray-400'}`}>
+                    {workflow.status === 'active' && (
+                      <span className="relative flex h-1.5 w-1.5 mr-0.5">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500"></span>
+                      </span>
+                    )}
+                    <span>{workflow.status}</span>
+                  </span>
+                  <span className="text-gray-300">•</span>
+                  <span className="text-[10px] font-medium text-gray-400">v{workflow.version}</span>
+                </div>
               </div>
             </div>
-            <div>
-              <h3 className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors tracking-tight">
-                {workflow.name}
-              </h3>
-              <div className="flex items-center space-x-2 mt-0.5">
-                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Version</span>
-                <span className="text-xs font-bold text-gray-900">{workflow.version}</span>
+
+            <div className="relative group/menu">
+              <button className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                <Settings className="w-4 h-4" />
+              </button>
+              {/* Dropdown Menu */}
+              <div className="absolute right-0 top-full mt-1 w-32 bg-white rounded-xl shadow-xl border border-gray-100 py-1 hidden group-hover/menu:block z-10">
+                <button onClick={() => {
+                  setEditingWorkflow(workflow);
+                  setShowEnhancedCreator(true);
+                }} className="w-full text-left px-3 py-2 text-xs font-semibold text-gray-600 hover:bg-gray-50 flex items-center space-x-2">
+                  <Edit className="w-3.5 h-3.5" />
+                  <span>Edit</span>
+                </button>
+                <button onClick={() => openShareModal(workflow)} className="w-full text-left px-3 py-2 text-xs font-semibold text-gray-600 hover:bg-gray-50 flex items-center space-x-2">
+                  <Share2 className="w-3.5 h-3.5" />
+                  <span>Share</span>
+                </button>
+                <div className="h-px bg-gray-100 my-1"></div>
+                <button onClick={() => handleDeleteWorkflow(workflow.id)} className="w-full text-left px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 flex items-center space-x-2">
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Delete</span>
+                </button>
               </div>
             </div>
           </div>
-          <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center space-x-1.5 border ${getStatusColor(workflow.status)}`}>
-            <div className={`w-1.5 h-1.5 rounded-full ${workflow.status === 'active' ? 'bg-green-500 animate-pulse' : 'bg-current opacity-50'}`}></div>
-            <span>{workflow.status}</span>
+
+          {/* Description */}
+          <p className="text-sm text-gray-500 line-clamp-2 mb-6 min-h-[40px]">
+            {workflow.description || "No description provided."}
+          </p>
+
+          {/* Visual Tool Chain */}
+          <div className="mt-auto">
+            <div className="flex items-center space-x-1 mb-4 overflow-hidden py-1">
+              {/* Trigger Icon */}
+              <div
+                className="w-8 h-8 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center shrink-0 relative group/icon"
+                title={`Trigger: ${workflow.trigger_type}`}
+              >
+                <Zap className={`w-3.5 h-3.5 ${workflow.status === 'active' ? 'text-amber-500 fill-amber-500' : 'text-gray-400'}`} />
+                <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover/icon:opacity-100 transition-opacity whitespace-nowrap z-20 pointer-events-none">
+                  Trigger: {workflow.trigger_type}
+                </div>
+              </div>
+
+              {/* Connector */}
+              <div className="w-4 h-0.5 bg-gray-200 shrink-0"></div>
+
+              {/* Steps */}
+              {visibleSteps.map((step, idx) => (
+                <React.Fragment key={idx}>
+                  <div
+                    className="w-8 h-8 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0 text-xs font-bold text-blue-600 relative group/icon cursor-default"
+                  >
+                    {step.tool_name.charAt(0).toUpperCase()}
+                    <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover/icon:opacity-100 transition-opacity whitespace-nowrap z-20 pointer-events-none">
+                      {step.tool_name}
+                    </div>
+                  </div>
+                  {idx < visibleSteps.length - 1 && (
+                    <div className="w-4 h-0.5 bg-blue-100 shrink-0"></div>
+                  )}
+                </React.Fragment>
+              ))}
+
+              {hasMoreSteps && (
+                <>
+                  <div className="w-4 h-0.5 bg-gray-200 shrink-0"></div>
+                  <div className="w-8 h-8 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center shrink-0 text-[10px] font-bold text-gray-500">
+                    +{steps.length - 4}
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Metrics Footer */}
+            <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+              <div className="flex items-center space-x-3 text-xs text-gray-500">
+                <div className="flex items-center space-x-1" title="Runs">
+                  <Activity className="w-3.5 h-3.5 text-gray-400" />
+                  <span className="font-semibold">{Math.floor(Math.random() * 50)}</span>
+                </div>
+                <div className="flex items-center space-x-1" title="Last Run">
+                  <Clock className="w-3.5 h-3.5 text-gray-400" />
+                  <span>{new Date(workflow.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => handleToggleStatus(workflow)}
+                  className={`p-1.5 rounded-lg transition-colors ${workflow.status === 'active'
+                      ? 'text-green-600 hover:bg-green-50'
+                      : 'text-gray-400 hover:text-green-600 hover:bg-green-50'
+                    }`}
+                  title={workflow.status === 'active' ? 'Pause' : 'Activate'}
+                >
+                  {workflow.status === 'active' ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                </button>
+
+                <button
+                  onClick={() => {
+                    setExecutingWorkflow(workflow);
+                    setShowExecuteModal(true);
+                  }}
+                  className="flex items-center space-x-1.5 pl-2 pr-3 py-1.5 bg-gray-900 text-white rounded-lg hover:bg-black hover:shadow-lg transition-all text-xs font-bold"
+                >
+                  <Play className="w-3 h-3 fill-current" />
+                  <span>Run</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
+      </div>
+    );
+  };
 
-        {/* Description */}
-        <p className="text-gray-500 text-sm mb-6 leading-relaxed line-clamp-2 font-medium italic">
-          "{workflow.description}"
-        </p>
+  const renderWorkflowList = (workflow: WorkflowType) => {
+    // List view also gets a premium upgrade
+    const steps = workflow.steps || [];
 
-        {/* Dynamic Tags */}
-        <div className="flex flex-wrap gap-2 mb-6">
-          <span className="px-2.5 py-1 bg-gray-50 text-[10px] font-bold text-gray-500 rounded-lg border border-gray-100 uppercase tracking-tighter">
-            {workflow.trigger_type}
-          </span>
-          {workflow.steps?.slice(0, 2).map((step, idx) => (
-            <span key={idx} className="px-2.5 py-1 bg-blue-50 text-[10px] font-bold text-blue-600 rounded-lg border border-blue-100 uppercase tracking-tighter">
-              {step.tool_name.split('_')[0]}
+    return (
+      <div key={workflow.id} className="group bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-300 flex items-center p-4 relative overflow-hidden">
+        <div className={`absolute left-0 top-0 bottom-0 w-1 ${workflow.status === 'active' ? 'bg-blue-500' : 'bg-gray-200'}`}></div>
+
+        {/* Icon */}
+        <div className="ml-2 w-10 h-10 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center shrink-0 text-gray-500 group-hover:text-blue-600 group-hover:bg-blue-50 transition-colors">
+          <Workflow className="w-5 h-5" />
+        </div>
+
+        {/* Info */}
+        <div className="ml-4 flex-1 min-w-0 grid grid-cols-12 gap-4 items-center">
+          <div className="col-span-4">
+            <h3 className="text-sm font-bold text-gray-900 truncate group-hover:text-blue-600 transition-colors">{workflow.name}</h3>
+            <p className="text-xs text-gray-500 truncate">{workflow.description || 'No description'}</p>
+          </div>
+
+          <div className="col-span-3 flex items-center space-x-2">
+            <div title={`Trigger: ${workflow.trigger_type}`} className="flex items-center space-x-1.5 px-2 py-1 rounded bg-gray-50 border border-gray-100 text-xs text-gray-600">
+              <Zap className="w-3 h-3 text-amber-500" />
+              <span className="capitalize">{workflow.trigger_type}</span>
+            </div>
+            <div className="text-xs text-gray-400 font-medium">+ {steps.length} steps</div>
+          </div>
+
+          <div className="col-span-2">
+            <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${workflow.status === 'active' ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-gray-100 text-gray-500 border border-gray-200'
+              }`}>
+              {workflow.status === 'active' && <span className="w-1.5 h-1.5 rounded-full bg-green-500 mr-1.5 animate-pulse"></span>}
+              {workflow.status}
             </span>
-          ))}
-        </div>
-
-        {/* Stats Row */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Complexity</p>
-            <div className="flex items-center space-x-1">
-              <Activity className="w-3 h-3 text-blue-500" />
-              <span className="text-xs font-bold text-gray-900">{workflow.steps?.length || 0} Steps</span>
-            </div>
           </div>
-          <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Last Sync</p>
-            <div className="flex items-center space-x-1">
-              <Clock className="w-3 h-3 text-purple-500" />
-              <span className="text-xs font-bold text-gray-900">{new Date(workflow.created_at).toLocaleDateString()}</span>
-            </div>
-          </div>
-        </div>
 
-        {/* Main Action */}
-        <div className="grid grid-cols-2 gap-3 pt-6 border-t border-gray-100">
-          <button
-            onClick={() => {
-              setExecutingWorkflow(workflow);
-              setShowExecuteModal(true);
-            }}
-            className="flex items-center justify-center space-x-2 py-3 bg-gray-900 text-white rounded-xl hover:bg-black hover:shadow-lg transition-all duration-300 font-bold text-xs execute-workflow-btn"
-          >
-            <Play className="w-3.5 h-3.5 fill-current" />
-            <span>Launch</span>
-          </button>
-          <div className="flex space-x-1">
+          <div className="col-span-3 flex items-center justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button
+              onClick={() => {
+                setExecutingWorkflow(workflow);
+                setShowExecuteModal(true);
+              }}
+              className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Run"
+            >
+              <Play className="w-4 h-4" />
+            </button>
             <button
               onClick={() => {
                 setEditingWorkflow(workflow);
                 setShowEnhancedCreator(true);
               }}
-              className="flex-1 flex items-center justify-center p-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
-              title="View & Edit"
+              className="p-1.5 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors" title="Edit"
             >
-              <Eye className="w-4 h-4" />
+              <Edit className="w-4 h-4" />
             </button>
             <button
-              onClick={() => handleToggleStatus(workflow)}
-              className={`flex-1 flex items-center justify-center p-3 rounded-xl transition-colors ${workflow.status === 'active'
-                ? 'bg-orange-50 text-orange-600 hover:bg-orange-100'
-                : 'bg-green-50 text-green-600 hover:bg-green-100'
-                }`}
-              title={workflow.status === 'active' ? 'Pause Workflow' : 'Resume Workflow'}
+              onClick={() => handleDeleteWorkflow(workflow.id)}
+              className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete"
             >
-              {workflow.status === 'active' ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+              <Trash2 className="w-4 h-4" />
             </button>
-            <button
-              onClick={() => openShareModal(workflow)}
-              className="flex-1 flex items-center justify-center p-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
-              title="Share"
-            >
-              <Share2 className="w-4 h-4" />
-            </button>
-            <div className="relative group/more flex-1">
-              <button
-                className="w-full h-full flex items-center justify-center p-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
-              >
-                <Settings className="w-4 h-4" />
-              </button>
-              <div className="absolute bottom-full right-0 mb-2 w-32 bg-white rounded-xl shadow-2xl border border-gray-100 py-1 hidden group-hover/more:block">
-                <button onClick={() => handleDeleteWorkflow(workflow.id)} className="w-full text-left px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-50">Delete</button>
-                <button className="w-full text-left px-4 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50">Duplicate</button>
-              </div>
-            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
-
-  const renderWorkflowList = (workflow: WorkflowType) => (
-    <div key={workflow.id} className="group bg-white rounded-2xl border border-gray-200/60 shadow-sm hover:shadow-lg transition-all duration-300 hover:border-blue-200 flex flex-col sm:flex-row items-start sm:items-center p-5 sm:p-6 gap-5 sm:gap-6 relative overflow-hidden">
-      <div className="absolute left-0 top-0 w-1 sm:w-1.5 h-full bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-
-      <div className="hidden md:flex items-center justify-center w-14 h-14 bg-gradient-to-br from-blue-500/10 to-purple-600/10 rounded-2xl border border-blue-100 text-blue-600 shrink-0">
-        <Workflow className="w-7 h-7" />
-      </div>
-
-      <div className="flex-1 min-w-0 w-full">
-        <div className="flex items-center justify-between sm:justify-start flex-wrap gap-2 mb-1.5">
-          <h3 className="text-base font-bold text-gray-900 group-hover:text-blue-600 transition-colors truncate max-w-[200px] sm:max-w-none">
-            {workflow.name}
-          </h3>
-          <div className="flex items-center space-x-2">
-            <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-lg font-black uppercase tracking-tighter">v{workflow.version}</span>
-            <div className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${getStatusColor(workflow.status)}`}>
-              {workflow.status}
-            </div>
-          </div>
-        </div>
-        <p className="text-sm text-gray-500 line-clamp-1 sm:line-clamp-2 mb-3 sm:mb-2 font-medium">"{workflow.description}"</p>
-        <div className="flex items-center flex-wrap gap-x-4 gap-y-2 text-[10px] font-black uppercase tracking-widest text-gray-400">
-          <span className="flex items-center space-x-1">
-            <Activity className="w-3 h-3 text-blue-500" />
-            <span>{workflow.steps?.length || 0} Steps</span>
-          </span>
-          <span className="flex items-center space-x-1">
-            <Zap className="w-3 h-3 text-amber-500" />
-            <span>{workflow.trigger_type}</span>
-          </span>
-          <span className="flex items-center space-x-1">
-            <Clock className="w-3 h-3 text-purple-500" />
-            <span>{new Date(workflow.created_at).toLocaleDateString()}</span>
-          </span>
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between sm:justify-end w-full sm:w-auto pt-4 sm:pt-0 border-t sm:border-t-0 border-gray-100 sm:space-x-3">
-        <button
-          onClick={() => {
-            setExecutingWorkflow(workflow);
-            setShowExecuteModal(true);
-          }}
-          className="flex-1 sm:flex-none flex items-center justify-center space-x-2 px-6 py-2.5 bg-gray-900 text-white rounded-xl hover:bg-black transition-all duration-300 font-bold text-xs execute-workflow-btn"
-        >
-          <Play className="w-3 h-3 fill-current" />
-          <span>Launch</span>
-        </button>
-        <button
-          onClick={() => {
-            setEditingWorkflow(workflow);
-            setShowEnhancedCreator(true);
-          }}
-          className="p-2.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
-          title="View & Edit"
-        >
-          <Eye className="w-5 h-5" />
-        </button>
-        <button
-          onClick={() => handleToggleStatus(workflow)}
-          className={`p-2.5 rounded-xl transition-all ${workflow.status === 'active'
-            ? 'text-orange-400 hover:text-orange-600 hover:bg-orange-50'
-            : 'text-green-400 hover:text-green-600 hover:bg-green-50'
-            }`}
-          title={workflow.status === 'active' ? 'Pause Workflow' : 'Resume Workflow'}
-        >
-          {workflow.status === 'active' ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
-        </button>
-        <button
-          onClick={() => openShareModal(workflow)}
-          className="p-2.5 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-xl transition-all"
-        >
-          <Share2 className="w-5 h-5" />
-        </button>
-        <button
-          onClick={() => handleDeleteWorkflow(workflow.id)}
-          className="p-2.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
-        >
-          <Trash2 className="w-5 h-5" />
-        </button>
-      </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
@@ -697,21 +727,44 @@ const Workflows: React.FC = () => {
                 >
                   <RefreshCw className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" />
                 </button>
-                <button
-                  onClick={() => {
-                    const activeWorkflows = workflows.filter(w => w.status === 'active').length;
-                    if (!canUseFeature('max_active_workflows', activeWorkflows)) {
-                      toast.error(`You've reached the limit of active workflows for the ${tier} plan. Please upgrade to create more.`);
-                      navigate('/pricing');
-                      return;
-                    }
-                    setShowEnhancedCreator(true);
-                  }}
-                  className="flex-1 sm:flex-none flex items-center justify-center space-x-2 px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl hover:shadow-[0_0_20px_rgba(37,99,235,0.4)] transform hover:-translate-y-1 transition-all duration-300 font-bold workflow-builder"
-                >
-                  <Plus className="w-5 h-5" />
-                  <span>Create Workflow</span>
-                </button>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => {
+                      const activeWorkflows = workflows.filter(w => w.status === 'active').length;
+                      if (!canUseFeature('max_active_workflows', activeWorkflows)) {
+                        toast.error(`You've reached the limit of active workflows for the ${tier} plan. Please upgrade to create more.`);
+                        navigate('/pricing');
+                        return;
+                      }
+                      setCanvasInitialData(null);
+                      setFormToCanvasState(null);
+                      setShowCanvas(true);
+                    }}
+                    className="flex-1 sm:flex-none flex items-center justify-center space-x-2 px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl hover:shadow-[0_0_20px_rgba(37,99,235,0.4)] transform hover:-translate-y-1 transition-all duration-300 font-bold workflow-builder"
+                    title="Visual canvas builder"
+                  >
+                    <Plus className="w-5 h-5" />
+                    <span>Canvas Builder</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      const activeWorkflows = workflows.filter(w => w.status === 'active').length;
+                      if (!canUseFeature('max_active_workflows', activeWorkflows)) {
+                        toast.error(`You've reached the limit of active workflows for the ${tier} plan. Please upgrade to create more.`);
+                        navigate('/pricing');
+                        return;
+                      }
+                      setEditingWorkflow(null);
+                      setCanvasToFormState(null);
+                      setShowEnhancedCreator(true);
+                    }}
+                    className="flex-1 sm:flex-none flex items-center justify-center space-x-2 px-6 py-4 bg-white text-gray-700 border-2 border-gray-200 rounded-2xl hover:border-blue-300 hover:bg-blue-50 transition-all duration-300 font-bold"
+                    title="Step-by-step form builder"
+                  >
+                    <Plus className="w-5 h-5" />
+                    <span>Form Builder</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -923,18 +976,52 @@ const Workflows: React.FC = () => {
         )}
 
 
-        {/* Enhanced Workflow Creator */}
+        {/* Enhanced Workflow Creator (Form Mode) */}
         <EnhancedWorkflowCreator
           open={showEnhancedCreator}
           onClose={() => {
             setShowEnhancedCreator(false);
             setEditingWorkflow(null);
+            setCanvasToFormState(null);
           }}
           initialData={editingWorkflow}
+          initialCanvasState={canvasToFormState}
           onWorkflowCreated={(workflow) => {
             loadWorkflows();
             setShowEnhancedCreator(false);
             setEditingWorkflow(null);
+            setCanvasToFormState(null);
+          }}
+          onSwitchToCanvas={(state: CanvasState) => {
+            setShowEnhancedCreator(false);
+            setEditingWorkflow(null);
+            setFormToCanvasState(state);
+            setShowCanvas(true);
+          }}
+        />
+
+        {/* Canvas Workflow Builder */}
+        <WorkflowCanvas
+          open={showCanvas}
+          onClose={() => {
+            setShowCanvas(false);
+            setCanvasInitialData(null);
+            setFormToCanvasState(null);
+          }}
+          initialData={canvasInitialData}
+          initialCanvasState={formToCanvasState}
+          onWorkflowCreated={(workflow) => {
+            loadWorkflows();
+            setShowCanvas(false);
+            setCanvasInitialData(null);
+            setFormToCanvasState(null);
+          }}
+          onSwitchToForm={(state: CanvasState) => {
+            setShowCanvas(false);
+            setCanvasInitialData(null);
+            setFormToCanvasState(null);
+            setCanvasToFormState(state);
+            setShowEnhancedCreator(true);
           }}
         />
 

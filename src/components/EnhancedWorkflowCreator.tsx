@@ -42,6 +42,24 @@ interface EnhancedWorkflowCreatorProps {
     onClose: () => void;
     onWorkflowCreated?: (workflow: any) => void;
     initialData?: any; // Workflow to edit
+    initialCanvasState?: {
+        workflowName: string;
+        description: string;
+        triggerType: string;
+        triggerConfig: Record<string, any>;
+        category: string;
+        tags: string;
+        steps: WorkflowStep[];
+    } | null;
+    onSwitchToCanvas?: (state: {
+        workflowName: string;
+        description: string;
+        triggerType: string;
+        triggerConfig: Record<string, any>;
+        category: string;
+        tags: string;
+        steps: WorkflowStep[];
+    }) => void;
 }
 
 interface WorkflowStep {
@@ -157,7 +175,9 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
     open,
     onClose,
     onWorkflowCreated,
-    initialData
+    initialData,
+    initialCanvasState,
+    onSwitchToCanvas
 }) => {
     // Step management
     const [currentStep, setCurrentStep] = useState(0);
@@ -191,8 +211,17 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
     useEffect(() => {
         if (open) {
             loadTools();
-            // Reset or Initialize state
-            if (initialData) {
+            // Restore from canvas state if switching from canvas mode
+            if (initialCanvasState) {
+                setCurrentStep(1); // Go to tools step since we already have data
+                setWorkflowName(initialCanvasState.workflowName || '');
+                setDescription(initialCanvasState.description || '');
+                setTriggerType((initialCanvasState.triggerType as TriggerType) || 'manual');
+                setTriggerConfig(initialCanvasState.triggerConfig || {});
+                setCategory(initialCanvasState.category || '');
+                setTags(initialCanvasState.tags || '');
+                setWorkflowSteps(initialCanvasState.steps || []);
+            } else if (initialData) {
                 setCurrentStep(0);
                 setWorkflowName(initialData.name || '');
                 setDescription(initialData.description || '');
@@ -232,7 +261,7 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
             setSelectedCategory('All');
             setError(null);
         }
-    }, [open, initialData]);
+    }, [open, initialData, initialCanvasState]);
 
     const loadTools = async () => {
         try {
@@ -562,12 +591,30 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                             </p>
                         </div>
                     </div>
-                    <button
-                        onClick={onClose}
-                        className="p-2 rounded-lg hover:bg-white/20 transition-colors"
-                    >
-                        <X className="w-5 h-5 text-white" />
-                    </button>
+                    <div className="flex items-center space-x-2">
+                        {onSwitchToCanvas && (
+                            <button
+                                onClick={() => onSwitchToCanvas({
+                                    workflowName,
+                                    description,
+                                    triggerType,
+                                    triggerConfig,
+                                    category,
+                                    tags,
+                                    steps: workflowSteps,
+                                })}
+                                className="px-3 py-1.5 rounded-lg bg-white/20 hover:bg-white/30 transition-colors text-white text-xs font-bold"
+                            >
+                                Switch to Canvas
+                            </button>
+                        )}
+                        <button
+                            onClick={onClose}
+                            className="p-2 rounded-lg hover:bg-white/20 transition-colors"
+                        >
+                            <X className="w-5 h-5 text-white" />
+                        </button>
+                    </div>
                 </div>
 
                 {/* Step Indicators */}
