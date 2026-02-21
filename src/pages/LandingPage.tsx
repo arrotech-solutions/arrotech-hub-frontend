@@ -32,6 +32,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import SEO from '../components/SEO';
+import demoVideo from '../assets/videos/Unified_Workspace.mp4';
 
 // Import integration logos
 import slackLogo from '../assets/apps/slack.jpg';
@@ -180,7 +181,7 @@ const LandingPage: React.FC = () => {
             />
 
             {/* Hero Section */}
-            <section className="relative z-10 pt-24 sm:pt-28 pb-12 sm:pb-16 px-4 sm:px-6 lg:px-8 flex flex-col items-center overflow-hidden">
+            <section className="relative z-10 pt-2 pb-12 sm:pb-16 px-4 sm:px-6 lg:px-8 flex flex-col items-center overflow-hidden">
 
                 {/* Animated floating orbs — subtle to avoid navbar clash */}
                 <div className="absolute top-[15%] left-[15%] w-72 h-72 bg-purple-400/10 rounded-full blur-[120px] animate-float pointer-events-none"></div>
@@ -211,39 +212,6 @@ const LandingPage: React.FC = () => {
                         Stop switching apps. The intelligent workspace that unifies your <br className="hidden sm:block" />tools, tasks, and teams in one place.
                     </p>
 
-                    {/* Magic Search Bar */}
-                    <div className="max-w-xl sm:max-w-2xl mx-auto relative group mb-6 sm:mb-8">
-                        {/* Glow Effect */}
-                        <div className="absolute -inset-1.5 bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 rounded-full blur-[25px] opacity-25 group-hover:opacity-50 transition duration-700 animate-gradient-shift bg-[length:200%_200%]"></div>
-
-                        {/* Search Input Container */}
-                        <div className="relative bg-white/90 backdrop-blur-xl rounded-full shadow-2xl shadow-purple-500/10 border border-gray-200/80 p-2.5 pl-8 flex items-center transition-all duration-300 transform hover:scale-[1.01] hover:shadow-purple-500/20">
-                            <Search className="w-6 h-6 text-purple-500 mr-4 flex-shrink-0" />
-                            <div className="flex-1 text-left py-3">
-                                <span className="text-slate-400 text-sm sm:text-lg md:text-xl font-medium">Describe your workflow...</span>
-                            </div>
-
-                            {/* Magic Button */}
-                            <button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-5 sm:px-8 py-2.5 sm:py-3.5 rounded-full font-bold text-sm sm:text-base flex items-center gap-2 transition-all shadow-lg shadow-purple-500/25 hover:shadow-xl hover:shadow-purple-500/40 hover:scale-[1.03]">
-                                <Sparkles className="w-4 h-4 fill-white" />
-                                <span className="hidden sm:inline">Generate</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Quick Pills */}
-                    <div className="flex justify-center gap-2 sm:gap-3 mb-8 sm:mb-10">
-                        {[
-                            { label: 'Summarize Inbox', icon: Sparkles },
-                            { label: 'Draft Proposal', icon: FileText },
-                            { label: 'Schedule Meeting', icon: Calendar },
-                        ].map((action) => (
-                            <button key={action.label} className="px-4 py-2 bg-white/70 hover:bg-white border border-gray-200/60 rounded-full text-xs font-semibold text-slate-600 shadow-sm backdrop-blur-lg transition-all hover:scale-105 hover:text-purple-600 hover:border-purple-200 hover:shadow-md flex items-center gap-1.5">
-                                <action.icon className="w-3 h-3" />
-                                {action.label}
-                            </button>
-                        ))}
-                    </div>
 
                     {/* CTAs */}
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full sm:w-auto">
@@ -264,7 +232,12 @@ const LandingPage: React.FC = () => {
                                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                             </Link>
                         )}
-                        <button className="group w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white hover:bg-gray-50 border border-gray-200 text-slate-700 px-6 sm:px-8 py-3 sm:py-3.5 rounded-full font-bold text-sm sm:text-base transition-all duration-300 shadow-md hover:shadow-lg hover:scale-[1.02]">
+                        <button
+                            onClick={() => {
+                                document.getElementById('demo-video')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }}
+                            className="group w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white hover:bg-gray-50 border border-gray-200 text-slate-700 px-6 sm:px-8 py-3 sm:py-3.5 rounded-full font-bold text-sm sm:text-base transition-all duration-300 shadow-md hover:shadow-lg hover:scale-[1.02]"
+                        >
                             <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center group-hover:bg-purple-200 transition-colors">
                                 <Play className="w-4 h-4 text-purple-600 fill-current ml-0.5" />
                             </div>
@@ -300,6 +273,33 @@ const LandingPage: React.FC = () => {
                                 <div className="text-xl font-extrabold text-slate-900 leading-tight">{uptimeCount}.9%</div>
                                 <div className="text-xs text-slate-500 font-medium">Uptime SLA</div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Video Demo Section */}
+            <section id="demo-video" className="pb-16 md:pb-24 px-4 sm:px-6 lg:px-8 bg-transparent relative z-20 w-full overflow-hidden -mt-4 sm:-mt-8 md:-mt-12">
+                {/* Decorative Background Elements */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-5xl h-[300px] bg-gradient-to-b from-purple-500/10 to-transparent blur-3xl pointer-events-none"></div>
+
+                <div className="max-w-6xl mx-auto relative">
+                    {/* Video Container */}
+                    <div className="relative group rounded-[2rem] sm:rounded-[3rem] p-2 sm:p-4 bg-white/50 backdrop-blur-3xl border border-white shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] hover:shadow-[0_30px_80px_-20px_rgba(100,50,255,0.2)] transition-shadow duration-700">
+                        {/* Inner Video Wrapper */}
+                        <div className="relative rounded-2xl sm:rounded-[2rem] overflow-hidden bg-slate-900 aspect-video shadow-2xl ring-1 ring-slate-900/10 group-hover:ring-purple-500/30 transition-all duration-700 w-full transform group-hover:-translate-y-1">
+                            {/* Subtle Inner Glow */}
+                            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-10"></div>
+
+                            <video
+                                className="absolute top-0 left-0 w-full h-full relative z-0 animate-fade-in object-cover"
+                                src={demoVideo}
+                                controls
+                                autoPlay
+                                muted
+                                loop
+                                playsInline
+                            ></video>
                         </div>
                     </div>
                 </div>
