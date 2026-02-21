@@ -29,15 +29,6 @@ const Dashboard: React.FC = () => {
         requests: 0
     });
     useEffect(() => {
-        if (user?.email?.toLowerCase() === 'support@arrotechsolutions') {
-            navigate('/admin', { replace: true });
-        }
-    }, [user, navigate]);
-
-    useEffect(() => {
-        if (user?.email?.toLowerCase() === 'support@arrotechsolutions') {
-            return; // Don't fetch user stats if redirecting
-        }
         const fetchData = async () => {
             try {
                 // Fetch connections count
