@@ -49,14 +49,8 @@ const Login: React.FC = () => {
     setIsLoading(true);
     setFormError(null);
     try {
-      const loggedInUser = await login(data.email, data.password, rememberMe);
-      if (loggedInUser?.role === 'admin') {
-        navigate('/admin');
-      } else if (loggedInUser?.role === 'employee') {
-        navigate('/employee');
-      } else {
-        navigate('/unified');
-      }
+      await login(data.email, data.password, rememberMe);
+      navigate('/unified');
     } catch (error: any) {
       // Handle specific access errors
       const errorMessage = error.response?.data?.detail || 'Login failed. Please try again.';
@@ -72,14 +66,8 @@ const Login: React.FC = () => {
     setIsOAuthLoading(true);
     setOAuthProvider('Google');
     try {
-      const loggedInUser = await loginWithGoogle(response.credential);
-      if (loggedInUser?.role === 'admin') {
-        navigate('/admin');
-      } else if (loggedInUser?.role === 'employee') {
-        navigate('/employee');
-      } else {
-        navigate('/unified');
-      }
+      await loginWithGoogle(response.credential);
+      navigate('/unified');
     } catch (error: any) {
       const errorMessage = error.response?.data?.detail || 'Google login failed. Please try again.';
       setFormError(errorMessage);
@@ -174,14 +162,8 @@ const Login: React.FC = () => {
             if (accessToken) {
               setIsOAuthLoading(true);
               setOAuthProvider('Microsoft');
-              const msUser = await loginWithMicrosoft(accessToken);
-              if (msUser?.role === 'admin') {
-                navigate('/admin');
-              } else if (msUser?.role === 'employee') {
-                navigate('/employee');
-              } else {
-                navigate('/unified');
-              }
+              await loginWithMicrosoft(accessToken);
+              navigate('/unified');
             } else {
               setFormError('Microsoft login failed. No access token received.');
               setIsOAuthLoading(false);

@@ -31,6 +31,76 @@ const COMPETITORS: Record<string, any> = {
             'Team Collaboration': 'Yes',
             'AI Workflows': 'Auto-scheduling only'
         }
+    },
+    'zapier': {
+        name: 'Zapier',
+        title: 'Arrotech Hub vs Zapier | Best Zapier Alternative with Built-in AI',
+        description: 'Looking for a Zapier alternative? Arrotech Hub offers unified inboxes, native M-Pesa payments, and advanced AI agents at a fraction of the cost.',
+        price: 'From $19.99/mo',
+        features: {
+            'Unified Inbox': false,
+            'Calendar Sync': false,
+            'M-Pesa Integration': false,
+            'Local Pricing': false,
+            'Team Collaboration': 'Enterprise Only',
+            'AI Workflows': true
+        }
+    },
+    'make': {
+        name: 'Make.com',
+        title: 'Arrotech Hub vs Make.com | The Best Make Alternative',
+        description: 'Compare Arrotech Hub and Make.com. Discover why marketers and agencies prefer Arrotech Hub for unified productivity and automated M-Pesa payments.',
+        price: 'From $9/mo',
+        features: {
+            'Unified Inbox': false,
+            'Calendar Sync': false,
+            'M-Pesa Integration': false,
+            'Local Pricing': false,
+            'Team Collaboration': 'Pro Tier',
+            'AI Workflows': true
+        }
+    },
+    'n8n': {
+        name: 'n8n',
+        title: 'Arrotech Hub vs n8n | Better Than Open Source',
+        description: 'Compare Arrotech Hub and n8n. If you want a managed MCP server with built-in marketing tools instead of hosting your own infrastructure, Arrotech is for you.',
+        price: 'From $20/mo',
+        features: {
+            'Unified Inbox': false,
+            'Calendar Sync': false,
+            'M-Pesa Integration': false,
+            'Local Pricing': false,
+            'Team Collaboration': 'Yes',
+            'AI Workflows': true
+        }
+    },
+    'gumloop': {
+        name: 'Gumloop',
+        title: 'Arrotech Hub vs Gumloop | AI Marketing Agent Builder',
+        description: 'Compare Arrotech Hub and Gumloop. While Gumloop builds generic agents, Arrotech Hub provides out-of-the-box AI marketing employees with M-Pesa support.',
+        price: 'From $49/mo',
+        features: {
+            'Unified Inbox': false,
+            'Calendar Sync': false,
+            'M-Pesa Integration': false,
+            'Local Pricing': false,
+            'Team Collaboration': 'Yes',
+            'AI Workflows': true
+        }
+    },
+    'hubspot': {
+        name: 'HubSpot AI',
+        title: 'Arrotech Hub vs HubSpot AI | Cost-Effective Marketing Automation',
+        description: 'Compare Arrotech Hub and HubSpot AI. Get powerful marketing automation, Slack integration, and WhatsApp CRM for a fraction of HubSpot\'s enterprise costs.',
+        price: 'From $800/mo',
+        features: {
+            'Unified Inbox': true,
+            'Calendar Sync': true,
+            'M-Pesa Integration': false,
+            'Local Pricing': false,
+            'Team Collaboration': 'Yes',
+            'AI Workflows': true
+        }
     }
 };
 
