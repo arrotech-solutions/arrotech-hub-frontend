@@ -16,7 +16,6 @@ import {
   MessageCircle,
   Search,
   Settings,
-  Shield,
   ShoppingBag,
   Sparkles,
   User,
@@ -213,16 +212,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     },
   ];
 
-  // Add Admin Dashboard if user is admin
-  if (user?.email === 'support@arrotechsolutions') {
-    navigation.splice(1, 0, {
-      name: 'Admin Dashboard',
-      href: '/admin',
-      icon: Shield,
-      description: 'Manage access requests',
-      badge: null
-    });
-  }
+  // Admin Dashboard has been removed.
 
   const handleLogout = async () => {
     await logout();

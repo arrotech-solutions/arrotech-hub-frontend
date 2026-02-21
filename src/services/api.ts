@@ -436,6 +436,17 @@ class ApiService {
     return response.data;
   }
 
+  // HubSpot OAuth endpoints
+  async getHubSpotAuthUrl(): Promise<{ auth_url: string; state: string }> {
+    const response = await this.api.get('/api/hubspot/auth-url');
+    return response.data;
+  }
+
+  async getHubSpotCallback(code: string, state: string): Promise<{ success: boolean; error?: string }> {
+    const response = await this.api.get(`/api/hubspot/callback?code=${code}&state=${state}`);
+    return response.data;
+  }
+
   // WhatsApp OAuth endpoints
   async getWhatsAppAuthUrl(): Promise<{ url: string }> {
     const response = await this.api.get('/api/whatsapp/auth-url');
@@ -2872,37 +2883,6 @@ class ApiService {
     return response.data;
   }
 
-  // ── Employee & Admin Management ────────────────────────
-
-  async getEmployees(): Promise<any> {
-    const response = await this.api.get('/admin/employees');
-    return response.data;
-  }
-
-  async promoteEmployee(email: string): Promise<any> {
-    const response = await this.api.post('/admin/employees/promote', { email });
-    return response.data;
-  }
-
-  async updateEmployeePermissions(userId: number, permissions: Record<string, boolean>): Promise<any> {
-    const response = await this.api.put(`/admin/employees/${userId}/permissions`, { permissions });
-    return response.data;
-  }
-
-  async demoteEmployee(userId: number): Promise<any> {
-    const response = await this.api.delete(`/admin/employees/${userId}/demote`);
-    return response.data;
-  }
-
-  async getSubscribers(params?: { page?: number; per_page?: number; tier?: string; search?: string }): Promise<any> {
-    const response = await this.api.get('/admin/subscribers', { params });
-    return response.data;
-  }
-
-  async getMyPosts(): Promise<any> {
-    const response = await this.api.get('/admin/my-posts');
-    return response.data;
-  }
 }
 
 export const apiService = new ApiService();

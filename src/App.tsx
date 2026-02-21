@@ -23,6 +23,8 @@ import Register from './pages/Register';
 import ResetPassword from './pages/ResetPassword';
 import ComparisonPage from './pages/ComparisonPage';
 import IntegrationPage from './pages/IntegrationPage';
+import IntegrationPairPage from './pages/IntegrationPairPage';
+import UseCasePage from './pages/UseCasePage';
 import Blog from './pages/Blog';
 import BlogPost from './pages/BlogPost';
 import Settings from './pages/Settings';
@@ -30,8 +32,7 @@ import PrivacyPolicy from './pages/PrivacyPolicy';
 import Workflows from './pages/Workflows';
 import Pricing from './pages/Pricing';
 // import RequestAccess from './pages/RequestAccess';
-import AdminDashboard from './pages/AdminDashboard';
-import EmployeeHub from './pages/EmployeeHub';
+
 import UnifiedDashboard from './pages/UnifiedDashboard';
 import UnifiedInbox from './pages/UnifiedInbox';
 import UnifiedTaskView from './pages/UnifiedTaskView';
@@ -91,12 +92,6 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   }
 
   if (user) {
-    if (user.role === 'admin') {
-      return <Navigate to="/admin" replace />;
-    }
-    if (user.role === 'employee') {
-      return <Navigate to="/employee" replace />;
-    }
     return <Navigate to="/unified" replace />;
   }
 
@@ -156,6 +151,16 @@ const AppRoutes: React.FC = () => {
       <Route path="/integrations/:slug" element={
         <PublicLayout>
           <IntegrationPage />
+        </PublicLayout>
+      } />
+      <Route path="/connect/:pair" element={
+        <PublicLayout>
+          <IntegrationPairPage />
+        </PublicLayout>
+      } />
+      <Route path="/use-cases/:slug" element={
+        <PublicLayout>
+          <UseCasePage />
         </PublicLayout>
       } />
       <Route path="/blog" element={
@@ -403,26 +408,6 @@ const AppRoutes: React.FC = () => {
         element={
           <ProtectedRoute>
             <Chat />
-          </ProtectedRoute>
-        }
-      />
-
-      {/* Admin Route */}
-      <Route
-        path="/admin"
-        element={
-          <ProtectedRoute>
-            <AdminDashboard />
-          </ProtectedRoute>
-        }
-      />
-
-      {/* Employee Hub Route */}
-      <Route
-        path="/employee"
-        element={
-          <ProtectedRoute>
-            <EmployeeHub />
           </ProtectedRoute>
         }
       />
