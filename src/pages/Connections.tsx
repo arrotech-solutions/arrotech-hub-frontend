@@ -180,6 +180,8 @@ const Integrations: React.FC = () => {
         toast.success('Outlook connected successfully!');
       } else if (success === 'tiktok_connected') {
         toast.success('TikTok connected successfully!');
+      } else if (success === 'hubspot_connected') {
+        toast.success('HubSpot CRM connected successfully!');
       } else {
         toast.success('Connection successful!');
       }
@@ -591,6 +593,29 @@ const Integrations: React.FC = () => {
       }
     }
 
+    // Redirect to HubSpot OAuth if it's HubSpot AND NOT already connected
+    if (platform.id === 'hubspot' && !existing) {
+      try {
+        toast.loading('Redirecting to HubSpot...', { id: 'oauth-redirect' });
+        const { auth_url } = await apiService.getHubSpotAuthUrl();
+        window.location.href = auth_url;
+        return;
+      } catch (error: any) {
+        toast.dismiss('oauth-redirect');
+        if (error.response?.status === 402 || error.response?.data?.error === 'upgrade_required') {
+          const details = error.response?.data?.detail || error.response?.data || {};
+          setUpgradeModal({
+            isOpen: true,
+            feature: details.feature || 'HubSpot CRM integration',
+            requiredTier: details.required_tier || 'Biashara Lite',
+            currentTier: details.current_tier || 'Free'
+          });
+        } else {
+          toast.error('Failed to initiate HubSpot connection');
+        }
+        return;
+      }
+    }
 
     // Handle KRA Portal connection (PIN Entry Modal) - REMOVED
 
