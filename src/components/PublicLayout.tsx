@@ -84,7 +84,7 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
                         {/* Desktop Navigation */}
                         <div className="hidden md:flex items-center gap-0.5 bg-white/60 backdrop-blur-xl px-1.5 py-1 rounded-full border border-gray-200/40 shadow-sm mx-auto absolute left-1/2 transform -translate-x-1/2">
                             <button onClick={() => scrollToSection('features')} className="px-4 py-2 text-[13px] font-semibold text-slate-600 hover:text-slate-900 hover:bg-white/80 rounded-full transition-all duration-200">Features</button>
-                            <button onClick={() => scrollToSection('how-it-works')} className="px-4 py-2 text-[13px] font-semibold text-slate-600 hover:text-slate-900 hover:bg-white/80 rounded-full transition-all duration-200">How it Works</button>
+                            <button onClick={() => scrollToSection('demo-video')} className="px-4 py-2 text-[13px] font-semibold text-slate-600 hover:text-slate-900 hover:bg-white/80 rounded-full transition-all duration-200">How it Works</button>
                             <Link to="/pricing" className="px-4 py-2 text-[13px] font-semibold text-slate-600 hover:text-slate-900 hover:bg-white/80 rounded-full transition-all duration-200">Pricing</Link>
 
                             {/* Resources Dropdown */}
@@ -150,7 +150,7 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
                     <div className="md:hidden absolute top-full left-0 w-full bg-white/95 backdrop-blur-2xl border-b border-gray-100 py-6 px-5 shadow-2xl shadow-black/[0.08] max-h-[calc(100vh-4rem)] overflow-y-auto">
                         <div className="flex flex-col gap-1">
                             <button onClick={() => scrollToSection('features')} className="text-left py-3 px-4 rounded-xl hover:bg-slate-50 text-slate-800 font-semibold text-base transition-colors">Features</button>
-                            <button onClick={() => scrollToSection('how-it-works')} className="text-left py-3 px-4 rounded-xl hover:bg-slate-50 text-slate-800 font-semibold text-base transition-colors">How it Works</button>
+                            <button onClick={() => scrollToSection('demo-video')} className="text-left py-3 px-4 rounded-xl hover:bg-slate-50 text-slate-800 font-semibold text-base transition-colors">How it Works</button>
                             <Link to="/pricing" className="text-left py-3 px-4 rounded-xl hover:bg-slate-50 text-slate-800 font-semibold text-base transition-colors">Pricing</Link>
 
                             <div className="border-t border-gray-100 py-3 my-2">
