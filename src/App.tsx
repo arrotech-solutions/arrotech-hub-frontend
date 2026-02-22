@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { HelmetProvider } from 'react-helmet-async';
 import { Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 import Layout from './components/Layout';
@@ -7,47 +7,6 @@ import TutorialButton from './components/TutorialButton';
 import TutorialOverlay from './components/TutorialOverlay';
 import { AuthProvider, useAuth } from './hooks/useAuth';
 import { TutorialProvider } from './hooks/useTutorial';
-import Activity from './pages/Activity';
-import Agents from './pages/Agents';
-import Chat from './pages/Chat';
-import Connections from './pages/Connections';
-// Dashboard removed - UnifiedDashboard is now the primary landing page
-import ForgotPassword from './pages/ForgotPassword';
-import Login from './pages/Login';
-import Marketplace from './pages/Marketplace';
-import CreatorProfile from './pages/CreatorProfile';
-import Favorites from './pages/Favorites';
-import Payments from './pages/Payments';
-import Profile from './pages/Profile';
-import Register from './pages/Register';
-import ResetPassword from './pages/ResetPassword';
-import ComparisonPage from './pages/ComparisonPage';
-import IntegrationPage from './pages/IntegrationPage';
-import IntegrationPairPage from './pages/IntegrationPairPage';
-import UseCasePage from './pages/UseCasePage';
-import Blog from './pages/Blog';
-import BlogPost from './pages/BlogPost';
-import Settings from './pages/Settings';
-import PrivacyPolicy from './pages/PrivacyPolicy';
-import Workflows from './pages/Workflows';
-import Pricing from './pages/Pricing';
-// import RequestAccess from './pages/RequestAccess';
-
-import UnifiedDashboard from './pages/UnifiedDashboard';
-import UnifiedInbox from './pages/UnifiedInbox';
-import UnifiedTaskView from './pages/UnifiedTaskView';
-import UnifiedCalendar from './pages/UnifiedCalendar';
-import WhatsAppDashboard from './pages/WhatsAppDashboard';
-import TikTokDashboard from './pages/TikTokDashboard';
-import PremiumContentUnlock from './pages/PremiumContentUnlock';
-import HelpSupport from './pages/HelpSupport';
-import TipPage from './pages/TipPage';
-import TipVerify from './pages/TipVerify';
-import MicrosoftCallback from './pages/MicrosoftCallback';
-import LandingPage from './pages/LandingPage';
-import Terms from './pages/Terms';
-import KraDashboard from './pages/apps/KraDashboard';
-import ProductivityStats from './pages/ProductivityStats';
 
 import { CommandProvider } from './contexts/CommandContext';
 import { useCommand } from './hooks/useCommand';
@@ -56,6 +15,46 @@ import {
   LayoutDashboard, Mail, CheckSquare, Calendar, Settings as SettingsIcon, LogOut,
   GitBranch, Bot, MessageCircle, Video, ShoppingBag, Link, Activity as ActivityIcon, User
 } from 'lucide-react';
+
+const Activity = lazy(() => import('./pages/Activity'));
+const Agents = lazy(() => import('./pages/Agents'));
+const Chat = lazy(() => import('./pages/Chat'));
+const Connections = lazy(() => import('./pages/Connections'));
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
+const Login = lazy(() => import('./pages/Login'));
+const Marketplace = lazy(() => import('./pages/Marketplace'));
+const CreatorProfile = lazy(() => import('./pages/CreatorProfile'));
+const Favorites = lazy(() => import('./pages/Favorites'));
+const Payments = lazy(() => import('./pages/Payments'));
+const Profile = lazy(() => import('./pages/Profile'));
+const Register = lazy(() => import('./pages/Register'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword'));
+const ComparisonPage = lazy(() => import('./pages/ComparisonPage'));
+const IntegrationPage = lazy(() => import('./pages/IntegrationPage'));
+const IntegrationPairPage = lazy(() => import('./pages/IntegrationPairPage'));
+const UseCasePage = lazy(() => import('./pages/UseCasePage'));
+const Blog = lazy(() => import('./pages/Blog'));
+const BlogPost = lazy(() => import('./pages/BlogPost'));
+const Settings = lazy(() => import('./pages/Settings'));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
+const Workflows = lazy(() => import('./pages/Workflows'));
+const Pricing = lazy(() => import('./pages/Pricing'));
+
+const UnifiedDashboard = lazy(() => import('./pages/UnifiedDashboard'));
+const UnifiedInbox = lazy(() => import('./pages/UnifiedInbox'));
+const UnifiedTaskView = lazy(() => import('./pages/UnifiedTaskView'));
+const UnifiedCalendar = lazy(() => import('./pages/UnifiedCalendar'));
+const WhatsAppDashboard = lazy(() => import('./pages/WhatsAppDashboard'));
+const TikTokDashboard = lazy(() => import('./pages/TikTokDashboard'));
+const PremiumContentUnlock = lazy(() => import('./pages/PremiumContentUnlock'));
+const HelpSupport = lazy(() => import('./pages/HelpSupport'));
+const TipPage = lazy(() => import('./pages/TipPage'));
+const TipVerify = lazy(() => import('./pages/TipVerify'));
+const MicrosoftCallback = lazy(() => import('./pages/MicrosoftCallback'));
+const LandingPage = lazy(() => import('./pages/LandingPage'));
+const Terms = lazy(() => import('./pages/Terms'));
+const KraDashboard = lazy(() => import('./pages/apps/KraDashboard'));
+const ProductivityStats = lazy(() => import('./pages/ProductivityStats'));
 
 
 
@@ -451,13 +450,21 @@ const DefaultGlobalCommands: React.FC = () => {
   return null;
 };
 
+const FallbackLoader = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+  </div>
+);
+
 const App: React.FC = () => {
   return (
     <HelmetProvider>
       <AuthProvider>
         <CommandProvider>
           <TutorialProvider>
-            <AppRoutes />
+            <Suspense fallback={<FallbackLoader />}>
+              <AppRoutes />
+            </Suspense>
             <GlobalCommandPalette />
             <DefaultGlobalCommands />
             <TutorialButton />
