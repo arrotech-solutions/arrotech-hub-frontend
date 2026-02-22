@@ -66,14 +66,11 @@ export default defineConfig(({ mode }) => ({
         sourcemap: mode === 'development',
         rollupOptions: {
             output: {
-                manualChunks: {
-                    // Split React core into its own chunk (rarely changes, cached long-term)
-                    'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-                    // Split UI libraries
-                    'ui-vendor': ['lucide-react', 'recharts', 'react-hot-toast', 'clsx'],
-                    // Split utility libraries
-                    'utils-vendor': ['axios', 'react-hook-form', 'react-helmet-async'],
-                },
+                manualChunks(id) {
+                    if (id.includes('node_modules')) {
+                        return 'vendor';
+                    }
+                }
             },
         },
     },
