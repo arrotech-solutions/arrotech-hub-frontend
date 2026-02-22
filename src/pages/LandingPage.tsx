@@ -32,7 +32,6 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import SEO from '../components/SEO';
-import demoVideo from '../assets/videos/Unified_Workspace.mp4';
 
 // Import integration logos
 import slackLogo from '../assets/apps/slack.jpg';
@@ -291,15 +290,14 @@ const LandingPage: React.FC = () => {
                             {/* Subtle Inner Glow */}
                             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-10"></div>
 
-                            <video
-                                className="absolute top-0 left-0 w-full h-full relative z-0 animate-fade-in object-cover"
-                                src={demoVideo}
-                                controls
-                                autoPlay
-                                muted
-                                loop
-                                playsInline
-                            ></video>
+                            <iframe
+                                className="absolute top-0 left-0 w-full h-full relative z-0 animate-fade-in"
+                                src="https://www.youtube.com/embed/DjMBlY2NAN8?autoplay=1&mute=1&loop=1&playlist=DjMBlY2NAN8&controls=0"
+                                title="Product Demo"
+                                frameBorder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                allowFullScreen
+                            ></iframe>
                         </div>
                     </div>
                 </div>
