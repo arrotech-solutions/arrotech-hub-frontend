@@ -8,6 +8,7 @@ import apiService from '../services/api';
 import { ClickUpLogo, TrelloLogo, JiraLogo, AsanaLogo } from '../components/BrandIcons';
 import { PieChart, Pie, Cell } from 'recharts';
 import toast from 'react-hot-toast';
+import { useWebSocket } from '../hooks/useWebSocket';
 
 interface Task {
     id: string;
@@ -31,6 +32,9 @@ const UnifiedTaskView: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [filterText, setFilterText] = useState('');
     const [activePlatformFilter, setActivePlatformFilter] = useState<string | null>(null);
+
+    // Real-time WebSocket connection
+    const { lastEvent } = useWebSocket();
 
     const fetchTasks = async () => {
         setLoading(true);
@@ -293,6 +297,22 @@ const UnifiedTaskView: React.FC = () => {
     useEffect(() => {
         fetchTasks();
     }, []);
+
+    // Phase 3: Listen for real-time WebSocket events to update the tasks
+    useEffect(() => {
+        if (!lastEvent) return;
+
+        // Refresh tasks if a workflow completes or a generic sync/task event arrives
+        if (
+            lastEvent.type === 'workflow_execution_completed' ||
+            lastEvent.type?.includes('task') ||
+            lastEvent.type?.includes('issue') ||
+            lastEvent.type?.includes('sync')
+        ) {
+            console.log('Real-time event received, refreshing tasks:', lastEvent.type);
+            fetchTasks();
+        }
+    }, [lastEvent]);
 
     const filteredTasks = tasks.filter(task => {
         const matchPlatform = !activePlatformFilter || task.platform === activePlatformFilter;
