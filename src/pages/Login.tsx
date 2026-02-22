@@ -79,7 +79,7 @@ const Login: React.FC = () => {
 
   // Initialize Google Sign-In
   useEffect(() => {
-    const googleClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+    const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
     if (!googleClientId) {
       console.warn('Google Client ID not configured');
       return;
@@ -121,7 +121,7 @@ const Login: React.FC = () => {
 
   // Microsoft Sign-In handler
   const handleMicrosoftLogin = useCallback(async () => {
-    const msClientId = process.env.REACT_APP_MICROSOFT_CLIENT_ID;
+    const msClientId = import.meta.env.VITE_MICROSOFT_CLIENT_ID;
     if (!msClientId) {
       setFormError('Microsoft login is not configured');
       return;
@@ -355,7 +355,7 @@ const Login: React.FC = () => {
               <button
                 type="button"
                 onClick={handleMicrosoftLogin}
-                disabled={!process.env.REACT_APP_MICROSOFT_CLIENT_ID}
+                disabled={!import.meta.env.VITE_MICROSOFT_CLIENT_ID}
                 className="w-full flex items-center justify-center gap-2 border border-gray-200 py-2 rounded-lg text-[10px] font-black text-gray-500 hover:bg-gray-50 transition-colors uppercase tracking-tight disabled:bg-gray-50 disabled:text-gray-300 disabled:cursor-not-allowed"
               >
                 <MicrosoftIcon /> <span>Microsoft Account</span>

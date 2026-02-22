@@ -81,7 +81,7 @@ const Register: React.FC = () => {
   }, [loginWithGoogle, navigate]);
 
   useEffect(() => {
-    const googleClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+    const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
     if (!googleClientId) return;
     const script = document.createElement('script');
     script.src = 'https://accounts.google.com/gsi/client';
@@ -100,7 +100,7 @@ const Register: React.FC = () => {
   }, [handleGoogleCallback]);
 
   const handleMicrosoftLogin = useCallback(async () => {
-    const msClientId = process.env.REACT_APP_MICROSOFT_CLIENT_ID;
+    const msClientId = import.meta.env.VITE_MICROSOFT_CLIENT_ID;
     if (!msClientId) { setFormError('Microsoft not configured'); return; }
     try {
       const redirectUri = encodeURIComponent(window.location.origin + '/auth/microsoft/callback');
@@ -216,7 +216,7 @@ const Register: React.FC = () => {
               <button
                 type="button"
                 onClick={handleMicrosoftLogin}
-                disabled={!process.env.REACT_APP_MICROSOFT_CLIENT_ID}
+                disabled={!import.meta.env.VITE_MICROSOFT_CLIENT_ID}
                 className="w-full flex items-center justify-center gap-2 border border-gray-200 py-2 rounded-lg text-[10px] font-black text-gray-500 hover:bg-gray-50 transition-colors uppercase tracking-tight disabled:bg-gray-50 disabled:text-gray-300 disabled:cursor-not-allowed"
               >
                 <MicrosoftIcon /> <span>Microsoft Account</span>
