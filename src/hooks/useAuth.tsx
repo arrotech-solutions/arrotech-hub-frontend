@@ -76,6 +76,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const response = await apiService.login(email, password, rememberMe);
       localStorage.setItem('auth_token', response.data.token);
+      if (response.data.refresh_token) {
+        localStorage.setItem('refresh_token', response.data.refresh_token);
+      }
 
       if (response.data.remember_me_token) {
         localStorage.setItem('remember_me_token', response.data.remember_me_token);
@@ -94,6 +97,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const response = await apiService.register(email, password, name);
       localStorage.setItem('auth_token', response.data.token);
+      if (response.data.refresh_token) {
+        localStorage.setItem('refresh_token', response.data.refresh_token);
+      }
       setUser(response.data.user);
       toast.success('Registration successful!');
     } catch (error: any) {
@@ -106,6 +112,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const response = await apiService.googleAuth(credential);
       localStorage.setItem('auth_token', response.data.token);
+      if (response.data.refresh_token) {
+        localStorage.setItem('refresh_token', response.data.refresh_token);
+      }
       setUser(response.data.user);
       toast.success('Login successful!');
       return response.data.user;
@@ -119,6 +128,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const response = await apiService.microsoftAuth(accessToken);
       localStorage.setItem('auth_token', response.data.token);
+      if (response.data.refresh_token) {
+        localStorage.setItem('refresh_token', response.data.refresh_token);
+      }
       setUser(response.data.user);
       toast.success('Login successful!');
       return response.data.user;
@@ -136,6 +148,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setUser(null);
       localStorage.removeItem('auth_token');
+      localStorage.removeItem('refresh_token');
       localStorage.removeItem('remember_me_token');
       toast.success('Logged out successfully');
     }
