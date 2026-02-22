@@ -12,6 +12,7 @@ import gmailLogo from '../assets/apps/gmail.png';
 import slackLogo from '../assets/apps/slack.jpg';
 import teamsLogo from '../assets/apps/microsoft_teams.png';
 import outlookLogo from '../assets/apps/outlook.png';
+import { useWebSocket } from '../hooks/useWebSocket';
 
 interface Message {
     id: string;
@@ -132,6 +133,9 @@ const UnifiedInbox: React.FC = () => {
     const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
     const [loading, setLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+
+    // Real-time WebSocket connection
+    const { lastEvent } = useWebSocket();
 
     // UI State
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -384,6 +388,23 @@ const UnifiedInbox: React.FC = () => {
     useEffect(() => {
         fetchMessages();
     }, []);
+
+    // Phase 3: Listen for real-time WebSocket events to update the inbox
+    useEffect(() => {
+        if (!lastEvent) return;
+
+        // If a new email/message arrives, or if an action was taken elsewhere (like a workflow completing)
+        // refresh the inbox specifically if the event is relevant
+        if (
+            lastEvent.type === 'workflow_execution_completed' ||
+            lastEvent.type?.includes('message') ||
+            lastEvent.type?.includes('email') ||
+            lastEvent.type?.includes('sync')
+        ) {
+            console.log('Real-time event received, refreshing inbox:', lastEvent.type);
+            fetchMessages();
+        }
+    }, [lastEvent]);
 
     // Phase 3: Analyze messages with AI after fetching
     useEffect(() => {
