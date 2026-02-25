@@ -187,6 +187,7 @@ export interface ConnectionPlatform {
   features: string[];
   capabilities: PlatformCapability[];
   config_schema: Record<string, any>;
+  status?: string;
 }
 
 export interface Connection {
