@@ -333,10 +333,10 @@ const UnifiedTaskView: React.FC = () => {
 
     const PriorityBadge = ({ priority, color }: { priority?: string, color?: string }) => {
         const colors = {
-            urgent: 'bg-red-100 text-red-800 border-red-300',
-            high: 'bg-red-50 text-red-700 border-red-200',
-            medium: 'bg-orange-50 text-orange-700 border-orange-200',
-            low: 'bg-green-50 text-green-700 border-green-200'
+            urgent: 'bg-red-100 dark:bg-red-500/10 text-red-800 dark:text-red-400 border-red-300 dark:border-red-500/20',
+            high: 'bg-red-50 dark:bg-red-400/10 text-red-700 dark:text-red-300 border-red-200 dark:border-red-400/20',
+            medium: 'bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-200 dark:border-orange-500/20',
+            low: 'bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-400 border-green-200 dark:border-green-500/20'
         };
 
         // If custom color provided (from ClickUp)
@@ -366,10 +366,10 @@ const UnifiedTaskView: React.FC = () => {
     };
 
     const columns = [
-        { id: 'todo', label: 'To Do', color: 'bg-gray-100 border-gray-200', dot: 'bg-gray-400' },
-        { id: 'in_progress', label: 'In Progress', color: 'bg-blue-50 border-blue-100', dot: 'bg-blue-500' },
-        { id: 'review', label: 'In Review', color: 'bg-purple-50 border-purple-100', dot: 'bg-purple-500' },
-        { id: 'done', label: 'Done', color: 'bg-green-50 border-green-100', dot: 'bg-green-500' }
+        { id: 'todo', label: 'To Do', color: 'bg-gray-100 dark:bg-slate-800/40 border-gray-200 dark:border-slate-800', dot: 'bg-gray-400 dark:bg-slate-500' },
+        { id: 'in_progress', label: 'In Progress', color: 'bg-blue-50 dark:bg-blue-500/5 border-blue-100 dark:border-blue-500/20', dot: 'bg-blue-500 dark:bg-blue-400' },
+        { id: 'review', label: 'In Review', color: 'bg-purple-50 dark:bg-purple-500/5 border-purple-100 dark:border-purple-500/20', dot: 'bg-purple-500 dark:bg-purple-400' },
+        { id: 'done', label: 'Done', color: 'bg-green-50 dark:bg-green-500/5 border-green-100 dark:border-green-500/20', dot: 'bg-green-500 dark:bg-green-400' }
     ];
 
     // Stats for Bento Grid
@@ -446,17 +446,17 @@ const UnifiedTaskView: React.FC = () => {
         <div className="flex-1 overflow-y-auto px-4 md:px-8 pb-8 custom-scrollbar">
             <div className="space-y-4 mt-2 max-w-5xl mx-auto">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
-                    <div key={i} className="flex gap-4 p-5 rounded-2xl bg-white border border-gray-100 shimmer-effect shadow-sm">
-                        <div className="w-10 h-10 rounded-xl bg-gray-100 shrink-0" />
+                    <div key={i} className="flex gap-4 p-5 rounded-2xl bg-white dark:bg-slate-800/50 border border-gray-100 dark:border-slate-800 shimmer-effect shadow-sm transition-colors duration-300">
+                        <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-slate-700/50 shrink-0" />
                         <div className="flex-1 space-y-3">
                             <div className="flex justify-between items-start">
-                                <div className="h-4 bg-gray-100 rounded w-1/4" />
-                                <div className="h-3 bg-gray-100 rounded w-16" />
+                                <div className="h-4 bg-gray-100 dark:bg-slate-700/50 rounded w-1/4" />
+                                <div className="h-3 bg-gray-100 dark:bg-slate-700/50 rounded w-16" />
                             </div>
-                            <div className="h-3 bg-gray-100 rounded w-3/4" />
+                            <div className="h-3 bg-gray-100 dark:bg-slate-700/50 rounded w-3/4" />
                             <div className="flex gap-2 pt-2">
-                                <div className="h-4 bg-gray-100 rounded w-20" />
-                                <div className="h-4 bg-gray-100 rounded w-20" />
+                                <div className="h-4 bg-gray-100 dark:bg-slate-700/50 rounded w-20" />
+                                <div className="h-4 bg-gray-100 dark:bg-slate-700/50 rounded w-20" />
                             </div>
                         </div>
                     </div>
@@ -1248,27 +1248,34 @@ const UnifiedTaskView: React.FC = () => {
     };
 
     return (
-        <div className="flex flex-col h-screen bg-[conic-gradient(at_top_left,_var(--tw-gradient-stops))] from-slate-50 via-indigo-50/20 to-slate-50 text-slate-900 overflow-y-auto md:overflow-hidden relative">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-4 md:p-6 lg:p-8 relative overflow-hidden transition-colors duration-500">
+            {/* Ambient Animated Background */}
+            <div className="fixed inset-0 pointer-events-none">
+                <div className="absolute top-0 left-0 w-full h-[600px] bg-gradient-to-b from-indigo-50/60 dark:from-indigo-900/10 to-transparent" />
+                <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-purple-100/30 dark:bg-purple-900/20 rounded-full blur-[100px] animate-pulse" />
+                <div className="absolute top-[20%] left-[-10%] w-[400px] h-[400px] bg-blue-100/20 dark:bg-blue-900/10 rounded-full blur-[100px]" />
+            </div>
+
             {/* Create Task Modal */}
             {isCreateModalOpen && (
                 <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
-                        <div className="px-4 py-3 md:px-6 md:py-4 border-b border-gray-100 flex items-center justify-between shrink-0">
-                            <h3 className="text-lg font-bold text-gray-900">Create New Task</h3>
-                            <button onClick={() => setIsCreateModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh] border border-gray-100 dark:border-slate-800 transition-all duration-300">
+                        <div className="px-4 py-3 md:px-6 md:py-4 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between shrink-0">
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Create New Task</h3>
+                            <button onClick={() => setIsCreateModalOpen(false)} className="text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 transition-colors">
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
 
-                        <div className="p-4 md:p-6 space-y-4 overflow-y-auto custom-scrollbar">
+                        <div className="p-4 md:p-6 space-y-4 overflow-y-auto custom-scrollbar dark:bg-slate-900/50">
                             <div>
-                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Platform</label>
+                                <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">Platform</label>
                                 <div className="grid grid-cols-4 gap-2">
                                     {['jira', 'trello', 'clickup', 'asana'].map(p => (
                                         <button
                                             key={p}
                                             onClick={() => setNewTask({ ...newTask, platform: p as any, targetId: '', subTargetId: '', jiraIssueType: 'Task', jiraStatus: 'To Do', clickupSpaceId: '', clickupFolderId: '', clickupListId: '' })}
-                                            className={`flex flex-col items-center justify-center p-2 rounded-xl border transition-all ${newTask.platform === p ? 'bg-gray-900 text-white border-gray-900 ring-2 ring-gray-900 ring-offset-2' : 'bg-white text-gray-400 border-gray-200 hover:border-gray-300 hover:bg-gray-50'}`}
+                                            className={`flex flex-col items-center justify-center p-2 rounded-xl border transition-all ${newTask.platform === p ? 'bg-gray-900 dark:bg-indigo-600 text-white border-gray-900 dark:border-indigo-600 ring-2 ring-gray-900 dark:ring-indigo-600 ring-offset-2 dark:ring-offset-slate-900' : 'bg-white dark:bg-slate-800 text-gray-400 dark:text-slate-500 border-gray-200 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700/50'}`}
                                         >
                                             {getPlatformIcon(p)}
                                             <span className="text-[10px] font-bold mt-1 capitalize">{p}</span>
@@ -1278,22 +1285,22 @@ const UnifiedTaskView: React.FC = () => {
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">
+                                <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">
                                     {newTask.platform === 'jira' ? 'Project' :
                                         newTask.platform === 'trello' ? 'Board' :
                                             newTask.platform === 'clickup' ? 'Team' : 'Project'}
-                                    {loadingTargets && <span className="ml-2 text-gray-400 font-normal normal-case">(Loading...)</span>}
+                                    {loadingTargets && <span className="ml-2 text-gray-400 dark:text-slate-500 font-normal normal-case">(Loading...)</span>}
                                 </label>
 
                                 {availableTargets.length > 0 ? (
                                     <select
                                         value={newTask.targetId}
                                         onChange={e => setNewTask({ ...newTask, targetId: e.target.value, subTargetId: '' })}
-                                        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                                        className="w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 focus:border-blue-500 dark:focus:border-indigo-500 dark:text-white outline-none transition-all"
                                     >
-                                        <option value="">Select {newTask.platform === 'jira' ? 'Project' : 'Target'}...</option>
+                                        <option value="" className="dark:bg-slate-900">Select {newTask.platform === 'jira' ? 'Project' : 'Target'}...</option>
                                         {availableTargets.map(t => (
-                                            <option key={t.id} value={t.id}>{t.name}</option>
+                                            <option key={t.id} value={t.id} className="dark:bg-slate-900">{t.name}</option>
                                         ))}
                                     </select>
                                 ) : (
@@ -1301,7 +1308,7 @@ const UnifiedTaskView: React.FC = () => {
                                         type="text"
                                         value={newTask.targetId}
                                         onChange={e => setNewTask({ ...newTask, targetId: e.target.value })}
-                                        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                                        className="w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 focus:border-blue-500 dark:focus:border-indigo-500 dark:text-white outline-none transition-all"
                                         placeholder={newTask.platform === 'jira' ? 'e.g. PROJ' : 'e.g. ID'}
                                     />
                                 )}
@@ -1310,20 +1317,20 @@ const UnifiedTaskView: React.FC = () => {
                             {/* Jira Work Type Selection */}
                             {newTask.platform === 'jira' && newTask.targetId && (
                                 <div className="animate-in fade-in slide-in-from-top-2 duration-200">
-                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">
+                                    <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">
                                         Work Type
                                     </label>
                                     <select
                                         value={newTask.jiraIssueType}
                                         onChange={e => setNewTask({ ...newTask, jiraIssueType: e.target.value })}
-                                        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                                        className="w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 focus:border-blue-500 dark:focus:border-indigo-500 dark:text-white outline-none transition-all"
                                     >
-                                        <option value="Task">Task</option>
-                                        <option value="Bug">Bug</option>
-                                        <option value="Story">Story</option>
-                                        <option value="Epic">Epic</option>
-                                        <option value="Feature">Feature</option>
-                                        <option value="Request">Request</option>
+                                        <option value="Task" className="dark:bg-slate-900">Task</option>
+                                        <option value="Bug" className="dark:bg-slate-900">Bug</option>
+                                        <option value="Story" className="dark:bg-slate-900">Story</option>
+                                        <option value="Epic" className="dark:bg-slate-900">Epic</option>
+                                        <option value="Feature" className="dark:bg-slate-900">Feature</option>
+                                        <option value="Request" className="dark:bg-slate-900">Request</option>
                                     </select>
                                 </div>
                             )}
@@ -1331,18 +1338,18 @@ const UnifiedTaskView: React.FC = () => {
                             {/* Jira Status Selection */}
                             {newTask.platform === 'jira' && newTask.targetId && (
                                 <div className="animate-in fade-in slide-in-from-top-2 duration-200">
-                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">
+                                    <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">
                                         Status
                                     </label>
                                     <select
                                         value={newTask.jiraStatus}
                                         onChange={e => setNewTask({ ...newTask, jiraStatus: e.target.value })}
-                                        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                                        className="w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 focus:border-blue-500 dark:focus:border-indigo-500 dark:text-white outline-none transition-all"
                                     >
-                                        <option value="To Do">To Do</option>
-                                        <option value="In Progress">In Progress</option>
-                                        <option value="In Review">In Review</option>
-                                        <option value="Done">Done</option>
+                                        <option value="To Do" className="dark:bg-slate-900">To Do</option>
+                                        <option value="In Progress" className="dark:bg-slate-900">In Progress</option>
+                                        <option value="In Review" className="dark:bg-slate-900">In Review</option>
+                                        <option value="Done" className="dark:bg-slate-900">Done</option>
                                     </select>
                                 </div>
                             )}
@@ -1350,18 +1357,18 @@ const UnifiedTaskView: React.FC = () => {
                             {/* Second Dropdown for Trello (List Selection) */}
                             {newTask.platform === 'trello' && newTask.targetId && (
                                 <div className="animate-in fade-in slide-in-from-top-2 duration-200">
-                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">
+                                    <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">
                                         List
-                                        {loadingTargets && <span className="ml-2 text-gray-400 font-normal normal-case">(Loading...)</span>}
+                                        {loadingTargets && <span className="ml-2 text-gray-400 dark:text-slate-500 font-normal normal-case">(Loading...)</span>}
                                     </label>
                                     <select
                                         value={newTask.subTargetId}
                                         onChange={e => setNewTask({ ...newTask, subTargetId: e.target.value })}
-                                        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                                        className="w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 focus:border-blue-500 dark:focus:border-indigo-500 dark:text-white outline-none transition-all"
                                     >
-                                        <option value="">Select List...</option>
+                                        <option value="" className="dark:bg-slate-900">Select List...</option>
                                         {availableSubTargets.map(t => (
-                                            <option key={t.id} value={t.id}>{t.name}</option>
+                                            <option key={t.id} value={t.id} className="dark:bg-slate-900">{t.name}</option>
                                         ))}
                                     </select>
                                 </div>
@@ -1372,18 +1379,18 @@ const UnifiedTaskView: React.FC = () => {
                                 <>
                                     {/* Space Selection */}
                                     <div className="animate-in fade-in slide-in-from-top-2 duration-200">
-                                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">
+                                        <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">
                                             Space
-                                            {loadingClickup && <span className="ml-2 text-gray-400 font-normal normal-case">(Loading...)</span>}
+                                            {loadingClickup && <span className="ml-2 text-gray-400 dark:text-slate-500 font-normal normal-case">(Loading...)</span>}
                                         </label>
                                         <select
                                             value={newTask.clickupSpaceId}
                                             onChange={e => setNewTask({ ...newTask, clickupSpaceId: e.target.value, clickupFolderId: '', clickupListId: '' })}
-                                            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                                            className="w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 focus:border-blue-500 dark:focus:border-indigo-500 dark:text-white outline-none transition-all"
                                         >
-                                            <option value="">Select Space...</option>
+                                            <option value="" className="dark:bg-slate-900">Select Space...</option>
                                             {clickupSpaces.map(s => (
-                                                <option key={s.id} value={s.id}>{s.name}</option>
+                                                <option key={s.id} value={s.id} className="dark:bg-slate-900">{s.name}</option>
                                             ))}
                                         </select>
                                     </div>
@@ -1391,18 +1398,18 @@ const UnifiedTaskView: React.FC = () => {
                                     {/* Folder Selection (optional) */}
                                     {newTask.clickupSpaceId && (
                                         <div className="animate-in fade-in slide-in-from-top-2 duration-200">
-                                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">
-                                                Folder <span className="text-gray-400 font-normal normal-case">(optional)</span>
-                                                {loadingClickup && <span className="ml-2 text-gray-400 font-normal normal-case">(Loading...)</span>}
+                                            <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">
+                                                Folder <span className="text-gray-400 dark:text-slate-500 font-normal normal-case">(optional)</span>
+                                                {loadingClickup && <span className="ml-2 text-gray-400 dark:text-slate-500 font-normal normal-case">(Loading...)</span>}
                                             </label>
                                             <select
                                                 value={newTask.clickupFolderId}
                                                 onChange={e => setNewTask({ ...newTask, clickupFolderId: e.target.value, clickupListId: '' })}
-                                                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                                                className="w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 focus:border-blue-500 dark:focus:border-indigo-500 dark:text-white outline-none transition-all"
                                             >
-                                                <option value="">Select Folder...</option>
+                                                <option value="" className="dark:bg-slate-900">Select Folder...</option>
                                                 {clickupFolders.map(f => (
-                                                    <option key={f.id} value={f.id}>{f.name}</option>
+                                                    <option key={f.id} value={f.id} className="dark:bg-slate-900">{f.name}</option>
                                                 ))}
                                             </select>
                                         </div>
@@ -1411,18 +1418,18 @@ const UnifiedTaskView: React.FC = () => {
                                     {/* List Selection */}
                                     {newTask.clickupFolderId && (
                                         <div className="animate-in fade-in slide-in-from-top-2 duration-200">
-                                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">
+                                            <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">
                                                 List
-                                                {loadingClickup && <span className="ml-2 text-gray-400 font-normal normal-case">(Loading...)</span>}
+                                                {loadingClickup && <span className="ml-2 text-gray-400 dark:text-slate-500 font-normal normal-case">(Loading...)</span>}
                                             </label>
                                             <select
                                                 value={newTask.clickupListId}
                                                 onChange={e => setNewTask({ ...newTask, clickupListId: e.target.value })}
-                                                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                                                className="w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 focus:border-blue-500 dark:focus:border-indigo-500 dark:text-white outline-none transition-all"
                                             >
-                                                <option value="">Select List...</option>
+                                                <option value="" className="dark:bg-slate-900">Select List...</option>
                                                 {clickupLists.map(l => (
-                                                    <option key={l.id} value={l.id}>{l.name}</option>
+                                                    <option key={l.id} value={l.id} className="dark:bg-slate-900">{l.name}</option>
                                                 ))}
                                             </select>
                                         </div>
@@ -1431,24 +1438,24 @@ const UnifiedTaskView: React.FC = () => {
                             )}
 
                             <div>
-                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Task Title</label>
+                                <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">Task Title</label>
                                 <input
                                     type="text"
                                     value={newTask.title}
                                     onChange={e => setNewTask({ ...newTask, title: e.target.value })}
                                     placeholder="What needs to be done?"
-                                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                                    className="w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 focus:border-blue-500 dark:focus:border-indigo-500 dark:text-white outline-none transition-all"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Description</label>
+                                <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">Description</label>
                                 <textarea
                                     value={newTask.description}
                                     onChange={e => setNewTask({ ...newTask, description: e.target.value })}
                                     placeholder="Add details..."
                                     rows={3}
-                                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all resize-none"
+                                    className="w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 focus:border-blue-500 dark:focus:border-indigo-500 dark:text-white outline-none transition-all resize-none"
                                 />
                             </div>
 
@@ -1457,28 +1464,28 @@ const UnifiedTaskView: React.FC = () => {
                                 {/* Priority - hide for Trello (no priority support) */}
                                 {newTask.platform !== 'trello' && (
                                     <div>
-                                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Priority</label>
+                                        <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">Priority</label>
                                         <select
                                             value={newTask.priority}
                                             onChange={e => setNewTask({ ...newTask, priority: e.target.value })}
-                                            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                                            className="w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 focus:border-blue-500 dark:focus:border-indigo-500 dark:text-white outline-none transition-all"
                                         >
-                                            <option value="urgent">Urgent</option>
-                                            <option value="high">High</option>
-                                            <option value="medium">Normal</option>
-                                            <option value="low">Low</option>
+                                            <option value="urgent" className="dark:bg-slate-900">Urgent</option>
+                                            <option value="high" className="dark:bg-slate-900">High</option>
+                                            <option value="medium" className="dark:bg-slate-900">Normal</option>
+                                            <option value="low" className="dark:bg-slate-900">Low</option>
                                         </select>
                                     </div>
                                 )}
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Assignee</label>
+                                    <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">Assignee</label>
                                     <div className="relative">
                                         {/* Custom Dropdown Trigger */}
                                         <button
                                             type="button"
                                             onClick={() => setAssigneeDropdownOpen(!assigneeDropdownOpen)}
                                             disabled={loadingAssignees}
-                                            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-left flex items-center gap-2"
+                                            className="w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 focus:border-blue-500 dark:focus:border-indigo-500 outline-none transition-all text-left flex items-center gap-2"
                                         >
                                             {newTask.assignee ? (
                                                 (() => {
@@ -1493,27 +1500,27 @@ const UnifiedTaskView: React.FC = () => {
                                                                         {selected.initials || selected.name?.slice(0, 2).toUpperCase()}
                                                                     </div>
                                                                 )}
-                                                                <span className="text-gray-900">{selected.name}</span>
+                                                                <span className="text-gray-900 dark:text-white">{selected.name}</span>
                                                             </>
                                                         );
                                                     }
                                                     return <span className="text-gray-500">Select assignee...</span>;
                                                 })()
                                             ) : (
-                                                <span className="text-gray-500">Unassigned</span>
+                                                <span className="text-gray-500 dark:text-slate-500">Unassigned</span>
                                             )}
                                             <div className="ml-auto">
                                                 {loadingAssignees ? (
                                                     <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
                                                 ) : (
-                                                    <MoreHorizontal className="w-4 h-4 text-gray-400" />
+                                                    <MoreHorizontal className="w-4 h-4 text-gray-400 dark:text-slate-500" />
                                                 )}
                                             </div>
                                         </button>
 
                                         {/* Dropdown List */}
                                         {assigneeDropdownOpen && (
-                                            <div className="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                                            <div className="absolute z-50 mt-1 w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-lg max-h-60 overflow-y-auto custom-scrollbar">
                                                 {/* Unassigned Option */}
                                                 <button
                                                     type="button"
@@ -1521,12 +1528,12 @@ const UnifiedTaskView: React.FC = () => {
                                                         setNewTask({ ...newTask, assignee: '' });
                                                         setAssigneeDropdownOpen(false);
                                                     }}
-                                                    className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 transition-colors"
+                                                    className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center gap-2 transition-colors"
                                                 >
-                                                    <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-gray-400 text-xs">
+                                                    <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-slate-700 flex items-center justify-center text-gray-400 dark:text-slate-500 text-xs">
                                                         —
                                                     </div>
-                                                    <span className="text-gray-500">Unassigned</span>
+                                                    <span className="text-gray-500 dark:text-slate-500">Unassigned</span>
                                                 </button>
 
                                                 {/* User List */}
@@ -1538,7 +1545,7 @@ const UnifiedTaskView: React.FC = () => {
                                                             setNewTask({ ...newTask, assignee: String(u.id) });
                                                             setAssigneeDropdownOpen(false);
                                                         }}
-                                                        className={`w-full px-3 py-2 text-left text-sm hover:bg-blue-50 flex items-center gap-2 transition-colors ${String(newTask.assignee) === String(u.id) ? 'bg-blue-50' : ''}`}
+                                                        className={`w-full px-3 py-2 text-left text-sm hover:bg-blue-50 dark:hover:bg-slate-700 flex items-center gap-2 transition-colors ${String(newTask.assignee) === String(u.id) ? 'bg-blue-50 dark:bg-indigo-500/20' : ''}`}
                                                     >
                                                         {u.avatarUrl ? (
                                                             <img src={u.avatarUrl} alt={u.name} className="w-6 h-6 rounded-full object-cover" />
@@ -1547,12 +1554,12 @@ const UnifiedTaskView: React.FC = () => {
                                                                 {u.initials || u.name?.slice(0, 2).toUpperCase()}
                                                             </div>
                                                         )}
-                                                        <span className="text-gray-900">{u.name}</span>
+                                                        <span className="text-gray-900 dark:text-slate-200">{u.name}</span>
                                                     </button>
                                                 ))}
 
                                                 {availableAssignees.length === 0 && !loadingAssignees && (
-                                                    <div className="px-3 py-2 text-sm text-gray-400 text-center">No assignees available</div>
+                                                    <div className="px-3 py-2 text-sm text-gray-400 dark:text-slate-500 text-center">No assignees available</div>
                                                 )}
                                             </div>
                                         )}
@@ -1565,38 +1572,38 @@ const UnifiedTaskView: React.FC = () => {
                                 {/* Start Date - hide for Jira (not supported) */}
                                 {newTask.platform !== 'jira' && (
                                     <div>
-                                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Start Date</label>
+                                        <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">Start Date</label>
                                         <input
                                             type="date"
                                             value={newTask.startDate}
                                             onChange={e => setNewTask({ ...newTask, startDate: e.target.value })}
-                                            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                                            className="w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 focus:border-blue-500 dark:focus:border-indigo-500 dark:text-white outline-none transition-all"
                                         />
                                     </div>
                                 )}
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Due Date</label>
+                                    <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">Due Date</label>
                                     <input
                                         type="date"
                                         value={newTask.dueDate}
                                         onChange={e => setNewTask({ ...newTask, dueDate: e.target.value })}
-                                        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                                        className="w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 focus:border-blue-500 dark:focus:border-indigo-500 dark:text-white outline-none transition-all"
                                     />
                                 </div>
                             </div>
                         </div>
 
-                        <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
+                        <div className="p-4 border-t border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 flex justify-end gap-3 transition-colors">
                             <button
                                 onClick={() => setIsCreateModalOpen(false)}
-                                className="px-4 py-2 text-sm font-semibold text-gray-600 hover:text-gray-800 transition-colors"
+                                className="px-4 py-2 text-sm font-semibold text-gray-600 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200 transition-colors"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={handleCreateTask}
                                 disabled={creating || !newTask.title || !newTask.targetId}
-                                className="px-6 py-2 bg-gray-900 hover:bg-black text-white text-sm font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                className="px-6 py-2 bg-gray-900 dark:bg-indigo-600 hover:bg-black dark:hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow-lg hover:shadow-xl dark:shadow-indigo-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                             >
                                 {creating && <Loader2 className="w-4 h-4 animate-spin" />}
                                 {creating ? 'Creating...' : 'Create Task'}
@@ -1609,37 +1616,37 @@ const UnifiedTaskView: React.FC = () => {
             {/* Edit Task Modal */}
             {isEditModalOpen && editingTask && (
                 <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
-                        <div className="px-4 py-3 md:px-6 md:py-4 border-b border-gray-100 flex items-center justify-between shrink-0">
-                            <h3 className="text-lg font-bold text-gray-900">Edit Task</h3>
-                            <button onClick={() => setIsEditModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh] border border-gray-100 dark:border-slate-800 transition-all duration-300">
+                        <div className="px-4 py-3 md:px-6 md:py-4 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between shrink-0">
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Edit Task</h3>
+                            <button onClick={() => setIsEditModalOpen(false)} className="text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 transition-colors">
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
 
-                        <div className="p-4 md:p-6 space-y-4 overflow-y-auto custom-scrollbar">
+                        <div className="p-4 md:p-6 space-y-4 overflow-y-auto custom-scrollbar dark:bg-slate-900/50">
                             <div className="flex items-center gap-2 mb-2">
                                 {getPlatformIcon(editingTask.platform)}
-                                <span className="text-xs font-semibold uppercase tracking-wider text-gray-400">{editingTask.platform} Task</span>
+                                <span className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-500">{editingTask.platform} Task</span>
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Title / Summary</label>
+                                <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">Title / Summary</label>
                                 <input
                                     type="text"
                                     value={editForm.description}
                                     onChange={e => setEditForm({ ...editForm, description: e.target.value })}
-                                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                                    className="w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 focus:border-blue-500 dark:focus:border-indigo-500 dark:text-white outline-none transition-all"
                                     placeholder="Task title"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Description</label>
+                                <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">Description</label>
                                 <textarea
                                     value={editForm.fullDescription}
                                     onChange={e => setEditForm({ ...editForm, fullDescription: e.target.value })}
-                                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all min-h-[100px] resize-none"
+                                    className="w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 focus:border-blue-500 dark:focus:border-indigo-500 dark:text-white outline-none transition-all min-h-[100px] resize-none"
                                     placeholder="Detailed description..."
                                 />
                             </div>
@@ -1649,28 +1656,28 @@ const UnifiedTaskView: React.FC = () => {
                                 {/* Priority - hide for Trello (no priority support) */}
                                 {editingTask.platform !== 'trello' && (
                                     <div>
-                                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Priority</label>
+                                        <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">Priority</label>
                                         <select
                                             value={editForm.priority || 'medium'}
                                             onChange={e => setEditForm({ ...editForm, priority: e.target.value as any })}
-                                            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                                            className="w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 focus:border-blue-500 dark:focus:border-indigo-500 dark:text-white outline-none transition-all"
                                         >
-                                            <option value="urgent">Urgent</option>
-                                            <option value="high">High</option>
-                                            <option value="medium">Normal</option>
-                                            <option value="low">Low</option>
+                                            <option value="urgent" className="dark:bg-slate-900">Urgent</option>
+                                            <option value="high" className="dark:bg-slate-900">High</option>
+                                            <option value="medium" className="dark:bg-slate-900">Normal</option>
+                                            <option value="low" className="dark:bg-slate-900">Low</option>
                                         </select>
                                     </div>
                                 )}
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Assignee</label>
+                                    <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">Assignee</label>
                                     <div className="relative">
                                         {/* Custom Dropdown Trigger */}
                                         <button
                                             type="button"
                                             onClick={() => setEditAssigneeDropdownOpen(!editAssigneeDropdownOpen)}
                                             disabled={loadingEditAssignees}
-                                            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-left flex items-center gap-2"
+                                            className="w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 focus:border-blue-500 dark:focus:border-indigo-500 dark:text-white outline-none transition-all text-left flex items-center gap-2"
                                         >
                                             {editForm.assignee ? (
                                                 (() => {
@@ -1685,27 +1692,27 @@ const UnifiedTaskView: React.FC = () => {
                                                                         {selected.initials || selected.name?.slice(0, 2).toUpperCase()}
                                                                     </div>
                                                                 )}
-                                                                <span className="text-gray-900">{selected.name}</span>
+                                                                <span className="text-gray-900 dark:text-white">{selected.name}</span>
                                                             </>
                                                         );
                                                     }
                                                     return <span className="text-gray-500">Select assignee...</span>;
                                                 })()
                                             ) : (
-                                                <span className="text-gray-500">Unassigned</span>
+                                                <span className="text-gray-500 dark:text-slate-500">Unassigned</span>
                                             )}
                                             <div className="ml-auto">
                                                 {loadingEditAssignees ? (
                                                     <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
                                                 ) : (
-                                                    <MoreHorizontal className="w-4 h-4 text-gray-400" />
+                                                    <MoreHorizontal className="w-4 h-4 text-gray-400 dark:text-slate-500" />
                                                 )}
                                             </div>
                                         </button>
 
                                         {/* Dropdown List */}
                                         {editAssigneeDropdownOpen && (
-                                            <div className="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                                            <div className="absolute z-50 mt-1 w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-lg max-h-60 overflow-y-auto custom-scrollbar">
                                                 {/* Unassigned Option */}
                                                 <button
                                                     type="button"
@@ -1713,12 +1720,12 @@ const UnifiedTaskView: React.FC = () => {
                                                         setEditForm({ ...editForm, assignee: '' });
                                                         setEditAssigneeDropdownOpen(false);
                                                     }}
-                                                    className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 transition-colors"
+                                                    className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center gap-2 transition-colors"
                                                 >
-                                                    <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-gray-400 text-xs">
+                                                    <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-slate-700 flex items-center justify-center text-gray-400 dark:text-slate-500 text-xs">
                                                         —
                                                     </div>
-                                                    <span className="text-gray-500">Unassigned</span>
+                                                    <span className="text-gray-500 dark:text-slate-500">Unassigned</span>
                                                 </button>
 
                                                 {/* User List */}
@@ -1730,7 +1737,7 @@ const UnifiedTaskView: React.FC = () => {
                                                             setEditForm({ ...editForm, assignee: String(u.id) });
                                                             setEditAssigneeDropdownOpen(false);
                                                         }}
-                                                        className={`w-full px-3 py-2 text-left text-sm hover:bg-blue-50 flex items-center gap-2 transition-colors ${String(editForm.assignee) === String(u.id) ? 'bg-blue-50' : ''}`}
+                                                        className={`w-full px-3 py-2 text-left text-sm hover:bg-blue-50 dark:hover:bg-slate-700 flex items-center gap-2 transition-colors ${String(editForm.assignee) === String(u.id) ? 'bg-blue-50 dark:bg-indigo-500/20' : ''}`}
                                                     >
                                                         {u.avatarUrl ? (
                                                             <img src={u.avatarUrl} alt={u.name} className="w-6 h-6 rounded-full object-cover" />
@@ -1739,12 +1746,12 @@ const UnifiedTaskView: React.FC = () => {
                                                                 {u.initials || u.name?.slice(0, 2).toUpperCase()}
                                                             </div>
                                                         )}
-                                                        <span className="text-gray-900">{u.name}</span>
+                                                        <span className="text-gray-900 dark:text-white">{u.name}</span>
                                                     </button>
                                                 ))}
 
                                                 {availableEditAssignees.length === 0 && !loadingEditAssignees && (
-                                                    <div className="px-3 py-2 text-sm text-gray-400 text-center">No assignees available</div>
+                                                    <div className="px-3 py-2 text-sm text-gray-400 dark:text-slate-500 text-center">No assignees available</div>
                                                 )}
                                             </div>
                                         )}
@@ -1756,35 +1763,35 @@ const UnifiedTaskView: React.FC = () => {
                                 {/* Start Date - hide for Jira (not supported) */}
                                 {editingTask.platform !== 'jira' && (
                                     <div>
-                                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Start Date</label>
+                                        <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">Start Date</label>
                                         <input
                                             type="date"
                                             value={editForm.startDate || ''}
                                             onChange={e => setEditForm({ ...editForm, startDate: e.target.value })}
-                                            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                                            className="w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 focus:border-blue-500 dark:focus:border-indigo-500 dark:text-white outline-none transition-all"
                                         />
                                     </div>
                                 )}
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Due Date</label>
+                                    <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">Due Date</label>
                                     <input
                                         type="date"
                                         value={editForm.dueDate || ''}
                                         onChange={e => setEditForm({ ...editForm, dueDate: e.target.value })}
-                                        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                                        className="w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 focus:border-blue-500 dark:focus:border-indigo-500 dark:text-white outline-none transition-all"
                                     />
                                 </div>
                             </div>
 
 
                             <div>
-                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Status</label>
+                                <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">Status</label>
                                 <div className="grid grid-cols-2 gap-2">
                                     {columns.map(col => (
                                         <button
                                             key={col.id}
                                             onClick={() => setEditForm({ ...editForm, status: col.id as Task['status'] })}
-                                            className={`flex items-center gap-2 px-3 py-2 rounded-xl border transition-all ${editForm.status === col.id ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-gray-50 text-gray-600 border-gray-100 hover:border-gray-200'}`}
+                                            className={`flex items-center gap-2 px-3 py-2 rounded-xl border transition-all ${editForm.status === col.id ? 'bg-indigo-600 dark:bg-indigo-500 text-white border-indigo-600 dark:border-indigo-500' : 'bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-slate-400 border-gray-100 dark:border-slate-700 hover:border-gray-200 dark:hover:border-slate-600'}`}
                                         >
                                             <div className={`w-2 h-2 rounded-full ${editForm.status === col.id ? 'bg-white' : col.dot}`} />
                                             <span className="text-xs font-medium">{col.label}</span>
@@ -1793,17 +1800,17 @@ const UnifiedTaskView: React.FC = () => {
                                 </div>
                             </div>
 
-                            <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex items-center justify-between shrink-0">
+                            <div className="px-6 py-4 border-t border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 flex items-center justify-between shrink-0 transition-colors">
                                 <button
                                     onClick={() => setIsEditModalOpen(false)}
-                                    className="px-4 py-2 text-sm font-semibold text-gray-500 hover:text-gray-700"
+                                    className="px-4 py-2 text-sm font-semibold text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 transition-colors"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     onClick={handleUpdateTask}
                                     disabled={updating || !editForm.description}
-                                    className="px-6 py-2 bg-gray-900 hover:bg-black text-white text-sm font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                    className="px-6 py-2 bg-gray-900 dark:bg-indigo-600 hover:bg-black dark:hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow-lg hover:shadow-xl dark:shadow-indigo-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                 >
                                     {updating && <Loader2 className="w-4 h-4 animate-spin" />}
                                     {updating ? 'Updating...' : 'Save Changes'}
@@ -1815,26 +1822,26 @@ const UnifiedTaskView: React.FC = () => {
             )}
 
             {/* Header / Toolbar */}
-            <div className="bg-white/80 backdrop-blur-xl border-b border-white/50 px-4 md:px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 sticky top-0 z-30 unified-tasks-header shadow-sm">
+            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-white/50 dark:border-slate-800 px-4 md:px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 sticky top-0 z-30 unified-tasks-header shadow-sm transition-colors">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-2">
-                        <CheckSquare className="w-7 h-7 text-indigo-600" />
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight flex items-center gap-2">
+                        <CheckSquare className="w-7 h-7 text-indigo-600 dark:text-indigo-400" />
                         Task Hub
                     </h1>
-                    <p className="text-sm text-gray-500 mt-1">Manage all your work across varying platforms in one place.</p>
+                    <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Manage all your work across varying platforms in one place.</p>
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <div className="bg-gray-100 p-1 rounded-lg flex items-center shrink-0">
+                    <div className="tasks-view-modes-tut bg-gray-100 dark:bg-slate-800 p-1 rounded-lg flex items-center shrink-0">
                         <button
                             onClick={() => setViewMode('kanban')}
-                            className={`p-2 rounded-md transition-all ${viewMode === 'kanban' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+                            className={`p-2 rounded-md transition-all ${viewMode === 'kanban' ? 'bg-white dark:bg-slate-700 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200'}`}
                         >
                             <LayoutGrid className="w-4 h-4" />
                         </button>
                         <button
                             onClick={() => setViewMode('list')}
-                            className={`p-2 rounded-md transition-all ${viewMode === 'list' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+                            className={`p-2 rounded-md transition-all ${viewMode === 'list' ? 'bg-white dark:bg-slate-700 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200'}`}
                         >
                             <ListIcon className="w-4 h-4" />
                         </button>
@@ -1852,7 +1859,7 @@ const UnifiedTaskView: React.FC = () => {
                     </button>
                     <button
                         onClick={fetchTasks}
-                        className="p-2.5 bg-white border border-gray-200 text-gray-500 hover:text-blue-600 hover:border-blue-200 rounded-xl transition-all shadow-sm shrink-0"
+                        className="p-2.5 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-indigo-400 hover:border-blue-200 dark:hover:border-indigo-500/50 rounded-xl transition-all shadow-sm shrink-0"
                     >
                         <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
                     </button>
@@ -1866,13 +1873,13 @@ const UnifiedTaskView: React.FC = () => {
                 <div className="flex-1 flex flex-col min-w-0">
                     {/* Bento Grid Header */}
                     <div className="px-4 md:px-8 pt-6 pb-2">
-                        <div className="flex overflow-x-auto pb-2 gap-4 mb-6 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:pb-0 sm:overflow-visible custom-scrollbar snap-x snap-mandatory">
+                        <div className="tasks-stats-tut flex overflow-x-auto pb-2 gap-4 mb-6 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:pb-0 sm:overflow-visible custom-scrollbar snap-x snap-mandatory">
                             {/* Summary Cards */}
                             {stats.map((stat, i) => (
-                                <div key={i} className="min-w-[240px] sm:min-w-0 bg-white/70 backdrop-blur-lg p-5 rounded-2xl border border-white/60 shadow-sm flex items-center justify-between hover:shadow-md hover:scale-[1.02] transition-all snap-start">
+                                <div key={i} className="min-w-[240px] sm:min-w-0 bg-white/70 dark:bg-slate-900/50 backdrop-blur-lg p-5 rounded-2xl border border-white/60 dark:border-slate-800/50 shadow-sm flex items-center justify-between hover:shadow-md dark:hover:shadow-indigo-500/10 hover:scale-[1.02] transition-all snap-start">
                                     <div>
-                                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{stat.label}</p>
-                                        <p className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</p>
+                                        <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide">{stat.label}</p>
+                                        <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{stat.value}</p>
                                     </div>
                                     <div className={`p-3 rounded-xl ${stat.color} bg-opacity-10 backdrop-blur-sm`}>
                                         <stat.icon className={`w-5 h-5 ${stat.color.replace('bg-', 'text-').replace('text-white', '')}`} style={{ color: stat.color.includes('text-white') ? undefined : 'currentColor' }} />
@@ -1880,7 +1887,7 @@ const UnifiedTaskView: React.FC = () => {
                                 </div>
                             ))}
                             {/* Mini Chart */}
-                            <div className="min-w-[240px] sm:min-w-0 bg-white p-1 rounded-2xl border border-gray-200/60 shadow-sm relative overflow-hidden flex items-center justify-center sm:col-span-1 lg:col-span-1 min-h-[100px] snap-start">
+                            <div className="min-w-[240px] sm:min-w-0 bg-white dark:bg-slate-900/50 p-1 rounded-2xl border border-gray-200/60 dark:border-slate-800 shadow-sm relative overflow-hidden flex items-center justify-center sm:col-span-1 lg:col-span-1 min-h-[100px] snap-start transition-colors">
                                 <div className="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none">
                                     <PieChart width={100} height={100}>
                                         <Pie data={chartData} innerRadius={35} outerRadius={45} paddingAngle={2} dataKey="value">
@@ -1891,28 +1898,28 @@ const UnifiedTaskView: React.FC = () => {
                                     </PieChart>
                                 </div>
                                 <div className="text-center z-10">
-                                    <span className="block text-xl font-bold text-gray-800">{Math.round((tasks.filter(t => t.status === 'done').length / (tasks.length || 1)) * 100)}%</span>
-                                    <span className="text-[10px] uppercase font-bold text-gray-400">Completion</span>
+                                    <span className="block text-xl font-bold text-gray-800 dark:text-slate-200">{Math.round((tasks.filter(t => t.status === 'done').length / (tasks.length || 1)) * 100)}%</span>
+                                    <span className="text-[10px] uppercase font-bold text-gray-400 dark:text-slate-500">Completion</span>
                                 </div>
                             </div>
                         </div>
 
                         {/* Filters Bar */}
-                        <div className="flex items-center gap-3 overflow-x-auto pb-4 custom-scrollbar no-scrollbar-mobile">
+                        <div className="tasks-filters-tut flex items-center gap-3 overflow-x-auto pb-4 custom-scrollbar no-scrollbar-mobile">
                             <div className="relative shrink-0">
-                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-gray-400 dark:text-slate-500" />
                                 <input
                                     type="text"
                                     placeholder="Filter by name..."
                                     value={filterText}
                                     onChange={(e) => setFilterText(e.target.value)}
-                                    className="pl-9 pr-4 py-1.5 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 w-48 shadow-sm transition-all"
+                                    className="tasks-search-tut pl-9 pr-4 py-1.5 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700/50 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 focus:border-blue-500 dark:focus:border-indigo-500 w-48 shadow-sm transition-all dark:text-white"
                                 />
                             </div>
-                            <div className="h-6 w-px bg-gray-200 mx-1 shrink-0" />
+                            <div className="h-6 w-px bg-gray-200 dark:bg-slate-800 mx-1 shrink-0" />
                             <button
                                 onClick={() => setActivePlatformFilter(null)}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border shrink-0 ${!activePlatformFilter ? 'bg-gray-800 text-white border-gray-800' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'}`}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border shrink-0 ${!activePlatformFilter ? 'bg-gray-800 dark:bg-indigo-600 text-white border-gray-800 dark:border-indigo-600' : 'bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-400 border-gray-200 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600'}`}
                             >
                                 All
                             </button>
@@ -1920,7 +1927,7 @@ const UnifiedTaskView: React.FC = () => {
                                 <button
                                     key={p}
                                     onClick={() => setActivePlatformFilter(p)}
-                                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border flex items-center gap-1.5 capitalize shrink-0 ${activePlatformFilter === p ? 'bg-gray-100 text-gray-900 border-gray-300' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'}`}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border flex items-center gap-1.5 capitalize shrink-0 ${activePlatformFilter === p ? 'bg-gray-100 dark:bg-slate-700 text-gray-900 dark:text-white border-gray-300 dark:border-slate-600' : 'bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-400 border-gray-200 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600'}`}
                                 >
                                     {getPlatformIcon(p)}
                                     {p}
@@ -1935,29 +1942,29 @@ const UnifiedTaskView: React.FC = () => {
                     ) : (
                         <>
                             {viewMode === 'kanban' && (
-                                <div className="flex-1 overflow-visible md:overflow-x-auto custom-scrollbar px-4 md:px-8 pb-8">
+                                <div className="tasks-kanban-tut flex-1 overflow-visible md:overflow-x-auto custom-scrollbar px-4 md:px-8 pb-8">
                                     <div className="flex flex-col md:flex-row gap-6 md:gap-6 h-auto md:h-full md:min-w-max md:overflow-y-hidden pb-20 md:pb-0">
                                         {columns.map(col => {
                                             const colTasks = filteredTasks.filter(t => t.status === col.id);
                                             return (
                                                 <div
                                                     key={col.id}
-                                                    className="w-full md:w-[320px] flex flex-col h-auto md:h-full shrink-0 bg-white/30 backdrop-blur-md rounded-3xl border border-white/40 p-3"
+                                                    className="w-full md:w-[320px] flex flex-col h-auto md:h-full shrink-0 bg-white/30 dark:bg-slate-900/30 backdrop-blur-md rounded-3xl border border-white/40 dark:border-white/5 p-3"
                                                     onDragOver={handleDragOver}
                                                     onDrop={(e) => handleDrop(e, col.id as any)}
                                                 >
                                                     <div className="flex items-center justify-between mb-4">
                                                         <div className="flex items-center gap-2">
                                                             <span className={`w-2 h-2 rounded-full ${col.dot}`} />
-                                                            <h3 className="font-bold text-gray-700 text-sm">{col.label}</h3>
-                                                            <span className="bg-gray-200 text-gray-600 text-[10px] font-bold px-1.5 py-0.5 rounded-md">{colTasks.length}</span>
+                                                            <h3 className="font-bold text-gray-700 dark:text-slate-300 text-sm">{col.label}</h3>
+                                                            <span className="bg-gray-200 dark:bg-slate-800 text-gray-600 dark:text-slate-400 text-[10px] font-bold px-1.5 py-0.5 rounded-md">{colTasks.length}</span>
                                                         </div>
-                                                        <button className="text-gray-400 hover:text-gray-600"><MoreHorizontal className="w-4 h-4" /></button>
+                                                        <button className="text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300"><MoreHorizontal className="w-4 h-4" /></button>
                                                     </div>
 
                                                     <div className="flex-1 md:overflow-y-auto pr-0 md:pr-2 custom-scrollbar space-y-3 pb-4">
                                                         {colTasks.length === 0 && (
-                                                            <div className="border-2 border-dashed border-gray-100 rounded-xl h-24 flex items-center justify-center text-gray-300 text-xs font-medium">
+                                                            <div className="border-2 border-dashed border-gray-100 dark:border-slate-800/50 rounded-xl h-24 flex items-center justify-center text-gray-300 dark:text-slate-700 text-xs font-medium">
                                                                 No Tasks
                                                             </div>
                                                         )}
@@ -1967,32 +1974,32 @@ const UnifiedTaskView: React.FC = () => {
                                                                 draggable
                                                                 onDragStart={(e) => handleDragStart(e, task.id)}
                                                                 onClick={() => openEditModal(task)}
-                                                                className="bg-white/90 p-4 rounded-2xl border border-white/60 shadow-sm hover:shadow-lg hover:shadow-indigo-500/10 transition-all cursor-pointer group hover:-translate-y-1 relative overflow-hidden backdrop-blur-sm"
+                                                                className="bg-white/90 dark:bg-slate-800/90 p-4 rounded-2xl border border-white/60 dark:border-white/5 shadow-sm hover:shadow-lg dark:hover:shadow-indigo-500/10 transition-all cursor-pointer group hover:-translate-y-1 relative overflow-hidden backdrop-blur-sm"
                                                             >
                                                                 <div className={`absolute left-0 top-0 bottom-0 w-1 ${col.dot}`} />
 
                                                                 <div className="flex justify-between items-start mb-2 pl-2">
-                                                                    <div className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-500 bg-gray-50 px-2 py-0.5 rounded-md border border-gray-100">
+                                                                    <div className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-500 dark:text-slate-400 bg-gray-50 dark:bg-slate-900 px-2 py-0.5 rounded-md border border-gray-100 dark:border-slate-800">
                                                                         {getPlatformIcon(task.platform)}
                                                                         <span className="capitalize">{task.platform}</span>
                                                                     </div>
                                                                     <button
                                                                         onClick={(e) => { e.stopPropagation(); openEditModal(task); }}
-                                                                        className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-blue-600 transition-all p-1 hover:bg-blue-50 rounded-lg"
+                                                                        className="opacity-0 group-hover:opacity-100 text-gray-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-indigo-400 transition-all p-1 hover:bg-blue-50 dark:hover:bg-indigo-500/10 rounded-lg"
                                                                         title="Edit Task"
                                                                     >
                                                                         <MoreHorizontal className="w-3.5 h-3.5" />
                                                                     </button>
                                                                 </div>
 
-                                                                <h4 className={`text-sm font-bold text-gray-800 mb-1 pl-2 leading-snug ${task.status === 'done' ? 'line-through text-gray-400' : ''}`}>{task.description}</h4>
+                                                                <h4 className={`text-sm font-bold text-gray-800 dark:text-slate-200 mb-1 pl-2 leading-snug ${task.status === 'done' ? 'line-through text-gray-400 dark:text-slate-600' : ''}`}>{task.description}</h4>
 
                                                                 <div className="flex items-center gap-2 mb-3 pl-2">
-                                                                    <span className="text-[11px] font-medium text-gray-500 truncate max-w-[120px]">{task.project}</span>
+                                                                    <span className="text-[11px] font-medium text-gray-500 dark:text-slate-400 truncate max-w-[120px]">{task.project}</span>
                                                                 </div>
 
-                                                                <div className="flex items-center justify-between pl-2 pt-2 border-t border-gray-50">
-                                                                    <div className="flex items-center gap-1.5 text-xs text-gray-400 font-medium">
+                                                                <div className="flex items-center justify-between pl-2 pt-2 border-t border-gray-50 dark:border-slate-700/50">
+                                                                    <div className="flex items-center gap-1.5 text-xs text-gray-400 dark:text-slate-500 font-medium">
                                                                         <Calendar className="w-3.5 h-3.5" />
                                                                         {task.dueDate}
                                                                     </div>
@@ -2009,11 +2016,11 @@ const UnifiedTaskView: React.FC = () => {
                             )}
 
                             {viewMode === 'list' && (
-                                <div className="flex-1 overflow-y-auto px-4 md:px-8 pb-8 custom-scrollbar">
+                                <div className="tasks-list-tut flex-1 overflow-y-auto px-4 md:px-8 pb-8 custom-scrollbar">
                                     {/* Desktop Table View */}
-                                    <div className="hidden md:block bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden min-w-[600px]">
-                                        <table className="w-full text-left text-sm text-gray-600">
-                                            <thead className="bg-gray-50/50 text-xs uppercase font-semibold text-gray-500">
+                                    <div className="hidden md:block bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-gray-100 dark:border-slate-800 overflow-hidden min-w-[600px] transition-colors">
+                                        <table className="w-full text-left text-sm text-gray-600 dark:text-slate-400">
+                                            <thead className="bg-gray-50/50 dark:bg-slate-800 text-xs uppercase font-semibold text-gray-500 dark:text-slate-400">
                                                 <tr>
                                                     <th className="px-6 py-4">Task</th>
                                                     <th className="px-6 py-4">Platform</th>
@@ -2023,37 +2030,37 @@ const UnifiedTaskView: React.FC = () => {
                                                     <th className="px-6 py-4 text-right">Actions</th>
                                                 </tr>
                                             </thead>
-                                            <tbody className="divide-y divide-gray-50">
+                                            <tbody className="divide-y divide-gray-50 dark:divide-slate-800">
                                                 {filteredTasks.map(task => (
-                                                    <tr key={task.id} onClick={() => openEditModal(task)} className="hover:bg-gray-50/50 transition-colors group cursor-pointer">
-                                                        <td className="px-6 py-4 font-medium text-gray-900">
+                                                    <tr key={task.id} onClick={() => openEditModal(task)} className="hover:bg-gray-50/50 dark:hover:bg-slate-800/50 transition-colors group cursor-pointer">
+                                                        <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">
                                                             <div className="flex items-center gap-3">
                                                                 <div className={`w-1.5 h-1.5 rounded-full ${columns.find(c => c.id === task.status)?.dot}`} />
-                                                                <span className={task.status === 'done' ? 'line-through text-gray-400' : ''}>{task.description}</span>
+                                                                <span className={task.status === 'done' ? 'line-through text-gray-400 dark:text-slate-600' : ''}>{task.description}</span>
                                                             </div>
                                                         </td>
                                                         <td className="px-6 py-4">
                                                             <div className="flex items-center gap-2">
                                                                 {getPlatformIcon(task.platform)}
-                                                                <span className="capitalize text-xs font-semibold bg-gray-100 px-2 py-0.5 rounded-md">{task.platform}</span>
+                                                                <span className="capitalize text-xs font-semibold bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300 px-2 py-0.5 rounded-md">{task.platform}</span>
                                                             </div>
                                                         </td>
                                                         <td className="px-6 py-4">
-                                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${task.status === 'done' ? 'bg-green-100 text-green-700' :
-                                                                task.status === 'in_progress' ? 'bg-blue-100 text-blue-700' :
-                                                                    task.status === 'review' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-700'
+                                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${task.status === 'done' ? 'bg-green-100/10 dark:bg-green-500/10 text-green-700 dark:text-green-400' :
+                                                                task.status === 'in_progress' ? 'bg-blue-100/10 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400' :
+                                                                    task.status === 'review' ? 'bg-purple-100/10 dark:bg-purple-500/10 text-purple-700 dark:text-purple-400' : 'bg-gray-100/10 dark:bg-slate-800 text-gray-700 dark:text-slate-400'
                                                                 }`}>
                                                                 {task.status.replace('_', ' ')}
                                                             </span>
                                                         </td>
-                                                        <td className="px-6 py-4 font-mono text-xs">{task.dueDate}</td>
+                                                        <td className="px-6 py-4 font-mono text-xs text-gray-500 dark:text-slate-400">{task.dueDate}</td>
                                                         <td className="px-6 py-4">
                                                             <PriorityBadge priority={task.priority} color={task.priorityColor} />
                                                         </td>
                                                         <td className="px-6 py-4 text-right">
                                                             <button
                                                                 onClick={(e) => { e.stopPropagation(); openEditModal(task); }}
-                                                                className="text-gray-400 hover:text-blue-600 transition-colors p-1.5 hover:bg-blue-50 rounded-lg"
+                                                                className="text-gray-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-indigo-400 transition-colors p-1.5 hover:bg-blue-50 dark:hover:bg-slate-800 rounded-lg"
                                                             >
                                                                 <MoreHorizontal className="w-4 h-4" />
                                                             </button>
@@ -2070,23 +2077,23 @@ const UnifiedTaskView: React.FC = () => {
                                             <div
                                                 key={task.id}
                                                 onClick={() => openEditModal(task)}
-                                                className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 space-y-3 active:scale-[0.99] transition-transform"
+                                                className="bg-white dark:bg-slate-900 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-slate-800 space-y-3 active:scale-[0.99] transition-transform"
                                             >
                                                 <div className="flex items-start justify-between gap-3">
                                                     <div className="flex items-center gap-2 min-w-0">
                                                         <div className={`w-2 h-2 rounded-full shrink-0 ${columns.find(c => c.id === task.status)?.dot}`} />
-                                                        <h4 className={`font-semibold text-gray-900 text-sm truncate ${task.status === 'done' ? 'line-through text-gray-400' : ''}`}>
+                                                        <h4 className={`font-semibold text-gray-900 dark:text-white text-sm truncate ${task.status === 'done' ? 'line-through text-gray-400 dark:text-slate-600' : ''}`}>
                                                             {task.description}
                                                         </h4>
                                                     </div>
                                                     <PriorityBadge priority={task.priority} color={task.priorityColor} />
                                                 </div>
 
-                                                <p className="text-xs text-gray-500 line-clamp-2">
+                                                <p className="text-xs text-gray-500 dark:text-slate-400 line-clamp-2">
                                                     {task.fullDescription || 'No description provided.'}
                                                 </p>
 
-                                                <div className="flex items-center justify-between text-xs text-gray-500 pt-2 border-t border-gray-50">
+                                                <div className="flex items-center justify-between text-xs text-gray-500 dark:text-slate-500 pt-2 border-t border-gray-50 dark:border-slate-800">
                                                     <div className="flex items-center gap-3">
                                                         <div className="flex items-center gap-1.5">
                                                             {getPlatformIcon(task.platform)}
@@ -2098,10 +2105,10 @@ const UnifiedTaskView: React.FC = () => {
                                                         </div>
                                                     </div>
 
-                                                    <span className={`px-2 py-0.5 rounded-full capitalize text-[10px] font-medium ${task.status === 'done' ? 'bg-green-100 text-green-700' :
-                                                        task.status === 'in_progress' ? 'bg-blue-100 text-blue-700' :
-                                                            task.status === 'review' ? 'bg-purple-100 text-purple-700' :
-                                                                'bg-gray-100 text-gray-700'
+                                                    <span className={`px-2 py-0.5 rounded-full capitalize text-[10px] font-medium ${task.status === 'done' ? 'bg-green-100/10 dark:bg-green-500/10 text-green-700 dark:text-green-400' :
+                                                        task.status === 'in_progress' ? 'bg-blue-100/10 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400' :
+                                                            task.status === 'review' ? 'bg-purple-100/10 dark:bg-purple-500/10 text-purple-700 dark:text-purple-400' :
+                                                                'bg-gray-100/10 dark:bg-slate-800 text-gray-700 dark:text-slate-400'
                                                         }`}>
                                                         {task.status.replace('_', ' ')}
                                                     </span>
@@ -2128,8 +2135,14 @@ const UnifiedTaskView: React.FC = () => {
                     background: rgba(156, 163, 175, 0.3);
                     border-radius: 99px;
                 }
+                .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+                    background: rgba(148, 163, 184, 0.2);
+                }
                 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
                     background: rgba(156, 163, 175, 0.5);
+                }
+                .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                    background: rgba(148, 163, 184, 0.4);
                 }
                 
                 .shimmer-effect {

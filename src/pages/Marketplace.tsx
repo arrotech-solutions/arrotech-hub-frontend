@@ -290,20 +290,20 @@ const Marketplace: React.FC = () => {
       {/* Header */}
       <div className="marketplace-header flex flex-col md:flex-row items-center justify-between gap-6 mb-10">
         <div className="text-center md:text-left">
-          <h1 className="text-3xl sm:text-4xl font-black text-gray-900 flex flex-col sm:flex-row items-center sm:space-x-3 gap-3">
+          <h1 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white flex flex-col sm:flex-row items-center sm:space-x-3 gap-3">
             <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl shadow-lg shadow-purple-500/20">
               <ShoppingBag className="w-8 h-8 text-white" />
             </div>
             <span>Workflow Marketplace</span>
           </h1>
-          <p className="text-gray-500 mt-3 font-medium max-w-md">
+          <p className="text-gray-500 dark:text-slate-400 mt-3 font-medium max-w-md">
             Discover, share, and import community-driven intelligent workflows.
           </p>
         </div>
         <div className="flex items-center space-x-3 w-full sm:w-auto justify-center md:justify-end">
           <button
             onClick={() => setShowImportModal(true)}
-            className="flex-1 sm:flex-none flex items-center justify-center space-x-2 px-6 py-3 border border-gray-200 bg-white text-gray-700 rounded-xl hover:bg-gray-50 hover:border-purple-300 transition-all shadow-sm font-bold"
+            className="flex-1 sm:flex-none flex items-center justify-center space-x-2 px-6 py-3 border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-300 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-700 hover:border-purple-300 transition-all shadow-sm font-bold"
           >
             <Upload className="w-4 h-4" />
             <span>Import JSON</span>
@@ -314,7 +314,7 @@ const Marketplace: React.FC = () => {
               else if (activeTab === 'my-shared') fetchMyShared();
               else fetchMyDownloads();
             }}
-            className="p-3 text-gray-600 bg-white border border-gray-200 rounded-xl hover:text-purple-600 hover:border-purple-200 transition-all shadow-sm"
+            className="p-3 text-gray-600 dark:text-slate-400 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl hover:text-purple-600 dark:hover:text-purple-400 hover:border-purple-200 transition-all shadow-sm"
             title="Refresh"
           >
             <RefreshCw className="w-5 h-5" />
@@ -324,7 +324,7 @@ const Marketplace: React.FC = () => {
 
       {/* Tabs */}
       <div className="overflow-x-auto custom-scrollbar-hide mb-8">
-        <div className="marketplace-tabs flex space-x-1 bg-gray-100/50 backdrop-blur-sm border border-gray-200/50 rounded-2xl p-1.5 w-max">
+        <div className="marketplace-tabs flex space-x-1 bg-gray-100/50 dark:bg-slate-800/50 backdrop-blur-sm border border-gray-200/50 dark:border-slate-700/50 rounded-2xl p-1.5 w-max">
           {[
             { id: 'browse', label: 'Browse', icon: Globe },
             { id: 'my-shared', label: 'My Shared', icon: Share2 },
@@ -337,8 +337,8 @@ const Marketplace: React.FC = () => {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`flex items-center space-x-2 px-6 py-2.5 rounded-xl font-bold text-sm transition-all ${isActive
-                  ? 'bg-white text-purple-600 shadow-md transform scale-105'
-                  : 'text-gray-500 hover:text-gray-900 hover:bg-white/50'
+                  ? 'bg-white dark:bg-slate-700 text-purple-600 dark:text-purple-400 shadow-md transform scale-105'
+                  : 'text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-slate-700/50'
                   }`}
               >
                 <Icon className={`w-4 h-4 ${isActive ? 'animate-pulse' : ''}`} />
@@ -353,18 +353,18 @@ const Marketplace: React.FC = () => {
       {activeTab === 'browse' && (
         <>
           {/* Search and Filters */}
-          <div className="marketplace-filters bg-white/40 backdrop-blur-md rounded-2xl border border-white/60 shadow-sm p-4 sm:p-6 mb-8">
+          <div className="marketplace-filters bg-white/40 dark:bg-slate-800/40 backdrop-blur-md rounded-2xl border border-white/60 dark:border-slate-700/50 shadow-sm p-4 sm:p-6 mb-8">
             <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-4 sm:gap-6">
               {/* Search */}
               <form onSubmit={handleSearch} className="flex-1">
                 <div className="relative group">
-                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 group-focus-within:text-purple-500 transition-colors" />
+                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-slate-500 w-5 h-5 group-focus-within:text-purple-500 transition-colors" />
                   <input
                     type="text"
                     placeholder="Search workflows by name, tags, or author..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3.5 bg-white border border-gray-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all placeholder:text-gray-400 font-medium"
+                    className="w-full pl-12 pr-4 py-3.5 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all placeholder:text-gray-400 dark:placeholder:text-slate-500 text-slate-900 dark:text-white font-medium shadow-inner"
                   />
                 </div>
               </form>
@@ -372,15 +372,15 @@ const Marketplace: React.FC = () => {
               <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-4">
                 {/* Category Filter */}
                 <div className="relative flex-1 sm:flex-none w-full sm:w-auto">
-                  <Tag className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
+                  <Tag className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-slate-500 w-4 h-4 pointer-events-none" />
                   <select
                     value={selectedCategory || ''}
                     onChange={(e) => setSelectedCategory(e.target.value || null)}
-                    className="w-full pl-10 pr-10 py-3.5 bg-white border border-gray-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all font-bold text-sm appearance-none cursor-pointer"
+                    className="w-full pl-10 pr-10 py-3.5 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all font-bold text-sm appearance-none cursor-pointer text-slate-900 dark:text-white shadow-inner"
                   >
-                    <option value="">All Categories</option>
+                    <option value="" className="dark:bg-slate-900">All Categories</option>
                     {categories.map((cat) => (
-                      <option key={cat.name} value={cat.name}>
+                      <option key={cat.name} value={cat.name} className="dark:bg-slate-900 text-slate-900 dark:text-white">
                         {cat.name} ({cat.count})
                       </option>
                     ))}
@@ -392,25 +392,25 @@ const Marketplace: React.FC = () => {
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-                    className="w-full px-6 py-3.5 bg-white border border-gray-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all font-bold text-sm appearance-none cursor-pointer"
+                    className="w-full px-6 py-3.5 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all font-bold text-sm appearance-none cursor-pointer text-slate-900 dark:text-white shadow-inner"
                   >
-                    <option value="downloads">Most Popular</option>
-                    <option value="rating">Top Rated</option>
-                    <option value="newest">Latest First</option>
+                    <option value="downloads" className="dark:bg-slate-900">Most Popular</option>
+                    <option value="rating" className="dark:bg-slate-900">Top Rated</option>
+                    <option value="newest" className="dark:bg-slate-900">Latest First</option>
                   </select>
                 </div>
 
                 {/* View Toggle */}
-                <div className="flex items-center p-1 bg-gray-100 rounded-xl mx-auto sm:mx-0">
+                <div className="flex items-center p-1 bg-gray-100 dark:bg-slate-800 rounded-xl mx-auto sm:mx-0 shadow-inner">
                   <button
                     onClick={() => setViewMode('grid')}
-                    className={`p-2.5 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white text-purple-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+                    className={`p-2.5 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white dark:bg-slate-700 text-purple-600 dark:text-purple-400 shadow-sm' : 'text-gray-400 hover:text-gray-600 dark:hover:text-slate-300'}`}
                   >
                     <Grid className="w-5 h-5" />
                   </button>
                   <button
                     onClick={() => setViewMode('list')}
-                    className={`p-2.5 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white text-purple-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+                    className={`p-2.5 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white dark:bg-slate-700 text-purple-600 dark:text-purple-400 shadow-sm' : 'text-gray-400 hover:text-gray-600 dark:hover:text-slate-300'}`}
                   >
                     <List className="w-5 h-5" />
                   </button>
@@ -425,7 +425,7 @@ const Marketplace: React.FC = () => {
               <div className="flex items-center justify-between mb-4 marketplace-trending-header">
                 <div className="flex items-center space-x-2">
                   <TrendingUp className="w-5 h-5 text-orange-500" />
-                  <h2 className="text-lg font-semibold text-gray-900">Trending This Week</h2>
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Trending This Week</h2>
                   <span className="px-2 py-0.5 bg-orange-100 text-orange-700 text-xs font-medium rounded-full">🔥 Hot</span>
                 </div>
               </div>
@@ -440,28 +440,28 @@ const Marketplace: React.FC = () => {
                         setShowDetailsModal(true);
                       }
                     }}
-                    className="group bg-gradient-to-br from-orange-50 to-pink-50 rounded-2xl p-5 border border-orange-100/50 hover:shadow-xl hover:shadow-orange-500/10 hover:-translate-y-1 transition-all cursor-pointer relative overflow-hidden"
+                    className="group bg-gradient-to-br from-orange-50 to-pink-50 dark:from-orange-900/10 dark:to-pink-900/10 rounded-2xl p-5 border border-orange-100/50 dark:border-orange-500/20 hover:shadow-xl hover:shadow-orange-500/10 hover:-translate-y-1 transition-all cursor-pointer relative overflow-hidden"
                   >
                     <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
-                      <TrendingUp className="w-12 h-12 text-orange-600" />
+                      <TrendingUp className="w-12 h-12 text-orange-600 dark:text-orange-400" />
                     </div>
                     <div className="relative flex items-center space-x-3 mb-3">
-                      <span className="text-xl font-black text-orange-600/40">#{index + 1}</span>
-                      <span className="flex-1 font-bold text-gray-900 truncate group-hover:text-orange-600 transition-colors">{wf.name}</span>
+                      <span className="text-xl font-black text-orange-600/40 dark:text-orange-400/40">#{index + 1}</span>
+                      <span className="flex-1 font-bold text-gray-900 dark:text-white truncate group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">{wf.name}</span>
                     </div>
-                    <p className="relative text-xs text-gray-500 line-clamp-2 mb-4 font-medium leading-relaxed italic">"{wf.description || 'Seamless community automation.'}"</p>
-                    <div className="relative flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-gray-400">
+                    <p className="relative text-xs text-gray-500 dark:text-slate-400 line-clamp-2 mb-4 font-medium leading-relaxed italic">"{wf.description || 'Seamless community automation.'}"</p>
+                    <div className="relative flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-slate-500">
                       <span className="flex items-center space-x-1">
-                        <Download className="w-3 h-3 text-orange-500" />
+                        <Download className="w-3 h-3 text-orange-500 dark:text-orange-400" />
                         <span>{wf.downloads_count}</span>
                       </span>
                       {wf.rating ? (
                         <span className="flex items-center space-x-1">
                           <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
-                          <span className="text-gray-900">{wf.rating.toFixed(1)}</span>
+                          <span className="text-gray-900 dark:text-white">{wf.rating.toFixed(1)}</span>
                         </span>
                       ) : (
-                        <span className="text-gray-300">Unrated</span>
+                        <span className="text-gray-300 dark:text-slate-600">Unrated</span>
                       )}
                     </div>
                   </div>
@@ -472,14 +472,19 @@ const Marketplace: React.FC = () => {
 
           {/* Workflow Grid/List */}
           {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <RefreshCw className="w-8 h-8 text-purple-600 animate-spin" />
+            <div className="flex items-center justify-center py-24">
+              <div className="relative">
+                <div className="w-12 h-12 border-4 border-purple-500/20 border-t-purple-500 rounded-full animate-spin"></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <ShoppingBag className="w-4 h-4 text-purple-500" />
+                </div>
+              </div>
             </div>
           ) : workflows.length === 0 ? (
-            <div className="text-center py-12 bg-white rounded-xl border border-gray-200 marketplace-list-empty">
-              <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900">No workflows found</h3>
-              <p className="text-gray-600 mt-2">
+            <div className="text-center py-24 bg-white dark:bg-slate-800/50 rounded-2xl border border-gray-200 dark:border-slate-700/50 marketplace-list-empty shadow-inner">
+              <Package className="w-16 h-16 text-gray-300 dark:text-slate-600 mx-auto mb-4 opacity-50" />
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">No workflows found</h3>
+              <p className="text-gray-600 dark:text-slate-400 mt-2 font-medium">
                 Be the first to share a workflow with the community!
               </p>
             </div>
@@ -488,22 +493,22 @@ const Marketplace: React.FC = () => {
               {workflows.map((workflow) => (
                 <div
                   key={workflow.id}
-                  className="marketplace-card bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow overflow-hidden"
+                  className="marketplace-card bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700/50 hover:shadow-lg dark:hover:shadow-2xl hover:border-purple-200 dark:hover:border-purple-500/30 transition-all overflow-hidden group/card"
                 >
                   {/* Card Header */}
-                  <div className="p-5 border-b border-gray-100">
+                  <div className="p-5 border-b border-gray-100 dark:border-slate-700/50">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center space-x-3">
-                        <div className="p-2 bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg text-purple-600">
+                        <div className="p-2.5 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 rounded-xl text-purple-600 dark:text-purple-400 group-hover/card:scale-110 transition-transform shadow-sm">
                           {getCategoryIcon(workflow.category)}
                         </div>
                         <div>
-                          <h3 className="font-semibold text-gray-900">{workflow.name}</h3>
-                          <p className="text-sm text-gray-500">by {workflow.author_name}</p>
+                          <h3 className="font-bold text-gray-900 dark:text-white group-hover/card:text-purple-600 dark:group-hover/card:text-purple-400 transition-colors line-clamp-1">{workflow.name}</h3>
+                          <p className="text-xs text-gray-500 dark:text-slate-400 font-medium">by {workflow.author_name}</p>
                         </div>
                       </div>
                       {workflow.license_type !== 'free' && workflow.price && (
-                        <span className="px-2 py-1 bg-green-100 text-green-700 text-sm font-medium rounded-full">
+                        <span className="px-2.5 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-black uppercase tracking-wide rounded-lg border border-green-200 dark:border-green-800/50">
                           ${(workflow.price / 100).toFixed(2)}
                         </span>
                       )}
@@ -512,19 +517,19 @@ const Marketplace: React.FC = () => {
 
                   {/* Card Body */}
                   <div className="p-5">
-                    <p className="text-gray-600 text-sm line-clamp-2 mb-4">
+                    <p className="text-gray-600 dark:text-slate-400 text-sm line-clamp-2 mb-4 min-h-[40px] font-medium leading-relaxed">
                       {workflow.description || 'No description provided'}
                     </p>
 
                     {/* Stats */}
-                    <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+                    <div className="flex items-center justify-between text-xs text-gray-500 dark:text-slate-500 mb-4 font-bold uppercase tracking-widest">
                       <div className="flex items-center space-x-4">
-                        <span className="flex items-center space-x-1">
-                          <ArrowDownToLine className="w-4 h-4" />
+                        <span className="flex items-center space-x-1.5 group/stat hover:text-purple-500 transition-colors">
+                          <ArrowDownToLine className="w-3.5 h-3.5" />
                           <span>{workflow.downloads_count}</span>
                         </span>
-                        <span className="flex items-center space-x-1">
-                          <Zap className="w-4 h-4" />
+                        <span className="flex items-center space-x-1.5 group/stat hover:text-purple-500 transition-colors">
+                          <Zap className="w-3.5 h-3.5" />
                           <span>{workflow.steps_count} steps</span>
                         </span>
                       </div>
@@ -533,11 +538,11 @@ const Marketplace: React.FC = () => {
 
                     {/* Tags */}
                     {workflow.tags && workflow.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mb-4">
+                      <div className="flex flex-wrap gap-1.5 mb-4">
                         {workflow.tags.slice(0, 3).map((tag, idx) => (
                           <span
                             key={idx}
-                            className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-full"
+                            className="px-2.5 py-0.5 bg-gray-100 dark:bg-slate-700/50 text-gray-600 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider rounded-md border border-transparent dark:border-slate-600/30"
                           >
                             {tag}
                           </span>
@@ -547,8 +552,8 @@ const Marketplace: React.FC = () => {
 
                     {/* Required Connections */}
                     {workflow.required_connections && workflow.required_connections.length > 0 && (
-                      <div className="text-xs text-gray-500 mb-4">
-                        <span className="font-medium">Requires:</span>{' '}
+                      <div className="text-[10px] font-bold text-gray-400 dark:text-slate-500 mb-4 uppercase tracking-widest leading-relaxed">
+                        <span className="text-gray-500 dark:text-slate-400">Requires:</span>{' '}
                         {workflow.required_connections.join(', ')}
                       </div>
                     )}
@@ -557,17 +562,17 @@ const Marketplace: React.FC = () => {
                     <div className="flex items-center space-x-2">
                       <button
                         onClick={() => handleImportWorkflow(workflow)}
-                        className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all"
+                        className="flex-1 flex items-center justify-center space-x-2 px-4 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-500 dark:to-pink-500 text-white rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all font-bold text-sm shadow-md shadow-purple-500/20"
                       >
-                        <Download className="w-4 h-4" />
+                        <Download className="w-3.5 h-3.5" />
                         <span>Import</span>
                       </button>
                       <button
                         onClick={() => openWorkflowDetails(workflow)}
-                        className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                        className="px-4 py-2.5 border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-400 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-700 transition-all shadow-sm group/btn"
                         title="View Details & Reviews"
                       >
-                        <ExternalLink className="w-4 h-4" />
+                        <ExternalLink className="w-4 h-4 group-hover/btn:text-purple-500 transition-colors" />
                       </button>
                     </div>
                   </div>
@@ -586,41 +591,41 @@ const Marketplace: React.FC = () => {
               <RefreshCw className="w-8 h-8 text-purple-600 animate-spin" />
             </div>
           ) : myShared.length === 0 ? (
-            <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
-              <Share2 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900">No shared workflows</h3>
-              <p className="text-gray-600 mt-2">
+            <div className="text-center py-24 bg-white dark:bg-slate-800/50 rounded-2xl border border-gray-200 dark:border-slate-700/50 shadow-inner">
+              <Share2 className="w-16 h-16 text-gray-300 dark:text-slate-600 mx-auto mb-4 opacity-50" />
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">No shared workflows</h3>
+              <p className="text-gray-600 dark:text-slate-400 mt-2 font-medium">
                 Share your workflows from the Workflows page to see them here.
               </p>
             </div>
           ) : (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700/50 overflow-hidden">
               <div className="hidden sm:block overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-gray-50 border-b border-gray-100">
+                  <thead className="bg-gray-50 dark:bg-slate-900/50 border-b border-gray-100 dark:border-slate-700/50">
                     <tr>
-                      <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Name</th>
-                      <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Visibility</th>
-                      <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Downloads</th>
-                      <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Rating</th>
-                      <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Actions</th>
+                      <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest">Name</th>
+                      <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest">Visibility</th>
+                      <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest">Downloads</th>
+                      <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest">Rating</th>
+                      <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="divide-y divide-gray-100 dark:divide-slate-700/50">
                     {myShared.map((wf) => (
-                      <tr key={wf.id} className="hover:bg-gray-50/50 transition-colors">
-                        <td className="px-6 py-4 font-bold text-gray-900">{wf.name}</td>
+                      <tr key={wf.id} className="hover:bg-gray-50/50 dark:hover:bg-slate-700/30 transition-colors group">
+                        <td className="px-6 py-4 font-bold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">{wf.name}</td>
                         <td className="px-6 py-4">
-                          <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-tighter border ${wf.visibility === 'public' ? 'bg-green-50 border-green-100 text-green-700' :
-                            wf.visibility === 'marketplace' ? 'bg-purple-50 border-purple-100 text-purple-700' :
-                              'bg-gray-50 border-gray-100 text-gray-700'
+                          <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-tighter border ${wf.visibility === 'public' ? 'bg-green-50 dark:bg-green-900/20 border-green-100 dark:border-green-800/30 text-green-700 dark:text-green-400' :
+                            wf.visibility === 'marketplace' ? 'bg-purple-50 dark:bg-purple-900/20 border-purple-100 dark:border-purple-800/30 text-purple-700 dark:text-purple-400' :
+                              'bg-gray-50 dark:bg-slate-700 border-gray-100 dark:border-slate-600 text-gray-700 dark:text-slate-300'
                             }`}>
                             {wf.visibility}
                           </span>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="flex items-center space-x-2 font-medium text-gray-600">
-                            <Download className="w-4 h-4 text-gray-400" />
+                          <div className="flex items-center space-x-2 font-medium text-gray-600 dark:text-slate-400">
+                            <Download className="w-4 h-4 text-gray-400 dark:text-slate-500" />
                             <span>{wf.downloads_count}</span>
                           </div>
                         </td>
@@ -629,7 +634,7 @@ const Marketplace: React.FC = () => {
                           {wf.share_code && (
                             <button
                               onClick={() => handleCopyShareLink(wf.share_code)}
-                              className="px-4 py-2 bg-purple-50 text-purple-600 rounded-xl hover:bg-purple-100 transition-all font-bold text-xs"
+                              className="px-4 py-2 bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 rounded-xl hover:bg-purple-100 dark:hover:bg-purple-900/40 transition-all font-bold text-xs"
                             >
                               Copy Link
                             </button>
@@ -646,10 +651,10 @@ const Marketplace: React.FC = () => {
                   <div key={wf.id} className="p-5 space-y-4">
                     <div className="flex items-start justify-between">
                       <div>
-                        <h4 className="font-bold text-gray-900">{wf.name}</h4>
-                        <span className={`inline-block mt-1 px-2.5 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-tighter border ${wf.visibility === 'public' ? 'bg-green-50 border-green-100 text-green-700' :
-                          wf.visibility === 'marketplace' ? 'bg-purple-50 border-purple-100 text-purple-700' :
-                            'bg-gray-50 border-gray-100 text-gray-700'
+                        <h4 className="font-bold text-gray-900 dark:text-white">{wf.name}</h4>
+                        <span className={`inline-block mt-1 px-2.5 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-tighter border ${wf.visibility === 'public' ? 'bg-green-50 dark:bg-green-900/20 border-green-100 dark:border-green-800/30 text-green-700 dark:text-green-400' :
+                          wf.visibility === 'marketplace' ? 'bg-purple-50 dark:bg-purple-900/20 border-purple-100 dark:border-purple-800/30 text-purple-700 dark:text-purple-400' :
+                            'bg-gray-50 dark:bg-slate-700 border-gray-100 dark:border-slate-600 text-gray-700 dark:text-slate-300'
                           }`}>
                           {wf.visibility}
                         </span>
@@ -657,7 +662,7 @@ const Marketplace: React.FC = () => {
                       {wf.share_code && (
                         <button
                           onClick={() => handleCopyShareLink(wf.share_code)}
-                          className="p-2 text-purple-600 bg-purple-50 rounded-lg"
+                          className="p-2 text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/20 rounded-lg"
                         >
                           <Share2 className="w-4 h-4" />
                         </button>
@@ -665,8 +670,8 @@ const Marketplace: React.FC = () => {
                     </div>
                     <div className="flex items-center justify-between text-xs pt-1">
                       <div className="flex items-center space-x-4">
-                        <div className="flex items-center space-x-1.5 text-gray-600 font-medium">
-                          <Download className="w-3.5 h-3.5 text-gray-400" />
+                        <div className="flex items-center space-x-1.5 text-gray-600 dark:text-slate-400 font-medium font-bold uppercase tracking-widest text-[10px]">
+                          <Download className="w-3.5 h-3.5 text-gray-400 dark:text-slate-500" />
                           <span>{wf.downloads_count}</span>
                         </div>
                       </div>
@@ -687,33 +692,33 @@ const Marketplace: React.FC = () => {
               <RefreshCw className="w-8 h-8 text-purple-600 animate-spin" />
             </div>
           ) : myDownloads.length === 0 ? (
-            <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
-              <Download className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900">No downloads yet</h3>
-              <p className="text-gray-600 mt-2">
+            <div className="text-center py-24 bg-white dark:bg-slate-800/50 rounded-2xl border border-gray-200 dark:border-slate-700/50 shadow-inner">
+              <Download className="w-16 h-16 text-gray-300 dark:text-slate-600 mx-auto mb-4 opacity-50" />
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">No downloads yet</h3>
+              <p className="text-gray-600 dark:text-slate-400 mt-2 font-medium">
                 Import workflows from the marketplace to see them here.
               </p>
             </div>
           ) : (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700/50 overflow-hidden">
               <div className="hidden sm:block overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-gray-50 border-b border-gray-100">
+                  <thead className="bg-gray-50 dark:bg-slate-900/50 border-b border-gray-100 dark:border-slate-700/50">
                     <tr>
-                      <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Workflow</th>
-                      <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Downloaded</th>
-                      <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Imported As</th>
+                      <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest">Workflow</th>
+                      <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest">Downloaded</th>
+                      <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest">Imported As</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="divide-y divide-gray-100 dark:divide-slate-700/50">
                     {myDownloads.map((dl) => (
-                      <tr key={dl.id} className="hover:bg-gray-50/50 transition-colors">
-                        <td className="px-6 py-4 font-bold text-gray-900">{dl.workflow_name}</td>
-                        <td className="px-6 py-4 text-gray-600 font-medium">
+                      <tr key={dl.id} className="hover:bg-gray-50/50 dark:hover:bg-slate-700/30 transition-colors group">
+                        <td className="px-6 py-4 font-bold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">{dl.workflow_name}</td>
+                        <td className="px-6 py-4 text-gray-600 dark:text-slate-400 font-medium">
                           {new Date(dl.downloaded_at).toLocaleDateString()}
                         </td>
                         <td className="px-6 py-4">
-                          <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-lg text-xs font-bold border border-blue-100">
+                          <span className="px-3 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg text-[10px] font-black uppercase tracking-widest border border-blue-100 dark:border-blue-800/30">
                             {dl.imported_workflow_id ? `Workflow #${dl.imported_workflow_id}` : 'Manual Import'}
                           </span>
                         </td>
@@ -724,13 +729,13 @@ const Marketplace: React.FC = () => {
               </div>
 
               {/* Mobile View for Downloads */}
-              <div className="sm:hidden divide-y divide-gray-100">
+              <div className="sm:hidden divide-y divide-gray-100 dark:divide-slate-700/50">
                 {myDownloads.map((dl) => (
                   <div key={dl.id} className="p-5 space-y-3">
-                    <h4 className="font-bold text-gray-900">{dl.workflow_name}</h4>
-                    <div className="flex items-center justify-between text-xs italic text-gray-500 font-medium">
+                    <h4 className="font-bold text-gray-900 dark:text-white">{dl.workflow_name}</h4>
+                    <div className="flex items-center justify-between text-[10px] italic text-gray-500 dark:text-slate-400 font-bold uppercase tracking-widest">
                       <span>Downloaded on {new Date(dl.downloaded_at).toLocaleDateString()}</span>
-                      <span className="text-blue-600 font-black">
+                      <span className="text-blue-600 dark:text-blue-400 font-black">
                         {dl.imported_workflow_id ? `#${dl.imported_workflow_id}` : ''}
                       </span>
                     </div>
@@ -746,41 +751,41 @@ const Marketplace: React.FC = () => {
       {showImportModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowImportModal(false)} />
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-hidden flex flex-col">
-            <div className="flex items-center justify-between p-6 border-b border-gray-100">
-              <h2 className="text-xl font-bold text-gray-900">Import Workflow</h2>
-              <button onClick={() => setShowImportModal(false)} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                <X className="w-5 h-5" />
+          <div className="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-hidden flex flex-col border border-slate-200 dark:border-slate-800">
+            <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-slate-800 transition-colors">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Import Workflow</h2>
+              <button onClick={() => setShowImportModal(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
+                <X className="w-5 h-5 text-gray-500 dark:text-slate-400" />
               </button>
             </div>
 
-            <div className="p-6 overflow-y-auto">
+            <div className="p-6 overflow-y-auto bg-white dark:bg-slate-900">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                  <label className="block text-sm font-bold text-gray-700 dark:text-slate-300 mb-2">
                     Paste exported workflow JSON
                   </label>
                   <textarea
                     value={importData}
                     onChange={(e) => setImportData(e.target.value)}
-                    className="w-full h-64 px-4 py-3 border border-gray-200 rounded-2xl font-mono text-sm focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all placeholder:text-gray-400"
+                    className="w-full h-64 px-4 py-3 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl font-mono text-sm focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all placeholder:text-gray-400 dark:placeholder:text-slate-600 text-slate-900 dark:text-white"
                     placeholder='{"format_version": "1.0", "workflow": {...}}'
                   />
                 </div>
               </div>
             </div>
 
-            <div className="p-6 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-end gap-3">
+            <div className="p-6 border-t border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-900/50 flex flex-col sm:flex-row items-center justify-end gap-3 transition-colors">
               <button
                 onClick={() => setShowImportModal(false)}
-                className="w-full sm:w-auto px-6 py-3 border border-gray-200 rounded-xl hover:bg-gray-50 transition-all font-bold text-sm"
+                className="w-full sm:w-auto px-6 py-3 border border-gray-200 dark:border-slate-700 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-all font-bold text-sm"
               >
                 Cancel
               </button>
               <button
                 onClick={handleImportFromJson}
                 disabled={!importData.trim() || importLoading}
-                className="w-full sm:w-auto flex items-center justify-center space-x-2 px-8 py-3 bg-gray-900 text-white rounded-xl hover:bg-black transition-all disabled:opacity-50 font-bold text-sm"
+                className="w-full sm:w-auto flex items-center justify-center space-x-2 px-8 py-3 bg-gray-900 dark:bg-white text-white dark:text-slate-900 rounded-xl hover:bg-black dark:hover:bg-slate-200 transition-all disabled:opacity-50 font-bold text-sm shadow-xl"
               >
                 {importLoading ? (
                   <RefreshCw className="w-4 h-4 animate-spin" />
@@ -801,7 +806,7 @@ const Marketplace: React.FC = () => {
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
             onClick={() => setShowDetailsModal(false)}
           />
-          <div className="relative bg-white rounded-[2rem] shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col border border-gray-100">
+          <div className="relative bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col border border-gray-100 dark:border-slate-800">
             {/* Header */}
             <div className="p-6 sm:p-8 border-b border-gray-100 bg-gradient-to-r from-purple-600 to-pink-600">
               <div className="flex items-start justify-between">
@@ -844,8 +849,8 @@ const Marketplace: React.FC = () => {
             <div className="flex-1 overflow-y-auto p-6 sm:p-8">
               {/* Description */}
               <div className="mb-8">
-                <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Description</h3>
-                <p className="text-gray-700 leading-relaxed font-medium bg-gray-50 p-5 rounded-2xl border border-gray-100 italic">
+                <h3 className="text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-3">Description</h3>
+                <p className="text-gray-700 dark:text-slate-300 leading-relaxed font-medium bg-gray-50 dark:bg-slate-800/50 p-5 rounded-2xl border border-gray-100 dark:border-slate-700/50 italic transition-colors">
                   "{detailsWorkflow.description || 'No description provided.'}"
                 </p>
               </div>
@@ -854,10 +859,10 @@ const Marketplace: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                 {detailsWorkflow.tags && detailsWorkflow.tags.length > 0 && (
                   <div>
-                    <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Community Tags</h3>
+                    <h3 className="text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-3">Community Tags</h3>
                     <div className="flex flex-wrap gap-2">
                       {detailsWorkflow.tags.map((tag, idx) => (
-                        <span key={idx} className="px-3 py-1 bg-purple-50 text-purple-600 rounded-lg text-xs font-bold border border-purple-100">
+                        <span key={idx} className="px-3 py-1 bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 rounded-lg text-xs font-bold border border-purple-100 dark:border-purple-800/30">
                           {tag}
                         </span>
                       ))}
@@ -866,10 +871,10 @@ const Marketplace: React.FC = () => {
                 )}
                 {detailsWorkflow.required_connections && detailsWorkflow.required_connections.length > 0 && (
                   <div>
-                    <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Dependencies</h3>
+                    <h3 className="text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-3">Dependencies</h3>
                     <div className="flex flex-wrap gap-2">
                       {detailsWorkflow.required_connections.map((conn, idx) => (
-                        <span key={idx} className="px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-bold border border-blue-100 flex items-center space-x-2">
+                        <span key={idx} className="px-3 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 rounded-lg text-xs font-bold border border-blue-100 dark:border-blue-800/30 flex items-center space-x-2">
                           <Code className="w-3.5 h-3.5" />
                           <span>{conn}</span>
                         </span>
@@ -880,21 +885,21 @@ const Marketplace: React.FC = () => {
               </div>
 
               {/* Reviews Section */}
-              <div className="border-t border-gray-100 pt-8">
+              <div className="border-t border-gray-100 dark:border-slate-800 pt-8">
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-black text-gray-900 flex items-center space-x-2">
+                  <h3 className="text-lg font-black text-gray-900 dark:text-white flex items-center space-x-2 transition-colors">
                     <MessageSquare className="w-5 h-5 text-purple-600" />
                     <span>Community Reviews</span>
                   </h3>
-                  <span className="text-xs font-bold text-gray-400 uppercase">{detailsWorkflow.rating_count || 0} Ratings</span>
+                  <span className="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase">{detailsWorkflow.rating_count || 0} Ratings</span>
                 </div>
 
                 {/* Add Review Form */}
-                <div className="bg-gray-50/50 rounded-2xl p-6 mb-8 border border-gray-100">
-                  <h4 className="font-bold text-gray-900 mb-4 text-sm">Contribute a Review</h4>
+                <div className="bg-gray-50/50 dark:bg-slate-800/50 rounded-2xl p-6 mb-8 border border-gray-100 dark:border-slate-700/50 transition-colors">
+                  <h4 className="font-bold text-gray-900 dark:text-white mb-4 text-sm">Contribute a Review</h4>
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">My Rating</label>
+                      <label className="block text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-2">My Rating</label>
                       <div className="flex items-center space-x-2">
                         {[1, 2, 3, 4, 5].map((star) => (
                           <button
@@ -905,7 +910,7 @@ const Marketplace: React.FC = () => {
                             <Star
                               className={`w-7 h-7 transition-colors ${star <= newReview.rating
                                 ? 'text-yellow-400 fill-yellow-400'
-                                : 'text-gray-200 hover:text-yellow-200'
+                                : 'text-gray-200 dark:text-slate-700 hover:text-yellow-200 dark:hover:text-yellow-400/50'
                                 }`}
                             />
                           </button>
@@ -920,7 +925,7 @@ const Marketplace: React.FC = () => {
                           placeholder="Headline for your review..."
                           value={newReview.title}
                           onChange={(e) => setNewReview({ ...newReview, title: e.target.value })}
-                          className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all font-medium text-sm"
+                          className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all font-medium text-sm text-slate-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-600 shadow-inner"
                         />
                       </div>
                       <div className="sm:col-span-2">
@@ -929,7 +934,7 @@ const Marketplace: React.FC = () => {
                           value={newReview.comment}
                           onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
                           rows={4}
-                          className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all font-medium text-sm resize-none"
+                          className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all font-medium text-sm text-slate-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-600 resize-none shadow-inner"
                         />
                       </div>
                     </div>
@@ -938,7 +943,7 @@ const Marketplace: React.FC = () => {
                       <button
                         onClick={handleSubmitReview}
                         disabled={submittingReview}
-                        className="flex items-center space-x-2 px-8 py-3 bg-gray-900 text-white rounded-xl hover:bg-black transition-all disabled:opacity-50 font-bold text-sm shadow-md"
+                        className="flex items-center space-x-2 px-8 py-3 bg-gray-900 dark:bg-white text-white dark:text-slate-900 rounded-xl hover:bg-black dark:hover:bg-slate-200 transition-all disabled:opacity-50 font-bold text-sm shadow-xl"
                       >
                         {submittingReview ? (
                           <RefreshCw className="w-4 h-4 animate-spin" />
@@ -957,34 +962,34 @@ const Marketplace: React.FC = () => {
                     <RefreshCw className="w-6 h-6 text-purple-600 animate-spin" />
                   </div>
                 ) : workflowReviews.length === 0 ? (
-                  <div className="text-center py-12 bg-white rounded-2xl border border-gray-100 border-dashed">
-                    <MessageSquare className="w-12 h-12 mx-auto mb-3 text-gray-200" />
-                    <p className="text-gray-400 font-bold text-sm uppercase">No reviews yet. Be the first!</p>
+                  <div className="text-center py-12 bg-white dark:bg-slate-900/50 rounded-2xl border border-gray-100 dark:border-slate-800 border-dashed transition-colors">
+                    <MessageSquare className="w-12 h-12 mx-auto mb-3 text-gray-200 dark:text-slate-800" />
+                    <p className="text-gray-400 dark:text-slate-600 font-bold text-sm uppercase">No reviews yet. Be the first!</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
                     {workflowReviews.map((review) => (
-                      <div key={review.id} className="bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-lg transition-shadow">
+                      <div key={review.id} className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700/50 rounded-2xl p-6 hover:shadow-lg dark:hover:shadow-2xl transition-all group">
                         <div className="flex items-start justify-between mb-4">
                           <div className="flex items-center space-x-3">
-                            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white text-sm font-black shadow-lg shadow-purple-500/20">
+                            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white text-sm font-black shadow-lg shadow-purple-500/20 group-hover:scale-110 transition-transform">
                               {review.user_name?.charAt(0) || 'U'}
                             </div>
                             <div>
-                              <p className="font-bold text-gray-900">{review.user_name || 'Anonymous User'}</p>
+                              <p className="font-bold text-gray-900 dark:text-white transition-colors">{review.user_name || 'Anonymous User'}</p>
                               <div className="flex items-center space-x-1 mt-0.5">
                                 {renderStars(review.rating)}
                               </div>
                             </div>
                           </div>
-                          <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                          <span className="text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest">
                             {review.created_at ? new Date(review.created_at).toLocaleDateString() : ''}
                           </span>
                         </div>
                         {review.title && (
-                          <p className="font-bold text-gray-900 mb-2 truncate">{review.title}</p>
+                          <p className="font-bold text-gray-900 dark:text-white mb-2 truncate transition-colors">{review.title}</p>
                         )}
-                        <p className="text-gray-600 text-sm leading-relaxed font-medium">{review.comment}</p>
+                        <p className="text-gray-600 dark:text-slate-400 text-sm leading-relaxed font-medium transition-colors">{review.comment}</p>
                       </div>
                     ))}
                   </div>
@@ -993,10 +998,10 @@ const Marketplace: React.FC = () => {
             </div>
 
             {/* Footer */}
-            <div className="p-6 border-t border-gray-100 bg-gray-50 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="p-6 border-t border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-900/80 flex flex-col sm:flex-row items-center justify-between gap-4 transition-colors">
               <button
                 onClick={() => handleExportWorkflow(detailsWorkflow.id)}
-                className="w-full sm:w-auto flex items-center justify-center space-x-2 px-6 py-3 border border-gray-200 bg-white text-gray-700 rounded-xl hover:bg-gray-50 transition-all font-bold text-sm shadow-sm"
+                className="w-full sm:w-auto flex items-center justify-center space-x-2 px-6 py-3 border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-300 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-700 transition-all font-bold text-sm shadow-sm"
               >
                 <Copy className="w-4 h-4" />
                 <span>Copy JSON</span>
@@ -1006,7 +1011,7 @@ const Marketplace: React.FC = () => {
                   handleImportWorkflow(detailsWorkflow);
                   setShowDetailsModal(false);
                 }}
-                className="w-full sm:w-auto flex items-center justify-center space-x-2 px-8 py-3 bg-gray-900 text-white rounded-xl hover:bg-black transition-all font-bold text-sm shadow-md"
+                className="w-full sm:w-auto flex items-center justify-center space-x-2 px-8 py-3 bg-gray-900 dark:bg-white text-white dark:text-slate-900 rounded-xl hover:bg-black dark:hover:bg-slate-200 transition-all font-bold text-sm shadow-xl"
               >
                 <Download className="w-4 h-4" />
                 <span>Import to Workspace</span>
