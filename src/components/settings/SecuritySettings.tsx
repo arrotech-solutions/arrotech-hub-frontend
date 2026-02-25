@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Shield, Clock, Globe, ChevronDown, ChevronRight } from 'lucide-react';
+import { Shield, Clock, Globe, ChevronDown, ChevronRight, Lock, Key, Copy, Check, Smartphone } from 'lucide-react';
 import { SecuritySettings } from '../../types';
 
 interface SecuritySettingsProps {
@@ -23,22 +23,98 @@ const SecuritySettingsTab: React.FC<SecuritySettingsProps> = ({
         onUpdate(newSettings);
     };
 
+    const [isSettingUp2FA, setIsSettingUp2FA] = useState(false);
+    const [totpSetupData, setTotpSetupData] = useState<{ secret: string; qr_code: string; uri: string } | null>(null);
+    const [verificationCode, setVerificationCode] = useState('');
+    const [backupCodes, setBackupCodes] = useState<string[]>([]);
+    const [isCopied, setIsCopied] = useState(false);
+
+    // Provide a mocked mechanism to hook into until the API service is updated with these endpoints
+    // These should ideally come from an API layer like `useAuth()` or `api.ts` directly.
+    const handleStart2FASetup = async () => {
+        setIsSettingUp2FA(true);
+        try {
+            const token = localStorage.getItem('auth_token');
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'https://mini-hub.fly.dev'}/api/v1/security/2fa/totp/setup`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (data.success) {
+                setTotpSetupData(data.data);
+            }
+        } catch (error) {
+            console.error('Failed to start 2FA setup', error);
+        }
+    };
+
+    const handleVerify2FASetup = async () => {
+        try {
+            const token = localStorage.getItem('auth_token');
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'https://mini-hub.fly.dev'}/api/v1/security/2fa/totp/verify`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ code: verificationCode })
+            });
+            const data = await res.json();
+            if (data.success) {
+                handleChange('two_factor_enabled', true);
+                setBackupCodes(data.data.backup_codes);
+                setIsSettingUp2FA(false); // Move to backup codes view
+            }
+        } catch (error) {
+            console.error('Failed to verify 2FA setup', error);
+        }
+    };
+
+    const handleDisable2FA = async () => {
+        if (!confirm('Are you sure you want to disable Two-Factor Authentication? This will make your account less secure.')) return;
+        try {
+            const token = localStorage.getItem('auth_token');
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'https://mini-hub.fly.dev'}/api/v1/security/2fa/disable`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({}) // May require password in future
+            });
+            const data = await res.json();
+            if (data.success) {
+                handleChange('two_factor_enabled', false);
+                setTotpSetupData(null);
+                setBackupCodes([]);
+            }
+        } catch (error) {
+            console.error('Failed to disable 2FA', error);
+        }
+    };
+
+    const copyBackupCodes = () => {
+        navigator.clipboard.writeText(backupCodes.join('\n'));
+        setIsCopied(true);
+        setTimeout(() => setIsCopied(false), 2000);
+    };
+
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-red-100 rounded-lg">
-                        <Shield className="w-5 h-5 text-red-600" />
+                    <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg transition-colors">
+                        <Shield className="w-5 h-5 text-red-600 dark:text-red-400" />
                     </div>
                     <div>
-                        <h3 className="text-xl font-semibold text-gray-900">Security Settings</h3>
-                        <p className="text-gray-600">Configure security policies and access controls</p>
+                        <h3 className="text-xl font-semibold text-gray-900 dark:text-white transition-colors">Security Settings</h3>
+                        <p className="text-gray-600 dark:text-slate-400 transition-colors">Configure security policies and access controls</p>
                     </div>
                 </div>
                 {onToggle && (
                     <button
                         onClick={onToggle}
-                        className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                        className="p-2 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-400 transition-colors"
                     >
                         {expanded ? <ChevronDown className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
                     </button>
@@ -47,73 +123,151 @@ const SecuritySettingsTab: React.FC<SecuritySettingsProps> = ({
 
             {expanded && (
                 <div className="space-y-6 animate-in fade-in duration-300">
-                    {/* Two Factor Authentication - DISABLED FOR NOW (TODO: Enable when backend ready) */}
-                    {/* 
-          <div className="bg-gray-50 rounded-lg p-6 grayscale opacity-60 relative cursor-not-allowed">
-            <div className="absolute inset-0 z-10" title="Coming Soon"></div>
-            <div className="flex items-center space-x-3 mb-4">
-              <Lock className="w-5 h-5 text-red-600" />
-              <h4 className="text-lg font-medium text-gray-900">Two Factor Authentication (Coming Soon)</h4>
-            </div>
-            <div className="space-y-4">
-              <label className="flex items-center space-x-3">
-                <input
-                  type="checkbox"
-                  checked={localSettings.two_factor_enabled}
-                  onChange={(e) => handleChange('two_factor_enabled', e.target.checked)}
-                  className="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500"
-                  disabled
-                />
-                <span className="text-gray-700">Enable two factor authentication</span>
-              </label>
-              <p className="text-sm text-gray-600">Add an extra layer of security to your account</p>
-            </div>
-          </div>
-          */}
+                    {/* Two Factor Authentication */}
+                    <div className="bg-gray-50 dark:bg-slate-900/50 rounded-lg p-6 border border-transparent dark:border-slate-700/50 transition-colors">
+                        <div className="flex items-center space-x-3 mb-4">
+                            <Lock className="w-5 h-5 text-red-600 dark:text-red-400 transition-colors" />
+                            <h4 className="text-lg font-medium text-gray-900 dark:text-white transition-colors">Two Factor Authentication</h4>
+                        </div>
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm text-gray-900 dark:text-white font-medium transition-colors">Authenticator App (TOTP)</p>
+                                    <p className="text-sm text-gray-600 dark:text-slate-400 transition-colors">Add an extra layer of security to your account</p>
+                                </div>
+                                {localSettings.two_factor_enabled ? (
+                                    <button
+                                        onClick={handleDisable2FA}
+                                        className="px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+                                    >
+                                        Disable 2FA
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={handleStart2FASetup}
+                                        className="px-4 py-2 text-sm font-medium text-white bg-blue-600 dark:bg-blue-600 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-500 transition-all shadow-sm hover:shadow-md"
+                                    >
+                                        Enable 2FA
+                                    </button>
+                                )}
+                            </div>
+
+                            {/* Setup Modal/Inline View */}
+                            {isSettingUp2FA && totpSetupData && (
+                                <div className="mt-4 p-4 border border-blue-100 dark:border-blue-500/20 bg-blue-50/50 dark:bg-blue-500/5 rounded-xl space-y-4 transition-colors">
+                                    <h5 className="font-semibold text-gray-900 dark:text-white transition-colors">1. Scan QR Code</h5>
+                                    <p className="text-sm text-gray-600 dark:text-slate-400 transition-colors">Scan this code with Microsoft Authenticator, Google Authenticator, or Authy.</p>
+                                    <div className="flex justify-center bg-white dark:bg-slate-200 p-4 rounded-lg inline-block mx-auto border border-gray-200 dark:border-slate-100 transition-colors">
+                                        <img src={totpSetupData.qr_code} alt="QR Code" className="w-48 h-48" />
+                                    </div>
+                                    <p className="text-xs text-center text-gray-500 dark:text-slate-500 font-mono break-all transition-colors">{totpSetupData.secret}</p>
+
+                                    <div className="pt-4 border-t border-blue-100 dark:border-blue-500/20 transition-colors">
+                                        <h5 className="font-semibold text-gray-900 dark:text-white mb-2 transition-colors">2. Enter Verification Code</h5>
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="text"
+                                                value={verificationCode}
+                                                onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                                                className="flex-1 px-3 py-2 text-center text-lg tracking-[0.5em] bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500/50 transition-colors placeholder:text-gray-300 dark:placeholder:text-slate-700"
+                                                placeholder="000000"
+                                            />
+                                            <button
+                                                onClick={handleVerify2FASetup}
+                                                disabled={verificationCode.length !== 6}
+                                                className="px-6 py-2 bg-blue-600 dark:bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-700 dark:hover:bg-blue-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
+                                            >
+                                                Verify
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Backup Codes Display (Shown only once right after setup) */}
+                            {backupCodes.length > 0 && (
+                                <div className="mt-4 p-6 border-2 border-green-200 dark:border-green-500/20 bg-green-50 dark:bg-green-500/5 rounded-xl transition-colors">
+                                    <div className="flex items-start justify-between">
+                                        <div>
+                                            <h5 className="font-bold text-gray-900 dark:text-white text-lg flex items-center gap-2 transition-colors">
+                                                <Key className="w-5 h-5 text-green-600 dark:text-green-400" />
+                                                Save Your Backup Codes
+                                            </h5>
+                                            <p className="text-sm text-gray-700 dark:text-slate-300 mt-1 max-w-md transition-colors">
+                                                These codes are the ONLY way to access your account if you lose your device. Keep them somewhere safe. <strong>They will only be shown once.</strong>
+                                            </p>
+                                        </div>
+                                        <button
+                                            onClick={copyBackupCodes}
+                                            className="p-2 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center gap-2 text-sm font-medium transition-colors text-gray-700 dark:text-slate-200 shadow-sm"
+                                        >
+                                            {isCopied ? <Check className="w-4 h-4 text-green-600 dark:text-green-400" /> : <Copy className="w-4 h-4" />}
+                                            {isCopied ? 'Copied' : 'Copy Codes'}
+                                        </button>
+                                    </div>
+                                    <div className="mt-6 grid grid-cols-2 gap-4">
+                                        {backupCodes.map((code, idx) => (
+                                            <div key={idx} className="bg-white dark:bg-slate-900 p-2 rounded border border-green-100 dark:border-green-900/30 text-center font-mono font-medium tracking-wider text-gray-800 dark:text-slate-200 shadow-sm transition-colors">
+                                                {code}
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className="mt-6">
+                                        <button
+                                            onClick={() => setBackupCodes([])}
+                                            className="w-full py-2 bg-green-600 dark:bg-green-500 text-white font-medium rounded-lg hover:bg-green-700 dark:hover:bg-green-400 transition-all shadow-sm hover:shadow-md"
+                                        >
+                                            I have saved my backup codes
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
 
                     {/* Session Timeout */}
-                    <div className="bg-gray-50 rounded-lg p-6">
+                    <div className="bg-gray-50 dark:bg-slate-900/50 rounded-lg p-6 border border-transparent dark:border-slate-700/50 transition-colors">
                         <div className="flex items-center space-x-3 mb-4">
-                            <Clock className="w-5 h-5 text-red-600" />
-                            <h4 className="text-lg font-medium text-gray-900">Session Timeout</h4>
+                            <Clock className="w-5 h-5 text-red-600 dark:text-red-400 transition-colors" />
+                            <h4 className="text-lg font-medium text-gray-900 dark:text-white transition-colors">Session Timeout</h4>
                         </div>
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2 transition-colors">
                                     Session Timeout (minutes)
                                 </label>
                                 <input
                                     type="number"
                                     value={localSettings.session_timeout}
                                     onChange={(e) => handleChange('session_timeout', parseInt(e.target.value))}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                    className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-red-500 dark:focus:ring-red-500/50 focus:border-transparent transition-colors"
                                     min="5"
                                     max="1440"
                                 />
-                                <p className="text-sm text-gray-600">Time before session expires (5-1440 minutes)</p>
+                                <p className="text-sm text-gray-600 dark:text-slate-400 transition-colors">Time before session expires (5-1440 minutes)</p>
                             </div>
                         </div>
                     </div>
 
                     {/* IP Whitelist */}
-                    <div className="bg-gray-50 rounded-lg p-6">
+                    <div className="bg-gray-50 dark:bg-slate-900/50 rounded-lg p-6 border border-transparent dark:border-slate-700/50 transition-colors">
                         <div className="flex items-center space-x-3 mb-4">
-                            <Globe className="w-5 h-5 text-red-600" />
-                            <h4 className="text-lg font-medium text-gray-900">IP Whitelist</h4>
+                            <Globe className="w-5 h-5 text-red-600 dark:text-red-400 transition-colors" />
+                            <h4 className="text-lg font-medium text-gray-900 dark:text-white transition-colors">IP Whitelist</h4>
                         </div>
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2 transition-colors">
                                     IP Addresses (one per line)
                                 </label>
                                 <textarea
                                     value={localSettings.ip_whitelist?.join('\n') || ''}
                                     onChange={(e) => handleChange('ip_whitelist', e.target.value.split('\n').filter(ip => ip.trim()))}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent font-mono text-sm"
+                                    className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-red-500 dark:focus:ring-red-500/50 focus:border-transparent font-mono text-sm transition-colors placeholder:text-gray-400 dark:placeholder:text-slate-600"
                                     rows={4}
                                     placeholder="192.168.1.1&#10;10.0.0.1"
                                 />
-                                <p className="text-sm text-gray-600">Restrict access to specific IP addresses (leave empty to allow all)</p>
+                                <p className="text-sm text-gray-600 dark:text-slate-400 transition-colors">Restrict access to specific IP addresses (leave empty to allow all)</p>
                             </div>
                         </div>
                     </div>

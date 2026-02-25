@@ -59,13 +59,13 @@ const Chat: React.FC = () => {
 
   // Theme Management
   useEffect(() => {
-    const savedTheme = localStorage.getItem('chat-theme');
+    const savedTheme = localStorage.getItem('theme');
     const darkMode = savedTheme ? savedTheme === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
     setIsDarkMode(darkMode);
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('chat-theme', isDarkMode ? 'dark' : 'light');
+    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
     document.documentElement.classList.toggle('dark', isDarkMode);
   }, [isDarkMode]);
 

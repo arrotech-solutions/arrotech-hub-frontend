@@ -181,16 +181,16 @@ const CreatorProfile: React.FC = () => {
 
   const renderBadge = (badge: string) => {
     const badgeStyles: Record<string, { icon: React.ReactNode; color: string; label: string }> = {
-      top_creator: { icon: <Star className="w-3 h-3" />, color: 'bg-yellow-100 text-yellow-700', label: 'Top Creator' },
-      verified: { icon: <Shield className="w-3 h-3" />, color: 'bg-blue-100 text-blue-700', label: 'Verified' },
-      expert: { icon: <Award className="w-3 h-3" />, color: 'bg-purple-100 text-purple-700', label: 'Expert' },
-      early_adopter: { icon: <Zap className="w-3 h-3" />, color: 'bg-green-100 text-green-700', label: 'Early Adopter' },
+      top_creator: { icon: <Star className="w-3 h-3" />, color: 'bg-yellow-100 dark:bg-yellow-500/10 text-yellow-700 dark:text-yellow-400', label: 'Top Creator' },
+      verified: { icon: <Shield className="w-3 h-3" />, color: 'bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400', label: 'Verified' },
+      expert: { icon: <Award className="w-3 h-3" />, color: 'bg-purple-100 dark:bg-purple-500/10 text-purple-700 dark:text-purple-400', label: 'Expert' },
+      early_adopter: { icon: <Zap className="w-3 h-3" />, color: 'bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-green-400', label: 'Early Adopter' },
     };
 
-    const style = badgeStyles[badge] || { icon: <Award className="w-3 h-3" />, color: 'bg-gray-100 text-gray-700', label: badge };
+    const style = badgeStyles[badge] || { icon: <Award className="w-3 h-3" />, color: 'bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-400', label: badge };
 
     return (
-      <span key={badge} className={`inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-xs font-medium ${style.color}`}>
+      <span key={badge} className={`inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-xs font-bold ${style.color}`}>
         {style.icon}
         <span>{style.label}</span>
       </span>
@@ -206,26 +206,26 @@ const CreatorProfile: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-purple-50 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950/30 transition-colors duration-500">
       <div className="max-w-7xl mx-auto p-6 md:p-10">
         {/* Header with Mesh Gradient */}
-        <div className="relative overflow-hidden bg-white rounded-3xl border border-gray-200 shadow-sm mb-8">
-          <div className="absolute top-0 right-0 -mt-20 -mr-20 w-80 h-80 bg-purple-400/20 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-64 h-64 bg-indigo-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div className="relative overflow-hidden bg-white dark:bg-slate-900 rounded-3xl border border-gray-200 dark:border-slate-800 shadow-sm mb-8 transition-colors">
+          <div className="absolute top-0 right-0 -mt-20 -mr-20 w-80 h-80 bg-purple-400/20 dark:bg-purple-500/10 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-64 h-64 bg-indigo-400/20 dark:bg-indigo-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
 
           <div className="relative px-8 py-10 creator-header">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
               <div className="flex-1 text-center sm:text-left">
                 <div className="flex items-center justify-center sm:justify-start space-x-2 mb-3">
-                  <div className="p-1.5 bg-purple-100/80 rounded-lg">
-                    <Sparkles className="w-4 h-4 text-purple-600" />
+                  <div className="p-1.5 bg-purple-100/80 dark:bg-purple-900/30 rounded-lg">
+                    <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                   </div>
-                  <span className="text-xs font-bold text-purple-600 uppercase tracking-wider">Creator Hub</span>
+                  <span className="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider">Creator Hub</span>
                 </div>
-                <h1 className="text-3xl sm:text-4xl font-black text-gray-900 mb-2 tracking-tight">
-                  {profile?.display_name?.split(' ')[0] || 'Creator'} <span className="bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">Profile</span>
+                <h1 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mb-2 tracking-tight">
+                  {profile?.display_name?.split(' ')[0] || 'Creator'} <span className="bg-gradient-to-r from-purple-600 to-indigo-600 dark:from-purple-400 dark:to-indigo-400 bg-clip-text text-transparent">Profile</span>
                 </h1>
-                <p className="text-gray-500 max-w-md font-medium mx-auto sm:mx-0">
+                <p className="text-gray-500 dark:text-slate-400 max-w-md font-medium mx-auto sm:mx-0">
                   Manage your identity, track your metrics, and showcase your digital reach.
                 </p>
               </div>
@@ -233,7 +233,7 @@ const CreatorProfile: React.FC = () => {
                 {profile && !isEditing && (
                   <button
                     onClick={handleRefreshStats}
-                    className="p-3 bg-white text-gray-700 rounded-2xl border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-all duration-200 shadow-sm group"
+                    className="p-3 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-300 rounded-2xl border border-gray-200 dark:border-slate-700 hover:border-purple-300 dark:hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all duration-200 shadow-sm group"
                   >
                     <RefreshCw className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" />
                   </button>
@@ -250,14 +250,14 @@ const CreatorProfile: React.FC = () => {
                   <div className="flex items-center space-x-3">
                     <button
                       onClick={() => setIsEditing(false)}
-                      className="px-6 py-4 bg-white text-gray-700 rounded-2xl border border-gray-200 hover:bg-gray-50 font-bold transition-all"
+                      className="px-6 py-4 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-300 rounded-2xl border border-gray-200 dark:border-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700 font-bold transition-all"
                     >
                       Cancel
                     </button>
                     <button
                       onClick={handleSaveProfile}
                       disabled={saving}
-                      className="flex items-center space-x-2 px-8 py-4 bg-gray-900 text-white rounded-2xl hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 font-bold disabled:opacity-50"
+                      className="flex items-center space-x-2 px-8 py-4 bg-gray-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl hover:shadow-xl dark:hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] transform hover:-translate-y-1 transition-all duration-300 font-bold disabled:opacity-50"
                     >
                       {saving ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
                       <span>Save Changes</span>
@@ -273,14 +273,14 @@ const CreatorProfile: React.FC = () => {
           {/* Main Profile Section */}
           <div className="lg:col-span-2 space-y-8">
             {/* Profile Card - Glassmorphism */}
-            <div className="creator-profile-card bg-white/60 backdrop-blur-xl rounded-[32px] shadow-sm border border-white/50 overflow-hidden relative group">
-              <div className="h-32 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 opacity-80" />
+            <div className="creator-profile-card bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[32px] shadow-sm border border-white/50 dark:border-slate-800/50 overflow-hidden relative group transition-colors">
+              <div className="h-32 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 opacity-80 dark:opacity-60" />
 
               <div className="p-8 -mt-16 relative">
                 <div className="flex flex-col sm:flex-row items-center sm:items-end space-y-4 sm:space-y-0 sm:space-x-6 mb-8 text-center sm:text-left">
                   <div className="relative">
-                    <div className="absolute inset-0 bg-purple-500 blur-lg opacity-20 animate-pulse"></div>
-                    <div className="relative w-32 h-32 rounded-[32px] bg-white border-4 border-white shadow-2xl flex items-center justify-center overflow-hidden shrink-0">
+                    <div className="absolute inset-0 bg-purple-500 blur-lg opacity-20 dark:opacity-40 animate-pulse"></div>
+                    <div className="relative w-32 h-32 rounded-[32px] bg-white dark:bg-slate-800 border-4 border-white dark:border-slate-800 shadow-2xl flex items-center justify-center overflow-hidden shrink-0">
                       {profile?.avatar_url ? (
                         <img src={profile.avatar_url} alt={profile.display_name} className="w-full h-full object-cover" />
                       ) : (
@@ -292,11 +292,11 @@ const CreatorProfile: React.FC = () => {
                   </div>
                   <div className="flex-1 pb-2">
                     <div className="flex flex-col sm:flex-row items-center sm:items-baseline sm:space-x-3 mb-2">
-                      <h2 className="text-3xl font-black text-gray-900 tracking-tight">
+                      <h2 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">
                         {profile?.display_name || user?.name || 'Your Name'}
                       </h2>
                       {profile?.is_verified && (
-                        <div title="Verified Creator" className="p-1 px-2 bg-blue-50 text-blue-600 rounded-lg text-xs font-black uppercase tracking-widest border border-blue-100 flex items-center space-x-1">
+                        <div title="Verified Creator" className="p-1 px-2 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-lg text-xs font-black uppercase tracking-widest border border-blue-100 dark:border-blue-500/20 flex items-center space-x-1">
                           <Shield className="w-3.5 h-3.5" />
                           <span>Verified</span>
                         </div>
@@ -315,34 +315,34 @@ const CreatorProfile: React.FC = () => {
                   <div className="space-y-6 animate-in fade-in duration-500">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                       <div className="space-y-2">
-                        <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-1">Identity Name</label>
+                        <label className="text-xs font-black uppercase tracking-widest text-gray-400 dark:text-slate-500 ml-1">Identity Name</label>
                         <input
                           type="text"
                           value={editForm.display_name}
                           onChange={(e) => setEditForm({ ...editForm, display_name: e.target.value })}
-                          className="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-purple-500 font-bold"
+                          className="w-full px-5 py-4 bg-gray-50 dark:bg-slate-800/50 border-none rounded-2xl focus:ring-2 focus:ring-purple-500 font-bold text-gray-900 dark:text-white transition-colors"
                           placeholder="Your display name"
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-1">Avatar Resource (URL)</label>
+                        <label className="text-xs font-black uppercase tracking-widest text-gray-400 dark:text-slate-500 ml-1">Avatar Resource (URL)</label>
                         <input
                           type="url"
                           value={editForm.avatar_url}
                           onChange={(e) => setEditForm({ ...editForm, avatar_url: e.target.value })}
-                          className="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-purple-500 font-bold"
+                          className="w-full px-5 py-4 bg-gray-50 dark:bg-slate-800/50 border-none rounded-2xl focus:ring-2 focus:ring-purple-500 font-bold text-gray-900 dark:text-white transition-colors"
                           placeholder="https://example.com/avatar.jpg"
                         />
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-1">Creator Bio</label>
+                      <label className="text-xs font-black uppercase tracking-widest text-gray-400 dark:text-slate-500 ml-1">Creator Bio</label>
                       <textarea
                         value={editForm.bio}
                         onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
                         rows={4}
-                        className="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-purple-500 resize-none font-medium leading-relaxed"
+                        className="w-full px-5 py-4 bg-gray-50 dark:bg-slate-800/50 border-none rounded-2xl focus:ring-2 focus:ring-purple-500 resize-none font-medium leading-relaxed text-gray-900 dark:text-white transition-colors"
                         placeholder="Tell the world about your expertise..."
                       />
                     </div>
@@ -357,7 +357,7 @@ const CreatorProfile: React.FC = () => {
                         const Icon = social.icon;
                         return (
                           <div key={social.id} className="space-y-2">
-                            <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-1 flex items-center">
+                            <label className="text-xs font-black uppercase tracking-widest text-gray-400 dark:text-slate-500 ml-1 flex items-center">
                               <Icon className="w-3.5 h-3.5 mr-1.5" />
                               {social.label}
                             </label>
@@ -365,7 +365,7 @@ const CreatorProfile: React.FC = () => {
                               type="url"
                               value={(editForm as any)[social.id]}
                               onChange={(e) => setEditForm({ ...editForm, [social.id]: e.target.value })}
-                              className="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-purple-500 font-bold text-sm"
+                              className="w-full px-5 py-4 bg-gray-50 dark:bg-slate-800/50 border-none rounded-2xl focus:ring-2 focus:ring-purple-500 font-bold text-sm text-gray-900 dark:text-white transition-colors"
                               placeholder={social.placeholder}
                             />
                           </div>
@@ -380,19 +380,19 @@ const CreatorProfile: React.FC = () => {
                             type="checkbox"
                             checked={editForm.is_public}
                             onChange={(e) => setEditForm({ ...editForm, is_public: e.target.checked })}
-                            className="w-6 h-6 text-purple-600 rounded-lg border-gray-200 focus:ring-purple-500"
+                            className="w-6 h-6 text-purple-600 dark:text-purple-500 rounded-lg border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-purple-500 transition-colors"
                           />
                         </div>
-                        <span className="text-sm font-bold text-gray-700">Public Profile</span>
+                        <span className="text-sm font-bold text-gray-700 dark:text-slate-300 transition-colors">Public Profile</span>
                       </label>
                       <label className="flex items-center space-x-3 cursor-pointer group">
                         <input
                           type="checkbox"
                           checked={editForm.accept_donations}
                           onChange={(e) => setEditForm({ ...editForm, accept_donations: e.target.checked })}
-                          className="w-6 h-6 text-green-600 rounded-lg border-gray-200 focus:ring-green-500"
+                          className="w-6 h-6 text-green-600 dark:text-green-500 rounded-lg border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-green-500 transition-colors"
                         />
-                        <span className="text-sm font-bold text-gray-700">Accept Donations</span>
+                        <span className="text-sm font-bold text-gray-700 dark:text-slate-300 transition-colors">Accept Donations</span>
                       </label>
                     </div>
                   </div>
@@ -400,17 +400,17 @@ const CreatorProfile: React.FC = () => {
                   /* Profile Details View */
                   <div className="space-y-8 animate-in fade-in duration-700">
                     {profile?.bio ? (
-                      <p className="text-gray-600 text-lg font-medium leading-relaxed italic">
+                      <p className="text-gray-600 dark:text-slate-300 text-lg font-medium leading-relaxed italic">
                         "{profile.bio}"
                       </p>
                     ) : (
-                      <p className="text-gray-400 italic">No bio provided yet.</p>
+                      <p className="text-gray-400 dark:text-slate-500 italic">No bio provided yet.</p>
                     )}
 
                     <div className="flex flex-wrap items-center gap-4">
                       {profile?.website && (
                         <a href={profile.website} target="_blank" rel="noopener noreferrer"
-                          className="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-100 rounded-xl text-gray-600 hover:text-purple-600 hover:border-purple-200 transition-all font-bold text-sm shadow-sm">
+                          className="flex items-center space-x-2 px-4 py-2 bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl text-gray-600 dark:text-slate-300 hover:text-purple-600 dark:hover:text-purple-400 hover:border-purple-200 dark:hover:border-purple-500/50 transition-all font-bold text-sm shadow-sm">
                           <Globe className="w-4 h-4" />
                           <span>Website</span>
                           <ExternalLink className="w-3 h-3 opacity-50" />
@@ -418,14 +418,14 @@ const CreatorProfile: React.FC = () => {
                       )}
                       {profile?.github_url && (
                         <a href={profile.github_url} target="_blank" rel="noopener noreferrer"
-                          className="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-100 rounded-xl text-gray-600 hover:text-gray-900 hover:border-gray-900 transition-all font-bold text-sm shadow-sm">
+                          className="flex items-center space-x-2 px-4 py-2 bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:border-gray-900 dark:hover:border-slate-500 transition-all font-bold text-sm shadow-sm">
                           <Github className="w-4 h-4" />
                           <span>GitHub</span>
                         </a>
                       )}
                       {profile?.twitter_url && (
                         <a href={profile.twitter_url} target="_blank" rel="noopener noreferrer"
-                          className="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-100 rounded-xl text-gray-600 hover:text-blue-400 hover:border-blue-400 transition-all font-bold text-sm shadow-sm">
+                          className="flex items-center space-x-2 px-4 py-2 bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl text-gray-600 dark:text-slate-300 hover:text-blue-400 dark:hover:text-blue-400 hover:border-blue-400 dark:hover:border-blue-500/50 transition-all font-bold text-sm shadow-sm">
                           <Twitter className="w-4 h-4" />
                           <span>Twitter</span>
                         </a>
@@ -437,7 +437,7 @@ const CreatorProfile: React.FC = () => {
             </div>
 
             {/* Stats Grid - Premium Experience */}
-            <div className="creator-stats grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="creator-stats grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 font-sans">
               {[
                 { label: 'Downloads', value: profile?.total_downloads || 0, icon: Download, color: 'blue' },
                 { label: 'Rating', value: profile?.average_rating?.toFixed(1) || '0.0', icon: Star, color: 'amber' },
@@ -448,9 +448,9 @@ const CreatorProfile: React.FC = () => {
               ].map((stat, idx) => {
                 const Icon = stat.icon;
                 return (
-                  <div key={idx} className="bg-white/60 backdrop-blur-md rounded-2xl p-4 border border-white/50 shadow-sm hover:shadow-md transition-all group overflow-hidden relative">
+                  <div key={idx} className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-md rounded-2xl p-4 border border-white/50 dark:border-slate-800/50 shadow-sm hover:shadow-md transition-all group overflow-hidden relative">
                     <div className="relative z-10">
-                      <div className={`p-2 w-10 h-10 rounded-xl bg-white shadow-sm border border-gray-100 mb-3 group-hover:scale-110 transition-transform ${stat.color === 'blue' ? 'text-blue-500' :
+                      <div className={`p-2 w-10 h-10 rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-gray-100 dark:border-slate-700 mb-3 group-hover:scale-110 transition-transform ${stat.color === 'blue' ? 'text-blue-500' :
                         stat.color === 'amber' ? 'text-amber-500' :
                           stat.color === 'rose' ? 'text-rose-500' :
                             stat.color === 'indigo' ? 'text-indigo-500' :
@@ -459,8 +459,8 @@ const CreatorProfile: React.FC = () => {
                         }`}>
                         <Icon className="w-6 h-6" />
                       </div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">{stat.label}</p>
-                      <p className="text-xl font-black text-gray-900">{stat.value}</p>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-slate-500 mb-1">{stat.label}</p>
+                      <p className="text-xl font-black text-gray-900 dark:text-white">{stat.value}</p>
                     </div>
                   </div>
                 );
@@ -474,19 +474,19 @@ const CreatorProfile: React.FC = () => {
 
             {/* My Public Workflows */}
             {myWorkflows.length > 0 ? (
-              <div className="creator-workflows bg-white/60 backdrop-blur-xl rounded-[32px] shadow-sm border border-white/50 p-8">
-                <h3 className="text-xl font-black text-gray-900 mb-6 flex items-center space-x-3">
-                  <div className="p-2 bg-purple-100 rounded-xl">
-                    <Zap className="w-5 h-5 text-purple-600" />
+              <div className="creator-workflows bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[32px] shadow-sm border border-white/50 dark:border-slate-800/50 p-8 transition-colors">
+                <h3 className="text-xl font-black text-gray-900 dark:text-white mb-6 flex items-center space-x-3">
+                  <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-xl">
+                    <Zap className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                   </div>
                   <span>Shared Workflows</span>
                 </h3>
                 <div className="space-y-4 creator-workflows-list">
                   {myWorkflows.map((wf) => (
-                    <div key={wf.id} className="group flex items-center justify-between p-4 bg-white/40 hover:bg-white/80 border border-transparent hover:border-purple-100 rounded-2xl transition-all duration-300">
+                    <div key={wf.id} className="group flex items-center justify-between p-4 bg-white/40 dark:bg-slate-800/20 hover:bg-white/80 dark:hover:bg-slate-800/60 border border-transparent hover:border-purple-100 dark:hover:border-purple-500/30 rounded-2xl transition-all duration-300">
                       <div>
-                        <h4 className="font-bold text-gray-900 group-hover:text-purple-600 transition-colors uppercase tracking-tight">{wf.name}</h4>
-                        <div className="flex items-center space-x-4 text-xs font-bold text-gray-400 mt-2 uppercase tracking-widest">
+                        <h4 className="font-bold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors uppercase tracking-tight">{wf.name}</h4>
+                        <div className="flex items-center space-x-4 text-xs font-bold text-gray-400 dark:text-slate-500 mt-2 uppercase tracking-widest">
                           <span className="flex items-center space-x-1.5">
                             <Download className="w-3.5 h-3.5" />
                             <span>{wf.downloads_count}</span>
@@ -498,7 +498,7 @@ const CreatorProfile: React.FC = () => {
                             </span>
                           )}
                           {wf.category && (
-                            <span className="px-2 py-0.5 bg-purple-50 text-purple-600 rounded-lg">
+                            <span className="px-2 py-0.5 bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-lg">
                               {wf.category}
                             </span>
                           )}
@@ -513,41 +513,41 @@ const CreatorProfile: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <div className="creator-workflows creator-workflows-empty bg-white/40 backdrop-blur-xl rounded-[32px] border border-white/50 p-10 text-center">
-                <div className="w-20 h-20 bg-purple-50 rounded-[28px] flex items-center justify-center mx-auto mb-6">
-                  <Zap className="w-10 h-10 text-purple-400" />
+              <div className="creator-workflows creator-workflows-empty bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl rounded-[32px] border border-white/50 dark:border-slate-800/50 p-10 text-center transition-colors">
+                <div className="w-20 h-20 bg-purple-50 dark:bg-purple-900/20 rounded-[28px] flex items-center justify-center mx-auto mb-6">
+                  <Zap className="w-10 h-10 text-purple-400 dark:text-purple-600" />
                 </div>
-                <h3 className="text-xl font-black text-gray-900 mb-2">No Public Assets</h3>
-                <p className="text-gray-500 font-medium">Your marketplace contributions will appear here.</p>
+                <h3 className="text-xl font-black text-gray-900 dark:text-white mb-2">No Public Assets</h3>
+                <p className="text-gray-500 dark:text-slate-400 font-medium">Your marketplace contributions will appear here.</p>
               </div>
             )}
 
             {/* Activity Feed */}
             {activityFeed.length > 0 ? (
-              <div className="creator-activity bg-white/60 backdrop-blur-xl rounded-[32px] shadow-sm border border-white/50 p-8">
-                <h3 className="text-xl font-black text-gray-900 mb-6 flex items-center space-x-3">
-                  <div className="p-2 bg-blue-100 rounded-xl">
-                    <Activity className="w-5 h-5 text-blue-600" />
+              <div className="creator-activity bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[32px] shadow-sm border border-white/50 dark:border-slate-800/50 p-8 transition-colors">
+                <h3 className="text-xl font-black text-gray-900 dark:text-white mb-6 flex items-center space-x-3">
+                  <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
+                    <Activity className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                   </div>
                   <span>Engagement Feed</span>
                 </h3>
                 <div className="space-y-4 creator-activity-list">
                   {activityFeed.map((item) => (
-                    <div key={item.id} className="flex items-start space-x-4 p-4 bg-white/40 rounded-2xl border border-transparent hover:border-blue-100 transition-all cursor-default">
+                    <div key={item.id} className="flex items-start space-x-4 p-4 bg-white/40 dark:bg-slate-800/20 rounded-2xl border border-transparent hover:border-blue-100 dark:hover:border-blue-500/30 transition-all cursor-default">
                       <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-400 to-purple-400 flex items-center justify-center text-white font-black shrink-0">
                         {item.actor_name?.charAt(0).toUpperCase() || '?'}
                       </div>
                       <div className="flex-1">
-                        <p className="text-sm font-bold text-gray-900 leading-tight">
-                          <span className="text-blue-600">{item.actor_name}</span> {item.title}
+                        <p className="text-sm font-bold text-gray-900 dark:text-white leading-tight">
+                          <span className="text-blue-600 dark:text-blue-400">{item.actor_name}</span> {item.title}
                         </p>
                         {item.workflow_name && (
-                          <div className="flex items-center text-[10px] font-black uppercase tracking-widest text-gray-400 mt-2">
+                          <div className="flex items-center text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-slate-500 mt-2">
                             <Zap className="w-3.5 h-3.5 mr-1" />
                             {item.workflow_name}
                           </div>
                         )}
-                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-300 mt-1">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-300 dark:text-slate-600 mt-1">
                           {new Date(item.created_at).toLocaleDateString()}
                         </p>
                       </div>
@@ -556,12 +556,12 @@ const CreatorProfile: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <div className="creator-activity creator-activity-empty bg-white/40 backdrop-blur-xl rounded-[32px] border border-white/50 p-10 text-center">
-                <div className="w-20 h-20 bg-blue-50 rounded-[28px] flex items-center justify-center mx-auto mb-6">
-                  <Activity className="w-10 h-10 text-blue-400" />
+              <div className="creator-activity creator-activity-empty bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl rounded-[32px] border border-white/50 dark:border-slate-800/50 p-10 text-center transition-colors">
+                <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/20 rounded-[28px] flex items-center justify-center mx-auto mb-6">
+                  <Activity className="w-10 h-10 text-blue-400 dark:text-blue-600" />
                 </div>
-                <h3 className="text-xl font-black text-gray-900 mb-2">Passive Feed</h3>
-                <p className="text-gray-500 font-medium">Follower interactions will be logged here.</p>
+                <h3 className="text-xl font-black text-gray-900 dark:text-white mb-2">Passive Feed</h3>
+                <p className="text-gray-500 dark:text-slate-400 font-medium">Follower interactions will be logged here.</p>
               </div>
             )}
           </div>
@@ -570,15 +570,15 @@ const CreatorProfile: React.FC = () => {
           <div className="space-y-8">
             {/* People You Follow */}
             {followingList.length > 0 && (
-              <div className="bg-white/60 backdrop-blur-xl rounded-[32px] border border-white/50 p-8">
-                <h3 className="text-lg font-black text-gray-900 mb-6 flex items-center space-x-3 uppercase tracking-tight">
-                  <Users className="w-5 h-5 text-indigo-600" />
+              <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[32px] border border-white/50 dark:border-slate-800/50 p-8 transition-colors">
+                <h3 className="text-lg font-black text-gray-900 dark:text-white mb-6 flex items-center space-x-3 uppercase tracking-tight">
+                  <Users className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                   <span>Following</span>
                 </h3>
                 <div className="space-y-4">
                   {followingList.slice(0, 5).map((following) => (
                     <div key={following.id} className="flex items-center space-x-3 group cursor-pointer">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-400 to-purple-400 flex items-center justify-center text-white font-black overflow-hidden ring-2 ring-transparent group-hover:ring-indigo-100 transition-all">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-400 to-purple-400 flex items-center justify-center text-white font-black overflow-hidden ring-2 ring-transparent group-hover:ring-indigo-100 dark:group-hover:ring-indigo-900/50 transition-all">
                         {following.avatar_url ? (
                           <img src={following.avatar_url} alt={following.display_name || ''} className="w-full h-full object-cover" />
                         ) : (
@@ -586,7 +586,7 @@ const CreatorProfile: React.FC = () => {
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-gray-900 truncate group-hover:text-indigo-600 transition-colors">
+                        <p className="text-sm font-bold text-gray-900 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                           {following.display_name || following.user_name}
                         </p>
                       </div>
@@ -594,7 +594,7 @@ const CreatorProfile: React.FC = () => {
                   ))}
                 </div>
                 {followingCount > 5 && (
-                  <button className="mt-6 w-full py-3 text-xs font-black uppercase tracking-widest text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all border border-transparent hover:border-indigo-100">
+                  <button className="mt-6 w-full py-3 text-xs font-black uppercase tracking-widest text-gray-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-xl transition-all border border-transparent hover:border-indigo-100 dark:hover:border-indigo-500/30">
                     Discover More ({followingCount - 5})
                   </button>
                 )}
@@ -602,13 +602,13 @@ const CreatorProfile: React.FC = () => {
             )}
 
             {/* Top Creators Leaderboard */}
-            <div className="creator-leaderboard bg-white/60 backdrop-blur-xl rounded-[32px] border border-white/50 p-8 creator-top-leaderboard">
-              <h3 className="text-lg font-black text-gray-900 mb-6 flex items-center space-x-3 uppercase tracking-tight">
-                <BarChart3 className="w-5 h-5 text-purple-600" />
+            <div className="creator-leaderboard bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[32px] border border-white/50 dark:border-slate-800/50 p-8 creator-top-leaderboard transition-colors">
+              <h3 className="text-lg font-black text-gray-900 dark:text-white mb-6 flex items-center space-x-3 uppercase tracking-tight">
+                <BarChart3 className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                 <span>Elite Node</span>
               </h3>
               {topCreators.length === 0 ? (
-                <p className="text-sm text-gray-400 font-bold uppercase tracking-widest text-center py-4 italic">No nodes detected</p>
+                <p className="text-sm text-gray-400 dark:text-slate-600 font-bold uppercase tracking-widest text-center py-4 italic">No nodes detected</p>
               ) : (
                 <div className="space-y-4">
                   {topCreators.map((creator, index) => (
@@ -629,10 +629,10 @@ const CreatorProfile: React.FC = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center space-x-1">
-                          <p className="text-sm font-bold text-gray-900 truncate">{creator.display_name}</p>
-                          {creator.is_verified && <Shield className="w-3.5 h-3.5 text-blue-500" />}
+                          <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{creator.display_name}</p>
+                          {creator.is_verified && <Shield className="w-3.5 h-3.5 text-blue-500 dark:text-blue-400" />}
                         </div>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-slate-500">
                           {creator.total_downloads} CLXS • {creator.total_workflows} OPS
                         </p>
                       </div>
@@ -643,8 +643,8 @@ const CreatorProfile: React.FC = () => {
             </div>
 
             {/* Quick Tips */}
-            <div className="bg-gradient-to-br from-purple-600/10 to-indigo-600/10 rounded-[32px] border border-purple-100 p-8">
-              <h3 className="text-lg font-black text-gray-900 mb-4 uppercase tracking-tight">Creator Protocols</h3>
+            <div className="bg-gradient-to-br from-purple-600/10 to-indigo-600/10 dark:from-purple-500/5 dark:to-indigo-500/5 rounded-[32px] border border-purple-100 dark:border-purple-900/30 p-8 transition-colors">
+              <h3 className="text-lg font-black text-gray-900 dark:text-white mb-4 uppercase tracking-tight">Creator Protocols</h3>
               <ul className="space-y-4">
                 {[
                   'Optimize bio for neural search',
@@ -653,10 +653,10 @@ const CreatorProfile: React.FC = () => {
                   'Categorical frequency tagging'
                 ].map((tip, i) => (
                   <li key={i} className="flex items-start space-x-3">
-                    <div className="p-1 bg-green-500 rounded-lg mt-0.5">
+                    <div className="p-1 bg-green-500 dark:bg-green-600 rounded-lg mt-0.5">
                       <Check className="w-3 h-3 text-white" />
                     </div>
-                    <span className="text-sm font-bold text-gray-600">{tip}</span>
+                    <span className="text-sm font-bold text-gray-600 dark:text-slate-300">{tip}</span>
                   </li>
                 ))}
               </ul>

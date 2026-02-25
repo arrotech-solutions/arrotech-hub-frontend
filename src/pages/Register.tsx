@@ -12,6 +12,7 @@ import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import SEO from '../components/SEO';
+import { ThemeToggle } from '../components/ThemeToggle';
 import logo from '../assets/Logo/fulllogo_transparent.png';
 
 // Microsoft Icon SVG component
@@ -126,18 +127,21 @@ const Register: React.FC = () => {
   }, [loginWithMicrosoft, navigate]);
 
   return (
-    <div className="min-h-screen flex relative bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+    <div className="min-h-screen flex relative bg-slate-50 dark:bg-slate-900 transition-colors">
       <SEO
         title="Create Your Account"
         description="Get started with Arrotech Hub for free. Connect your apps, automate workflows, and boost your productivity with our unified workspace."
         url="/register"
         keywords={['Sign Up', 'Register', 'Create Account', 'Arrotech Hub', 'Free Workspace']}
       />
+      <div className="absolute top-4 right-4 md:top-6 md:right-6 z-50">
+        <ThemeToggle />
+      </div>
       {isOAuthLoading && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-xl shadow-2xl flex flex-col items-center gap-3">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center transition-all">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-xl shadow-2xl flex flex-col items-center gap-3 border border-transparent dark:border-slate-800 transition-colors">
             <div className="animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent"></div>
-            <p className="font-bold text-sm text-gray-800">Signing up with {oAuthProvider}...</p>
+            <p className="font-bold text-sm text-gray-800 dark:text-white transition-colors">Signing up with {oAuthProvider}...</p>
           </div>
         </div>
       )}
@@ -148,67 +152,67 @@ const Register: React.FC = () => {
             <Link to="/" className="inline-block hover:scale-110 transition-transform mb-2">
               <img src={logo} alt="Arrotech Hub" className="h-12 w-auto object-contain" />
             </Link>
-            <h1 className="text-xl font-black text-gray-900 mb-0.5">Join Arrotech Hub</h1>
-            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Create Account</p>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-1 tracking-tighter leading-tight transition-colors">Join Arrotech Hub</h1>
+            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium transition-colors">Create your account</p>
           </div>
 
-          <div className="bg-white rounded-xl p-4 shadow-xl border border-gray-100">
+          <div className="bg-white/80 dark:bg-slate-900/50 backdrop-blur-md rounded-xl p-4 shadow-xl border border-gray-100 dark:border-slate-800/50 transition-colors">
             {formError && (
-              <div className="mb-2 bg-red-50 border border-red-100 text-red-600 px-2 py-1 rounded text-[9px] flex items-center gap-1.5 font-bold uppercase">
-                <Shield className="w-3 h-3" /> {formError}
+              <div className="mb-2 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/50 text-red-600 dark:text-red-400 px-2 py-1 rounded text-[9px] flex items-center gap-1.5 font-bold uppercase transition-colors">
+                <Shield className="w-3 h-3 text-red-500 dark:text-red-400" /> {formError}
               </div>
             )}
             <form className="space-y-2" onSubmit={handleSubmit(onSubmit)}>
               <div className="grid grid-cols-1 gap-2">
                 <div>
-                  <label className="block text-[9px] font-black text-gray-400 uppercase mb-0.5">Full Name</label>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 transition-colors">Full Name</label>
                   <div className="relative">
-                    <User className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300" />
-                    <input {...register('name', { required: 'Required' })} className="w-full pl-8 pr-3 py-1.5 border border-gray-200 rounded-lg text-xs focus:ring-1 focus:ring-blue-500 focus:border-transparent outline-none" placeholder="Name" />
+                    <User className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500 transition-colors" />
+                    <input {...register('name', { required: 'Required' })} className="w-full pl-8 pr-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-lg text-sm font-medium focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100 focus:border-transparent outline-none transition-all placeholder-slate-400 dark:placeholder-slate-500" placeholder="Enter your name" />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-[9px] font-black text-gray-400 uppercase mb-0.5">Email Address</label>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 transition-colors">Email Address</label>
                   <div className="relative">
-                    <Mail className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-300" />
-                    <input {...register('email', { required: 'Required' })} type="email" className="w-full pl-8 pr-3 py-1.5 border border-gray-200 rounded-lg text-xs focus:ring-1 focus:ring-blue-500 focus:border-transparent outline-none" placeholder="Email" />
+                    <Mail className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500 transition-colors" />
+                    <input {...register('email', { required: 'Required' })} type="email" className="w-full pl-8 pr-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-lg text-sm font-medium focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100 focus:border-transparent outline-none transition-all placeholder-slate-400 dark:placeholder-slate-500" placeholder="name@company.com" />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-[9px] font-black text-gray-400 uppercase mb-0.5">Password</label>
+                    <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 transition-colors">Password</label>
                     <div className="relative">
-                      <Lock className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-300" />
-                      <input {...register('password', { required: 'Required', minLength: 6 })} type={showPassword ? 'text' : 'password'} className="w-full pl-8 pr-8 py-1.5 border border-gray-200 rounded-lg text-xs focus:ring-1 focus:ring-blue-500 outline-none" placeholder="••••••" />
-                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-500">{showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}</button>
+                      <Lock className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500 transition-colors" />
+                      <input {...register('password', { required: 'Required', minLength: 6 })} type={showPassword ? 'text' : 'password'} className="w-full pl-8 pr-8 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-lg text-sm font-medium focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100 focus:border-transparent outline-none transition-all placeholder-slate-400 dark:placeholder-slate-500" placeholder="Minimum 6 characters" />
+                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">{showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button>
                     </div>
                   </div>
                   <div>
-                    <label className="block text-[9px] font-black text-gray-400 uppercase mb-0.5">Confirm</label>
+                    <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 transition-colors">Confirm Password</label>
                     <div className="relative">
-                      <Lock className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-300" />
-                      <input {...register('confirmPassword', { validate: v => v === password || 'No match' })} type={showConfirmPassword ? 'text' : 'password'} className="w-full pl-8 pr-8 py-1.5 border border-gray-200 rounded-lg text-xs focus:ring-1 focus:ring-blue-500 outline-none" placeholder="••••••" />
-                      <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-500">{showConfirmPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}</button>
+                      <Lock className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500 transition-colors" />
+                      <input {...register('confirmPassword', { validate: v => v === password || 'No match' })} type={showConfirmPassword ? 'text' : 'password'} className="w-full pl-8 pr-8 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-lg text-sm font-medium focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100 focus:border-transparent outline-none transition-all placeholder-slate-400 dark:placeholder-slate-500" placeholder="Confirm password" />
+                      <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">{showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 py-0.5">
-                <input type="checkbox" className="h-3 w-3 rounded border-gray-300 text-blue-600" required />
-                <span className="text-[8px] text-gray-400 font-bold uppercase tracking-tighter">Agree to <Link to="/terms" className="text-blue-500 underline">Terms</Link> & <Link to="/privacy" className="text-blue-500 underline">Privacy</Link></span>
+              <div className="flex items-center gap-2 py-2 mt-2">
+                <input type="checkbox" className="h-4 w-4 rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-slate-900 dark:focus:ring-slate-100 transition-colors" required />
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium transition-colors">I agree to the <Link to="/terms" className="text-slate-900 dark:text-slate-200 hover:text-slate-700 dark:hover:text-slate-400 font-semibold transition-colors">Terms</Link> and <Link to="/privacy" className="text-slate-900 dark:text-slate-200 hover:text-slate-700 dark:hover:text-slate-400 font-semibold transition-colors">Privacy Policy</Link></span>
               </div>
 
-              <button type="submit" disabled={isLoading} className="w-full bg-blue-600 text-white py-2 rounded-lg font-black text-xs hover:bg-blue-700 transition-all transform active:scale-95 disabled:opacity-50 shadow-md shadow-blue-100 flex items-center justify-center gap-2">
+              <button type="submit" disabled={isLoading} className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-2.5 rounded-lg font-semibold text-sm hover:shadow-[0_6px_20px_rgba(0,0,0,0.15)] dark:hover:shadow-none hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2 mt-4 shadow-[0_4px_14px_0_rgb(0,0,0,0.1)] dark:shadow-none">
                 {isLoading ? 'Processing...' : <>Create Account <ArrowRight className="h-3 w-3" /></>}
               </button>
             </form>
 
-            <div className="relative my-3 flex items-center justify-center">
-              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-100"></div></div>
-              <span className="relative px-2 bg-white text-[8px] font-black text-gray-300 uppercase tracking-widest">Or Signup With</span>
+            <div className="relative my-6 flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200 dark:border-slate-700 transition-colors"></div></div>
+              <span className="relative px-3 bg-white dark:bg-slate-900 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest transition-colors">Or continue with</span>
             </div>
 
             <div className="space-y-2">
@@ -217,15 +221,15 @@ const Register: React.FC = () => {
                 type="button"
                 onClick={handleMicrosoftLogin}
                 disabled={!import.meta.env.VITE_MICROSOFT_CLIENT_ID}
-                className="w-full flex items-center justify-center gap-2 border border-gray-200 py-2 rounded-lg text-[10px] font-black text-gray-500 hover:bg-gray-50 transition-colors uppercase tracking-tight disabled:bg-gray-50 disabled:text-gray-300 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700 py-2 rounded-lg text-[10px] font-black text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors uppercase tracking-tight disabled:bg-slate-50 dark:disabled:bg-slate-800 disabled:text-slate-300 dark:disabled:text-slate-600 disabled:cursor-not-allowed"
               >
                 <MicrosoftIcon /> <span>Microsoft Account</span>
               </button>
             </div>
 
-            <div className="mt-3.5 pt-3 border-t border-gray-100 text-center">
-              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">
-                Got an account? <Link to="/login" className="text-blue-600 hover:underline">Sign In Now</Link>
+            <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800 text-center transition-colors">
+              <p className="text-sm text-slate-500 dark:text-slate-400 font-medium transition-colors">
+                Already have an account? <Link to="/login" className="text-slate-900 dark:text-slate-200 hover:text-slate-700 dark:hover:text-slate-400 font-semibold transition-colors">Sign in</Link>
               </p>
             </div>
           </div>

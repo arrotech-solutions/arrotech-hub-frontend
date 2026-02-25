@@ -180,12 +180,12 @@ const Settings: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 transition-colors">
         <div className="max-w-7xl mx-auto p-6">
           <div className="flex items-center justify-center py-16">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading settings...</p>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-500 mx-auto mb-4"></div>
+              <p className="text-gray-600 dark:text-slate-400 transition-colors">Loading settings...</p>
             </div>
           </div>
         </div>
@@ -194,26 +194,26 @@ const Settings: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-orange-50/30">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-orange-50/30 dark:from-slate-900 dark:via-slate-900 dark:to-orange-900/10 transition-colors">
       <div className="max-w-7xl mx-auto p-6 md:p-10">
         {/* Header with Mesh Gradient */}
-        <div className="relative overflow-hidden bg-white rounded-3xl border border-gray-200 shadow-sm mb-8">
-          <div className="absolute top-0 right-0 -mt-20 -mr-20 w-80 h-80 bg-orange-400/20 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-64 h-64 bg-blue-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div className="relative overflow-hidden bg-white dark:bg-slate-800 rounded-3xl border border-gray-200 dark:border-slate-700/50 shadow-sm mb-8 transition-colors">
+          <div className="absolute top-0 right-0 -mt-20 -mr-20 w-80 h-80 bg-orange-400/20 dark:bg-orange-500/10 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-64 h-64 bg-blue-400/20 dark:bg-blue-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
 
           <div className="relative px-8 py-10 settings-header">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
               <div className="flex-1 text-center sm:text-left">
                 <div className="flex items-center justify-center sm:justify-start space-x-2 mb-3">
-                  <div className="p-1.5 bg-orange-100/80 rounded-lg">
-                    <Sparkles className="w-4 h-4 text-orange-600" />
+                  <div className="p-1.5 bg-orange-100/80 dark:bg-orange-900/30 rounded-lg transition-colors">
+                    <Sparkles className="w-4 h-4 text-orange-600 dark:text-orange-400" />
                   </div>
-                  <span className="text-xs font-bold text-orange-600 uppercase tracking-wider">Configuration Node</span>
+                  <span className="text-xs font-bold text-orange-600 dark:text-orange-400 uppercase tracking-wider transition-colors">Configuration Node</span>
                 </div>
-                <h1 className="text-3xl sm:text-4xl font-black text-gray-900 mb-2 tracking-tight">
-                  System <span className="bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">Settings</span>
+                <h1 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mb-2 tracking-tight transition-colors">
+                  System <span className="bg-gradient-to-r from-orange-600 to-amber-600 dark:from-orange-400 dark:to-amber-400 bg-clip-text text-transparent">Settings</span>
                 </h1>
-                <p className="text-gray-500 max-w-md font-medium mx-auto sm:mx-0">
+                <p className="text-gray-500 dark:text-slate-400 max-w-md font-medium mx-auto sm:mx-0 transition-colors">
                   Calibrate your account preferences, security protocols, and integration pathways.
                 </p>
               </div>
@@ -221,13 +221,13 @@ const Settings: React.FC = () => {
                 <button
                   onClick={resetSettings}
                   disabled={saving}
-                  className="flex items-center space-x-2 px-6 py-4 bg-white text-gray-700 rounded-2xl border border-gray-200 hover:border-orange-300 hover:bg-orange-50 transition-all duration-200 shadow-sm disabled:opacity-50"
+                  className="flex items-center space-x-2 px-6 py-4 bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-300 rounded-2xl border border-gray-200 dark:border-slate-700 hover:border-orange-300 dark:hover:border-orange-500/50 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200 shadow-sm dark:shadow-none disabled:opacity-50"
                 >
                   <RotateCcw className="w-5 h-5" />
                   <span>Reset Node</span>
                 </button>
                 {saving && (
-                  <div className="flex items-center px-4 py-2 bg-orange-50 text-orange-700 rounded-xl text-sm font-black uppercase tracking-widest border border-orange-100">
+                  <div className="flex items-center px-4 py-2 bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400 rounded-xl text-sm font-black uppercase tracking-widest border border-orange-100 dark:border-orange-500/20 transition-colors">
                     <Loader2 className="animate-spin h-4 w-4 mr-2" />
                     <span>Syncing...</span>
                   </div>
@@ -238,12 +238,12 @@ const Settings: React.FC = () => {
         </div>
 
         {message && (
-          <div className={`mb-8 p-6 rounded-[24px] border animate-in slide-in-from-top-4 duration-500 ${message.type === 'success'
-            ? 'bg-emerald-50 border-emerald-100 text-emerald-800'
-            : 'bg-rose-50 border-rose-100 text-rose-800'
+          <div className={`mb-8 p-6 rounded-[24px] border animate-in slide-in-from-top-4 duration-500 transition-colors ${message.type === 'success'
+            ? 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-100 dark:border-emerald-500/20 text-emerald-800 dark:text-emerald-400'
+            : 'bg-rose-50 dark:bg-rose-500/10 border-rose-100 dark:border-rose-500/20 text-rose-800 dark:text-rose-400'
             }`}>
             <div className="flex items-center">
-              <div className={`p-2 rounded-xl mr-4 ${message.type === 'success' ? 'bg-emerald-100' : 'bg-rose-100'}`}>
+              <div className={`p-2 rounded-xl mr-4 transition-colors ${message.type === 'success' ? 'bg-emerald-100 dark:bg-emerald-900/30' : 'bg-rose-100 dark:bg-rose-900/30'}`}>
                 {message.type === 'success' ? (
                   <CheckCircle className="w-5 h-5" />
                 ) : (
@@ -259,15 +259,15 @@ const Settings: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Navigation Sidebar */}
           <div className="lg:col-span-1">
-            <div className="bg-white/60 backdrop-blur-xl rounded-[32px] border border-white/50 p-6 space-y-2 sticky top-24">
-              <h3 className="px-4 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-6">Configuration Domains</h3>
+            <div className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl rounded-[32px] border border-white/50 dark:border-slate-700/50 p-6 space-y-2 sticky top-24 transition-colors">
+              <h3 className="px-4 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-slate-500 mb-6 transition-colors">Configuration Domains</h3>
               <SettingsSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
             </div>
           </div>
 
           {/* Settings Content Area */}
           <div className="lg:col-span-2">
-            <div className="settings-container settings-content bg-white/60 backdrop-blur-xl rounded-[32px] border border-white/50 p-8 min-h-[600px] shadow-sm">
+            <div className="settings-container settings-content bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl rounded-[32px] border border-white/50 dark:border-slate-700/50 p-8 min-h-[600px] shadow-sm transition-colors">
 
               {activeTab === 'profile' && user && (
                 <div className="animate-in fade-in slide-in-from-right-4 duration-500">

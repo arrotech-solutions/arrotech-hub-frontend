@@ -42,19 +42,19 @@ const AgentCreatorModal: React.FC<AgentCreatorModalProps> = ({
   const [intervalUnit, setIntervalUnit] = useState<'minutes' | 'hours' | 'days'>('hours');
   const [cronExpression, setCronExpression] = useState('0 9 * * 1-5');
   const [maxExecutions, setMaxExecutions] = useState<number | null>(null);
-  
+
   // Notification settings
   const [notifyOnSuccess, setNotifyOnSuccess] = useState(true);
   const [notifyOnFailure, setNotifyOnFailure] = useState(true);
   const [slackChannel, setSlackChannel] = useState('#automation-logs');
   const [notificationEmail, setNotificationEmail] = useState('');
-  
+
   // Error handling
   const [retryOnFailure, setRetryOnFailure] = useState(true);
   const [maxRetries, setMaxRetries] = useState(3);
   const [retryDelay, setRetryDelay] = useState(30);
   const [pauseOnFailure, setPauseOnFailure] = useState(true);
-  
+
   // UI state
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -99,7 +99,7 @@ const AgentCreatorModal: React.FC<AgentCreatorModalProps> = ({
   const getCronDescription = (cron: string): string => {
     const parts = cron.split(' ');
     if (parts.length !== 5) return 'Invalid cron expression';
-    
+
     const presets: Record<string, string> = {
       '0 * * * *': 'Every hour',
       '0 0 * * *': 'Every day at midnight',
@@ -108,7 +108,7 @@ const AgentCreatorModal: React.FC<AgentCreatorModalProps> = ({
       '0 0 * * 0': 'Every Sunday at midnight',
       '0 0 1 * *': 'First day of every month',
     };
-    
+
     return presets[cron] || 'Custom schedule';
   };
 
@@ -165,13 +165,13 @@ const AgentCreatorModal: React.FC<AgentCreatorModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
-      <div 
+      <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
       />
-      
+
       {/* Modal */}
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
+      <div className="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden border border-gray-100 dark:border-slate-800 transition-all">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-green-600 to-teal-600">
           <div className="flex items-center space-x-3">
@@ -198,24 +198,24 @@ const AgentCreatorModal: React.FC<AgentCreatorModalProps> = ({
           {success ? (
             // Success State
             <div className="text-center py-8">
-              <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
-                <CheckCircle className="w-8 h-8 text-green-600" />
+              <div className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-500/20 flex items-center justify-center mx-auto mb-4">
+                <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
                 Agent Created Successfully!
               </h3>
-              <p className="text-gray-600 mb-2">
-                Agent ID: <span className="font-mono text-purple-600">{createdAgent?.agent_id}</span>
+              <p className="text-gray-600 dark:text-slate-400 mb-2 font-medium">
+                Agent ID: <span className="font-mono text-purple-600 dark:text-purple-400 font-bold">{createdAgent?.agent_id}</span>
               </p>
-              <p className="text-gray-600 mb-6">
-                {scheduleType === 'manual' 
+              <p className="text-gray-600 dark:text-slate-400 mb-6 transition-colors">
+                {scheduleType === 'manual'
                   ? 'Your agent is ready to run manually.'
                   : 'Your agent will run according to the configured schedule.'}
               </p>
               <div className="flex items-center justify-center space-x-4">
                 <button
                   onClick={onClose}
-                  className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  className="px-6 py-2.5 border border-gray-300 dark:border-slate-700 rounded-lg text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 transition-all font-bold"
                 >
                   Close
                 </button>
@@ -236,17 +236,17 @@ const AgentCreatorModal: React.FC<AgentCreatorModalProps> = ({
             <div className="space-y-6">
               {/* Error Alert */}
               {error && (
-                <div className="flex items-start space-x-3 p-4 bg-red-50 border border-red-200 rounded-lg">
-                  <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                <div className="flex items-start space-x-3 p-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg">
+                  <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-sm font-medium text-red-800">Error</p>
-                    <p className="text-sm text-red-700">{error}</p>
+                    <p className="text-sm font-bold text-red-800 dark:text-red-300">Error</p>
+                    <p className="text-sm text-red-700 dark:text-red-400 font-medium">{error}</p>
                   </div>
                 </div>
               )}
 
               {/* Tabs */}
-              <div className="flex space-x-1 bg-gray-100 rounded-lg p-1">
+              <div className="flex space-x-1 bg-gray-100 dark:bg-slate-800 rounded-lg p-1">
                 {[
                   { id: 'schedule', label: 'Schedule', icon: Clock },
                   { id: 'notifications', label: 'Notifications', icon: Bell },
@@ -255,14 +255,13 @@ const AgentCreatorModal: React.FC<AgentCreatorModalProps> = ({
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as typeof activeTab)}
-                    className={`flex-1 flex items-center justify-center space-x-2 py-2.5 px-4 rounded-md text-sm font-medium transition-all ${
-                      activeTab === tab.id
-                        ? 'bg-white text-gray-900 shadow-sm'
-                        : 'text-gray-600 hover:text-gray-900'
-                    }`}
+                    className={`flex-1 flex items-center justify-center space-x-2 py-2.5 px-4 rounded-md text-sm font-bold transition-all ${activeTab === tab.id
+                        ? 'bg-white dark:bg-slate-700 text-gray-900 dark:text-white shadow-sm'
+                        : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200'
+                      }`}
                   >
                     <tab.icon className="w-4 h-4" />
-                    <span>{tab.label}</span>
+                    <span className="hidden sm:inline">{tab.label}</span>
                   </button>
                 ))}
               </div>
@@ -282,11 +281,10 @@ const AgentCreatorModal: React.FC<AgentCreatorModalProps> = ({
                       ].map((option) => (
                         <label
                           key={option.value}
-                          className={`flex items-center space-x-3 p-3 border rounded-lg cursor-pointer transition-all ${
-                            scheduleType === option.value
-                              ? 'border-green-500 bg-green-50'
-                              : 'border-gray-200 hover:border-gray-300'
-                          }`}
+                          className={`flex items-center space-x-3 p-3 border rounded-xl cursor-pointer transition-all ${scheduleType === option.value
+                              ? 'border-green-500 bg-green-50 dark:bg-green-500/10 ring-1 ring-green-500/50'
+                              : 'border-gray-200 dark:border-slate-800 hover:border-gray-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900'
+                            }`}
                         >
                           <input
                             type="radio"
@@ -294,16 +292,15 @@ const AgentCreatorModal: React.FC<AgentCreatorModalProps> = ({
                             value={option.value}
                             checked={scheduleType === option.value}
                             onChange={(e) => setScheduleType(e.target.value as typeof scheduleType)}
-                            className="w-4 h-4 text-green-600"
+                            className="w-4 h-4 text-green-600 dark:bg-slate-800 dark:border-slate-700"
                           />
-                          <div className={`p-2 rounded-lg ${
-                            scheduleType === option.value ? 'bg-green-100' : 'bg-gray-100'
-                          }`}>
-                            <option.icon className="w-4 h-4" />
+                          <div className={`p-2 rounded-lg ${scheduleType === option.value ? 'bg-green-100 dark:bg-green-500/20' : 'bg-gray-100 dark:bg-slate-800'
+                            }`}>
+                            <option.icon className={`w-4 h-4 ${scheduleType === option.value ? 'text-green-600 dark:text-green-400' : 'text-slate-500'}`} />
                           </div>
                           <div>
-                            <p className="font-medium text-gray-900">{option.label}</p>
-                            <p className="text-xs text-gray-500">{option.desc}</p>
+                            <p className="font-bold text-gray-900 dark:text-white text-sm">{option.label}</p>
+                            <p className="text-xs text-gray-500 dark:text-slate-400">{option.desc}</p>
                           </div>
                         </label>
                       ))}
@@ -313,7 +310,7 @@ const AgentCreatorModal: React.FC<AgentCreatorModalProps> = ({
                   {scheduleType === 'interval' && (
                     <div className="flex items-center space-x-3">
                       <div className="flex-1">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-bold text-gray-700 dark:text-slate-300 mb-1">
                           Run every
                         </label>
                         <input
@@ -321,17 +318,17 @@ const AgentCreatorModal: React.FC<AgentCreatorModalProps> = ({
                           min={1}
                           value={intervalValue}
                           onChange={(e) => setIntervalValue(Number(e.target.value))}
-                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                          className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900 dark:text-white font-bold"
                         />
                       </div>
                       <div className="flex-1">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-bold text-gray-700 dark:text-slate-300 mb-1">
                           Unit
                         </label>
                         <select
                           value={intervalUnit}
                           onChange={(e) => setIntervalUnit(e.target.value as typeof intervalUnit)}
-                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                          className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900 dark:text-white font-bold"
                         >
                           <option value="minutes">Minutes</option>
                           <option value="hours">Hours</option>
@@ -349,6 +346,7 @@ const AgentCreatorModal: React.FC<AgentCreatorModalProps> = ({
                           📅 Quick Schedule (Recommended)
                         </label>
                         <div className="grid grid-cols-2 gap-2">
+                          {/* Preset Buttons */}
                           {[
                             { label: '⏰ Every hour', value: '0 * * * *', desc: 'On the hour' },
                             { label: '🌅 Every morning (9 AM)', value: '0 9 * * *', desc: 'Daily at 9 AM' },
@@ -360,27 +358,26 @@ const AgentCreatorModal: React.FC<AgentCreatorModalProps> = ({
                             <button
                               key={preset.value}
                               onClick={() => setCronExpression(preset.value)}
-                              className={`p-3 text-left rounded-lg border transition-all ${
-                                cronExpression === preset.value
-                                  ? 'border-green-500 bg-green-50'
-                                  : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                              }`}
+                              className={`p-3 text-left rounded-lg border transition-all ${cronExpression === preset.value
+                                  ? 'border-green-500 bg-green-50 dark:bg-green-500/10 ring-1 ring-green-500/30'
+                                  : 'border-gray-200 dark:border-slate-800 hover:border-gray-300 dark:hover:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800'
+                                }`}
                             >
-                              <p className="font-medium text-gray-900 text-sm">{preset.label}</p>
-                              <p className="text-xs text-gray-500">{preset.desc}</p>
+                              <p className="font-bold text-gray-900 dark:text-white text-xs">{preset.label}</p>
+                              <p className="text-[10px] text-gray-500 dark:text-slate-400">{preset.desc}</p>
                             </button>
                           ))}
                         </div>
                       </div>
-                      
+
                       {/* Human-readable description */}
-                      <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                        <p className="text-sm text-blue-800">
-                          <span className="font-medium">Currently set to run:</span>{' '}
+                      <div className="p-4 bg-blue-50 dark:bg-blue-500/10 rounded-lg border border-blue-200 dark:border-blue-500/20">
+                        <p className="text-sm text-blue-800 dark:text-blue-300 font-medium">
+                          <span className="font-bold">Currently set to run:</span>{' '}
                           {getCronDescription(cronExpression)}
                         </p>
                       </div>
-                      
+
                       {/* Advanced: Raw cron expression */}
                       <details className="mt-2">
                         <summary className="text-xs text-gray-500 cursor-pointer hover:text-gray-700">
@@ -434,13 +431,11 @@ const AgentCreatorModal: React.FC<AgentCreatorModalProps> = ({
                       </div>
                       <button
                         onClick={() => setNotifyOnSuccess(!notifyOnSuccess)}
-                        className={`w-11 h-6 rounded-full transition-colors ${
-                          notifyOnSuccess ? 'bg-green-600' : 'bg-gray-300'
-                        }`}
+                        className={`w-11 h-6 rounded-full transition-colors ${notifyOnSuccess ? 'bg-green-600' : 'bg-gray-300'
+                          }`}
                       >
-                        <div className={`w-5 h-5 bg-white rounded-full shadow transition-transform ${
-                          notifyOnSuccess ? 'translate-x-5' : 'translate-x-0.5'
-                        }`} />
+                        <div className={`w-5 h-5 bg-white rounded-full shadow transition-transform ${notifyOnSuccess ? 'translate-x-5' : 'translate-x-0.5'
+                          }`} />
                       </button>
                     </label>
 
@@ -453,13 +448,11 @@ const AgentCreatorModal: React.FC<AgentCreatorModalProps> = ({
                       </div>
                       <button
                         onClick={() => setNotifyOnFailure(!notifyOnFailure)}
-                        className={`w-11 h-6 rounded-full transition-colors ${
-                          notifyOnFailure ? 'bg-green-600' : 'bg-gray-300'
-                        }`}
+                        className={`w-11 h-6 rounded-full transition-colors ${notifyOnFailure ? 'bg-green-600' : 'bg-gray-300'
+                          }`}
                       >
-                        <div className={`w-5 h-5 bg-white rounded-full shadow transition-transform ${
-                          notifyOnFailure ? 'translate-x-5' : 'translate-x-0.5'
-                        }`} />
+                        <div className={`w-5 h-5 bg-white rounded-full shadow transition-transform ${notifyOnFailure ? 'translate-x-5' : 'translate-x-0.5'
+                          }`} />
                       </button>
                     </label>
                   </div>
@@ -478,14 +471,14 @@ const AgentCreatorModal: React.FC<AgentCreatorModalProps> = ({
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-bold text-gray-700 dark:text-slate-300 mb-1">
                       Email
                     </label>
                     <input
                       type="email"
                       value={notificationEmail}
                       onChange={(e) => setNotificationEmail(e.target.value)}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900 dark:text-white font-bold"
                       placeholder="admin@company.com"
                     />
                   </div>
@@ -507,13 +500,11 @@ const AgentCreatorModal: React.FC<AgentCreatorModalProps> = ({
                     </div>
                     <button
                       onClick={() => setRetryOnFailure(!retryOnFailure)}
-                      className={`w-11 h-6 rounded-full transition-colors ${
-                        retryOnFailure ? 'bg-green-600' : 'bg-gray-300'
-                      }`}
+                      className={`w-11 h-6 rounded-full transition-colors ${retryOnFailure ? 'bg-green-600' : 'bg-gray-300'
+                        }`}
                     >
-                      <div className={`w-5 h-5 bg-white rounded-full shadow transition-transform ${
-                        retryOnFailure ? 'translate-x-5' : 'translate-x-0.5'
-                      }`} />
+                      <div className={`w-5 h-5 bg-white rounded-full shadow transition-transform ${retryOnFailure ? 'translate-x-5' : 'translate-x-0.5'
+                        }`} />
                     </button>
                   </label>
 
@@ -568,13 +559,11 @@ const AgentCreatorModal: React.FC<AgentCreatorModalProps> = ({
                     </div>
                     <button
                       onClick={() => setPauseOnFailure(!pauseOnFailure)}
-                      className={`w-11 h-6 rounded-full transition-colors ${
-                        pauseOnFailure ? 'bg-green-600' : 'bg-gray-300'
-                      }`}
+                      className={`w-11 h-6 rounded-full transition-colors ${pauseOnFailure ? 'bg-green-600' : 'bg-gray-300'
+                        }`}
                     >
-                      <div className={`w-5 h-5 bg-white rounded-full shadow transition-transform ${
-                        pauseOnFailure ? 'translate-x-5' : 'translate-x-0.5'
-                      }`} />
+                      <div className={`w-5 h-5 bg-white rounded-full shadow transition-transform ${pauseOnFailure ? 'translate-x-5' : 'translate-x-0.5'
+                        }`} />
                     </button>
                   </label>
                 </div>
@@ -585,14 +574,14 @@ const AgentCreatorModal: React.FC<AgentCreatorModalProps> = ({
 
         {/* Footer */}
         {!success && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 bg-gray-50">
+          <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-800/50">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-gray-700 hover:text-gray-900 transition-colors"
+              className="px-4 py-2 text-gray-700 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors font-bold"
             >
               Cancel
             </button>
-            
+
             <button
               onClick={handleCreateAgent}
               disabled={loading}

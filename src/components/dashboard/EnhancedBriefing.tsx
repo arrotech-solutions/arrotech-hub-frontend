@@ -345,30 +345,30 @@ const EnhancedBriefing: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             />
 
             {/* Content Card */}
-            <div className="relative w-full max-w-4xl max-h-[90vh] bg-white rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-4 duration-300 flex flex-col">
+            <div className="relative w-full max-w-4xl max-h-[90vh] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-4 duration-300 flex flex-col border border-gray-100 dark:border-slate-800">
 
                 {/* Decorative Header */}
                 <div className="h-2 bg-gradient-to-r from-orange-400 via-pink-500 to-indigo-500 flex-shrink-0" />
 
                 {/* Header */}
-                <div className="px-6 pt-6 pb-4 border-b border-gray-100 flex-shrink-0">
+                <div className="px-6 pt-6 pb-4 border-b border-gray-100 dark:border-slate-800 flex-shrink-0">
                     <div className="flex justify-between items-start">
                         <div>
-                            <div className="flex items-center gap-2 text-indigo-600 font-bold tracking-wide uppercase text-xs mb-1">
+                            <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-bold tracking-wide uppercase text-xs mb-1">
                                 <Sparkles className="w-4 h-4" />
                                 <span>My Briefing</span>
                             </div>
                             {loading ? (
                                 <div className="animate-pulse">
-                                    <div className="h-8 w-64 bg-gray-200 rounded mb-2" />
-                                    <div className="h-5 w-48 bg-gray-100 rounded" />
+                                    <div className="h-8 w-64 bg-gray-200 dark:bg-slate-800 rounded mb-2" />
+                                    <div className="h-5 w-48 bg-gray-100 dark:bg-slate-800/50 rounded" />
                                 </div>
                             ) : (
                                 <>
-                                    <h1 className={`font-bold text-gray-900 mb-1 ${zenMode ? 'text-4xl' : 'text-3xl'}`}>
+                                    <h1 className={`font-bold text-gray-900 dark:text-white mb-1 tracking-tight ${zenMode ? 'text-4xl' : 'text-3xl'}`}>
                                         {data?.greeting || getGreetingPrefix()}, {user?.name?.split(' ')[0] || 'Creator'}.
                                     </h1>
-                                    <p className={`text-gray-500 font-light ${zenMode ? 'text-2xl' : 'text-xl'}`}>
+                                    <p className={`text-gray-500 dark:text-slate-400 font-light ${zenMode ? 'text-2xl' : 'text-xl'}`}>
                                         {data?.headline}
                                     </p>
                                 </>
@@ -377,14 +377,14 @@ const EnhancedBriefing: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                         <div className="flex items-center gap-2">
                             <button
                                 onClick={() => setZenMode(!zenMode)}
-                                className={`p-2 rounded-full transition-all ${zenMode ? 'bg-indigo-100 text-indigo-600' : 'hover:bg-gray-100 text-gray-400 hover:text-gray-600'}`}
+                                className={`p-2 rounded-full transition-all ${zenMode ? 'bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400' : 'hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300'}`}
                                 title={zenMode ? 'Exit Zen Mode' : 'Enter Zen Mode'}
                             >
                                 <Coffee className="w-5 h-5" />
                             </button>
                             <button
                                 onClick={onClose}
-                                className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-gray-600"
+                                className="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-full transition-colors text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300"
                             >
                                 <X className="w-6 h-6" />
                             </button>
@@ -393,16 +393,16 @@ const EnhancedBriefing: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
                     {/* Tabs - Only show in normal mode */}
                     {!zenMode && !loading && (
-                        <div className="flex gap-1 mt-4 overflow-x-auto pb-1">
+                        <div className="flex gap-1 mt-4 overflow-x-auto pb-1 custom-scrollbar">
                             {tabs.map((tab) => (
                                 <button
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id)}
                                     className={`
-                                        flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap
+                                        flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap
                                         ${activeTab === tab.id
-                                            ? 'bg-indigo-100 text-indigo-700'
-                                            : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
+                                            ? 'bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400 ring-1 ring-indigo-500/50'
+                                            : 'text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-700 dark:hover:text-slate-200'
                                         }
                                     `}
                                 >
@@ -410,8 +410,8 @@ const EnhancedBriefing: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                                     {tab.label}
                                     {tab.count !== undefined && tab.count > 0 && (
                                         <span className={`
-                                            text-xs px-1.5 py-0.5 rounded-full
-                                            ${activeTab === tab.id ? 'bg-indigo-200 text-indigo-700' : 'bg-gray-200 text-gray-600'}
+                                            text-[10px] px-1.5 py-0.5 rounded-full font-bold
+                                            ${activeTab === tab.id ? 'bg-indigo-200 dark:bg-indigo-500/30 text-indigo-700 dark:text-indigo-300' : 'bg-gray-200 dark:bg-slate-700 text-gray-600 dark:text-slate-400'}
                                         `}>
                                             {tab.count}
                                         </span>
@@ -442,19 +442,19 @@ const EnhancedBriefing: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     ) : zenMode ? (
                         /* ZEN MODE */
                         <div className="py-8 text-center space-y-8">
-                            <p className="text-lg text-gray-600 font-light max-w-md mx-auto leading-relaxed">
-                                {data?.summary}
+                            <p className="text-lg text-gray-600 dark:text-slate-300 font-light max-w-md mx-auto leading-relaxed italic">
+                                "{data?.summary}"
                             </p>
                             <div className="space-y-4 max-w-md mx-auto">
-                                <h3 className="text-sm font-medium text-gray-400 uppercase tracking-wide">
-                                    Focus on these today
+                                <h3 className="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-[0.2em]">
+                                    Core Focus Today
                                 </h3>
                                 {data?.priorities.slice(0, 3).map((item, i) => (
-                                    <div key={i} className="flex items-center gap-4 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl border border-indigo-100">
-                                        <span className="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center text-sm font-bold text-indigo-600">
+                                    <div key={i} className="flex items-center gap-4 p-5 bg-gradient-to-r from-indigo-50/50 to-purple-50/50 dark:from-indigo-500/10 dark:to-purple-500/10 rounded-2xl border border-indigo-100/50 dark:border-indigo-500/20 shadow-sm">
+                                        <span className="w-8 h-8 rounded-xl bg-white dark:bg-slate-800 shadow-sm flex items-center justify-center text-sm font-bold text-indigo-600 dark:text-indigo-400">
                                             {i + 1}
                                         </span>
-                                        <span className="text-gray-700 font-medium text-left">
+                                        <span className="text-gray-700 dark:text-slate-200 font-bold text-left tracking-tight">
                                             {item}
                                         </span>
                                     </div>
@@ -477,12 +477,14 @@ const EnhancedBriefing: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                             {activeTab === 'overview' && (
                                 <>
                                     {/* Summary Card */}
-                                    <div className="bg-gradient-to-br from-indigo-50 to-purple-50 p-5 rounded-xl border border-indigo-100">
-                                        <div className="flex items-start gap-3">
-                                            <Sun className="w-5 h-5 text-indigo-500 mt-0.5 shrink-0" />
+                                    <div className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-500/10 dark:to-purple-500/10 p-5 rounded-2xl border border-indigo-100 dark:border-indigo-500/20 shadow-sm">
+                                        <div className="flex items-start gap-4">
+                                            <div className="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 shadow-sm flex items-center justify-center shrink-0">
+                                                <Sun className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
+                                            </div>
                                             <div>
-                                                <h3 className="font-semibold text-indigo-900 mb-2">Daily Summary</h3>
-                                                <p className="text-indigo-800/80 text-sm leading-relaxed">
+                                                <h3 className="font-bold text-indigo-900 dark:text-white mb-1.5 text-sm uppercase tracking-wider">Daily Summary</h3>
+                                                <p className="text-indigo-800/80 dark:text-slate-300 text-sm leading-relaxed font-medium">
                                                     {data?.summary}
                                                 </p>
                                             </div>
@@ -520,15 +522,15 @@ const EnhancedBriefing: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
                                     {/* Risks */}
                                     {data?.risks && data.risks.length > 0 && (
-                                        <div className="bg-amber-50 p-4 rounded-xl border border-amber-100">
-                                            <h3 className="font-semibold text-amber-900 mb-3 flex items-center gap-2 text-sm">
-                                                <AlertTriangle className="w-4 h-4 text-amber-500" />
+                                        <div className="bg-amber-50 dark:bg-amber-900/10 p-5 rounded-2xl border border-amber-100 dark:border-amber-900/20 shadow-sm">
+                                            <h3 className="font-bold text-amber-900 dark:text-amber-400 mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
+                                                <AlertTriangle className="w-5 h-5 text-amber-500" />
                                                 Potential Risks
                                             </h3>
-                                            <ul className="space-y-2">
+                                            <ul className="space-y-3">
                                                 {data.risks.map((risk, i) => (
-                                                    <li key={i} className="flex gap-2 text-sm text-amber-700/80 items-start">
-                                                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-1.5 shrink-0" />
+                                                    <li key={i} className="flex gap-3 text-sm text-amber-800/90 dark:text-amber-300/90 items-start font-bold">
+                                                        <span className="w-2 h-2 rounded-full bg-amber-400 dark:bg-amber-500 mt-1.5 shrink-0 shadow-sm" />
                                                         {risk}
                                                     </li>
                                                 ))}
@@ -538,75 +540,78 @@ const EnhancedBriefing: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
                                     {/* Weekly Pulse Teaser */}
                                     {data?.weekly_pulse && (
-                                        <div className="bg-gradient-to-r from-gray-900 to-gray-800 p-5 rounded-xl text-white">
+                                        <div className="bg-gradient-to-r from-gray-900 to-slate-800 dark:from-slate-800 dark:to-slate-900 p-6 rounded-2xl text-white shadow-xl border border-white/5">
                                             <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center relative">
-                                                        <BarChart3 className="w-6 h-6" />
+                                                <div className="flex items-center gap-5">
+                                                    <div className="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center relative shadow-inner ring-1 ring-white/20">
+                                                        <BarChart3 className="w-7 h-7 text-indigo-300" />
                                                         {data.weekly_pulse.trend === 'up' && (
-                                                            <div className="absolute top-1 right-1 w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                                                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-slate-900 animate-pulse" />
                                                         )}
                                                     </div>
                                                     <div>
-                                                        <h3 className="font-semibold text-lg">Weekly Pulse: {data.weekly_pulse.score}</h3>
-                                                        <div className="flex gap-4 text-gray-400 text-sm mt-0.5">
-                                                            <span>✨ {data.weekly_pulse.completedTasks} Tasks Done</span>
-                                                            <span>🧠 {data.weekly_pulse.focusHours}h Focus Time</span>
+                                                        <h3 className="font-bold text-xl tracking-tight">Weekly Pulse: {data.weekly_pulse.score}</h3>
+                                                        <div className="flex gap-4 text-slate-400 text-sm mt-1 font-medium">
+                                                            <span className="flex items-center gap-1"><Sparkles className="w-3.5 h-3.5 text-indigo-400" /> {data.weekly_pulse.completedTasks} Done</span>
+                                                            <span className="flex items-center gap-1"><Coffee className="w-3.5 h-3.5 text-amber-400" /> {data.weekly_pulse.focusHours}h Focus</span>
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <button
                                                     onClick={() => setShowFullReport(!showFullReport)}
-                                                    className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                                                    className="px-5 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ring-1 ring-white/10"
                                                 >
-                                                    {showFullReport ? 'Hide' : 'Full Report'} <ChevronRight className={`w-4 h-4 transition-transform ${showFullReport ? 'rotate-90' : ''}`} />
+                                                    {showFullReport ? 'Hide' : 'Full Report'} <ChevronRight className={`w-4 h-4 transition-transform duration-300 ${showFullReport ? 'rotate-90' : ''}`} />
                                                 </button>
                                             </div>
 
                                             {/* Expanded Full Report Section */}
                                             {showFullReport && (
-                                                <div className="mt-4 p-4 bg-white/5 rounded-xl border border-white/10 animate-in fade-in slide-in-from-top-2 duration-300">
-                                                    <h4 className="font-semibold text-white mb-4">📊 Weekly Productivity Report</h4>
+                                                <div className="mt-6 p-5 bg-black/20 dark:bg-white/5 rounded-2xl border border-white/10 animate-in fade-in slide-in-from-top-3 duration-500">
+                                                    <h4 className="font-bold text-white mb-5 flex items-center gap-2 text-sm uppercase tracking-widest opacity-80">
+                                                        <Zap className="w-4 h-4 text-amber-400" />
+                                                        Weekly Performance
+                                                    </h4>
 
                                                     {/* Stats Grid */}
-                                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-                                                        <div className="p-3 bg-white/5 rounded-lg text-center">
-                                                            <div className="text-2xl font-bold text-green-400">{data.weekly_pulse.completedTasks}</div>
-                                                            <div className="text-xs text-gray-400">Tasks Completed</div>
+                                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                                                        <div className="p-4 bg-white/5 rounded-2xl text-center border border-white/5 backdrop-blur-sm">
+                                                            <div className="text-3xl font-bold text-green-400 mb-1">{data.weekly_pulse.completedTasks}</div>
+                                                            <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wide">Tasks</div>
                                                         </div>
-                                                        <div className="p-3 bg-white/5 rounded-lg text-center">
-                                                            <div className="text-2xl font-bold text-blue-400">{data.weekly_pulse.focusHours}h</div>
-                                                            <div className="text-xs text-gray-400">Focus Time</div>
+                                                        <div className="p-4 bg-white/5 rounded-2xl text-center border border-white/5 backdrop-blur-sm">
+                                                            <div className="text-3xl font-bold text-blue-400 mb-1">{data.weekly_pulse.focusHours}h</div>
+                                                            <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wide">Focus</div>
                                                         </div>
-                                                        <div className="p-3 bg-white/5 rounded-lg text-center">
-                                                            <div className="text-2xl font-bold text-orange-400">{data.weekly_pulse.meetingHours}h</div>
-                                                            <div className="text-xs text-gray-400">In Meetings</div>
+                                                        <div className="p-4 bg-white/5 rounded-2xl text-center border border-white/5 backdrop-blur-sm">
+                                                            <div className="text-3xl font-bold text-orange-400 mb-1">{data.weekly_pulse.meetingHours}h</div>
+                                                            <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wide">Meetings</div>
                                                         </div>
-                                                        <div className="p-3 bg-white/5 rounded-lg text-center">
-                                                            <div className="text-2xl font-bold text-purple-400">{data.weekly_pulse.score}</div>
-                                                            <div className="text-xs text-gray-400">Productivity Score</div>
+                                                        <div className="p-4 bg-white/5 rounded-2xl text-center border border-white/5 backdrop-blur-sm">
+                                                            <div className="text-3xl font-bold text-indigo-400 mb-1">{data.weekly_pulse.score}</div>
+                                                            <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wide">Score</div>
                                                         </div>
                                                     </div>
 
                                                     {/* Progress Bar */}
-                                                    <div className="mb-3">
-                                                        <div className="flex justify-between text-xs text-gray-400 mb-1">
-                                                            <span>Weekly Goal Progress</span>
-                                                            <span>{data.weekly_pulse.score}%</span>
+                                                    <div className="mb-6">
+                                                        <div className="flex justify-between text-xs text-gray-400 mb-2 font-bold uppercase tracking-tighter">
+                                                            <span>Weekly Goal Completion</span>
+                                                            <span className="text-white">{data.weekly_pulse.score}%</span>
                                                         </div>
-                                                        <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                                                        <div className="h-2.5 bg-white/10 rounded-full overflow-hidden p-0.5 border border-white/5 shadow-inner">
                                                             <div
-                                                                className="h-full bg-gradient-to-r from-green-500 to-emerald-400 rounded-full transition-all duration-500"
+                                                                className="h-full bg-gradient-to-r from-green-500 via-indigo-500 to-purple-500 rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(99,102,241,0.5)]"
                                                                 style={{ width: `${Math.min(data.weekly_pulse.score, 100)}%` }}
                                                             />
                                                         </div>
                                                     </div>
 
                                                     {/* Insights */}
-                                                    <div className="text-xs text-gray-400 space-y-1">
-                                                        <p>🎯 You're {data.weekly_pulse.score >= 80 ? 'crushing it!' : data.weekly_pulse.score >= 60 ? 'on track!' : 'building momentum!'}</p>
-                                                        <p>📈 {data.weekly_pulse.focusHours > data.weekly_pulse.meetingHours ? 'Great focus-to-meeting ratio!' : 'Consider blocking more focus time.'}</p>
-                                                        <p className="text-gray-500 italic mt-2">Full analytics dashboard coming in Phase 5</p>
+                                                    <div className="text-xs text-slate-300 space-y-2 font-medium bg-white/5 p-4 rounded-xl border border-white/10 italic leading-relaxed">
+                                                        <p>🎯 {data.weekly_pulse.score >= 80 ? 'Exceptional output! You are consistently outperforming targets.' : data.weekly_pulse.score >= 60 ? 'Solid performance. You are in a healthy flow state.' : 'Gaining momentum. Focus on clear, high-impact tasks.'}</p>
+                                                        <p>📈 {data.weekly_pulse.focusHours > data.weekly_pulse.meetingHours ? 'Optimal deep work ratio achieved. Your focus-to-meeting balance is high.' : 'Meeting volume is high. Consider aggressive time-blocking for deep work.'}</p>
+                                                        <p className="text-gray-500 not-italic font-bold uppercase tracking-widest mt-4 text-[10px]">Full analytics engine coming in v2.4</p>
                                                     </div>
                                                 </div>
                                             )}
@@ -672,23 +677,23 @@ const EnhancedBriefing: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
                 {/* Footer with AI Ask + Actions */}
                 {!zenMode && !loading && (
-                    <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex-shrink-0">
+                    <div className="px-6 py-5 border-t border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-800/50 flex-shrink-0">
                         {/* AI Response Display */}
                         {aiResponse && (
-                            <div className="mb-4 p-4 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl border border-indigo-100">
-                                <div className="flex items-start gap-3">
-                                    <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center flex-shrink-0">
-                                        <Sparkles className="w-4 h-4 text-indigo-600" />
+                            <div className="mb-5 p-5 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-500/10 dark:to-purple-500/10 rounded-2xl border border-indigo-100 dark:border-indigo-500/20 shadow-md animate-in slide-in-from-bottom-2 duration-300">
+                                <div className="flex items-start gap-4">
+                                    <div className="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center flex-shrink-0 shadow-sm">
+                                        <Sparkles className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                                     </div>
                                     <div className="flex-1">
-                                        <p className="text-sm text-indigo-900 leading-relaxed">{aiResponse.answer}</p>
+                                        <p className="text-sm text-indigo-900 dark:text-slate-200 leading-relaxed font-medium">{aiResponse.answer}</p>
                                         {aiResponse.suggestions && aiResponse.suggestions.length > 0 && (
-                                            <div className="flex flex-wrap gap-2 mt-3">
+                                            <div className="flex flex-wrap gap-2 mt-4">
                                                 {aiResponse.suggestions.map((suggestion, i) => (
                                                     <button
                                                         key={i}
                                                         onClick={() => setAiQuestion(suggestion)}
-                                                        className="px-3 py-1.5 text-xs bg-white border border-indigo-200 text-indigo-700 rounded-full hover:bg-indigo-50 transition-colors"
+                                                        className="px-4 py-1.5 text-[10px] uppercase tracking-wider bg-white dark:bg-slate-800 border border-indigo-200 dark:border-slate-700 text-indigo-700 dark:text-indigo-400 rounded-full hover:bg-indigo-50 dark:hover:bg-slate-700 transition-all font-bold shadow-sm"
                                                     >
                                                         {suggestion}
                                                     </button>
@@ -698,33 +703,33 @@ const EnhancedBriefing: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                                     </div>
                                     <button
                                         onClick={() => setAiResponse(null)}
-                                        className="text-gray-400 hover:text-gray-600"
+                                        className="text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 transition-colors"
                                     >
-                                        <X className="w-4 h-4" />
+                                        <X className="w-5 h-5" />
                                     </button>
                                 </div>
                             </div>
                         )}
 
-                        <div className="flex flex-col sm:flex-row gap-4">
+                        <div className="flex flex-col sm:flex-row gap-4 items-center">
                             {/* Ask AI Input */}
-                            <div className="flex-1 flex gap-2">
-                                <div className="flex-1 relative">
+                            <div className="flex-1 flex gap-2 w-full">
+                                <div className="flex-1 relative group">
                                     <input
                                         type="text"
                                         value={aiQuestion}
                                         onChange={(e) => setAiQuestion(e.target.value)}
                                         onKeyDown={(e) => e.key === 'Enter' && handleAskAI()}
-                                        placeholder="Ask AI a follow-up question..."
-                                        className="w-full px-4 py-2.5 pr-10 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                        placeholder="Ask AI follow-up..."
+                                        className="w-full px-5 py-3 pr-12 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-600 focus:border-transparent transition-all dark:text-white font-medium"
                                         disabled={askingAI}
                                     />
-                                    <Zap className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                    <Zap className={`absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors ${askingAI ? 'text-indigo-500 animate-pulse' : 'text-gray-400 group-focus-within:text-indigo-500'}`} />
                                 </div>
                                 <button
                                     onClick={handleAskAI}
                                     disabled={askingAI || !aiQuestion.trim()}
-                                    className="px-4 py-2.5 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                    className="px-5 py-3 bg-indigo-600 dark:bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 dark:hover:bg-indigo-500 transition-all disabled:opacity-50 shadow-lg shadow-indigo-600/20 flex items-center gap-2 active:scale-95"
                                 >
                                     {askingAI ? (
                                         <RefreshCw className="w-4 h-4 animate-spin" />
@@ -735,20 +740,20 @@ const EnhancedBriefing: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                             </div>
 
                             {/* Quick Actions */}
-                            <div className="flex gap-2 flex-wrap">
-                                {data?.suggested_actions?.slice(0, 2).map((action, i) => (
+                            <div className="flex gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto">
+                                {data?.suggested_actions?.slice(0, 1).map((action, i) => (
                                     <button
                                         key={i}
                                         onClick={() => handleAction(action.action, action.label)}
                                         disabled={!!processingAction}
-                                        className={`px-4 py-2 bg-white border border-gray-200 shadow-sm text-gray-600 text-sm rounded-lg hover:border-indigo-300 hover:text-indigo-600 transition-all font-medium ${processingAction === action.action ? 'opacity-50 cursor-wait' : ''}`}
+                                        className={`flex-1 sm:flex-none px-5 py-3 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 shadow-sm text-gray-700 dark:text-slate-300 text-sm rounded-xl hover:border-indigo-300 dark:hover:border-indigo-500/50 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all font-bold whitespace-nowrap active:scale-95 ${processingAction === action.action ? 'opacity-50 cursor-wait' : ''}`}
                                     >
                                         {processingAction === action.action ? 'Processing...' : action.label}
                                     </button>
                                 ))}
                                 <button
                                     onClick={onClose}
-                                    className="px-6 py-2 bg-gray-900 hover:bg-gray-800 text-white rounded-lg font-medium text-sm flex items-center gap-2 transition-transform active:scale-95"
+                                    className="flex-1 sm:flex-none px-8 py-3 bg-gray-900 dark:bg-slate-100 hover:bg-gray-800 dark:hover:bg-white text-white dark:text-gray-900 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-95 shadow-xl"
                                 >
                                     Start My Day <ArrowRight className="w-4 h-4" />
                                 </button>
