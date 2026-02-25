@@ -69,12 +69,97 @@ const pageConfig: Record<string, string> = {
   unifiedTasks: '/unified/tasks',
   unifiedCalendar: '/unified/calendar',
   whatsapp: '/whatsapp',
+  kra: '/apps/kra',
+  tiktok: '/tiktok',
+  productivity: '/productivity',
 };
 
 // Tutorial steps configuration - using more reliable CSS selectors
 const tutorialSteps: TutorialStep[] = [
   // Dashboard steps removed - workspace (UnifiedDashboard) is now the landing page
   // See workspace-* steps below for the new primary tutorial flow
+
+  // Productivity Analytics steps (8 steps)
+  {
+    id: 'productivity-intro',
+    title: 'Productivity Analytics',
+    description: 'Welcome to your performance hub. Track your efficiency, visualize patterns, and build winning habits across all your workflows.',
+    target: '.productivity-header-tut',
+    fallbackTarget: 'main h1',
+    position: 'bottom',
+    page: 'productivity',
+    order: 1
+  },
+  {
+    id: 'productivity-score',
+    title: 'Productivity Score',
+    description: 'Your daily efficiency rating (0-100). It aggregates your tasks, emails, and focus time into a single, actionable metric.',
+    target: '.productivity-score-tut',
+    fallbackTarget: '.lg\\:col-span-2',
+    position: 'bottom',
+    page: 'productivity',
+    order: 2
+  },
+  {
+    id: 'productivity-streak',
+    title: 'Streak Tracker',
+    description: 'Build consistency! Maintain your daily streak to earn bonus multipliers and level up your performance status.',
+    target: '.productivity-streak-tut',
+    fallbackTarget: '.bg-gradient-to-br',
+    position: 'left',
+    page: 'productivity',
+    order: 3
+  },
+  {
+    id: 'productivity-trends',
+    title: 'Growth Trends',
+    description: 'Visualize your performance over the last 30 days. Identify peak periods and areas for improvement at a glance.',
+    target: '.productivity-trends-tut',
+    fallbackTarget: '.lg\\:col-span-2',
+    position: 'top',
+    page: 'productivity',
+    order: 4
+  },
+  {
+    id: 'productivity-breakdown',
+    title: 'Activity Breakdown',
+    description: 'See exactly where your time goes. Filter by day, week, or month to analyze your focus across different categories.',
+    target: '.productivity-breakdown-tut',
+    fallbackTarget: '.bg-white\\/5',
+    position: 'right',
+    page: 'productivity',
+    order: 5
+  },
+  {
+    id: 'productivity-comparison',
+    title: 'Weekly Comparison',
+    description: 'Measure your progress! See how your current week compares to the previous one with automated trend analysis.',
+    target: '.productivity-comparison-tut',
+    fallbackTarget: '.bg-white\\/5',
+    position: 'right',
+    page: 'productivity',
+    order: 6
+  },
+  {
+    id: 'productivity-achievements',
+    title: 'Milestones',
+    description: 'Unlock special badges as you hit productivity targets. Gamify your workday and celebrate your wins!',
+    target: '.productivity-achievements-tut',
+    fallbackTarget: '.lg\\:col-span-2',
+    position: 'top',
+    page: 'productivity',
+    order: 7
+  },
+  {
+    id: 'productivity-stats',
+    title: 'Core Metrics',
+    description: 'A rapid overview of your key volumes - emails processed, tasks completed, meetings, and total focus hours.',
+    target: '.productivity-stats-tut',
+    fallbackTarget: '.bg-white\\/5',
+    position: 'top',
+    page: 'productivity',
+    order: 8
+  },
 
   // Chat page steps (7 steps)
   {
@@ -148,67 +233,6 @@ const tutorialSteps: TutorialStep[] = [
     order: 11
   },
 
-  // Workflows page steps (6 steps)
-  {
-    id: 'workflows-intro',
-    title: 'Workflows Dashboard',
-    description: 'Create and manage automated workflows that chain tools and services together.',
-    target: '.workflows-header',
-    fallbackTarget: 'main h1',
-    position: 'bottom',
-    page: 'workflows',
-    order: 12
-  },
-  {
-    id: 'workflows-create',
-    title: 'Create New Workflow',
-    description: 'Build workflows manually or create them from successful chat conversations with the AI.',
-    target: '.workflow-builder',
-    fallbackTarget: 'button[class*="Create"]',
-    position: 'left',
-    page: 'workflows',
-    order: 13
-  },
-  {
-    id: 'workflows-tabs',
-    title: 'Workflows & Executions',
-    description: 'Switch between viewing your workflows and their execution history with these tabs.',
-    target: '.workflows-tabs',
-    fallbackTarget: '.bg-white.rounded-xl.shadow-sm.border',
-    position: 'bottom',
-    page: 'workflows',
-    order: 14
-  },
-  {
-    id: 'workflows-stats',
-    title: 'Workflow Statistics',
-    description: 'Track total workflows, active count, drafts, and completed executions at a glance.',
-    target: '.workflows-stats',
-    fallbackTarget: '.grid.grid-cols-1.md\\:grid-cols-4',
-    position: 'bottom',
-    page: 'workflows',
-    order: 15
-  },
-  {
-    id: 'workflows-filters',
-    title: 'Search & Filter',
-    description: 'Search workflows by name and filter by status. Toggle between grid and list views.',
-    target: '.workflows-filters',
-    fallbackTarget: 'input[placeholder*="Search"]',
-    position: 'bottom',
-    page: 'workflows',
-    order: 16
-  },
-  {
-    id: 'workflows-actions',
-    title: 'Workflow Actions',
-    description: 'Execute workflows, view details, edit configurations, or delete. Use the Execute modal for input data.',
-    target: '.execute-workflow-btn',
-    fallbackTarget: '.workflows-list-empty',
-    position: 'left',
-    page: 'workflows',
-    order: 17
-  },
 
   // Agents page steps (5 steps)
   {
@@ -737,59 +761,252 @@ const tutorialSteps: TutorialStep[] = [
   },
 
   // Unified Inbox steps
+
   {
-    id: 'inbox-intro',
-    title: 'Unified Inbox',
-    description: 'All your communications in one place. Switch tabs to filter by provider like Gmail, Slack, or Teams.',
-    target: '.unified-inbox-header',
-    fallbackTarget: 'h1',
-    position: 'bottom',
+    id: 'inbox-compose',
+    title: 'New Message',
+    description: 'Quickly compose a new message. You can choose which provider to send through (Gmail, Slack, etc.) from within the compose window.',
+    target: '.unified-inbox-compose-tut',
+    fallbackTarget: 'button[class*="gradient"]',
+    position: 'right',
     page: 'unifiedInbox',
-    order: 76
+    order: 77
+  },
+  {
+    id: 'inbox-tabs',
+    title: 'Provider Filters',
+    description: 'Filter your inbox by communication channel. Switch between all messages, Gmail, Slack, Outlook, or Teams.',
+    target: '.unified-inbox-tabs-tut',
+    fallbackTarget: '[class*="tabs"]',
+    position: 'right',
+    page: 'unifiedInbox',
+    order: 78
   },
   {
     id: 'inbox-search',
-    title: 'Search Messages',
-    description: 'Quickly find any message across all connected platforms.',
-    target: '.unified-inbox-search',
+    title: 'Search All Messages',
+    description: 'Find any message across all your connected accounts instantly using the unified search.',
+    target: '.unified-inbox-search-tut',
     fallbackTarget: 'input[type="text"]',
     position: 'bottom',
     page: 'unifiedInbox',
-    order: 77
+    order: 79
+  },
+  {
+    id: 'inbox-list',
+    title: 'Message List',
+    description: 'Your combined message feed. Unread messages are highlighted with a blue dot and AI-powered priority badges.',
+    target: '.unified-inbox-list-tut',
+    fallbackTarget: '.overflow-y-auto',
+    position: 'right',
+    page: 'unifiedInbox',
+    order: 80
+  },
+  {
+    id: 'inbox-detail',
+    title: 'Reading Pane',
+    description: 'Select a message to view its full content here. You can archive, star, delete, or reply directly.',
+    target: '.unified-inbox-detail-tut',
+    fallbackTarget: 'main',
+    position: 'left',
+    page: 'unifiedInbox',
+    order: 81
+  },
+  {
+    id: 'inbox-ai',
+    title: 'AI Quick Replies',
+    description: 'Save time with AI-generated quick replies tailored to the conversation context. Just click to draft!',
+    target: '.unified-inbox-ai-tut',
+    fallbackTarget: '.sparkles',
+    position: 'top',
+    page: 'unifiedInbox',
+    order: 82
   },
 
   // Unified Tasks steps
   {
     id: 'tasks-intro',
-    title: 'Unified Task View',
-    description: 'Manage tasks from Jira, Trello, Asana, and ClickUp in a single list.',
+    title: 'Unified Task Hub',
+    description: 'Welcome to your central command for tasks. Manage everything from Jira, Trello, Asana, and ClickUp in one powerful interface.',
     target: '.unified-tasks-header',
     fallbackTarget: 'h1',
     position: 'bottom',
     page: 'unifiedTasks',
-    order: 78
+    order: 83
+  },
+  {
+    id: 'tasks-stats',
+    title: 'Productivity Metrics',
+    target: '.tasks-stats-tut',
+    fallbackTarget: '.grid',
+    description: 'Monitor your task volume, high priority items, and completion rate in real-time across all platforms.',
+    position: 'bottom',
+    page: 'unifiedTasks',
+    order: 84
+  },
+  {
+    id: 'tasks-view-modes',
+    title: 'Flexible Visualization',
+    target: '.tasks-view-modes-tut',
+    fallbackTarget: '.flex',
+    description: 'Switch between Kanban board for visual workflow management and List view for rapid task scanning.',
+    position: 'bottom',
+    page: 'unifiedTasks',
+    order: 85
+  },
+  {
+    id: 'tasks-filters',
+    title: 'Search & Filter',
+    target: '.tasks-filters-tut',
+    fallbackTarget: 'input',
+    description: 'Instantly find tasks by title or filter by origin platform (Jira, Trello, etc.) to focus on specific workstreams.',
+    position: 'bottom',
+    page: 'unifiedTasks',
+    order: 86
+  },
+  {
+    id: 'tasks-board',
+    title: 'Kanban Workflow',
+    target: '.tasks-kanban-tut',
+    fallbackTarget: '.flex',
+    description: 'Drag and drop cards to update status across platforms. Click any card to edit details, assignees, and due dates.',
+    position: 'top',
+    page: 'unifiedTasks',
+    order: 87
   },
   {
     id: 'tasks-new',
-    title: 'Create Task',
-    description: 'Add a new task directly from here. It will sync back to the source platform.',
+    title: 'Unified Creation',
+    description: 'Create a new task and sync it directly to any of your connected platforms without leaving the dashboard.',
     target: '.create-task-btn',
     fallbackTarget: 'button',
     position: 'left',
     page: 'unifiedTasks',
-    order: 79
+    order: 88
   },
 
   // Unified Calendar steps
   {
     id: 'calendar-intro',
     title: 'Unified Calendar',
-    description: 'Your aggregated schedule. View events from Google Calendar and Outlook.',
-    target: '.unified-calendar-header',
+    description: 'Your aggregated schedule. View events from Google Calendar and Outlook in a single, high-performance view.',
+    target: '.unified-calendar-header-tut',
     fallbackTarget: 'h1',
     position: 'bottom',
     page: 'unifiedCalendar',
-    order: 80
+    order: 89
+  },
+  {
+    id: 'calendar-smart',
+    title: 'Smart AI Scheduler',
+    description: 'Use natural language to schedule meetings. Just type "Lunch with Sarah tomorrow at 12" and let the AI do the heavy lifting.',
+    target: '.calendar-smart-scheduler-tut',
+    fallbackTarget: 'input',
+    position: 'bottom',
+    page: 'unifiedCalendar',
+    order: 90
+  },
+  {
+    id: 'calendar-views',
+    title: 'View Modes',
+    description: 'Switch between Month, Week, and Day views depending on your needs. Each view is optimized for performance and clarity.',
+    target: '.calendar-view-modes-tut',
+    fallbackTarget: 'button',
+    position: 'bottom',
+    page: 'unifiedCalendar',
+    order: 91
+  },
+  {
+    id: 'calendar-sidebar',
+    title: 'Mini Preview & Filters',
+    description: 'Quickly navigate between months with the mini-calendar and toggle specific calendar sources on or off.',
+    target: '.calendar-sidebar-tut',
+    fallbackTarget: 'aside',
+    position: 'right',
+    page: 'unifiedCalendar',
+    order: 92
+  },
+  {
+    id: 'calendar-tasks',
+    title: 'Task Integration',
+    description: 'View your unscheduled tasks from Jira, Trello, and Asana directly alongside your calendar. Drag and drop onto the grid coming soon!',
+    target: '.calendar-task-tray-tut',
+    fallbackTarget: 'aside',
+    position: 'left',
+    page: 'unifiedCalendar',
+    order: 93
+  },
+  {
+    id: 'calendar-create',
+    title: 'Unified Creation',
+    description: 'Create new events across any connected platform with a single button click.',
+    target: '.calendar-create-btn-tut',
+    fallbackTarget: 'button',
+    position: 'left',
+    page: 'unifiedCalendar',
+    order: 94
+  },
+
+  // Workflows page steps (6 steps)
+  {
+    id: 'workflows-intro',
+    title: 'Intelligent Workflows',
+    description: 'Welcome to the automation engine. Build, manage, and monitor complex cross-platform workflows from this central hub.',
+    target: '.workflows-header-tut',
+    fallbackTarget: 'h1',
+    position: 'bottom',
+    page: 'workflows',
+    order: 95
+  },
+  {
+    id: 'workflows-builders',
+    title: 'Visual Builders',
+    description: 'Choose between the visual Canvas Builder for complex logic or the step-by-step Form Builder for quick setups.',
+    target: '.workflows-builders-tut',
+    fallbackTarget: '.flex',
+    position: 'left',
+    page: 'workflows',
+    order: 96
+  },
+  {
+    id: 'workflows-tabs',
+    title: 'Navigation & Library',
+    description: 'Manage your active workflows, review execution history, or browse the template library to get started faster.',
+    target: '.workflows-tabs-tut',
+    fallbackTarget: '.flex',
+    position: 'bottom',
+    page: 'workflows',
+    order: 97
+  },
+  {
+    id: 'workflows-stats',
+    title: 'Performance Insights',
+    description: 'Monitor your automation ROI with real-time stats on active workflows and successful job executions.',
+    target: '.workflows-stats-tut',
+    fallbackTarget: '.grid',
+    position: 'bottom',
+    page: 'workflows',
+    order: 98
+  },
+  {
+    id: 'workflows-filters',
+    title: 'Advanced Filtering',
+    description: 'Quickly locate workflows by name or filter by status. Switch between Grid and List views for optimal management.',
+    target: '.workflows-filters-tut',
+    fallbackTarget: '.flex',
+    position: 'bottom',
+    page: 'workflows',
+    order: 99
+  },
+  {
+    id: 'workflows-list',
+    title: 'Workflow Management',
+    description: 'Interact with your workflows directly from the list. Run, edit, share, or delete with a single click.',
+    target: '.workflows-list-tut',
+    fallbackTarget: '.workflows-empty-tut',
+    position: 'top',
+    page: 'workflows',
+    order: 100
   },
 
   // WhatsApp steps (6 steps)
@@ -801,7 +1018,7 @@ const tutorialSteps: TutorialStep[] = [
     fallbackTarget: 'main',
     position: 'bottom',
     page: 'whatsapp',
-    order: 81
+    order: 101
   },
   {
     id: 'whatsapp-stats',
@@ -811,7 +1028,7 @@ const tutorialSteps: TutorialStep[] = [
     fallbackTarget: 'main',
     position: 'bottom',
     page: 'whatsapp',
-    order: 82
+    order: 102
   },
   {
     id: 'whatsapp-tabs',
@@ -821,37 +1038,161 @@ const tutorialSteps: TutorialStep[] = [
     fallbackTarget: 'main',
     position: 'bottom',
     page: 'whatsapp',
-    order: 83
+    order: 103
   },
   {
     id: 'whatsapp-contacts',
     title: 'Contact List',
-    description: 'View all your WhatsApp contacts. Search by name or phone number. New contacts appear automatically when they message you.',
-    target: '.overflow-y-auto',
+    description: 'View all your WhatsApp contacts. Search by name or phone number. New contacts appear automatically.',
+    target: '.whatsapp-contacts-tut',
     fallbackTarget: 'main',
     position: 'right',
     page: 'whatsapp',
-    order: 84
+    order: 104
   },
   {
     id: 'whatsapp-chat',
     title: 'Chat Window',
-    description: 'Select a contact to view conversation history. Send messages directly and see delivery status (sent, delivered, read).',
-    target: '.lg\\:col-span-2',
+    description: 'Select a contact to view conversation history. Send messages directly and see delivery status.',
+    target: '.whatsapp-chat-tut',
     fallbackTarget: 'main',
     position: 'left',
     page: 'whatsapp',
-    order: 85
+    order: 105
   },
   {
     id: 'whatsapp-auto-reply',
     title: 'Auto-Reply Automation',
-    description: 'Create rules to automatically respond to customers 24/7. Use keywords, business hours, or AI-powered responses.',
-    target: '.space-y-6',
+    description: 'Create rules to automatically respond to customers 24/7. Use keywords or AI-powered responses.',
+    target: '.whatsapp-tab-auto-reply-tut',
     fallbackTarget: 'main',
     position: 'top',
     page: 'whatsapp',
-    order: 86
+    order: 106
+  },
+  {
+    id: 'whatsapp-broadcast',
+    title: 'Broadcast Campaigns',
+    description: 'Reach all your contacts at once. Create, schedule, and monitor bulk message campaigns with ease.',
+    target: '.whatsapp-tab-broadcast-tut',
+    fallbackTarget: 'main',
+    position: 'top',
+    page: 'whatsapp',
+    order: 106.5
+  },
+  {
+    id: 'whatsapp-settings',
+    title: 'Profile & Settings',
+    description: 'Configure your WhatsApp business profile, message templates, and connection settings from this tab.',
+    target: '.whatsapp-tab-settings-tut',
+    fallbackTarget: 'main',
+    position: 'top',
+    page: 'whatsapp',
+    order: 106.8
+  },
+
+  // KRA GavaConnect steps (5 steps)
+  {
+    id: 'kra-intro',
+    title: 'GavaConnect Portal',
+    description: 'Access essential Kenyan government services. This unified portal simplifies your tax and identity-related automations.',
+    target: '.kra-header-tut',
+    fallbackTarget: 'main',
+    position: 'bottom',
+    page: 'kra',
+    order: 107
+  },
+  {
+    id: 'kra-tabs',
+    title: 'KRA Services',
+    description: 'Switch between PIN verification, NIL filing, registration, and eTIMS services from this sidebar.',
+    target: '.kra-tabs-tut',
+    fallbackTarget: 'nav',
+    position: 'right',
+    page: 'kra',
+    order: 108
+  },
+  {
+    id: 'kra-content',
+    title: 'Service Interaction',
+    description: 'Perform your selected tax operation here. Enter details and click the primary action button to execute.',
+    target: '.kra-content-tut',
+    fallbackTarget: '.flex-1',
+    position: 'left',
+    page: 'kra',
+    order: 109
+  },
+  {
+    id: 'kra-status',
+    title: 'Connection Status',
+    description: 'Monitor the real-time status of the GavaConnect bridge to ensure successful service execution.',
+    target: '.kra-status-tut',
+    fallbackTarget: '.bg-white\\/50',
+    position: 'bottom',
+    page: 'kra',
+    order: 110
+  },
+  {
+    id: 'kra-help',
+    title: 'Expert Support',
+    description: 'Need assistance with specific tax obligations? The digital assistant is here to guide you through complex filings.',
+    target: '.kra-help-tut',
+    fallbackTarget: '.bg-gradient-to-br',
+    position: 'top',
+    page: 'kra',
+    order: 111
+  },
+
+  // TikTok Hub steps (5 steps)
+  {
+    id: 'tiktok-intro',
+    title: 'TikTok Hub',
+    description: 'Welcome to your viral command center. Manage your presence and unlock new revenue streams from your TikTok content.',
+    target: '.tiktok-header-tut',
+    fallbackTarget: 'main',
+    position: 'bottom',
+    page: 'tiktok',
+    order: 112
+  },
+  {
+    id: 'tiktok-stats',
+    title: 'Growth Analytics',
+    description: 'Track your followers, views, and engagement rate in real-time to optimize your content strategy.',
+    target: '.tiktok-stats-tut',
+    fallbackTarget: '.grid',
+    position: 'bottom',
+    page: 'tiktok',
+    order: 113
+  },
+  {
+    id: 'tiktok-scheduler',
+    title: 'Smart Scheduling',
+    description: 'Plan your viral hits in advance. Schedule posts at peak times to maximize reach and engagement.',
+    target: '.tiktok-scheduler-tut',
+    fallbackTarget: 'main',
+    position: 'left',
+    page: 'tiktok',
+    order: 114
+  },
+  {
+    id: 'tiktok-monetization',
+    title: 'Monetization Suite',
+    description: 'Turn your views into value. Manage your Tip Jar, Premium Links, and Media Kit from this dashboard.',
+    target: '.tiktok-monetization-tut',
+    fallbackTarget: '.bg-gradient-to-br',
+    position: 'right',
+    page: 'tiktok',
+    order: 115
+  },
+  {
+    id: 'tiktok-viral',
+    title: 'Viral Success Cards',
+    description: 'Generate beautiful, shareable cards of your performance metrics to showcase your growth on other platforms.',
+    target: '.tiktok-viral-tut',
+    fallbackTarget: 'button',
+    position: 'top',
+    page: 'tiktok',
+    order: 116
   },
 ];
 

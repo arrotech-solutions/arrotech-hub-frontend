@@ -70,17 +70,17 @@ const SettingsSidebar: React.FC<SettingsSidebarProps> = ({ activeTab, setActiveT
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
                         className={`w-full flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200 group ${isActive
-                                ? 'bg-blue-50 text-blue-700 shadow-sm'
-                                : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                            ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 shadow-sm'
+                            : 'text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700/50 hover:text-gray-900 dark:hover:text-white'
                             }`}
                     >
-                        <div className={`p-2 rounded-lg mr-3 transition-colors ${isActive ? 'bg-blue-100 text-blue-600' : 'bg-gray-100/50 text-gray-500 group-hover:bg-gray-100 group-hover:text-gray-600'
+                        <div className={`p-2 rounded-lg mr-3 transition-colors ${isActive ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : 'bg-gray-100/50 dark:bg-slate-800/50 text-gray-500 dark:text-slate-400 group-hover:bg-gray-100 dark:group-hover:bg-slate-700 group-hover:text-gray-600 dark:group-hover:text-slate-300'
                             }`}>
                             <Icon className="w-5 h-5" />
                         </div>
                         <div className="text-left">
-                            <span className="block font-semibold">{tab.name}</span>
-                            <span className={`text-xs ${isActive ? 'text-blue-600/80' : 'text-gray-500'}`}>
+                            <span className="block font-semibold transition-colors">{tab.name}</span>
+                            <span className={`text-xs transition-colors ${isActive ? 'text-blue-600/80 dark:text-blue-400/80' : 'text-gray-500 dark:text-slate-500'}`}>
                                 {tab.description}
                             </span>
                         </div>
