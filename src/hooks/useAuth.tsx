@@ -10,6 +10,8 @@ interface AuthContextType {
   isEmployee: boolean;
   hasPermission: (perm: string) => boolean;
   login: (email: string, password: string, rememberMe?: boolean) => Promise<any>;
+  verifyTOTP: (token: string, code: string) => Promise<any>;
+  verifyBackupCode: (token: string, code: string) => Promise<any>;
   loginWithGoogle: (credential: string) => Promise<any>;
   loginWithMicrosoft: (accessToken: string) => Promise<any>;
   register: (email: string, password: string, name: string) => Promise<void>;
@@ -75,6 +77,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string, rememberMe: boolean = false) => {
     try {
       const response = await apiService.login(email, password, rememberMe);
+
+      // Handle 2FA Challenge
+      if (response.data.requires_2fa) {
+        return { requires_2fa: true, ...response.data };
+      }
+
       localStorage.setItem('auth_token', response.data.token);
       if (response.data.refresh_token) {
         localStorage.setItem('refresh_token', response.data.refresh_token);
@@ -86,9 +94,53 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       setUser(response.data.user);
       toast.success('Login successful!');
-      return response.data.user;
+      return { requires_2fa: false, user: response.data.user };
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Login failed');
+      toast.error(error.response?.data?.message || error.response?.data?.detail || 'Login failed');
+      throw error;
+    }
+  };
+
+  const verifyTOTP = async (two_factor_token: string, code: string) => {
+    try {
+      const response = await apiService.request({
+        method: 'POST',
+        url: '/api/v1/auth/login/2fa/totp',
+        data: { two_factor_token, code }
+      });
+
+      localStorage.setItem('auth_token', response.data.data.token);
+      if (response.data.data.refresh_token) {
+        localStorage.setItem('refresh_token', response.data.data.refresh_token);
+      }
+
+      setUser(response.data.data.user);
+      toast.success('Login successful!');
+      return response.data.data.user;
+    } catch (error: any) {
+      toast.error(error.response?.data?.detail || 'Invalid code');
+      throw error;
+    }
+  };
+
+  const verifyBackupCode = async (two_factor_token: string, code: string) => {
+    try {
+      const response = await apiService.request({
+        method: 'POST',
+        url: '/api/v1/auth/login/2fa/backup',
+        data: { two_factor_token, code }
+      });
+
+      localStorage.setItem('auth_token', response.data.data.token);
+      if (response.data.data.refresh_token) {
+        localStorage.setItem('refresh_token', response.data.data.refresh_token);
+      }
+
+      setUser(response.data.data.user);
+      toast.success('Login successful!');
+      return response.data.data.user;
+    } catch (error: any) {
+      toast.error(error.response?.data?.detail || 'Invalid backup code');
       throw error;
     }
   };
@@ -219,6 +271,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isEmployee,
     hasPermission,
     login,
+    verifyTOTP,
+    verifyBackupCode,
     loginWithGoogle,
     loginWithMicrosoft,
     register,
