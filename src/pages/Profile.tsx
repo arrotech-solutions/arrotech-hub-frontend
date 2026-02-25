@@ -591,4 +591,6 @@ const Profile: React.FC = () => {
       </main>
     </div>
   );
-  export default Profile;
+};
+
+export default Profile;
