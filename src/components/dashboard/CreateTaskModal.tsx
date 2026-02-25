@@ -158,23 +158,23 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ isOpen, onClose, conn
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-            <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300">
+            <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh] border border-gray-100/50 dark:border-slate-800 animate-in zoom-in-95 duration-300">
                 {/* Header */}
-                <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-                    <h3 className="text-lg font-bold text-gray-900">Create New Task</h3>
-                    <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-200 transition-colors">
-                        <X className="w-5 h-5 text-gray-500" />
+                <div className="px-8 py-6 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900 transition-colors">
+                    <h3 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">Create New Task</h3>
+                    <button onClick={onClose} className="p-2 rounded-2xl hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-400 dark:text-slate-500 transition-all duration-200">
+                        <X className="w-6 h-6" />
                     </button>
                 </div>
 
                 {/* Body */}
-                <div className="p-6 overflow-y-auto space-y-4">
+                <div className="p-8 overflow-y-auto space-y-6">
                     {/* Space Selection */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Space</label>
+                        <label className="block text-[10px] font-black text-gray-700 dark:text-slate-400 mb-2 uppercase tracking-widest">Workspace Space</label>
                         <select
-                            className="w-full rounded-xl border-gray-200 focus:border-indigo-500 focus:ring-indigo-500 py-2.5 text-sm"
+                            className="w-full rounded-2xl border-gray-200 dark:border-slate-700 focus:border-indigo-500 dark:focus:border-indigo-500 bg-gray-50/50 dark:bg-slate-800/50 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-indigo-500/10 py-3.5 text-sm dark:text-white transition-all outline-none"
                             value={selectedSpace}
                             onChange={(e) => fetchFoldersAndLists(e.target.value)}
                             disabled={loading}
@@ -188,10 +188,10 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ isOpen, onClose, conn
 
                     {/* Folder Selection (Optional if lists exist in space) */}
                     {folders.length > 0 && (
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Folder (Optional)</label>
+                        <div className="animate-in slide-in-from-top-2 duration-300">
+                            <label className="block text-[10px] font-black text-gray-700 dark:text-slate-400 mb-2 uppercase tracking-widest">Folder (Optional)</label>
                             <select
-                                className="w-full rounded-xl border-gray-200 focus:border-indigo-500 focus:ring-indigo-500 py-2.5 text-sm"
+                                className="w-full rounded-2xl border-gray-200 dark:border-slate-700 focus:border-indigo-500 dark:focus:border-indigo-500 bg-gray-50/50 dark:bg-slate-800/50 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-indigo-500/10 py-3.5 text-sm dark:text-white transition-all outline-none"
                                 value={selectedFolder}
                                 onChange={(e) => fetchListsInFolder(e.target.value)}
                                 disabled={loading}
@@ -205,10 +205,10 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ isOpen, onClose, conn
                     )}
 
                     {/* List Selection */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">List</label>
+                    <div className="animate-in slide-in-from-top-2 duration-300">
+                        <label className="block text-[10px] font-black text-gray-700 dark:text-slate-400 mb-2 uppercase tracking-widest">Task List</label>
                         <select
-                            className="w-full rounded-xl border-gray-200 focus:border-indigo-500 focus:ring-indigo-500 py-2.5 text-sm"
+                            className="w-full rounded-2xl border-gray-200 dark:border-slate-700 focus:border-indigo-500 dark:focus:border-indigo-500 bg-gray-50/50 dark:bg-slate-800/50 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-indigo-500/10 py-3.5 text-sm dark:text-white transition-all outline-none"
                             value={selectedList}
                             onChange={(e) => setSelectedList(e.target.value)}
                             disabled={loading || (!selectedSpace && !selectedFolder)}
@@ -221,42 +221,44 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ isOpen, onClose, conn
                     </div>
 
                     {/* Task Details */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Task Title</label>
-                        <input
-                            type="text"
-                            className="w-full rounded-xl border-gray-200 focus:border-indigo-500 focus:ring-indigo-500 py-2.5 text-sm"
-                            placeholder="What needs to be done?"
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
-                        />
-                    </div>
+                    <div className="pt-2 border-t border-gray-100 dark:border-slate-800 space-y-5">
+                        <div>
+                            <label className="block text-[10px] font-black text-gray-700 dark:text-slate-400 mb-2 uppercase tracking-widest">Task Title</label>
+                            <input
+                                type="text"
+                                className="w-full rounded-2xl border-gray-200 dark:border-slate-700 focus:border-indigo-500 dark:focus:border-indigo-500 bg-gray-50/50 dark:bg-slate-800/50 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-indigo-500/10 py-3.5 text-sm dark:text-white transition-all outline-none shadow-sm"
+                                placeholder="What needs to be done?"
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                            />
+                        </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                        <textarea
-                            className="w-full rounded-xl border-gray-200 focus:border-indigo-500 focus:ring-indigo-500 py-2.5 text-sm"
-                            rows={3}
-                            placeholder="Add details..."
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                        />
+                        <div>
+                            <label className="block text-[10px] font-black text-gray-700 dark:text-slate-400 mb-2 uppercase tracking-widest">Description</label>
+                            <textarea
+                                className="w-full rounded-2xl border-gray-200 dark:border-slate-700 focus:border-indigo-500 dark:focus:border-indigo-500 bg-gray-50/50 dark:bg-slate-800/50 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-indigo-500/10 py-3.5 text-sm dark:text-white transition-all outline-none resize-none shadow-sm"
+                                rows={4}
+                                placeholder="Add details..."
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                            />
+                        </div>
                     </div>
 
                 </div>
 
                 {/* Footer */}
-                <div className="p-4 border-t border-gray-100 bg-gray-50/50 flex justify-end space-x-3">
+                <div className="p-6 border-t border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-900/50 flex justify-end space-x-4">
                     <button
                         onClick={onClose}
-                        className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 bg-white border border-gray-200 hover:bg-gray-50 rounded-lg transition-all"
+                        className="px-6 py-3 text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 rounded-2xl transition-all duration-200 active:scale-95"
                     >
                         Cancel
                     </button>
                     <button
                         onClick={handleSubmit}
                         disabled={loading || !title || !selectedList}
-                        className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm hover:shadow transition-all flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-8 py-3 text-xs font-bold uppercase tracking-widest text-white bg-indigo-600 hover:bg-indigo-700 rounded-2xl shadow-lg shadow-indigo-500/20 hover:shadow-xl hover:scale-[1.02] transition-all duration-200 flex items-center disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
                     >
                         {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Check className="w-4 h-4 mr-2" />}
                         Create Task

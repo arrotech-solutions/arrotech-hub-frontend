@@ -75,12 +75,12 @@ const Blog: React.FC = () => {
                 <meta name="description" content="Explore the latest insights on business automation, AI agents, M-Pesa integrations, and productivity from the Arrotech Hub team." />
             </Helmet>
 
-            <div className="min-h-screen bg-gray-50">
+            <div className="min-h-screen bg-transparent transition-colors">
                 {/* ── Hero Section ── */}
                 {featuredPost && (
-                    <section className="relative overflow-hidden bg-gradient-to-br from-gray-900 via-purple-900 to-indigo-900">
+                    <section className="relative overflow-hidden bg-transparent transition-colors">
                         {/* Background pattern */}
-                        <div className="absolute inset-0 opacity-10">
+                        <div className="absolute inset-0 opacity-10 dark:opacity-20 pointer-events-none">
                             <div className="absolute inset-0" style={{
                                 backgroundImage: `radial-gradient(circle at 25% 50%, rgba(124, 58, 237, 0.3) 0%, transparent 50%),
                                                   radial-gradient(circle at 75% 50%, rgba(99, 102, 241, 0.2) 0%, transparent 50%)`,
@@ -88,7 +88,7 @@ const Blog: React.FC = () => {
                             <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
                                 <defs>
                                     <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                                        <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+                                        <path d="M 40 0 L 0 0 0 40" fill="none" className="stroke-slate-200 dark:stroke-white/5" strokeWidth="1" />
                                     </pattern>
                                 </defs>
                                 <rect width="100%" height="100%" fill="url(#grid)" />
@@ -99,36 +99,36 @@ const Blog: React.FC = () => {
                             <div className="grid lg:grid-cols-2 gap-12 items-center">
                                 <div className="space-y-6 animate-fade-in">
                                     <div className="flex items-center gap-3">
-                                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/30 backdrop-blur-sm">
+                                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-purple-500/10 dark:bg-purple-500/20 text-purple-600 dark:text-purple-300 border border-purple-500/20 dark:border-purple-500/30 backdrop-blur-sm transition-colors">
                                             <Sparkles size={12} />
                                             Featured
                                         </span>
                                         {featuredPost.category && (
-                                            <span className="px-3 py-1 rounded-full text-xs font-medium text-white/70 border border-white/10 backdrop-blur-sm">
+                                            <span className="px-3 py-1 rounded-full text-xs font-medium text-slate-600 dark:text-white/70 border border-slate-200 dark:border-white/10 backdrop-blur-sm transition-colors">
                                                 {featuredPost.category}
                                             </span>
                                         )}
                                     </div>
 
-                                    <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight">
+                                    <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 dark:text-white leading-[1.1] tracking-tighter transition-colors">
                                         {featuredPost.title}
                                     </h1>
 
-                                    <p className="text-lg text-gray-300 leading-relaxed max-w-xl">
+                                    <p className="text-lg text-slate-600 dark:text-slate-300 leading-relaxed max-w-xl font-medium transition-colors">
                                         {featuredPost.description}
                                     </p>
 
-                                    <div className="flex items-center gap-4 text-sm text-gray-400">
-                                        <span className="font-medium text-white/80">{featuredPost.author}</span>
-                                        <span className="w-1 h-1 rounded-full bg-gray-600" />
+                                    <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400 transition-colors">
+                                        <span className="font-medium text-slate-700 dark:text-slate-300">{featuredPost.author}</span>
+                                        <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600" />
                                         <span>{featuredPost.date}</span>
-                                        <span className="w-1 h-1 rounded-full bg-gray-600" />
+                                        <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600" />
                                         <span className="flex items-center gap-1"><Clock size={13} />{featuredPost.readTime}</span>
                                     </div>
 
                                     <Link
                                         to={`/blog/${featuredPost.slug}`}
-                                        className="group inline-flex items-center gap-2 px-6 py-3 bg-white text-gray-900 rounded-xl font-semibold text-sm hover:bg-purple-50 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/20 hover:-translate-y-0.5"
+                                        className="group inline-flex items-center gap-2 px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-semibold text-sm hover:bg-slate-800 dark:hover:bg-slate-50 transition-all duration-300 shadow-[0_4px_14px_0_rgb(0,0,0,0.1)] dark:shadow-none hover:shadow-[0_6px_20px_rgba(0,0,0,0.15)] dark:hover:shadow-none hover:-translate-y-0.5"
                                     >
                                         Read Article
                                         <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
@@ -157,7 +157,7 @@ const Blog: React.FC = () => {
                 )}
 
                 {/* ── Filter & Search Bar ── */}
-                <section className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-gray-200/60">
+                <section className="sticky top-0 z-30 bg-transparent backdrop-blur-md transition-colors">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="flex flex-col sm:flex-row items-center gap-4 py-4">
                             {/* Category pills */}
@@ -168,7 +168,7 @@ const Blog: React.FC = () => {
                                         onClick={() => handleCategoryClick(cat.slug)}
                                         className={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${activeCategory === cat.slug
                                             ? 'text-white shadow-md'
-                                            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                                            : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-800'
                                             }`}
                                         style={activeCategory === cat.slug ? { backgroundColor: cat.color } : undefined}
                                     >
@@ -179,15 +179,15 @@ const Blog: React.FC = () => {
 
                             {/* Search */}
                             <div className="relative w-full sm:w-72">
-                                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500" />
                                 <input
                                     type="text"
                                     placeholder="Search articles..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-2.5 bg-gray-100/80 border border-gray-200/60 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-300 transition-all"
+                                    className="w-full pl-10 pr-4 py-2.5 bg-gray-100/80 dark:bg-slate-800/80 border border-gray-200/60 dark:border-slate-700/60 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/30 dark:focus:ring-purple-500/50 focus:border-purple-300 dark:focus:border-purple-500/50 transition-all"
                                 />
-                                <kbd className="hidden sm:inline-flex absolute right-3 top-1/2 -translate-y-1/2 px-1.5 py-0.5 text-[10px] font-mono text-gray-400 bg-gray-200/80 rounded">⌘K</kbd>
+                                <kbd className="hidden sm:inline-flex absolute right-3 top-1/2 -translate-y-1/2 px-1.5 py-0.5 text-[10px] font-mono text-gray-400 dark:text-slate-500 bg-gray-200/80 dark:bg-slate-700/80 rounded transition-colors">⌘K</kbd>
                             </div>
                         </div>
                     </div>
@@ -212,11 +212,11 @@ const Blog: React.FC = () => {
                     {/* Empty state */}
                     {!isLoading && filteredPosts.length === 0 && (
                         <div className="text-center py-24">
-                            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gray-100 mb-6">
-                                <Search size={32} className="text-gray-400" />
+                            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gray-100 dark:bg-slate-800 mb-6 transition-colors">
+                                <Search size={32} className="text-gray-400 dark:text-slate-500" />
                             </div>
-                            <h3 className="text-xl font-semibold text-gray-900 mb-2">No articles found</h3>
-                            <p className="text-gray-500 max-w-md mx-auto">
+                            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2 transition-colors">No articles found</h3>
+                            <p className="text-gray-500 dark:text-slate-400 max-w-md mx-auto transition-colors">
                                 {searchQuery
                                     ? `No results for "${searchQuery}". Try a different search term.`
                                     : 'No articles in this category yet. Check back soon!'}
@@ -239,7 +239,7 @@ const Blog: React.FC = () => {
                                     to={`/blog/${post.slug}`}
                                     onMouseEnter={() => setHoveredCard(post.slug)}
                                     onMouseLeave={() => setHoveredCard(null)}
-                                    className="group bg-white rounded-2xl border border-gray-200/80 overflow-hidden transition-all duration-500 hover:shadow-xl hover:shadow-purple-500/5 hover:-translate-y-1 hover:border-purple-200/60"
+                                    className="group bg-white dark:bg-slate-900/50 rounded-2xl border border-gray-200/80 dark:border-slate-800 overflow-hidden transition-all duration-500 hover:shadow-xl hover:shadow-purple-500/5 dark:hover:shadow-none hover:-translate-y-1 hover:border-purple-200/60 dark:hover:border-purple-500/30"
                                     style={{ animationDelay: `${index * 80}ms` }}
                                 >
                                     {/* Cover image */}
@@ -268,33 +268,33 @@ const Blog: React.FC = () => {
                                         {!post.cover_image && post.tags.length > 0 && (
                                             <div className="flex flex-wrap gap-2 mb-3">
                                                 {post.tags.slice(0, 2).map(tag => (
-                                                    <span key={tag} className="px-2.5 py-0.5 text-xs font-medium text-purple-600 bg-purple-50 rounded-full">
+                                                    <span key={tag} className="px-2.5 py-0.5 text-xs font-medium text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30 rounded-full transition-colors">
                                                         {tag}
                                                     </span>
                                                 ))}
                                             </div>
                                         )}
 
-                                        <h3 className="text-lg font-bold text-gray-900 mb-2 leading-snug group-hover:text-purple-700 transition-colors line-clamp-2">
+                                        <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 leading-tight tracking-tight group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors line-clamp-2">
                                             {post.title}
                                         </h3>
 
-                                        <p className="text-sm text-gray-500 mb-4 leading-relaxed line-clamp-2 flex-1">
+                                        <p className="text-sm text-slate-500 dark:text-slate-400 mb-4 leading-relaxed font-medium line-clamp-2 flex-1 transition-colors">
                                             {post.description}
                                         </p>
 
                                         {/* Footer */}
-                                        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                                        <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-slate-800 transition-colors">
                                             <div className="flex items-center gap-3">
                                                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center text-white text-xs font-bold">
                                                     {post.author.charAt(0)}
                                                 </div>
                                                 <div>
-                                                    <p className="text-xs font-medium text-gray-900">{post.author}</p>
-                                                    <p className="text-xs text-gray-400">{post.date}</p>
+                                                    <p className="text-xs font-medium text-gray-900 dark:text-white transition-colors">{post.author}</p>
+                                                    <p className="text-xs text-gray-400 dark:text-slate-500 transition-colors">{post.date}</p>
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-3 text-xs text-gray-400">
+                                            <div className="flex items-center gap-3 text-xs text-gray-400 dark:text-slate-500 transition-colors">
                                                 <span className="flex items-center gap-1"><Clock size={11} />{post.readTime}</span>
                                                 {post.views_count && (
                                                     <span className="flex items-center gap-1"><Eye size={11} />{post.views_count.toLocaleString()}</span>
@@ -315,23 +315,23 @@ const Blog: React.FC = () => {
                 </section>
 
                 {/* ── Newsletter CTA ── */}
-                <section className="bg-gradient-to-r from-purple-600 via-purple-700 to-indigo-700">
+                <section className="bg-transparent transition-colors">
                     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
-                        <h2 className="text-3xl font-bold text-white mb-3">Stay ahead of the curve</h2>
-                        <p className="text-purple-200 mb-8 max-w-xl mx-auto">
+                        <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-3 tracking-tighter leading-[1.1] transition-colors">Stay ahead of the curve</h2>
+                        <p className="text-slate-600 dark:text-slate-400 mb-8 max-w-xl mx-auto font-medium transition-colors">
                             Get the latest insights on automation, AI, and productivity delivered to your inbox every week.
                         </p>
                         <div className="flex flex-col sm:flex-row items-center gap-3 max-w-md mx-auto">
                             <input
                                 type="email"
                                 placeholder="you@company.com"
-                                className="w-full px-5 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-purple-300 focus:outline-none focus:ring-2 focus:ring-white/30 backdrop-blur-sm"
+                                className="w-full px-5 py-3 rounded-xl bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/30 transition-colors"
                             />
-                            <button className="w-full sm:w-auto px-6 py-3 bg-white text-purple-700 rounded-xl font-semibold text-sm hover:bg-purple-50 transition-all hover:shadow-lg whitespace-nowrap">
+                            <button className="w-full sm:w-auto px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-semibold text-sm hover:bg-slate-800 dark:hover:bg-slate-100 transition-all hover:shadow-[0_6px_20px_rgba(0,0,0,0.15)] dark:hover:shadow-none whitespace-nowrap">
                                 Subscribe
                             </button>
                         </div>
-                        <p className="text-xs text-purple-300 mt-4">No spam. Unsubscribe anytime.</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-4 transition-colors">No spam. Unsubscribe anytime.</p>
                     </div>
                 </section>
             </div>

@@ -112,7 +112,13 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
 
                     {!sidebarCollapsed ? (
                         <div className="flex items-center space-x-1">
-                            <button onClick={toggleTheme} className={`p-2 rounded-lg ${isDarkMode ? 'hover:bg-gray-800 text-yellow-400' : 'hover:bg-gray-100 text-gray-600'}`}>
+                            <button
+                                onClick={toggleTheme}
+                                className={`p-2 rounded-lg transition-all ${isDarkMode
+                                    ? 'bg-slate-800 text-yellow-400 hover:text-yellow-300'
+                                    : 'bg-gray-100 text-gray-600 hover:text-gray-900'}`}
+                                aria-label="Toggle Dark Mode"
+                            >
                                 {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
                             </button>
                             <button onClick={() => setSidebarCollapsed(true)} className={`p-2 rounded-lg ${isDarkMode ? 'hover:bg-gray-800 text-gray-400' : 'hover:bg-gray-100 text-gray-500'}`}>

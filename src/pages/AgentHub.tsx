@@ -309,24 +309,24 @@ export default function AgentHub() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900 text-white p-6">
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-purple-50 dark:from-slate-900 dark:via-slate-900 dark:to-indigo-950/20 text-gray-900 dark:text-white p-6 transition-colors duration-300">
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
                 <div>
-                    <h1 className="text-3xl font-bold flex items-center gap-3">
-                        <Bot className="w-8 h-8 text-indigo-400" />
+                    <h1 className="text-3xl font-bold flex items-center gap-3 text-gray-900 dark:text-white">
+                        <Bot className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
                         Agent Hub
                     </h1>
-                    <p className="text-slate-400 mt-1">Manage your autonomous productivity agents</p>
+                    <p className="text-gray-500 dark:text-slate-400 mt-1">Manage your autonomous productivity agents</p>
                 </div>
 
                 <div className="flex items-center gap-3">
                     <button
                         onClick={fetchAgents}
                         disabled={loading}
-                        className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl transition-all border border-white/10"
+                        className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-200 rounded-xl transition-all border border-gray-200 dark:border-slate-700 shadow-sm"
                     >
-                        <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                        <RefreshCw className={`w-4 h-4 text-indigo-500 ${loading ? 'animate-spin' : ''}`} />
                         Refresh
                     </button>
                 </div>
@@ -334,52 +334,52 @@ export default function AgentHub() {
 
             {/* Stats Overview */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <div className="bg-white/5 backdrop-blur-xl rounded-xl border border-white/10 p-4">
+                <div className="bg-white/80 dark:bg-white/5 backdrop-blur-xl rounded-xl border border-gray-100 dark:border-white/10 p-4 shadow-sm">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center">
                             <Bot className="w-5 h-5 text-indigo-400" />
                         </div>
                         <div>
-                            <p className="text-2xl font-bold">{agents.length}</p>
-                            <p className="text-xs text-slate-400">Total Agents</p>
+                            <p className="text-2xl font-bold text-gray-900 dark:text-white">{agents.length}</p>
+                            <p className="text-xs text-gray-500 dark:text-slate-400">Total Agents</p>
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white/5 backdrop-blur-xl rounded-xl border border-white/10 p-4">
+                <div className="bg-white/80 dark:bg-white/5 backdrop-blur-xl rounded-xl border border-gray-100 dark:border-white/10 p-4 shadow-sm">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
                             <Activity className="w-5 h-5 text-emerald-400" />
                         </div>
                         <div>
-                            <p className="text-2xl font-bold">{agents.filter(a => a.status === 'active').length}</p>
-                            <p className="text-xs text-slate-400">Active</p>
+                            <p className="text-2xl font-bold text-gray-900 dark:text-white">{agents.filter(a => a.status === 'active').length}</p>
+                            <p className="text-xs text-gray-500 dark:text-slate-400">Active Now</p>
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white/5 backdrop-blur-xl rounded-xl border border-white/10 p-4">
+                <div className="bg-white/80 dark:bg-white/5 backdrop-blur-xl rounded-xl border border-gray-100 dark:border-white/10 p-4 shadow-sm">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center">
                             <Zap className="w-5 h-5 text-amber-400" />
                         </div>
                         <div>
-                            <p className="text-2xl font-bold">{agents.reduce((sum, a) => sum + a.runCount, 0)}</p>
-                            <p className="text-xs text-slate-400">Total Runs</p>
+                            <p className="text-2xl font-bold text-gray-900 dark:text-white">{agents.reduce((sum, a) => sum + a.runCount, 0)}</p>
+                            <p className="text-xs text-gray-500 dark:text-slate-400">Total Runs</p>
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white/5 backdrop-blur-xl rounded-xl border border-white/10 p-4">
+                <div className="bg-white/80 dark:bg-white/5 backdrop-blur-xl rounded-xl border border-gray-100 dark:border-white/10 p-4 shadow-sm">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center">
                             <CheckCircle className="w-5 h-5 text-purple-400" />
                         </div>
                         <div>
-                            <p className="text-2xl font-bold">
+                            <p className="text-2xl font-bold text-gray-900 dark:text-white">
                                 {(agents.reduce((sum, a) => sum + a.successRate, 0) / agents.length).toFixed(1)}%
                             </p>
-                            <p className="text-xs text-slate-400">Avg Success</p>
+                            <p className="text-xs text-gray-500 dark:text-slate-400">Avg Success</p>
                         </div>
                     </div>
                 </div>
@@ -390,26 +390,26 @@ export default function AgentHub() {
                 {agents.map((agent) => (
                     <div
                         key={agent.id}
-                        className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 overflow-hidden transition-all hover:border-white/20"
+                        className="bg-white/80 dark:bg-white/5 backdrop-blur-xl rounded-2xl border border-gray-100 dark:border-white/10 overflow-hidden transition-all hover:border-indigo-200 dark:hover:border-white/20 shadow-sm hover:shadow-lg"
                     >
                         {/* Main Row */}
                         <div className="p-6">
                             <div className="flex items-center justify-between">
                                 {/* Agent Info */}
                                 <div className="flex items-center gap-4">
-                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl ${agent.status === 'active'
-                                        ? 'bg-gradient-to-br from-indigo-500/30 to-purple-500/30 border border-indigo-500/40'
-                                        : 'bg-white/10 border border-white/10'
+                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shadow-inner ${agent.status === 'active'
+                                        ? 'bg-gradient-to-br from-indigo-500/10 to-purple-500/10 dark:from-indigo-500/30 dark:to-purple-500/30 border border-indigo-200 dark:border-indigo-500/40'
+                                        : 'bg-gray-50 dark:bg-white/10 border border-gray-100 dark:border-white/10'
                                         }`}>
                                         <span>{agent.icon}</span>
                                     </div>
 
                                     <div>
                                         <div className="flex items-center gap-3">
-                                            <h3 className="text-lg font-semibold">{agent.name}</h3>
+                                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">{agent.name}</h3>
                                             {getStatusBadge(agent.status)}
                                         </div>
-                                        <p className="text-sm text-slate-400 mt-1">{agent.description}</p>
+                                        <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">{agent.description}</p>
                                     </div>
                                 </div>
 
@@ -419,8 +419,8 @@ export default function AgentHub() {
                                     <button
                                         onClick={() => toggleAgent(agent.id)}
                                         className={`p-2 rounded-lg transition-colors ${agent.config.enabled
-                                            ? 'text-emerald-400 hover:bg-emerald-500/20'
-                                            : 'text-slate-400 hover:bg-white/10'
+                                            ? 'text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/20'
+                                            : 'text-gray-400 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-white/10'
                                             }`}
                                         title={agent.config.enabled ? 'Pause agent' : 'Enable agent'}
                                     >
@@ -435,7 +435,7 @@ export default function AgentHub() {
                                     <button
                                         onClick={() => runAgentNow(agent.id)}
                                         disabled={runningAgent === agent.id || !agent.config.enabled}
-                                        className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-600/50 disabled:cursor-not-allowed rounded-xl transition-all"
+                                        className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-all text-white font-bold shadow-lg shadow-indigo-500/20"
                                     >
                                         {runningAgent === agent.id ? (
                                             <>
@@ -453,7 +453,7 @@ export default function AgentHub() {
                                     {/* Expand */}
                                     <button
                                         onClick={() => toggleExpanded(agent.id)}
-                                        className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+                                        className="p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-white/10 text-gray-500 dark:text-slate-400 transition-colors"
                                     >
                                         {expandedAgent === agent.id ? (
                                             <ChevronUp className="w-5 h-5" />
@@ -465,29 +465,29 @@ export default function AgentHub() {
                             </div>
 
                             {/* Stats Row */}
-                            <div className="flex items-center gap-6 mt-4 pt-4 border-t border-white/10 text-sm">
+                            <div className="flex flex-wrap items-center gap-x-8 gap-y-3 mt-4 pt-4 border-t border-gray-100 dark:border-white/10 text-xs">
                                 <div className="flex items-center gap-2">
-                                    <Clock className="w-4 h-4 text-slate-400" />
-                                    <span className="text-slate-400">Last run:</span>
-                                    <span className="text-white">{formatRelativeTime(agent.lastRun)}</span>
+                                    <Clock className="w-4 h-4 text-gray-400 dark:text-slate-500" />
+                                    <span className="text-gray-400 dark:text-slate-500 font-bold uppercase tracking-widest text-[10px]">Last run</span>
+                                    <span className="text-gray-900 dark:text-white font-bold">{formatRelativeTime(agent.lastRun)}</span>
                                 </div>
 
                                 <div className="flex items-center gap-2">
-                                    <Calendar className="w-4 h-4 text-slate-400" />
-                                    <span className="text-slate-400">Next run:</span>
-                                    <span className="text-white">{formatRelativeTime(agent.nextRun)}</span>
+                                    <Calendar className="w-4 h-4 text-gray-400 dark:text-slate-500" />
+                                    <span className="text-gray-400 dark:text-slate-500 font-bold uppercase tracking-widest text-[10px]">Next run</span>
+                                    <span className="text-gray-900 dark:text-white font-bold">{formatRelativeTime(agent.nextRun)}</span>
                                 </div>
 
                                 <div className="flex items-center gap-2">
-                                    <Zap className="w-4 h-4 text-slate-400" />
-                                    <span className="text-slate-400">Total runs:</span>
-                                    <span className="text-white">{agent.runCount}</span>
+                                    <Zap className="w-4 h-4 text-gray-400 dark:text-slate-500" />
+                                    <span className="text-gray-400 dark:text-slate-500 font-bold uppercase tracking-widest text-[10px]">Total runs</span>
+                                    <span className="text-gray-900 dark:text-white font-bold">{agent.runCount}</span>
                                 </div>
 
                                 <div className="flex items-center gap-2">
-                                    <CheckCircle className="w-4 h-4 text-slate-400" />
-                                    <span className="text-slate-400">Success rate:</span>
-                                    <span className={agent.successRate >= 95 ? 'text-emerald-400' : 'text-amber-400'}>
+                                    <CheckCircle className="w-4 h-4 text-gray-400 dark:text-slate-500" />
+                                    <span className="text-gray-400 dark:text-slate-500 font-bold uppercase tracking-widest text-[10px]">Success rate</span>
+                                    <span className={`${agent.successRate >= 95 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'} font-bold`}>
                                         {agent.successRate}%
                                     </span>
                                 </div>
@@ -496,33 +496,33 @@ export default function AgentHub() {
 
                         {/* Expanded Section */}
                         {expandedAgent === agent.id && (
-                            <div className="px-6 pb-6 border-t border-white/10">
+                            <div className="px-6 pb-6 border-t border-gray-100 dark:border-white/10 bg-gray-50/30 dark:bg-white/5 transition-colors">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                                     {/* Configuration */}
-                                    <div className="bg-white/5 rounded-xl p-4">
-                                        <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                                    <div className="bg-white dark:bg-slate-900 rounded-xl p-5 border border-gray-100 dark:border-white/10 shadow-sm">
+                                        <h4 className="text-xs font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400 mb-4 flex items-center gap-2">
                                             <Settings className="w-4 h-4" />
                                             Configuration
                                         </h4>
 
                                         <div className="space-y-3 text-sm">
-                                            <div className="flex justify-between">
-                                                <span className="text-slate-400">Schedule</span>
-                                                <span className="text-white">{agent.config.schedule || 'Not set'}</span>
+                                            <div className="flex justify-between items-center text-xs">
+                                                <span className="text-gray-500 dark:text-slate-400 font-medium">Schedule</span>
+                                                <span className="text-gray-900 dark:text-white font-bold">{agent.config.schedule || 'Not set'}</span>
                                             </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-slate-400">Notifications</span>
-                                                <span className="text-white capitalize">{agent.config.notificationChannel || 'None'}</span>
+                                            <div className="flex justify-between items-center text-xs">
+                                                <span className="text-gray-500 dark:text-slate-400 font-medium">Notifications</span>
+                                                <span className="text-gray-900 dark:text-white font-bold capitalize">{agent.config.notificationChannel || 'None'}</span>
                                             </div>
                                             {Object.entries(agent.config)
                                                 .filter(([key]) => !['enabled', 'schedule', 'notificationChannel'].includes(key))
                                                 .slice(0, 3)
                                                 .map(([key, value]) => (
-                                                    <div key={key} className="flex justify-between">
-                                                        <span className="text-slate-400">
+                                                    <div key={key} className="flex justify-between items-center text-xs">
+                                                        <span className="text-gray-500 dark:text-slate-400 font-medium whitespace-nowrap mr-4">
                                                             {key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                                                         </span>
-                                                        <span className="text-white">
+                                                        <span className="text-gray-900 dark:text-white font-bold truncate">
                                                             {typeof value === 'boolean' ? (value ? 'Yes' : 'No') : String(value)}
                                                         </span>
                                                     </div>
@@ -532,8 +532,8 @@ export default function AgentHub() {
                                     </div>
 
                                     {/* Recent Runs */}
-                                    <div className="bg-white/5 rounded-xl p-4">
-                                        <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                                    <div className="bg-white dark:bg-slate-900 rounded-xl p-5 border border-gray-100 dark:border-white/10 shadow-sm">
+                                        <h4 className="text-xs font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400 mb-4 flex items-center gap-2">
                                             <Activity className="w-4 h-4" />
                                             Recent Runs
                                         </h4>
@@ -545,22 +545,22 @@ export default function AgentHub() {
                                                         key={run.id}
                                                         className="flex items-center justify-between text-sm py-2 border-b border-white/5 last:border-0"
                                                     >
-                                                        <div className="flex items-center gap-2">
+                                                        <div className="flex items-center gap-3">
                                                             {run.status === 'success' ? (
-                                                                <CheckCircle className="w-4 h-4 text-emerald-400" />
+                                                                <CheckCircle className="w-4 h-4 text-emerald-500" />
                                                             ) : (
-                                                                <AlertCircle className="w-4 h-4 text-red-400" />
+                                                                <AlertCircle className="w-4 h-4 text-red-500" />
                                                             )}
-                                                            <span className="text-slate-300">{run.summary}</span>
+                                                            <span className="text-gray-700 dark:text-slate-300 font-medium">{run.summary}</span>
                                                         </div>
-                                                        <span className="text-slate-500 text-xs">
+                                                        <span className="text-gray-400 dark:text-slate-500 text-[10px] font-bold uppercase tracking-widest">
                                                             {formatRelativeTime(run.timestamp)}
                                                         </span>
                                                     </div>
                                                 ))}
                                             </div>
                                         ) : (
-                                            <p className="text-slate-500 text-sm">No recent runs available</p>
+                                            <p className="text-gray-400 dark:text-slate-500 text-xs italic">No recent runs available</p>
                                         )}
                                     </div>
                                 </div>
@@ -572,10 +572,10 @@ export default function AgentHub() {
 
             {/* Empty State */}
             {agents.length === 0 && !loading && (
-                <div className="text-center py-16">
-                    <Bot className="w-16 h-16 text-slate-500 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold mb-2">No Agents Configured</h3>
-                    <p className="text-slate-400 mb-6">Set up autonomous agents to automate your productivity workflows.</p>
+                <div className="text-center py-24 bg-white/40 dark:bg-slate-800/40 backdrop-blur-md rounded-[32px] border border-white/60 dark:border-slate-700/50 shadow-inner">
+                    <Bot className="w-16 h-16 text-gray-300 dark:text-slate-600 mx-auto mb-4 opacity-50" />
+                    <h3 className="text-xl font-black text-gray-900 dark:text-white mb-2">No Agents Configured</h3>
+                    <p className="text-gray-500 dark:text-slate-400 mb-6 font-medium">Set up autonomous agents to automate your productivity workflows.</p>
                 </div>
             )}
         </div>

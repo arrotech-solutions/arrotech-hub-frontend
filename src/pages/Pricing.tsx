@@ -387,7 +387,7 @@ const Pricing: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30">
+        <div className="min-h-screen bg-transparent transition-colors">
             <SEO
                 title="Pricing | Flexible Plans for Teams"
                 description="Explore Arrotech Hub pricing. Start for free, upgrade to Pro or Enterprise. The most affordable unified workspace with M-Pesa support. Flexible plans for every team size."
@@ -427,43 +427,43 @@ const Pricing: React.FC = () => {
                 <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-l from-blue-400/10 to-cyan-400/10 rounded-full blur-3xl -z-10" />
 
                 <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 rounded-full text-sm font-semibold mb-6">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 rounded-full text-sm font-semibold mb-6">
                         <Sparkles className="w-4 h-4" />
                         Simple, transparent pricing
                     </div>
 
-                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 mb-6 tracking-tight">
+                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 dark:text-white mb-6 tracking-tighter leading-[1.1] transition-colors">
                         Choose the plan that
-                        <span className="block bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 bg-clip-text text-transparent">
+                        <span className="block text-slate-500 dark:text-slate-400 transition-colors">
                             fits your workflow
                         </span>
                     </h1>
 
-                    <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto mb-10">
+                    <p className="text-lg md:text-xl text-slate-500/90 dark:text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed font-medium transition-colors">
                         Start free, upgrade as you grow. All plans include our unified inbox, calendar, and task management.
-                        <span className="font-semibold text-gray-800"> Pay with M-Pesa.</span>
+                        <span className="font-bold text-slate-800 dark:text-slate-200 transition-colors"> Pay with M-Pesa.</span>
                     </p>
 
                     {/* Billing Toggle */}
-                    <div className="inline-flex items-center gap-3 p-1.5 bg-gray-100 rounded-2xl mb-8">
+                    <div className="inline-flex items-center gap-3 p-1.5 bg-gray-100 dark:bg-slate-800/80 rounded-2xl mb-8 border border-transparent dark:border-slate-700/50">
                         <button
                             onClick={() => setBillingCycle('monthly')}
-                            className={`px-6 py-2.5 rounded-xl font-semibold transition-all ${billingCycle === 'monthly'
-                                ? 'bg-white text-gray-900 shadow-md'
-                                : 'text-gray-600 hover:text-gray-900'
+                            className={`px-6 py-2.5 rounded-xl font-semibold transition-all duration-300 ${billingCycle === 'monthly'
+                                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-[0_2px_8px_rgb(0,0,0,0.06)] scale-105'
+                                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-700/50'
                                 }`}
                         >
                             Monthly
                         </button>
                         <button
                             onClick={() => setBillingCycle('yearly')}
-                            className={`px-6 py-2.5 rounded-xl font-semibold transition-all flex items-center gap-2 ${billingCycle === 'yearly'
-                                ? 'bg-white text-gray-900 shadow-md'
-                                : 'text-gray-600 hover:text-gray-900'
+                            className={`px-6 py-2.5 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 ${billingCycle === 'yearly'
+                                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-[0_2px_8px_rgb(0,0,0,0.06)] scale-105'
+                                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-700/50'
                                 }`}
                         >
                             Yearly
-                            <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full">
+                            <span className="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 text-xs font-bold rounded-full">
                                 Save 20%
                             </span>
                         </button>
@@ -488,8 +488,8 @@ const Pricing: React.FC = () => {
                             return (
                                 <div
                                     key={plan.id}
-                                    className={`relative flex flex-col rounded-3xl border-2 bg-white/80 backdrop-blur-sm transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 ${plan.highlight
-                                        ? 'border-indigo-400 shadow-xl shadow-indigo-500/10 scale-105 z-10'
+                                    className={`relative flex flex-col rounded-3xl border-2 bg-white/80 dark:bg-slate-900/80 dark:border-slate-800 backdrop-blur-sm transition-all duration-500 hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] dark:hover:shadow-none hover:-translate-y-2 ${plan.highlight
+                                        ? 'border-indigo-400 dark:border-indigo-500 shadow-[0_8px_30px_rgb(99,102,241,0.15)] scale-105 z-10'
                                         : plan.borderColor
                                         }`}
                                 >
@@ -509,39 +509,39 @@ const Pricing: React.FC = () => {
                                             <Icon className="w-6 h-6 text-white" />
                                         </div>
 
-                                        <h3 className="text-xl font-bold text-gray-900 mb-1">{plan.name}</h3>
-                                        <p className="text-sm text-gray-500 mb-4">{plan.tagline}</p>
+                                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">{plan.name}</h3>
+                                        <p className="text-sm text-gray-500 dark:text-slate-400 mb-4">{plan.tagline}</p>
 
                                         {/* Pricing */}
                                         <div className="mb-6">
                                             {plan.price !== null ? (
                                                 <div className="flex items-baseline gap-1">
-                                                    <span className="text-sm text-gray-500">KES</span>
-                                                    <span className="text-4xl font-black text-gray-900">{displayPrice}</span>
-                                                    <span className="text-gray-500">/{billingCycle === 'yearly' ? 'year' : 'mo'}</span>
+                                                    <span className="text-sm text-gray-500 dark:text-slate-400">KES</span>
+                                                    <span className="text-4xl font-black text-gray-900 dark:text-white">{displayPrice}</span>
+                                                    <span className="text-gray-500 dark:text-slate-400">/{billingCycle === 'yearly' ? 'year' : 'mo'}</span>
                                                 </div>
                                             ) : (
-                                                <div className="text-4xl font-black text-gray-900">Custom</div>
+                                                <div className="text-4xl font-black text-gray-900 dark:text-white">Custom</div>
                                             )}
                                             {billingCycle === 'yearly' && plan.price && (
-                                                <p className="text-sm text-emerald-600 font-medium mt-1">
+                                                <p className="text-sm text-emerald-600 dark:text-emerald-400 font-medium mt-1">
                                                     Save KES {((plan.price * 12) - yearlyPrice!).toLocaleString()}/year
                                                 </p>
                                             )}
                                         </div>
 
-                                        <p className="text-sm text-gray-600 mb-6">{plan.description}</p>
+                                        <p className="text-sm text-gray-600 dark:text-slate-400 mb-6">{plan.description}</p>
 
                                         {/* CTA Button */}
                                         <div className="mt-auto">
                                             {isCurrentPlan ? (
-                                                <div className="w-full py-3 px-4 bg-gray-100 text-gray-600 text-center rounded-xl font-semibold">
+                                                <div className="w-full py-3 px-4 bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 text-center rounded-xl font-semibold">
                                                     Current Plan
                                                 </div>
                                             ) : plan.id === 'enterprise' ? (
                                                 <a
                                                     href="mailto:sales@arrotechsolutions.com?subject=Enterprise%20Plan%20Inquiry"
-                                                    className="block w-full py-3 px-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-center rounded-xl font-semibold hover:shadow-lg transition-all"
+                                                    className="block w-full py-3 px-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-center rounded-xl font-semibold hover:shadow-[0_6px_20px_rgba(245,158,11,0.3)] dark:hover:shadow-none hover:-translate-y-0.5 transition-all duration-300"
                                                 >
                                                     Contact Sales
                                                 </a>
@@ -549,14 +549,14 @@ const Pricing: React.FC = () => {
                                                 user ? (
                                                     <Link
                                                         to="/unified"
-                                                        className="block w-full py-3 px-4 bg-gray-900 text-white text-center rounded-xl font-semibold hover:bg-gray-800 transition-all"
+                                                        className="block w-full py-3 px-4 bg-gray-900 dark:bg-slate-100 text-white dark:text-slate-900 text-center rounded-xl font-semibold hover:bg-gray-800 dark:hover:bg-white transition-all"
                                                     >
                                                         Go to Dashboard
                                                     </Link>
                                                 ) : (
                                                     <Link
                                                         to="/register"
-                                                        className="block w-full py-3 px-4 bg-gray-900 text-white text-center rounded-xl font-semibold hover:bg-gray-800 transition-all"
+                                                        className="block w-full py-3 px-4 bg-gray-900 dark:bg-slate-100 text-white dark:text-slate-900 text-center rounded-xl font-semibold hover:bg-gray-800 dark:hover:bg-white transition-all"
                                                     >
                                                         Get Started Free
                                                     </Link>
@@ -566,13 +566,13 @@ const Pricing: React.FC = () => {
                                                     {...getPaystackConfig(plan)}
                                                     onSuccess={(ref) => handlePaymentSuccess(ref, plan.id)}
                                                     onClose={handlePaymentClose}
-                                                    className={`w-full py-3 px-4 bg-gradient-to-r ${plan.gradient} text-white text-center rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50`}
+                                                    className={`w-full py-3 px-4 bg-gradient-to-r ${plan.gradient} text-white text-center rounded-xl font-semibold hover:shadow-lg dark:hover:shadow-none transition-all disabled:opacity-50`}
                                                     text={loading ? 'Processing...' : `Upgrade to ${plan.name}`}
                                                 />
                                             ) : (
                                                 <Link
                                                     to="/register"
-                                                    className={`block w-full py-3 px-4 bg-gradient-to-r ${plan.gradient} text-white text-center rounded-xl font-semibold hover:shadow-lg transition-all`}
+                                                    className={`block w-full py-3 px-4 bg-gradient-to-r ${plan.gradient} text-white text-center rounded-xl font-semibold hover:shadow-[0_6px_20px_rgba(0,0,0,0.15)] dark:hover:shadow-none hover:-translate-y-0.5 transition-all duration-300`}
                                                 >
                                                     Start with {plan.name}
                                                 </Link>
@@ -580,17 +580,17 @@ const Pricing: React.FC = () => {
                                         </div>
 
                                         {/* Features List */}
-                                        <div className="mt-6 pt-6 border-t border-gray-100">
-                                            <h4 className="text-sm font-semibold text-gray-900 mb-3">What's included:</h4>
+                                        <div className="mt-6 pt-6 border-t border-gray-100 dark:border-slate-800">
+                                            <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">What's included:</h4>
                                             <ul className="space-y-2.5">
                                                 {plan.features.included.slice(0, 6).map((feature, idx) => (
-                                                    <li key={idx} className="flex items-start gap-2 text-sm text-gray-600">
+                                                    <li key={idx} className="flex items-start gap-2 text-sm text-gray-600 dark:text-slate-400">
                                                         <Check className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
                                                         <span>{feature}</span>
                                                     </li>
                                                 ))}
                                                 {plan.features.included.length > 6 && (
-                                                    <li className="text-sm text-indigo-600 font-medium">
+                                                    <li className="text-sm text-indigo-600 dark:text-indigo-400 font-medium">
                                                         +{plan.features.included.length - 6} more features
                                                     </li>
                                                 )}
@@ -606,7 +606,7 @@ const Pricing: React.FC = () => {
                     <div className="text-center mt-12">
                         <button
                             onClick={() => setShowComparison(!showComparison)}
-                            className="inline-flex items-center gap-2 px-8 py-4 bg-white border-2 border-gray-200 text-gray-700 rounded-2xl font-semibold hover:border-indigo-300 hover:bg-indigo-50 transition-all"
+                            className="inline-flex items-center gap-2 px-8 py-4 bg-white dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-200 rounded-2xl font-semibold hover:border-indigo-300 dark:hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-all"
                         >
                             {showComparison ? 'Hide' : 'Compare all'} features
                             <ChevronDown className={`w-5 h-5 transition-transform ${showComparison ? 'rotate-180' : ''}`} />
@@ -621,40 +621,40 @@ const Pricing: React.FC = () => {
             {showComparison && (
                 <section className="pb-16 md:pb-24 animate-in slide-in-from-top-4">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="bg-white rounded-3xl border border-gray-200 shadow-xl overflow-hidden">
-                            <div className="p-6 md:p-8 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
-                                <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Feature Comparison</h2>
-                                <p className="text-gray-600 mt-2">A detailed breakdown of what each plan includes</p>
+                        <div className="bg-white dark:bg-slate-900/50 rounded-3xl border border-gray-200 dark:border-slate-800 shadow-xl overflow-hidden">
+                            <div className="p-6 md:p-8 border-b border-gray-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
+                                <h2 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Feature Comparison</h2>
+                                <p className="text-slate-500 dark:text-slate-400 mt-2 font-medium">A detailed breakdown of what each plan includes</p>
                             </div>
 
                             <div className="overflow-x-auto">
                                 <table className="w-full">
                                     <thead>
-                                        <tr className="bg-gray-50 border-b border-gray-200">
-                                            <th className="text-left py-4 px-6 font-semibold text-gray-900 min-w-[200px]">Feature</th>
-                                            <th className="text-center py-4 px-4 font-semibold text-gray-700">Free</th>
-                                            <th className="text-center py-4 px-4 font-semibold text-gray-700">Starter</th>
-                                            <th className="text-center py-4 px-4 font-semibold text-indigo-700 bg-indigo-50">Business</th>
-                                            <th className="text-center py-4 px-4 font-semibold text-gray-700">Pro</th>
+                                        <tr className="bg-gray-50 dark:bg-slate-800/80 border-b border-gray-200 dark:border-slate-700">
+                                            <th className="text-left py-4 px-6 font-semibold text-gray-900 dark:text-white min-w-[200px]">Feature</th>
+                                            <th className="text-center py-4 px-4 font-semibold text-gray-700 dark:text-slate-300">Free</th>
+                                            <th className="text-center py-4 px-4 font-semibold text-gray-700 dark:text-slate-300">Starter</th>
+                                            <th className="text-center py-4 px-4 font-semibold text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30">Business</th>
+                                            <th className="text-center py-4 px-4 font-semibold text-gray-700 dark:text-slate-300">Pro</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
+                                    <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
                                         {FEATURE_COMPARISON.map((category, catIdx) => (
                                             <React.Fragment key={catIdx}>
-                                                <tr className="bg-gray-50/50">
+                                                <tr className="bg-gray-50/50 dark:bg-slate-800/30">
                                                     <td colSpan={5} className="py-4 px-6">
                                                         <div className="flex items-center gap-2">
-                                                            <category.icon className="w-5 h-5 text-indigo-600" />
-                                                            <span className="font-bold text-gray-900">{category.category}</span>
+                                                            <category.icon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                                                            <span className="font-bold text-gray-900 dark:text-white">{category.category}</span>
                                                         </div>
                                                     </td>
                                                 </tr>
                                                 {category.features.map((feature, featIdx) => (
-                                                    <tr key={featIdx} className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors">
-                                                        <td className="py-3.5 px-6 text-sm text-gray-700">{feature.name}</td>
+                                                    <tr key={featIdx} className="hover:bg-gray-50/50 dark:hover:bg-slate-800/50 transition-colors">
+                                                        <td className="py-3.5 px-6 text-sm text-gray-700 dark:text-slate-300">{feature.name}</td>
                                                         <td className="py-3.5 px-4 text-center">{renderFeatureValue(feature.free)}</td>
                                                         <td className="py-3.5 px-4 text-center">{renderFeatureValue(feature.starter)}</td>
-                                                        <td className="py-3.5 px-4 text-center bg-indigo-50/30">{renderFeatureValue(feature.business)}</td>
+                                                        <td className="py-3.5 px-4 text-center bg-indigo-50/30 dark:bg-indigo-900/20">{renderFeatureValue(feature.business)}</td>
                                                         <td className="py-3.5 px-4 text-center">{renderFeatureValue(feature.pro)}</td>
                                                     </tr>
                                                 ))}
@@ -671,30 +671,30 @@ const Pricing: React.FC = () => {
             {/* ================================================================ */}
             {/* TRUST & PAYMENT SECTION */}
             {/* ================================================================ */}
-            <section className="py-16 bg-gradient-to-br from-gray-900 via-indigo-900 to-purple-900">
+            <section className="py-16 relative transition-colors">
                 <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
+                    <h2 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">
                         Trusted by businesses across Kenya
                     </h2>
-                    <p className="text-gray-300 mb-8 max-w-2xl mx-auto">
+                    <p className="text-slate-600 dark:text-slate-400 mb-8 max-w-2xl mx-auto font-medium">
                         Pay securely with M-Pesa through Paystack. Cancel anytime with no hidden fees.
                     </p>
 
                     <div className="flex flex-wrap items-center justify-center gap-6 md:gap-10">
-                        <div className="flex items-center gap-2 text-white/80">
-                            <Shield className="w-5 h-5 text-emerald-400" />
+                        <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
+                            <Shield className="w-5 h-5 text-emerald-500" />
                             <span className="text-sm">SSL Secured</span>
                         </div>
-                        <div className="flex items-center gap-2 text-white/80">
-                            <CreditCard className="w-5 h-5 text-emerald-400" />
+                        <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
+                            <CreditCard className="w-5 h-5 text-emerald-500" />
                             <span className="text-sm">M-Pesa Supported</span>
                         </div>
-                        <div className="flex items-center gap-2 text-white/80">
-                            <Globe className="w-5 h-5 text-emerald-400" />
+                        <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
+                            <Globe className="w-5 h-5 text-emerald-500" />
                             <span className="text-sm">Kenya-First Pricing</span>
                         </div>
-                        <div className="flex items-center gap-2 text-white/80">
-                            <Headphones className="w-5 h-5 text-emerald-400" />
+                        <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
+                            <Headphones className="w-5 h-5 text-emerald-500" />
                             <span className="text-sm">24/7 Support</span>
                         </div>
                     </div>
@@ -706,7 +706,7 @@ const Pricing: React.FC = () => {
             {/* ================================================================ */}
             <section className="py-16 md:py-24">
                 <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <h2 className="text-2xl md:text-3xl font-bold text-gray-900 text-center mb-12">
+                    <h2 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white text-center mb-12 tracking-tight transition-colors">
                         Frequently Asked Questions
                     </h2>
 
@@ -729,9 +729,9 @@ const Pricing: React.FC = () => {
                                 a: 'The Free plan is unlimited and never expires. For paid plans, we offer a 14-day money-back guarantee. If you\'re not satisfied, contact us for a full refund.'
                             }
                         ].map((faq, idx) => (
-                            <div key={idx} className="bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-2">{faq.q}</h3>
-                                <p className="text-gray-600">{faq.a}</p>
+                            <div key={idx} className="bg-white dark:bg-slate-900/50 rounded-2xl border border-gray-200 dark:border-slate-800 p-6 hover:shadow-lg dark:hover:shadow-none transition-all">
+                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{faq.q}</h3>
+                                <p className="text-gray-600 dark:text-slate-400">{faq.a}</p>
                             </div>
                         ))}
                     </div>
@@ -741,18 +741,18 @@ const Pricing: React.FC = () => {
             {/* ================================================================ */}
             {/* FINAL CTA */}
             {/* ================================================================ */}
-            <section className="py-16 md:py-20 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500">
+            <section className="py-16 md:py-20 relative transition-colors">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                    <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4 tracking-tighter leading-[1.1]">
                         Ready to unify your workflow?
                     </h2>
-                    <p className="text-white/80 text-lg mb-8">
+                    <p className="text-slate-600 dark:text-slate-400 text-lg mb-8 font-medium">
                         Join thousands of professionals who've simplified their work with Arrotech Hub.
                     </p>
                     {user ? (
                         <Link
                             to="/unified"
-                            className="inline-flex items-center gap-2 px-8 py-4 bg-white text-indigo-600 rounded-2xl font-bold text-lg hover:shadow-2xl hover:-translate-y-1 transition-all"
+                            className="inline-flex items-center gap-2 px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-lg hover:shadow-xl hover:-translate-y-1 transition-all"
                         >
                             Go to Dashboard
                             <ArrowRight className="w-5 h-5" />
@@ -760,7 +760,7 @@ const Pricing: React.FC = () => {
                     ) : (
                         <Link
                             to="/register"
-                            className="inline-flex items-center gap-2 px-8 py-4 bg-white text-indigo-600 rounded-2xl font-bold text-lg hover:shadow-2xl hover:-translate-y-1 transition-all"
+                            className="inline-flex items-center gap-2 px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-lg hover:shadow-xl hover:-translate-y-1 transition-all"
                         >
                             Get Started Free
                             <ArrowRight className="w-5 h-5" />

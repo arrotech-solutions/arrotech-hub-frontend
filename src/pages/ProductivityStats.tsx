@@ -211,7 +211,7 @@ export default function ProductivityStats() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white p-6">
             {/* Header */}
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center justify-between mb-8 productivity-header-tut">
                 <div>
                     <h1 className="text-3xl font-bold flex items-center gap-3">
                         <BarChart3 className="w-8 h-8 text-indigo-400" />
@@ -232,7 +232,7 @@ export default function ProductivityStats() {
             {/* Main Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Score Hero Card */}
-                <div className="lg:col-span-2 bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 relative overflow-hidden">
+                <div className="lg:col-span-2 bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 relative overflow-hidden productivity-score-tut">
                     <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-purple-500/10" />
 
                     <div className="relative z-10 flex items-center justify-between">
@@ -306,7 +306,7 @@ export default function ProductivityStats() {
                 </div>
 
                 {/* Streak Card */}
-                <div className="bg-gradient-to-br from-orange-500/20 to-red-500/20 backdrop-blur-xl rounded-2xl border border-orange-500/30 p-6 relative overflow-hidden">
+                <div className="bg-gradient-to-br from-orange-500/20 to-red-500/20 backdrop-blur-xl rounded-2xl border border-orange-500/30 p-6 relative overflow-hidden productivity-streak-tut">
                     <div className="absolute top-4 right-4">
                         <Flame className="w-16 h-16 text-orange-500/30" />
                     </div>
@@ -352,7 +352,7 @@ export default function ProductivityStats() {
                 </div>
 
                 {/* Trends Chart */}
-                <div className="lg:col-span-2 bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6">
+                <div className="lg:col-span-2 bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 productivity-trends-tut">
                     <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
                         <TrendingUp className="w-5 h-5 text-indigo-400" />
                         30-Day Productivity Trend
@@ -401,7 +401,7 @@ export default function ProductivityStats() {
                 </div>
 
                 {/* Activity Breakdown */}
-                <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6">
+                <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 productivity-breakdown-tut">
                     <div className="flex items-center justify-between mb-4">
                         <h2 className="text-lg font-semibold flex items-center gap-2">
                             <Target className="w-5 h-5 text-purple-400" />
@@ -459,7 +459,7 @@ export default function ProductivityStats() {
                 </div>
 
                 {/* Weekly Comparison */}
-                <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6">
+                <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 productivity-comparison-tut">
                     <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
                         <Calendar className="w-5 h-5 text-cyan-400" />
                         Weekly Comparison
@@ -507,7 +507,7 @@ export default function ProductivityStats() {
                 </div>
 
                 {/* Achievements */}
-                <div className="lg:col-span-2 bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6">
+                <div className="lg:col-span-2 bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 productivity-achievements-tut">
                     <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
                         <Trophy className="w-5 h-5 text-amber-400" />
                         Achievements
@@ -543,7 +543,7 @@ export default function ProductivityStats() {
                 </div>
 
                 {/* Quick Stats */}
-                <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6">
+                <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 productivity-stats-tut">
                     <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
                         <Zap className="w-5 h-5 text-yellow-400" />
                         Quick Stats

@@ -207,6 +207,14 @@ class ApiService {
     return response.data;
   }
 
+  /**
+   * Make a generic raw request using the configured Axios instance.
+   * Useful for specialized endpoints or when full response control is needed.
+   */
+  async request(config: any): Promise<any> {
+    return this.api.request(config);
+  }
+
   // Authentication methods
   async forgotPassword(email: string): Promise<ApiResponse<any>> {
     const response = await this.api.post('/auth/forgot-password', { email });
