@@ -101,15 +101,15 @@ const TikTokScheduler: React.FC = () => {
     };
 
     return (
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-100/50 p-6 md:p-8">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100/50 dark:border-slate-800 p-6 md:p-8 transition-colors">
             {/* ... preserve header ... */}
-            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-50">
-                <div className="p-2 bg-black text-white rounded-lg">
+            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-50 dark:border-slate-800">
+                <div className="p-2 bg-black dark:bg-white text-white dark:text-black rounded-lg">
                     <CalendarIcon className="w-5 h-5" />
                 </div>
                 <div>
-                    <h2 className="text-lg font-bold text-slate-800">Smart Scheduler</h2>
-                    <p className="text-xs text-slate-400">Post now or schedule for later</p>
+                    <h2 className="text-lg font-bold text-slate-800 dark:text-white">Smart Scheduler</h2>
+                    <p className="text-xs text-slate-400 dark:text-slate-500">Post now or schedule for later</p>
                 </div>
             </div>
 
@@ -118,7 +118,7 @@ const TikTokScheduler: React.FC = () => {
                 <div className="space-y-6">
                     {/* ... preserve upload UI ... */}
                     <div className="group relative">
-                        <div className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all duration-300 ${uploadedPath ? 'border-green-500 bg-green-50/30' : 'border-slate-200 hover:border-black hover:bg-slate-50'}`}>
+                        <div className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all duration-300 ${uploadedPath ? 'border-green-500 bg-green-50/30' : 'border-slate-200 dark:border-slate-800 hover:border-black dark:hover:border-white hover:bg-slate-50 dark:hover:bg-slate-800/50'}`}>
                             {/* ... input logic ... */}
                             <input
                                 type="file"
@@ -164,7 +164,7 @@ const TikTokScheduler: React.FC = () => {
                             type="datetime-local"
                             value={scheduledTime}
                             onChange={(e) => setScheduledTime(e.target.value)}
-                            className="w-full pl-4 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all text-sm"
+                            className="w-full pl-4 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent outline-none transition-all text-sm dark:text-white"
                         />
                     </div>
                 </div>
@@ -172,10 +172,10 @@ const TikTokScheduler: React.FC = () => {
                 {/* Right Column: AI Content */}
                 <div className="space-y-6">
                     {/* ... preserve AI generator ... */}
-                    <div className="bg-gradient-to-br from-pink-50 to-purple-50 p-6 rounded-2xl border border-pink-100">
+                    <div className="bg-gradient-to-br from-pink-50 to-purple-50 dark:from-pink-900/10 dark:to-purple-900/10 p-6 rounded-2xl border border-pink-100 dark:border-pink-900/30 transition-colors">
                         <div className="flex items-center gap-2 mb-4">
                             <Sparkles className="w-4 h-4 text-pink-500" />
-                            <h3 className="text-sm font-bold text-slate-800">AI Caption Generator</h3>
+                            <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100">AI Caption Generator</h3>
                         </div>
 
                         <div className="space-y-3">
@@ -185,12 +185,12 @@ const TikTokScheduler: React.FC = () => {
                                     placeholder="Topic (e.g. Nairobi Traffic)"
                                     value={topic}
                                     onChange={(e) => setTopic(e.target.value)}
-                                    className="w-full sm:flex-1 px-4 py-2.5 bg-white border border-pink-100 rounded-lg text-sm focus:ring-2 focus:ring-pink-500/20 outline-none"
+                                    className="w-full sm:flex-1 px-4 py-2.5 bg-white dark:bg-slate-800 border border-pink-100 dark:border-pink-900/30 rounded-lg text-sm focus:ring-2 focus:ring-pink-500/20 outline-none dark:text-white"
                                 />
                                 <select
                                     value={tone}
                                     onChange={(e) => setTone(e.target.value)}
-                                    className="w-full sm:w-auto px-3 py-2.5 bg-white border border-pink-100 rounded-lg text-sm outline-none cursor-pointer"
+                                    className="w-full sm:w-auto px-3 py-2.5 bg-white dark:bg-slate-800 border border-pink-100 dark:border-pink-900/30 rounded-lg text-sm outline-none cursor-pointer dark:text-white"
                                 >
                                     <option value="funny">Running</option>
                                     <option value="angry">Hype</option>
@@ -213,7 +213,7 @@ const TikTokScheduler: React.FC = () => {
                             value={caption}
                             onChange={(e) => setCaption(e.target.value)}
                             rows={5}
-                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent outline-none resize-none text-sm leading-relaxed"
+                            className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent outline-none resize-none text-sm leading-relaxed dark:text-white"
                             placeholder="Your awesome caption will appear here..."
                         />
                     </div>
@@ -224,7 +224,7 @@ const TikTokScheduler: React.FC = () => {
                         <select
                             value={privacyLevel}
                             onChange={(e) => setPrivacyLevel(e.target.value)}
-                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent outline-none text-sm cursor-pointer"
+                            className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent outline-none text-sm cursor-pointer dark:text-white"
                         >
                             <option value="SELF_ONLY">🔒 Private (Self Only)</option>
                             <option value="MUTUAL_FOLLOW_FRIENDS">👥 Friends Only</option>
@@ -234,7 +234,7 @@ const TikTokScheduler: React.FC = () => {
 
                     <button
                         onClick={handleSchedule}
-                        className="w-full py-3.5 bg-black text-white font-bold rounded-xl hover:bg-gray-800 transition-all shadow-lg shadow-gray-200 active:scale-95 flex items-center justify-center gap-2"
+                        className="w-full py-3.5 bg-black dark:bg-white text-white dark:text-black font-bold rounded-xl hover:bg-gray-800 dark:hover:bg-gray-100 transition-all shadow-lg shadow-gray-200 dark:shadow-none active:scale-95 flex items-center justify-center gap-2"
                     >
                         {scheduledTime ? (
                             <><Clock className="w-4 h-4" /> Schedule Post</>

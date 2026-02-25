@@ -291,22 +291,22 @@ const UnifiedDashboard: React.FC = () => {
         tutorialClass?: string
     }) => (
         <div
-            className={`bg-white rounded-2xl border border-gray-200/60 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden flex flex-col h-[420px] animate-in fade-in slide-in-from-bottom-4 duration-700 ${delay} ${tutorialClass}`}
+            className={`bg-white dark:bg-slate-800 rounded-2xl border border-gray-200/60 dark:border-slate-700/50 shadow-sm hover:shadow-md dark:hover:shadow-2xl transition-all relative overflow-hidden flex flex-col h-[420px] animate-in fade-in slide-in-from-bottom-4 duration-700 ${delay} ${tutorialClass}`}
         >
             {/* Header */}
-            <div className="p-6 pb-4 flex items-center justify-between border-b border-gray-100">
+            <div className="p-6 pb-4 flex items-center justify-between border-b border-gray-100 dark:border-slate-700/50">
                 <div className="flex items-center gap-3">
                     <div className={`p-2 rounded-xl ${color} bg-opacity-10 backdrop-blur-sm`}>
                         <Icon className={`w-5 h-5 ${color.replace('bg-', 'text-').replace('text-white', '')}`} style={{ color: color.includes('text-white') ? undefined : 'currentColor' }} />
                     </div>
                     <div>
-                        <h3 className="text-sm font-bold text-gray-900">{title}</h3>
-                        <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">{items.length} Items</p>
+                        <h3 className="text-sm font-bold text-gray-900 dark:text-white transition-colors">{title}</h3>
+                        <p className="text-[10px] font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide">{items.length} Items</p>
                     </div>
                 </div>
                 <button
                     onClick={() => navigate(path)}
-                    className="p-1.5 hover:bg-gray-50 rounded-lg text-gray-400 hover:text-gray-600 transition-colors"
+                    className="p-1.5 hover:bg-gray-50 dark:hover:bg-slate-700 rounded-lg text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 transition-colors"
                 >
                     <ArrowRight className="w-4 h-4" />
                 </button>
@@ -316,39 +316,39 @@ const UnifiedDashboard: React.FC = () => {
             <div className="flex-1 overflow-y-auto custom-scrollbar p-0">
                 {loading ? (
                     [1, 2, 3].map(i => (
-                        <div key={i} className="flex gap-4 p-4 border-b border-gray-50 last:border-0">
-                            <div className="w-8 h-8 rounded-full bg-gray-100 animate-pulse" />
+                        <div key={i} className="flex gap-4 p-4 border-b border-gray-50 dark:border-slate-700 last:border-0 transition-colors">
+                            <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-slate-700 animate-pulse" />
                             <div className="flex-1 space-y-2">
-                                <div className="h-4 w-3/4 bg-gray-100 animate-pulse rounded" />
-                                <div className="h-3 w-1/2 bg-gray-100 animate-pulse rounded" />
+                                <div className="h-4 w-3/4 bg-gray-100 dark:bg-slate-700 animate-pulse rounded" />
+                                <div className="h-3 w-1/2 bg-gray-100 dark:bg-slate-700 animate-pulse rounded" />
                             </div>
                         </div>
                     ))
                 ) : items.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-full text-gray-300">
+                    <div className="flex flex-col items-center justify-center h-full text-gray-300 dark:text-slate-700">
                         <Icon className="w-8 h-8 mb-2 opacity-50" />
                         <span className="text-sm font-medium">No items found</span>
-                        <span className="text-xs text-center mt-1 text-gray-400 px-6">Check your connections in Settings</span>
+                        <span className="text-xs text-center mt-1 text-gray-400 dark:text-slate-500 px-6">Check your connections in Settings</span>
                     </div>
                 ) : (
-                    <div className="divide-y divide-gray-50">
+                    <div className="divide-y divide-gray-50 dark:divide-slate-700/50">
                         {items.map((item) => (
                             <div
                                 key={item.id}
                                 onClick={() => navigate(path)}
-                                className="group flex items-start gap-3 p-4 hover:bg-gray-50/80 transition-colors cursor-pointer"
+                                className="group flex items-start gap-3 p-4 hover:bg-gray-50/80 dark:hover:bg-slate-700/50 transition-all cursor-pointer"
                             >
                                 {/* Icon/Avatar Placeholder */}
-                                <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center shrink-0 border border-gray-100 text-gray-500 text-xs font-bold">
+                                <div className="w-8 h-8 rounded-lg bg-gray-50 dark:bg-slate-900 flex items-center justify-center shrink-0 border border-gray-100 dark:border-slate-700 text-gray-500 dark:text-slate-400 text-xs font-bold transition-colors">
                                     {item.platform ? getPlatformIcon(item.platform) : item.title.charAt(0)}
                                 </div>
 
                                 <div className="flex-1 min-w-0">
                                     <div className="flex justify-between items-start mb-0.5">
-                                        <h4 className="text-sm font-semibold text-gray-900 truncate pr-2 group-hover:text-indigo-600 transition-colors">{item.title}</h4>
-                                        {item.time && !item.time.includes('T') && <span className="text-[10px] font-medium text-gray-400 whitespace-nowrap">{item.time}</span>}
+                                        <h4 className="text-sm font-semibold text-gray-900 dark:text-white truncate pr-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{item.title}</h4>
+                                        {item.time && !item.time.includes('T') && <span className="text-[10px] font-medium text-gray-400 dark:text-slate-500 whitespace-nowrap">{item.time}</span>}
                                     </div>
-                                    <p className="text-xs text-gray-500 truncate">{item.subtitle}</p>
+                                    <p className="text-xs text-gray-500 dark:text-slate-400 truncate">{item.subtitle}</p>
                                 </div>
                             </div>
                         ))}
@@ -357,10 +357,10 @@ const UnifiedDashboard: React.FC = () => {
             </div>
 
             {/* Footer Action */}
-            <div className="p-3 border-t border-gray-100 bg-gray-50/50">
+            <div className="p-3 border-t border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-900/50">
                 <button
                     onClick={() => navigate(path)}
-                    className="w-full py-2.5 rounded-xl border border-gray-200 bg-white text-xs font-semibold text-gray-700 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300 shadow-sm transition-all hover:shadow-md active:scale-[0.98]"
+                    className="w-full py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-semibold text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 hover:text-gray-900 dark:hover:text-white hover:border-gray-300 dark:hover:border-slate-600 shadow-sm transition-all hover:shadow-md active:scale-[0.98]"
                 >
                     {actionLabel}
                 </button>
@@ -369,10 +369,10 @@ const UnifiedDashboard: React.FC = () => {
     );
 
     return (
-        <div className="min-h-screen bg-slate-50 p-4 sm:p-6 lg:p-8 relative overflow-hidden">
+        <div className="min-h-screen bg-white dark:bg-slate-950 p-4 sm:p-6 lg:p-8 relative overflow-hidden transition-colors duration-500">
             {/* Ambient Background */}
-            <div className="fixed top-0 left-0 w-full h-[800px] bg-gradient-to-b from-indigo-50/40 via-purple-50/20 to-transparent pointer-events-none" />
-            <div className="fixed bottom-0 right-0 w-[500px] h-[500px] bg-blue-100/20 rounded-full blur-3xl pointer-events-none" />
+            <div className="fixed top-0 left-0 w-full h-[800px] bg-gradient-to-b from-indigo-50/40 via-purple-50/20 to-transparent dark:from-indigo-950/20 dark:via-purple-900/10 pointer-events-none" />
+            <div className="fixed bottom-0 right-0 w-[500px] h-[500px] bg-blue-100/20 dark:bg-blue-900/10 rounded-full blur-3xl pointer-events-none" />
 
             <div className="max-w-7xl mx-auto space-y-8 relative z-10 mt-4">
                 <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
@@ -430,7 +430,7 @@ const UnifiedDashboard: React.FC = () => {
 
                 {/* Welcome / Context Section */}
                 <div className="mt-12 text-center animate-in fade-in zoom-in duration-1000 delay-500">
-                    <p className="text-gray-400 text-xs font-bold tracking-widest uppercase">Workspace Overview</p>
+                    <p className="text-gray-400 dark:text-slate-600 text-xs font-bold tracking-widest uppercase">Workspace Overview</p>
                 </div>
             </div>
 

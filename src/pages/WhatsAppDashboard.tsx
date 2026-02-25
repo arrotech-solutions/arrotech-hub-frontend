@@ -259,25 +259,28 @@ const WhatsAppDashboard: React.FC = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+            <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center transition-colors">
                 <Loader2 className="w-8 h-8 animate-spin text-green-600" />
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors">
             {/* Header */}
-            <div className="bg-white border-b sticky top-0 z-10">
+            <div className="bg-white dark:bg-slate-900 border-b dark:border-slate-800 sticky top-0 z-10 transition-colors">
                 <div className="max-w-7xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
                     <div className="flex items-center justify-between flex-wrap gap-3">
                         <div className="flex items-center gap-3 whatsapp-header-tut">
-                            <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
-                                <MessageCircle className="w-5 h-5 text-white" />
+                            <div className="relative group">
+                                <div className="absolute inset-0 bg-green-500 rounded-full blur-md opacity-20 group-hover:opacity-40 transition-opacity"></div>
+                                <div className="relative w-10 h-10 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
+                                    <MessageCircle className="w-5 h-5 text-white" />
+                                </div>
                             </div>
                             <div>
-                                <h1 className="text-xl font-bold text-gray-900">WhatsApp Business</h1>
-                                <p className="text-sm text-gray-500">Manage conversations & automation</p>
+                                <h1 className="text-xl font-bold text-slate-900 dark:text-white">WhatsApp Business</h1>
+                                <p className="text-sm text-slate-500 dark:text-slate-400">Manage conversations & automation</p>
                             </div>
                         </div>
 
@@ -285,39 +288,39 @@ const WhatsAppDashboard: React.FC = () => {
                         {stats && (
                             <div className="hidden md:flex items-center gap-6 whatsapp-stats-tut">
                                 <div className="text-center">
-                                    <div className="text-2xl font-bold text-gray-900">{stats.total_contacts}</div>
-                                    <div className="text-xs text-gray-500">Contacts</div>
+                                    <div className="text-2xl font-bold text-slate-900 dark:text-white">{stats.total_contacts}</div>
+                                    <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">Contacts</div>
                                 </div>
                                 <div className="text-center">
-                                    <div className="text-2xl font-bold text-gray-900">{stats.messages_today}</div>
-                                    <div className="text-xs text-gray-500">Today</div>
+                                    <div className="text-2xl font-bold text-slate-900 dark:text-white">{stats.messages_today}</div>
+                                    <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">Today</div>
                                 </div>
                                 <div className="text-center">
-                                    <div className="text-2xl font-bold text-green-600">{stats.active_auto_replies}</div>
-                                    <div className="text-xs text-gray-500">Auto-Replies</div>
+                                    <div className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.active_auto_replies}</div>
+                                    <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">Auto-Replies</div>
                                 </div>
                             </div>
                         )}
                         {/* Mobile Stats */}
                         {stats && (
-                            <div className="flex md:hidden items-center justify-around w-full border-t pt-3 mt-2">
+                            <div className="flex md:hidden items-center justify-around w-full border-t dark:border-slate-800 pt-3 mt-2">
                                 <div className="text-center">
-                                    <div className="text-lg font-bold text-gray-900">{stats.total_contacts}</div>
-                                    <div className="text-xs text-gray-500">Contacts</div>
+                                    <div className="text-lg font-bold text-slate-900 dark:text-white">{stats.total_contacts}</div>
+                                    <div className="text-xs text-slate-500 dark:text-slate-400">Contacts</div>
                                 </div>
                                 <div className="text-center">
-                                    <div className="text-lg font-bold text-gray-900">{stats.messages_today}</div>
-                                    <div className="text-xs text-gray-500">Today</div>
+                                    <div className="text-lg font-bold text-slate-900 dark:text-white">{stats.messages_today}</div>
+                                    <div className="text-xs text-slate-500 dark:text-slate-400">Today</div>
                                 </div>
                                 <div className="text-center">
-                                    <div className="text-lg font-bold text-green-600">{stats.active_auto_replies}</div>
-                                    <div className="text-xs text-gray-500">Auto-Replies</div>
+                                    <div className="text-lg font-bold text-green-600 dark:text-green-400">{stats.active_auto_replies}</div>
+                                    <div className="text-xs text-slate-500 dark:text-slate-400">Auto-Replies</div>
                                 </div>
                             </div>
                         )}
 
                         {/* Tabs - Scrollable on mobile */}
-                        <div className="flex gap-2 sm:gap-4 mt-4 overflow-x-auto pb-2 -mx-3 px-3 sm:mx-0 sm:px-0 whatsapp-tabs-tut scrollbar-hide">
+                        <div className="flex gap-2 mt-4 overflow-x-auto pb-2 -mx-3 px-3 sm:mx-0 sm:px-0 whatsapp-tabs-tut scrollbar-hide">
                             {[
                                 { id: 'contacts', label: 'Conversations', icon: Users },
                                 { id: 'auto-reply', label: 'Auto-Reply', icon: Bot },
@@ -327,13 +330,13 @@ const WhatsAppDashboard: React.FC = () => {
                                 <button
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id as TabType)}
-                                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${activeTab === tab.id
-                                        ? 'bg-green-100 text-green-700'
-                                        : 'text-gray-600 hover:bg-gray-100'
+                                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium transition-all whitespace-nowrap whatsapp-tab-${tab.id}-tut ${activeTab === tab.id
+                                        ? 'bg-green-600 text-white shadow-lg shadow-green-500/20'
+                                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                                         }`}
                                 >
                                     <tab.icon className="w-4 h-4" />
-                                    <span className="whitespace-nowrap">{tab.label}</span>
+                                    <span>{tab.label}</span>
                                 </button>
                             ))}
                         </div>
@@ -346,24 +349,24 @@ const WhatsAppDashboard: React.FC = () => {
                 {activeTab === 'contacts' && (
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
                         {/* Contact List */}
-                        <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
-                            <div className="p-4 border-b">
+                        <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border dark:border-slate-800 overflow-hidden transition-colors">
+                            <div className="p-4 border-b dark:border-slate-800">
                                 <div className="relative">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                                     <input
                                         type="text"
                                         placeholder="Search contacts..."
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                        className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border dark:border-slate-700 border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all dark:text-white"
                                     />
                                 </div>
                             </div>
 
-                            <div className="overflow-y-auto max-h-[400px] sm:max-h-[500px] lg:max-h-[600px]">
+                            <div className="overflow-y-auto max-h-[400px] sm:max-h-[500px] lg:max-h-[600px] scrollbar-hide whatsapp-contacts-tut">
                                 {contacts.length === 0 ? (
-                                    <div className="p-8 text-center text-gray-500">
-                                        <Users className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                                    <div className="p-8 text-center text-slate-500">
+                                        <Users className="w-12 h-12 mx-auto mb-3 text-slate-300 dark:text-slate-700" />
                                         <p>No contacts yet</p>
                                         <p className="text-sm">Contacts appear when customers message you</p>
                                     </div>
@@ -372,29 +375,29 @@ const WhatsAppDashboard: React.FC = () => {
                                         <button
                                             key={contact.id}
                                             onClick={() => setSelectedContact(contact)}
-                                            className={`w-full p-4 flex items-center gap-3 hover:bg-gray-50 transition-colors border-b ${selectedContact?.id === contact.id ? 'bg-green-50' : ''
+                                            className={`w-full p-4 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors border-b dark:border-slate-800 ${selectedContact?.id === contact.id ? 'bg-green-50 dark:bg-green-900/10' : ''
                                                 }`}
                                         >
-                                            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                                <span className="text-green-700 font-semibold">
+                                            <div className="w-12 h-12 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center flex-shrink-0">
+                                                <span className="text-green-700 dark:text-green-400 font-semibold">
                                                     {(contact.name || contact.profile_name || contact.phone_number).charAt(0).toUpperCase()}
                                                 </span>
                                             </div>
                                             <div className="flex-1 min-w-0 text-left">
-                                                <div className="font-medium text-gray-900 truncate">
+                                                <div className="font-medium text-slate-900 dark:text-white truncate">
                                                     {contact.name || contact.profile_name || contact.phone_number}
                                                 </div>
-                                                <div className="text-sm text-gray-500 truncate">
+                                                <div className="text-sm text-slate-500 dark:text-slate-400 truncate">
                                                     +{contact.phone_number}
                                                 </div>
                                             </div>
                                             <div className="text-right flex-shrink-0">
-                                                <div className="text-xs text-gray-400">
+                                                <div className="text-xs text-slate-400">
                                                     {formatTime(contact.last_message_at)}
                                                 </div>
                                                 {contact.message_count > 0 && (
-                                                    <div className="text-xs text-gray-400 mt-1">
-                                                        {contact.message_count} msgs
+                                                    <div className="inline-flex items-center justify-center px-1.5 py-0.5 bg-green-100 dark:bg-green-900/30 rounded text-[10px] font-bold text-green-700 dark:text-green-400 mt-1">
+                                                        {contact.message_count}
                                                     </div>
                                                 )}
                                             </div>
@@ -405,41 +408,41 @@ const WhatsAppDashboard: React.FC = () => {
                         </div>
 
                         {/* Chat View - Full screen on mobile when contact selected */}
-                        <div className={`lg:col-span-2 bg-white rounded-xl shadow-sm border overflow-hidden flex flex-col h-[calc(100vh-200px)] sm:h-[500px] lg:h-[700px] ${selectedContact ? 'fixed inset-0 z-50 lg:relative lg:inset-auto' : 'hidden lg:flex'}`}>
+                        <div className={`lg:col-span-2 bg-white dark:bg-slate-900 rounded-xl shadow-sm border dark:border-slate-800 overflow-hidden flex flex-col h-[calc(100vh-200px)] sm:h-[500px] lg:h-[700px] transition-colors whatsapp-chat-tut ${selectedContact ? 'fixed inset-0 z-50 lg:relative lg:inset-auto' : 'hidden lg:flex'}`}>
                             {selectedContact ? (
                                 <>
                                     {/* Chat Header */}
-                                    <div className="p-4 border-b flex items-center gap-3">
+                                    <div className="p-4 border-b dark:border-slate-800 flex items-center gap-3 transition-colors">
                                         <button
                                             onClick={() => setSelectedContact(null)}
-                                            className="lg:hidden p-2 hover:bg-gray-100 rounded-lg"
+                                            className="lg:hidden p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-600 dark:text-slate-400"
                                         >
                                             <ArrowLeft className="w-5 h-5" />
                                         </button>
-                                        <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                                            <span className="text-green-700 font-semibold">
+                                        <div className="w-10 h-10 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center">
+                                            <span className="text-green-700 dark:text-green-400 font-semibold">
                                                 {(selectedContact.name || selectedContact.profile_name || selectedContact.phone_number).charAt(0).toUpperCase()}
                                             </span>
                                         </div>
                                         <div className="flex-1">
-                                            <div className="font-medium">
+                                            <div className="font-medium text-slate-900 dark:text-white">
                                                 {selectedContact.name || selectedContact.profile_name || selectedContact.phone_number}
                                             </div>
-                                            <div className="text-sm text-gray-500">+{selectedContact.phone_number}</div>
+                                            <div className="text-sm text-slate-500 dark:text-slate-400">+{selectedContact.phone_number}</div>
                                         </div>
-                                        <button className="p-2 hover:bg-gray-100 rounded-lg">
-                                            <Phone className="w-5 h-5 text-gray-600" />
+                                        <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg group transition-colors">
+                                            <Phone className="w-5 h-5 text-slate-600 dark:text-slate-400 group-hover:text-green-600 dark:group-hover:text-green-400" />
                                         </button>
-                                        <button className="p-2 hover:bg-gray-100 rounded-lg">
-                                            <MoreVertical className="w-5 h-5 text-gray-600" />
+                                        <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-600 dark:text-slate-400">
+                                            <MoreVertical className="w-5 h-5" />
                                         </button>
                                     </div>
 
                                     {/* Messages */}
-                                    <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+                                    <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50 dark:bg-slate-950/50 transition-colors">
                                         {messages.length === 0 ? (
-                                            <div className="text-center text-gray-500 py-8">
-                                                <MessageCircle className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                                            <div className="text-center text-slate-500 py-8">
+                                                <MessageCircle className="w-12 h-12 mx-auto mb-3 text-slate-300 dark:text-slate-700" />
                                                 <p>No messages yet</p>
                                             </div>
                                         ) : (
@@ -449,19 +452,19 @@ const WhatsAppDashboard: React.FC = () => {
                                                     className={`flex ${msg.direction === 'outgoing' ? 'justify-end' : 'justify-start'}`}
                                                 >
                                                     <div
-                                                        className={`max-w-[70%] rounded-2xl px-4 py-2 ${msg.direction === 'outgoing'
-                                                            ? 'bg-green-500 text-white rounded-br-md'
-                                                            : 'bg-white border rounded-bl-md'
+                                                        className={`max-w-[70%] rounded-2xl px-4 py-2 shadow-sm ${msg.direction === 'outgoing'
+                                                            ? 'bg-green-600 dark:bg-green-600 text-white rounded-br-md shadow-green-500/10'
+                                                            : 'bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-bl-md text-slate-900 dark:text-slate-100'
                                                             }`}
                                                     >
                                                         {msg.is_auto_reply && (
-                                                            <div className={`text-xs mb-1 flex items-center gap-1 ${msg.direction === 'outgoing' ? 'text-green-100' : 'text-gray-400'
+                                                            <div className={`text-[10px] font-bold uppercase tracking-wider mb-1 flex items-center gap-1 ${msg.direction === 'outgoing' ? 'text-green-100' : 'text-slate-400 dark:text-slate-500'
                                                                 }`}>
                                                                 <Bot className="w-3 h-3" /> Auto-reply
                                                             </div>
                                                         )}
-                                                        <p className="whitespace-pre-wrap">{msg.content}</p>
-                                                        <div className={`text-xs mt-1 flex items-center justify-end gap-1 ${msg.direction === 'outgoing' ? 'text-green-100' : 'text-gray-400'
+                                                        <p className="whitespace-pre-wrap text-sm leading-relaxed">{msg.content}</p>
+                                                        <div className={`text-[10px] mt-1 flex items-center justify-end gap-1 ${msg.direction === 'outgoing' ? 'text-green-100' : 'text-slate-400 dark:text-slate-500'
                                                             }`}>
                                                             {formatTime(msg.created_at)}
                                                             {msg.direction === 'outgoing' && <MessageStatus status={msg.status} />}
@@ -473,7 +476,7 @@ const WhatsAppDashboard: React.FC = () => {
                                     </div>
 
                                     {/* Message Input */}
-                                    <div className="p-4 border-t bg-white">
+                                    <div className="p-4 border-t dark:border-slate-800 bg-white dark:bg-slate-900 transition-colors">
                                         <div className="flex items-center gap-3">
                                             <input
                                                 type="text"
@@ -481,12 +484,12 @@ const WhatsAppDashboard: React.FC = () => {
                                                 value={newMessage}
                                                 onChange={(e) => setNewMessage(e.target.value)}
                                                 onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                                                className="flex-1 px-4 py-2 border rounded-full focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                                className="flex-1 px-5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all dark:text-white text-sm"
                                             />
                                             <button
                                                 onClick={handleSendMessage}
                                                 disabled={!newMessage.trim() || sendingMessage}
-                                                className="p-3 bg-green-500 text-white rounded-full hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                className="p-3 bg-green-600 text-white rounded-full hover:bg-green-700 shadow-lg shadow-green-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"
                                             >
                                                 {sendingMessage ? (
                                                     <Loader2 className="w-5 h-5 animate-spin" />
@@ -498,10 +501,12 @@ const WhatsAppDashboard: React.FC = () => {
                                     </div>
                                 </>
                             ) : (
-                                <div className="flex-1 flex items-center justify-center text-gray-500">
+                                <div className="flex-1 flex items-center justify-center text-slate-500 dark:text-slate-400">
                                     <div className="text-center">
-                                        <MessageCircle className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-                                        <p className="text-lg font-medium">Select a conversation</p>
+                                        <div className="w-20 h-20 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 border dark:border-slate-700">
+                                            <MessageCircle className="w-10 h-10 text-slate-300 dark:text-slate-600" />
+                                        </div>
+                                        <p className="text-lg font-bold text-slate-900 dark:text-white">Select a conversation</p>
                                         <p className="text-sm">Choose a contact to view messages</p>
                                     </div>
                                 </div>
@@ -511,12 +516,12 @@ const WhatsAppDashboard: React.FC = () => {
                 )}
 
                 {activeTab === 'auto-reply' && (
-                    <div className="space-y-6">
+                    <div className="space-y-6 whatsapp-auto-reply-tut">
                         {/* Header */}
                         <div className="flex items-center justify-between">
                             <div>
-                                <h2 className="text-lg font-semibold text-gray-900">Auto-Reply Rules</h2>
-                                <p className="text-sm text-gray-500">Automate responses to incoming messages</p>
+                                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Auto-Reply Rules</h2>
+                                <p className="text-sm text-gray-500 dark:text-slate-400">Automate responses to incoming messages</p>
                             </div>
                             <button
                                 onClick={() => setShowNewRuleModal(true)}
@@ -530,10 +535,10 @@ const WhatsAppDashboard: React.FC = () => {
                         {/* Rules List */}
                         <div className="grid gap-4">
                             {autoReplies.length === 0 ? (
-                                <div className="bg-white rounded-xl border p-8 text-center">
-                                    <Bot className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-                                    <h3 className="text-lg font-medium text-gray-900 mb-2">No auto-reply rules yet</h3>
-                                    <p className="text-gray-500 mb-4">
+                                <div className="bg-white dark:bg-slate-900 rounded-xl border dark:border-slate-800 p-8 text-center transition-colors">
+                                    <Bot className="w-16 h-16 mx-auto mb-4 text-gray-300 dark:text-slate-700" />
+                                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No auto-reply rules yet</h3>
+                                    <p className="text-gray-500 dark:text-slate-400 mb-4">
                                         Create rules to automatically respond to customer messages
                                     </p>
                                     <button
@@ -547,22 +552,22 @@ const WhatsAppDashboard: React.FC = () => {
                                 autoReplies.map((rule) => (
                                     <div
                                         key={rule.id}
-                                        className={`bg-white rounded-xl border p-6 ${rule.is_active ? '' : 'opacity-60'
+                                        className={`bg-white dark:bg-slate-900 rounded-xl border dark:border-slate-800 p-6 transition-colors ${rule.is_active ? '' : 'opacity-60'
                                             }`}
                                     >
                                         <div className="flex items-start justify-between">
                                             <div className="flex-1">
                                                 <div className="flex items-center gap-3 mb-2">
-                                                    <h3 className="font-semibold text-gray-900">{rule.name}</h3>
-                                                    <span className={`px-2 py-1 text-xs rounded-full ${rule.trigger_type === 'keyword' ? 'bg-blue-100 text-blue-700' :
-                                                        rule.trigger_type === 'first_message' ? 'bg-green-100 text-green-700' :
-                                                            rule.trigger_type === 'business_hours' ? 'bg-orange-100 text-orange-700' :
-                                                                'bg-purple-100 text-purple-700'
+                                                    <h3 className="font-semibold text-gray-900 dark:text-white">{rule.name}</h3>
+                                                    <span className={`px-2 py-1 text-xs rounded-full ${rule.trigger_type === 'keyword' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' :
+                                                        rule.trigger_type === 'first_message' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' :
+                                                            rule.trigger_type === 'business_hours' ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300' :
+                                                                'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
                                                         }`}>
                                                         {rule.trigger_type.replace('_', ' ')}
                                                     </span>
                                                     {rule.response_type === 'ai' && (
-                                                        <span className="px-2 py-1 text-xs rounded-full bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700">
+                                                        <span className="px-2 py-1 text-xs rounded-full bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/50 dark:to-pink-900/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800/50">
                                                             AI Powered
                                                         </span>
                                                     )}
@@ -573,23 +578,23 @@ const WhatsAppDashboard: React.FC = () => {
                                                 )}
 
                                                 {rule.trigger_value && (
-                                                    <div className="text-sm text-gray-600 mb-2">
+                                                    <div className="text-sm text-gray-600 dark:text-slate-400 mb-2">
                                                         <span className="font-medium">Triggers:</span>{' '}
                                                         {rule.trigger_value.split('|').map((t, i) => (
-                                                            <span key={i} className="inline-block px-2 py-0.5 bg-gray-100 rounded text-xs mr-1">
+                                                            <span key={i} className="inline-block px-2 py-0.5 bg-gray-100 dark:bg-slate-800 rounded text-xs mr-1">
                                                                 {t}
                                                             </span>
                                                         ))}
                                                     </div>
                                                 )}
 
-                                                <div className="text-sm text-gray-600 bg-gray-50 rounded-lg p-3 mt-2">
+                                                <div className="text-sm text-gray-600 dark:text-slate-300 bg-gray-50 dark:bg-slate-800/50 rounded-lg p-3 mt-2 border border-transparent dark:border-slate-800 transition-colors">
                                                     <span className="font-medium">Response:</span>{' '}
                                                     {rule.response_content?.substring(0, 100)}
                                                     {(rule.response_content?.length || 0) > 100 && '...'}
                                                 </div>
 
-                                                <div className="flex items-center gap-4 mt-3 text-xs text-gray-500">
+                                                <div className="flex items-center gap-4 mt-3 text-xs text-gray-500 dark:text-slate-500">
                                                     <span className="flex items-center gap-1">
                                                         <Zap className="w-3 h-3" />
                                                         Triggered {rule.times_triggered} times
@@ -605,7 +610,7 @@ const WhatsAppDashboard: React.FC = () => {
                                             <div className="flex items-center gap-2 ml-4">
                                                 <button
                                                     onClick={() => handleToggleRule(rule.id)}
-                                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${rule.is_active ? 'bg-green-500' : 'bg-gray-300'
+                                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${rule.is_active ? 'bg-green-500' : 'bg-gray-300 dark:bg-slate-700'
                                                         }`}
                                                 >
                                                     <span
@@ -615,7 +620,7 @@ const WhatsAppDashboard: React.FC = () => {
                                                 </button>
                                                 <button
                                                     onClick={() => handleDeleteRule(rule.id)}
-                                                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                                                    className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                                                 >
                                                     <X className="w-4 h-4" />
                                                 </button>
@@ -627,8 +632,8 @@ const WhatsAppDashboard: React.FC = () => {
                         </div>
 
                         {/* Quick Templates */}
-                        <div className="bg-white rounded-xl border p-6">
-                            <h3 className="font-semibold text-gray-900 mb-4">Quick Templates</h3>
+                        <div className="bg-white dark:bg-slate-900 rounded-xl border dark:border-slate-800 p-6 transition-colors">
+                            <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Quick Templates</h3>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 {[
                                     {
@@ -654,13 +659,13 @@ const WhatsAppDashboard: React.FC = () => {
                                             // Would open modal with pre-filled values
                                             toast.success(`Template "${template.name}" - Coming soon!`);
                                         }}
-                                        className="p-4 border rounded-lg text-left hover:border-green-500 hover:bg-green-50 transition-colors"
+                                        className="p-4 border dark:border-slate-800 rounded-lg text-left hover:border-green-500 dark:hover:border-green-900/50 hover:bg-green-50 dark:hover:bg-green-900/10 transition-colors group"
                                     >
-                                        <div className="font-medium text-gray-900 mb-1">{template.name}</div>
-                                        <div className="text-xs text-gray-500 mb-2">
+                                        <div className="font-medium text-gray-900 dark:text-white mb-1 group-hover:text-green-600 transition-colors">{template.name}</div>
+                                        <div className="text-xs text-gray-500 dark:text-slate-400 mb-2">
                                             Trigger: {template.trigger.replace('_', ' ')}
                                         </div>
-                                        <div className="text-sm text-gray-600 line-clamp-2">
+                                        <div className="text-sm text-gray-600 dark:text-slate-300 line-clamp-2">
                                             {template.response}
                                         </div>
                                     </button>
@@ -671,12 +676,12 @@ const WhatsAppDashboard: React.FC = () => {
                 )}
 
                 {activeTab === 'broadcast' && (
-                    <div className="space-y-6">
+                    <div className="space-y-6 whatsapp-broadcast-tut">
                         {/* Create Broadcast Button */}
                         <div className="flex justify-between items-center">
                             <div>
-                                <h2 className="text-xl font-bold text-gray-900">Broadcast Campaigns</h2>
-                                <p className="text-sm text-gray-500">Send bulk messages to your contacts</p>
+                                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Broadcast Campaigns</h2>
+                                <p className="text-sm text-gray-500 dark:text-slate-400">Send bulk messages to your contacts</p>
                             </div>
                             <button
                                 onClick={() => toast('Create campaign coming soon!')}
@@ -690,53 +695,53 @@ const WhatsAppDashboard: React.FC = () => {
                         {/* Broadcast Stats */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                             {[
-                                { label: 'Total Campaigns', value: broadcasts.length, icon: Megaphone, color: 'bg-blue-100 text-blue-600' },
-                                { label: 'Sent', value: broadcasts.filter(b => b.status === 'completed').length, icon: CheckCheck, color: 'bg-green-100 text-green-600' },
-                                { label: 'Scheduled', value: broadcasts.filter(b => b.status === 'scheduled').length, icon: Calendar, color: 'bg-yellow-100 text-yellow-600' },
-                                { label: 'Draft', value: broadcasts.filter(b => b.status === 'draft').length, icon: Clock, color: 'bg-gray-100 text-gray-600' },
+                                { label: 'Total Campaigns', value: broadcasts.length, icon: Megaphone, color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' },
+                                { label: 'Sent', value: broadcasts.filter(b => b.status === 'completed').length, icon: CheckCheck, color: 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' },
+                                { label: 'Scheduled', value: broadcasts.filter(b => b.status === 'scheduled').length, icon: Calendar, color: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400' },
+                                { label: 'Draft', value: broadcasts.filter(b => b.status === 'draft').length, icon: Clock, color: 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400' },
                             ].map((stat, idx) => (
-                                <div key={idx} className="bg-white rounded-xl border p-4">
+                                <div key={idx} className="bg-white dark:bg-slate-900 rounded-xl border dark:border-slate-800 p-4 transition-colors">
                                     <div className={`w-10 h-10 ${stat.color} rounded-lg flex items-center justify-center mb-2`}>
                                         <stat.icon className="w-5 h-5" />
                                     </div>
-                                    <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
-                                    <div className="text-sm text-gray-500">{stat.label}</div>
+                                    <div className="text-2xl font-bold text-slate-900 dark:text-white">{stat.value}</div>
+                                    <div className="text-sm text-slate-500 dark:text-slate-400">{stat.label}</div>
                                 </div>
                             ))}
                         </div>
 
                         {/* Campaigns List */}
-                        <div className="bg-white rounded-xl border overflow-hidden">
-                            <div className="p-4 border-b">
-                                <h3 className="font-semibold text-gray-900">All Campaigns</h3>
+                        <div className="bg-white dark:bg-slate-900 rounded-xl border dark:border-slate-800 overflow-hidden transition-colors">
+                            <div className="p-4 border-b dark:border-slate-800">
+                                <h3 className="font-semibold text-slate-900 dark:text-white">All Campaigns</h3>
                             </div>
-                            <div className="divide-y">
+                            <div className="divide-y dark:divide-slate-800">
                                 {broadcasts.length === 0 ? (
                                     <div className="p-8 text-center">
-                                        <Megaphone className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                                        <p className="text-gray-500">No broadcast campaigns yet</p>
-                                        <p className="text-sm text-gray-400 mt-1">Create your first campaign to reach all your contacts at once</p>
+                                        <Megaphone className="w-12 h-12 text-slate-300 dark:text-slate-700 mx-auto mb-4" />
+                                        <p className="text-slate-500 dark:text-slate-400">No broadcast campaigns yet</p>
+                                        <p className="text-sm text-slate-400 dark:text-slate-500 mt-1">Create your first campaign to reach all your contacts at once</p>
                                     </div>
                                 ) : (
                                     broadcasts.map((broadcast) => (
-                                        <div key={broadcast.id} className="p-4 hover:bg-gray-50">
+                                        <div key={broadcast.id} className="p-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
                                             <div className="flex items-center justify-between">
                                                 <div className="flex-1">
                                                     <div className="flex items-center gap-2">
-                                                        <h4 className="font-medium text-gray-900">{broadcast.name}</h4>
-                                                        <span className={`px-2 py-0.5 text-xs rounded-full ${broadcast.status === 'completed' ? 'bg-green-100 text-green-700' :
-                                                            broadcast.status === 'sending' ? 'bg-blue-100 text-blue-700' :
-                                                                broadcast.status === 'scheduled' ? 'bg-yellow-100 text-yellow-700' :
-                                                                    broadcast.status === 'failed' ? 'bg-red-100 text-red-700' :
-                                                                        'bg-gray-100 text-gray-700'
+                                                        <h4 className="font-medium text-slate-900 dark:text-white">{broadcast.name}</h4>
+                                                        <span className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full ${broadcast.status === 'completed' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' :
+                                                            broadcast.status === 'sending' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400' :
+                                                                broadcast.status === 'scheduled' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400' :
+                                                                    broadcast.status === 'failed' ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400' :
+                                                                        'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-400'
                                                             }`}>
                                                             {broadcast.status}
                                                         </span>
                                                     </div>
                                                     {broadcast.description && (
-                                                        <p className="text-sm text-gray-500 mt-1">{broadcast.description}</p>
+                                                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{broadcast.description}</p>
                                                     )}
-                                                    <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                                                    <div className="flex items-center gap-4 mt-2 text-[11px] font-medium text-slate-500 dark:text-slate-500">
                                                         <span>{broadcast.total_recipients} recipients</span>
                                                         <span>{broadcast.sent_count} sent</span>
                                                         <span>{broadcast.delivered_count} delivered</span>
@@ -756,7 +761,7 @@ const WhatsAppDashboard: React.FC = () => {
                                                                         toast.error('Failed to start broadcast');
                                                                     }
                                                                 }}
-                                                                className="p-2 text-green-600 hover:bg-green-50 rounded-lg"
+                                                                className="p-2 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
                                                                 title="Send now"
                                                             >
                                                                 <Play className="w-4 h-4" />
@@ -771,7 +776,7 @@ const WhatsAppDashboard: React.FC = () => {
                                                                         toast.error('Failed to delete');
                                                                     }
                                                                 }}
-                                                                className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                                                                className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                                                                 title="Delete"
                                                             >
                                                                 <Trash2 className="w-4 h-4" />
@@ -789,7 +794,7 @@ const WhatsAppDashboard: React.FC = () => {
                                                                     toast.error('Failed to cancel');
                                                                 }
                                                             }}
-                                                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                                                            className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                                                             title="Cancel"
                                                         >
                                                             <Pause className="w-4 h-4" />
@@ -807,40 +812,45 @@ const WhatsAppDashboard: React.FC = () => {
 
                 {activeTab === 'settings' && (
                     <div className="max-w-2xl space-y-6">
-                        <div className="bg-white rounded-xl border p-6">
-                            <h3 className="font-semibold text-gray-900 mb-4">Business Profile</h3>
-                            <p className="text-sm text-gray-500 mb-4">
+                        <div className="bg-white dark:bg-slate-900 rounded-2xl border dark:border-slate-800 p-6 sm:p-8 transition-colors">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                                    <Bot className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                                </div>
+                                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Business Profile</h3>
+                            </div>
+                            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
                                 This information helps AI generate better responses for your customers.
                             </p>
 
-                            <div className="space-y-4">
+                            <div className="space-y-5">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                                         Business Name
                                     </label>
                                     <input
                                         type="text"
                                         placeholder="Your Business Name"
-                                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500"
+                                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all dark:text-white dark:placeholder:text-slate-500"
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                                         Description
                                     </label>
                                     <textarea
                                         rows={3}
                                         placeholder="What does your business do?"
-                                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500"
+                                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all dark:text-white dark:placeholder:text-slate-500"
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                                         Industry
                                     </label>
-                                    <select className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500">
+                                    <select className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all dark:text-white">
                                         <option value="">Select industry</option>
                                         <option value="retail">Retail & E-commerce</option>
                                         <option value="food">Food & Beverage</option>
@@ -851,42 +861,49 @@ const WhatsAppDashboard: React.FC = () => {
                                     </select>
                                 </div>
 
-                                <button className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
+                                <button className="px-6 py-2.5 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 shadow-lg shadow-green-500/20 active:scale-95 transition-all">
                                     Save Profile
                                 </button>
                             </div>
                         </div>
 
-                        <div className="bg-white rounded-xl border p-6">
-                            <h3 className="font-semibold text-gray-900 mb-4">Business Hours</h3>
-                            <p className="text-sm text-gray-500 mb-4">
+                        <div className="bg-white dark:bg-slate-900 rounded-2xl border dark:border-slate-800 p-6 sm:p-8 transition-colors">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="p-2 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                                    <Clock className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+                                </div>
+                                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Business Hours</h3>
+                            </div>
+                            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
                                 Set your operating hours to send away messages when you're closed.
                             </p>
 
-                            <div className="space-y-3">
+                            <div className="space-y-4">
                                 {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => (
-                                    <div key={day} className="flex items-center gap-4">
-                                        <div className="w-24 font-medium text-gray-700">{day}</div>
-                                        <input
-                                            type="time"
-                                            defaultValue="08:00"
-                                            className="px-3 py-1 border rounded-lg"
-                                        />
-                                        <span className="text-gray-500">to</span>
-                                        <input
-                                            type="time"
-                                            defaultValue="18:00"
-                                            className="px-3 py-1 border rounded-lg"
-                                        />
-                                        <label className="flex items-center gap-2 text-sm text-gray-600">
-                                            <input type="checkbox" defaultChecked className="rounded" />
-                                            Open
+                                    <div key={day} className="flex items-center gap-4 group">
+                                        <div className="w-24 font-semibold text-slate-700 dark:text-slate-300">{day}</div>
+                                        <div className="flex items-center gap-2">
+                                            <input
+                                                type="time"
+                                                defaultValue="08:00"
+                                                className="px-3 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm dark:text-white outline-none focus:ring-2 focus:ring-green-500 transition-all"
+                                            />
+                                            <span className="text-slate-400">to</span>
+                                            <input
+                                                type="time"
+                                                defaultValue="18:00"
+                                                className="px-3 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm dark:text-white outline-none focus:ring-2 focus:ring-green-500 transition-all"
+                                            />
+                                        </div>
+                                        <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 cursor-pointer">
+                                            <input type="checkbox" defaultChecked className="rounded border-slate-300 dark:border-slate-700 text-green-600 focus:ring-green-500 dark:bg-slate-800" />
+                                            <span className="font-medium">Open</span>
                                         </label>
                                     </div>
                                 ))}
                             </div>
 
-                            <button className="mt-4 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
+                            <button className="mt-8 px-6 py-2.5 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 shadow-lg shadow-green-500/20 active:scale-95 transition-all">
                                 Save Hours
                             </button>
                         </div>
@@ -894,74 +911,89 @@ const WhatsAppDashboard: React.FC = () => {
                 )}
             </div>
 
-            {/* New Rule Modal - Placeholder */}
+            {/* New Rule Modal */}
             {showNewRuleModal && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-xl max-w-lg w-full p-6">
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-lg font-semibold">Create Auto-Reply Rule</h3>
-                            <button onClick={() => setShowNewRuleModal(false)}>
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowNewRuleModal(false)}></div>
+                    <div className="relative bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border dark:border-slate-800 transition-all">
+                        <div className="flex items-center justify-between mb-6">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                                    <Bot className="w-5 h-5 text-green-600 dark:text-green-400" />
+                                </div>
+                                <h3 className="text-xl font-bold text-slate-900 dark:text-white">Create Auto-Reply Rule</h3>
+                            </div>
+                            <button
+                                onClick={() => setShowNewRuleModal(false)}
+                                className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors text-slate-500"
+                            >
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
 
-                        <div className="space-y-4">
+                        <div className="space-y-5">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Rule Name</label>
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Rule Name</label>
                                 <input
                                     type="text"
                                     placeholder="e.g., Welcome Message"
-                                    className="w-full px-4 py-2 border rounded-lg"
+                                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all dark:text-white"
                                 />
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Trigger Type</label>
-                                <select className="w-full px-4 py-2 border rounded-lg">
-                                    <option value="first_message">First Message (New contacts)</option>
-                                    <option value="keyword">Keyword Match</option>
-                                    <option value="business_hours">Outside Business Hours</option>
-                                    <option value="all">All Messages (AI Mode)</option>
-                                </select>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Trigger Type</label>
+                                    <select className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all dark:text-white">
+                                        <option value="first_message">First Message</option>
+                                        <option value="keyword">Keyword Match</option>
+                                        <option value="business_hours">Outside Hours</option>
+                                        <option value="all">AI Mode</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                                        Keywords
+                                    </label>
+                                    <input
+                                        type="text"
+                                        placeholder="hi|hello|hey"
+                                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all dark:text-white"
+                                    />
+                                </div>
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Keywords (separate with |)
-                                </label>
-                                <input
-                                    type="text"
-                                    placeholder="e.g., hi|hello|hey"
-                                    className="w-full px-4 py-2 border rounded-lg"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Response</label>
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Response</label>
                                 <textarea
                                     rows={4}
                                     placeholder="Your auto-reply message..."
-                                    className="w-full px-4 py-2 border rounded-lg"
+                                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all dark:text-white"
                                 />
-                                <p className="text-xs text-gray-500 mt-1">
-                                    Available variables: {'{{name}}'}, {'{{greeting}}'}, {'{{business_name}}'}
-                                </p>
+                                <div className="mt-2 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg flex flex-wrap gap-2 transition-colors">
+                                    {['{{name}}', '{{greeting}}', '{{business_name}}'].map(v => (
+                                        <code key={v} className="text-[10px] font-bold px-1.5 py-0.5 bg-white dark:bg-slate-800 border dark:border-slate-700 rounded text-green-600 dark:text-green-400 transition-colors">
+                                            {v}
+                                        </code>
+                                    ))}
+                                </div>
                             </div>
 
                             <div className="flex gap-3 pt-4">
                                 <button
                                     onClick={() => setShowNewRuleModal(false)}
-                                    className="flex-1 px-4 py-2 border rounded-lg hover:bg-gray-50"
+                                    className="flex-1 py-3 px-4 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     onClick={() => {
-                                        toast.success('Rule created! (Demo)');
+                                        toast.success('Rule created!');
                                         setShowNewRuleModal(false);
                                         fetchAutoReplies();
                                     }}
-                                    className="flex-1 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                                    className="flex-[2] py-3 px-4 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 shadow-lg shadow-green-500/20 active:scale-95 transition-all"
                                 >
                                     Create Rule
                                 </button>

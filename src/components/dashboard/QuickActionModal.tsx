@@ -102,8 +102,8 @@ const QuickActionModal: React.FC<QuickActionModalProps> = ({ isOpen, type, onClo
     const Icon = theme.icon;
 
     const renderFields = () => {
-        const inputClasses = "w-full rounded-xl border-gray-200 border bg-gray-50/50 p-2.5 focus:ring-2 focus:ring-opacity-50 focus:bg-white transition-all outline-none text-sm";
-        const labelClasses = "block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide";
+        const inputClasses = "w-full rounded-xl border-gray-200 dark:border-slate-700 border bg-gray-50/50 dark:bg-slate-800/50 p-3 focus:ring-2 focus:ring-opacity-50 focus:bg-white dark:focus:bg-slate-800 transition-all outline-none text-sm dark:text-white dark:placeholder-slate-500 shadow-sm";
+        const labelClasses = "block text-[10px] font-black text-gray-700 dark:text-slate-400 mb-1.5 uppercase tracking-widest";
 
         switch (type) {
             case 'email':
@@ -199,45 +199,45 @@ const QuickActionModal: React.FC<QuickActionModalProps> = ({ isOpen, type, onClo
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 border border-gray-100/50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300">
+            <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 border border-gray-100/50 dark:border-slate-800">
                 {/* Header */}
-                <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-white relative">
-                    <div className="flex items-center space-x-3">
-                        <div className={`p-2.5 rounded-xl ${theme.bg}`}>
-                            <Icon className={`w-5 h-5 ${theme.text}`} />
+                <div className="px-8 py-6 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900 relative">
+                    <div className="flex items-center space-x-4">
+                        <div className={`p-3 rounded-2xl ${theme.bg} dark:bg-opacity-20 shadow-sm`}>
+                            <Icon className={`w-6 h-6 ${theme.text}`} />
                         </div>
                         <div>
-                            <h3 className="text-lg font-bold text-gray-900 tracking-tight">{getTitle()}</h3>
-                            <p className="text-xs text-gray-500 font-medium">Complete the form below to proceed</p>
+                            <h3 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">{getTitle()}</h3>
+                            <p className="text-[10px] text-gray-500 dark:text-slate-400 font-bold uppercase tracking-wider">Complete the form below to proceed</p>
                         </div>
                     </div>
                     <button
                         onClick={onClose}
-                        className="text-gray-400 hover:text-gray-600 p-2 rounded-xl hover:bg-gray-50 transition-all duration-200"
+                        className="text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 p-2.5 rounded-2xl hover:bg-gray-100 dark:hover:bg-slate-800 transition-all duration-200"
                     >
-                        <X className="w-5 h-5" />
+                        <X className="w-6 h-6" />
                     </button>
 
                     {/* Top Accent Line */}
                     <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${theme.gradient}`}></div>
                 </div>
 
-                <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-5">
+                <form onSubmit={handleSubmit(onSubmit)} className="p-8 space-y-6">
                     {renderFields()}
 
-                    <div className="pt-4 flex justify-end space-x-3 border-t border-gray-50 mt-2">
+                    <div className="pt-6 flex justify-end space-x-4 border-t border-gray-50 dark:border-slate-800 mt-2">
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-5 py-2.5 text-sm font-semibold text-gray-600 bg-gray-50 border border-gray-200 rounded-xl hover:bg-gray-100 hover:text-gray-900 transition-all duration-200"
+                            className="px-6 py-3 text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-900 dark:hover:text-white transition-all duration-200 active:scale-95"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
                             disabled={loading}
-                            className={`inline-flex items-center px-6 py-2.5 text-sm font-semibold text-white bg-gradient-to-r ${theme.gradient} rounded-xl hover:shadow-lg hover:opacity-95 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed`}
+                            className={`inline-flex items-center px-8 py-3 text-xs font-bold uppercase tracking-widest text-white bg-gradient-to-r ${theme.gradient} rounded-2xl hover:shadow-xl hover:scale-[1.02] transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed disabled:scale-100 flex-1 sm:flex-none justify-center`}
                         >
                             {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                             {type === 'email' ? 'Send Email' : type === 'slack' ? 'Send Message' : type === 'calendar' ? 'Schedule Event' : 'Create Task'}

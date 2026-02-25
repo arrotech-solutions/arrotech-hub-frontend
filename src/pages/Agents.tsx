@@ -65,9 +65,9 @@ const Agents: React.FC = () => {
   // Switch tabs based on tutorial step
   useEffect(() => {
     if (isTutorialActive && currentStep) {
-      if (['agents-stats', 'agents-filters', 'agents-actions'].includes(currentStep.id)) {
+      if (['agents-stats', 'agents-filters', 'agents-actions'].indexOf(currentStep.id) !== -1) {
         setActiveTab('managed');
-      } else if (['agents-intro', 'agents-create'].includes(currentStep.id)) {
+      } else if (['agents-intro', 'agents-create'].indexOf(currentStep.id) !== -1) {
         setActiveTab('discover');
       }
     }
@@ -300,19 +300,19 @@ const Agents: React.FC = () => {
   );
 
   const renderAgentCard = (agent: AgentResponse) => (
-    <div key={agent.agent_id} className="group relative bg-white rounded-[32px] p-6 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-500 overflow-hidden agent-card">
-      <div className="absolute top-0 right-0 w-32 h-32 bg-purple-50 rounded-full -mr-16 -mt-16 opacity-50 group-hover:scale-110 transition-transform duration-500" />
+    <div key={agent.agent_id} className="group relative bg-white dark:bg-slate-800 rounded-[32px] p-6 border border-gray-100 dark:border-slate-700 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-500 overflow-hidden agent-card">
+      <div className="absolute top-0 right-0 w-32 h-32 bg-purple-50 dark:bg-purple-900/20 rounded-full -mr-16 -mt-16 opacity-50 group-hover:scale-110 transition-transform duration-500" />
       <div className="relative z-10">
         <div className="flex items-start justify-between mb-6">
           <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-purple-200 group-hover:scale-110 transition-transform duration-500">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-purple-200 dark:shadow-none group-hover:scale-110 transition-transform duration-500">
               <Bot className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="text-xl font-bold text-gray-900 group-hover:text-purple-600 transition-colors">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
                 {agent.workflow_name || `Agent ${agent.agent_id}`}
               </h3>
-              <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">ID: {agent.agent_id}</p>
+              <p className="text-xs font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wider">ID: {agent.agent_id}</p>
             </div>
           </div>
           <div className={`px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest border ${getStatusColor(agent.status)}`}>
@@ -320,45 +320,45 @@ const Agents: React.FC = () => {
           </div>
         </div>
         <div className="grid grid-cols-2 gap-4 mb-6">
-          <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100/50">
-            <div className="flex items-center space-x-2 text-gray-400 mb-1">
+          <div className="bg-gray-50 dark:bg-slate-900/50 rounded-2xl p-4 border border-gray-100/50 dark:border-slate-700/50">
+            <div className="flex items-center space-x-2 text-gray-400 dark:text-slate-500 mb-1">
               <Activity className="w-3.5 h-3.5" />
               <span className="text-[10px] font-bold uppercase">Executions</span>
             </div>
-            <p className="text-lg font-black text-gray-900 leading-none">{agent.performance_metrics?.execution_count || 0}</p>
+            <p className="text-lg font-black text-gray-900 dark:text-white leading-none">{agent.performance_metrics?.execution_count || 0}</p>
           </div>
-          <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100/50">
-            <div className="flex items-center space-x-2 text-gray-400 mb-1">
+          <div className="bg-gray-50 dark:bg-slate-900/50 rounded-2xl p-4 border border-gray-100/50 dark:border-slate-700/50">
+            <div className="flex items-center space-x-2 text-gray-400 dark:text-slate-500 mb-1">
               <Clock className="w-3.5 h-3.5" />
               <span className="text-[10px] font-bold uppercase">Active Since</span>
             </div>
-            <p className="text-lg font-black text-gray-900 leading-none">{new Date(agent.created_at).toLocaleDateString()}</p>
+            <p className="text-lg font-black text-gray-900 dark:text-white leading-none">{new Date(agent.created_at).toLocaleDateString()}</p>
           </div>
         </div>
-        <div className="flex items-center justify-between pt-6 border-t border-gray-100 agent-actions-container">
+        <div className="flex items-center justify-between pt-6 border-t border-gray-100 dark:border-slate-700/50 agent-actions-container">
           <div className="flex items-center space-x-2">
             {agent.status === 'active' ? (
-              <button onClick={() => handlePauseAgent(agent.agent_id)} className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center hover:bg-amber-100 transition-colors shadow-sm agent-pause-btn">
+              <button onClick={() => handlePauseAgent(agent.agent_id)} className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center hover:bg-amber-100 dark:hover:bg-amber-500/20 transition-colors shadow-sm agent-pause-btn">
                 <Pause className="w-4 h-4" />
               </button>
             ) : (
-              <button onClick={() => handleResumeAgent(agent.agent_id)} className="w-10 h-10 rounded-xl bg-green-50 text-green-600 flex items-center justify-center hover:bg-green-100 transition-colors shadow-sm agent-resume-btn">
+              <button onClick={() => handleResumeAgent(agent.agent_id)} className="w-10 h-10 rounded-xl bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 flex items-center justify-center hover:bg-green-100 dark:hover:bg-green-500/20 transition-colors shadow-sm agent-resume-btn">
                 <Play className="w-4 h-4" />
               </button>
             )}
-            <button onClick={() => handleExecuteAgent(agent.agent_id)} className="px-4 h-10 rounded-xl bg-purple-600 text-white font-bold text-sm flex items-center space-x-2 hover:bg-purple-700 transition-all shadow-lg shadow-purple-200 agent-execute-btn">
+            <button onClick={() => handleExecuteAgent(agent.agent_id)} className="px-4 h-10 rounded-xl bg-purple-600 text-white font-bold text-sm flex items-center space-x-2 hover:bg-purple-700 transition-all shadow-lg shadow-purple-200 dark:shadow-none agent-execute-btn">
               <Zap className="w-4 h-4" />
               <span>Execute</span>
             </button>
           </div>
           <div className="flex items-center space-x-1">
-            <button onClick={() => { setSelectedAgent(agent); loadAgentStatus(agent.agent_id); }} className="p-2.5 text-gray-400 hover:text-purple-600 transition-colors rounded-xl hover:bg-purple-50 agent-view-btn">
+            <button onClick={() => { setSelectedAgent(agent); loadAgentStatus(agent.agent_id); }} className="p-2.5 text-gray-400 dark:text-slate-500 hover:text-purple-600 dark:hover:text-purple-400 transition-colors rounded-xl hover:bg-purple-50 dark:hover:bg-slate-700 agent-view-btn">
               <Eye className="w-5 h-5" />
             </button>
-            <button onClick={() => handleShareAgent(agent)} className="p-2.5 text-gray-400 hover:text-blue-600 transition-colors rounded-xl hover:bg-blue-50 agent-share-btn">
+            <button onClick={() => handleShareAgent(agent)} className="p-2.5 text-gray-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors rounded-xl hover:bg-blue-50 dark:hover:bg-slate-700 agent-share-btn">
               <Share2 className="w-5 h-5" />
             </button>
-            <button onClick={() => handleDeleteAgent(agent.agent_id)} className="p-2.5 text-gray-400 hover:text-red-600 transition-colors rounded-xl hover:bg-red-50 agent-delete-btn">
+            <button onClick={() => handleDeleteAgent(agent.agent_id)} className="p-2.5 text-gray-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 transition-colors rounded-xl hover:bg-red-50 dark:hover:bg-slate-700 agent-delete-btn">
               <Trash2 className="w-5 h-5" />
             </button>
           </div>
@@ -399,27 +399,29 @@ const Agents: React.FC = () => {
             )}
             <button onClick={() => handleExecuteAgent(agent.agent_id)} className="px-5 h-10 rounded-xl bg-purple-600 text-white font-bold text-sm flex items-center space-x-2 ml-1.5 shadow-lg shadow-purple-200 agent-execute-btn"><Zap className="w-4 h-4" /><span>Run</span></button>
           </div>
-          <button onClick={() => { setSelectedAgent(agent); loadAgentStatus(agent.agent_id); }} className="p-2.5 text-gray-400 hover:text-purple-600 transition-colors rounded-xl agent-view-btn"><Eye className="w-5 h-5" /></button>
-          <button onClick={() => handleDeleteAgent(agent.agent_id)} className="p-2.5 text-gray-400 hover:text-red-600 transition-colors rounded-xl agent-delete-btn"><Trash2 className="w-5 h-5" /></button>
+          <div className="flex items-center space-x-1 pl-3 border-l border-gray-200 dark:border-slate-700">
+            <button onClick={() => { setSelectedAgent(agent); loadAgentStatus(agent.agent_id); }} className="p-2.5 text-gray-400 dark:text-slate-500 hover:text-purple-600 dark:hover:text-purple-400 transition-colors rounded-xl agent-view-btn"><Eye className="w-5 h-5" /></button>
+            <button onClick={() => handleDeleteAgent(agent.agent_id)} className="p-2.5 text-gray-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 transition-colors rounded-xl agent-delete-btn"><Trash2 className="w-5 h-5" /></button>
+          </div>
         </div>
       </div>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-purple-50 dark:from-slate-900 dark:via-slate-900 dark:to-indigo-950/20 transition-colors duration-300">
       <div className="max-w-7xl mx-auto p-6 md:p-10">
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
           <div className="space-y-4">
-            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-purple-100 text-purple-700 text-xs font-bold uppercase tracking-wider">
+            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 text-xs font-bold uppercase tracking-wider">
               <Sparkles className="w-3 h-3" />
               <span>Regional Intelligence</span>
             </div>
-            <h1 className="text-5xl md:text-6xl font-black text-gray-900 tracking-tight leading-none agents-header">
-              Agent <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600">Hub</span>
+            <h1 className="text-5xl md:text-6xl font-black text-gray-900 dark:text-white tracking-tight leading-none agents-header transition-colors">
+              Agent <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600 dark:from-purple-400 dark:to-indigo-400">Hub</span>
             </h1>
-            <p className="text-xl text-gray-500 font-medium max-w-xl">
+            <p className="text-xl text-gray-500 dark:text-slate-400 font-medium max-w-xl transition-colors">
               Discover and manage specialized AI agents optimized for the Kenyan business landscape.
             </p>
           </div>
@@ -427,14 +429,14 @@ const Agents: React.FC = () => {
           <div className="flex items-center space-x-4">
             <button
               onClick={() => navigate('/chat')}
-              className="flex items-center space-x-2 bg-white text-gray-700 px-6 py-4 rounded-[20px] font-bold border border-gray-100 shadow-sm hover:shadow-md transition-all active:scale-95"
+              className="flex items-center space-x-2 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 px-6 py-4 rounded-[20px] font-bold border border-gray-100 dark:border-slate-700 shadow-sm hover:shadow-md transition-all active:scale-95"
             >
               <ArrowRight className="w-5 h-5" />
               <span>Go to Chat</span>
             </button>
             <button
               onClick={() => setShowCreateModal(true)}
-              className="flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-8 py-4 rounded-[20px] font-bold shadow-xl shadow-purple-200 hover:shadow-2xl hover:scale-[1.02] transition-all active:scale-95 create-agent-btn"
+              className="flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-8 py-4 rounded-[20px] font-bold shadow-xl shadow-purple-200 dark:shadow-none hover:shadow-2xl hover:scale-[1.02] transition-all active:scale-95 create-agent-btn"
             >
               <Plus className="w-6 h-6" />
               <span>Create Agent</span>
@@ -443,12 +445,12 @@ const Agents: React.FC = () => {
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex p-1.5 bg-gray-100/80 backdrop-blur-sm rounded-[24px] w-fit mb-10 border border-gray-200/50 agent-hub-tabs">
+        <div className="flex p-1.5 bg-gray-100/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-[24px] w-fit mb-10 border border-gray-200/50 dark:border-slate-700/50 agent-hub-tabs transition-colors">
           <button
             onClick={() => setActiveTab('discover')}
             className={`flex items-center space-x-3 px-8 py-4 rounded-[18px] text-sm font-black transition-all duration-300 ${activeTab === 'discover'
-              ? 'bg-white text-purple-600 shadow-lg'
-              : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'
+              ? 'bg-white dark:bg-slate-900 text-purple-600 dark:text-purple-400 shadow-lg'
+              : 'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 hover:bg-gray-200/50 dark:hover:bg-slate-700/50'
               }`}
           >
             <Rocket className="w-5 h-5" />
@@ -457,8 +459,8 @@ const Agents: React.FC = () => {
           <button
             onClick={() => setActiveTab('managed')}
             className={`flex items-center space-x-3 px-8 py-4 rounded-[18px] text-sm font-black transition-all duration-300 ${activeTab === 'managed'
-              ? 'bg-white text-purple-600 shadow-lg'
-              : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'
+              ? 'bg-white dark:bg-slate-900 text-purple-600 dark:text-purple-400 shadow-lg'
+              : 'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 hover:bg-gray-200/50 dark:hover:bg-slate-700/50'
               }`}
           >
             <Bot className="w-5 h-5" />
@@ -467,8 +469,8 @@ const Agents: React.FC = () => {
           <button
             onClick={() => setActiveTab('autonomous')}
             className={`flex items-center space-x-3 px-8 py-4 rounded-[18px] text-sm font-black transition-all duration-300 ${activeTab === 'autonomous'
-              ? 'bg-white text-purple-600 shadow-lg'
-              : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'
+              ? 'bg-white dark:bg-slate-900 text-purple-600 dark:text-purple-400 shadow-lg'
+              : 'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 hover:bg-gray-200/50 dark:hover:bg-slate-700/50'
               }`}
           >
             <Zap className="w-5 h-5" />
@@ -479,15 +481,15 @@ const Agents: React.FC = () => {
         {activeTab === 'discover' ? (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 discover-hub-section">
             {/* Hub Tools */}
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white/50 backdrop-blur-md p-4 rounded-[24px] border border-gray-100">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white/50 dark:bg-slate-800/50 backdrop-blur-md p-4 rounded-[24px] border border-gray-100 dark:border-slate-700/50 transition-colors">
               <div className="relative flex-1 w-full">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 w-5 h-5" />
                 <input
                   type="text"
                   placeholder="Search and find regional intelligence..."
                   value={hubSearch}
                   onChange={(e) => setHubSearch(e.target.value)}
-                  className="w-full pl-12 pr-6 py-4 bg-transparent border-none focus:ring-0 text-gray-900 font-medium placeholder:text-gray-400 text-lg"
+                  className="w-full pl-12 pr-6 py-4 bg-transparent border-none focus:ring-0 text-gray-900 dark:text-white font-medium placeholder:text-gray-400 dark:placeholder:text-slate-500 text-lg outline-none"
                 />
               </div>
               <div className="flex items-center space-x-2">
@@ -496,8 +498,8 @@ const Agents: React.FC = () => {
                     key={cat}
                     onClick={() => setHubSearch(cat === 'All' ? '' : cat)}
                     className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${(cat === 'All' && !hubSearch) || hubSearch === cat
-                      ? 'bg-purple-600 text-white shadow-lg'
-                      : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                      ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/20'
+                      : 'bg-gray-100 dark:bg-slate-900 text-gray-500 dark:text-slate-400 hover:bg-gray-200 dark:hover:bg-slate-800'
                       }`}
                   >
                     {cat}
@@ -511,9 +513,9 @@ const Agents: React.FC = () => {
               {filteredHubAgents.map((agent) => (
                 <div
                   key={agent.id}
-                  className="group relative bg-white rounded-[40px] p-8 border border-gray-100/80 shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 overflow-hidden"
+                  className="group relative bg-white dark:bg-slate-800 rounded-[40px] p-8 border border-gray-100/80 dark:border-slate-700 shadow-sm hover:shadow-2xl dark:hover:shadow-purple-500/5 transition-all duration-500 hover:-translate-y-2 overflow-hidden"
                 >
-                  <div className={`absolute top-0 right-0 w-40 h-40 bg-gradient-to-br ${agent.color} opacity-[0.03] rounded-bl-[100px] group-hover:scale-110 transition-transform duration-700`} />
+                  <div className={`absolute top-0 right-0 w-40 h-40 bg-gradient-to-br ${agent.color} opacity-[0.03] dark:opacity-10 rounded-bl-[100px] group-hover:scale-110 transition-transform duration-700`} />
 
                   <div className="relative z-10 space-y-6">
                     <div className="flex items-center justify-between">
@@ -526,17 +528,17 @@ const Agents: React.FC = () => {
                     </div>
 
                     <div>
-                      <h3 className="text-2xl font-black text-gray-900 mb-2 group-hover:text-purple-600 transition-colors">
+                      <h3 className="text-2xl font-black text-gray-900 dark:text-white mb-2 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
                         {agent.name}
                       </h3>
-                      <p className="text-gray-500 font-medium line-clamp-2 leading-relaxed">
+                      <p className="text-gray-500 dark:text-slate-400 font-medium line-clamp-2 leading-relaxed transition-colors">
                         {agent.description}
                       </p>
                     </div>
 
                     <button
                       onClick={() => handleLaunchAgent(agent)}
-                      className="w-full flex items-center justify-between group/btn bg-gray-50 hover:bg-purple-600 hover:text-white p-5 rounded-2xl transition-all duration-300 transform active:scale-[0.98]"
+                      className="w-full flex items-center justify-between group/btn bg-gray-50 dark:bg-slate-900 hover:bg-purple-600 dark:hover:bg-purple-600 text-gray-900 dark:text-white hover:text-white p-5 rounded-2xl transition-all duration-300 transform active:scale-[0.98]"
                     >
                       <span className="font-bold tracking-tight">Launch Intelligence</span>
                       <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
@@ -551,14 +553,14 @@ const Agents: React.FC = () => {
             {/* Stats Grid */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 agents-stats">
               {[
-                { label: 'Total Fleet', value: stats.total, color: 'text-purple-600', icon: <Bot className="w-5 h-5" /> },
-                { label: 'Active Now', value: stats.active, color: 'text-green-600', icon: <CheckCircle className="w-5 h-5" /> },
-                { label: 'Resting', value: stats.paused, color: 'text-amber-600', icon: <Pause className="w-5 h-5" /> },
-                { label: 'Efficiency', value: '98%', color: 'text-blue-600', icon: <Zap className="w-5 h-5" /> },
+                { label: 'Total Fleet', value: stats.total, color: 'text-purple-600 dark:text-purple-400', icon: <Bot className="w-5 h-5" /> },
+                { label: 'Active Now', value: stats.active, color: 'text-green-600 dark:text-green-400', icon: <CheckCircle className="w-5 h-5" /> },
+                { label: 'Resting', value: stats.paused, color: 'text-amber-600 dark:text-amber-400', icon: <Pause className="w-5 h-5" /> },
+                { label: 'Efficiency', value: '98%', color: 'text-blue-600 dark:text-blue-400', icon: <Zap className="w-5 h-5" /> },
               ].map((stat, i) => (
-                <div key={i} className="bg-white/80 backdrop-blur-sm rounded-[28px] p-6 border border-gray-100 shadow-sm">
+                <div key={i} className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-[28px] p-6 border border-gray-100 dark:border-slate-700/50 shadow-sm transition-colors">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">{stat.label}</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-slate-500">{stat.label}</span>
                     <div className={`${stat.color} opacity-80`}>{stat.icon}</div>
                   </div>
                   <p className={`text-3xl font-black ${stat.color}`}>{stat.value}</p>
@@ -567,50 +569,50 @@ const Agents: React.FC = () => {
             </div>
 
             {/* Management Controls */}
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6 bg-white/50 backdrop-blur-md p-6 rounded-[32px] border border-gray-100 shadow-sm agents-filters">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6 bg-white/50 dark:bg-slate-800/50 backdrop-blur-md p-6 rounded-[32px] border border-gray-100 dark:border-slate-700/50 shadow-sm agents-filters transition-colors">
               <div className="relative flex-1 w-full">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 w-5 h-5" />
                 <input
                   type="text"
                   placeholder="Search your autonomous fleet..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-12 pr-6 py-3 bg-transparent border-none focus:ring-0 text-gray-900 font-bold placeholder:text-gray-400"
+                  className="w-full pl-12 pr-6 py-3 bg-transparent border-none focus:ring-0 text-gray-900 dark:text-white font-bold placeholder:text-gray-400 dark:placeholder:text-slate-500 outline-none"
                 />
               </div>
               <div className="flex items-center space-x-3">
-                <button onClick={() => setShowFilters(!showFilters)} className={`flex items-center space-x-2 px-6 py-3 rounded-2xl font-bold transition-all border ${showFilters ? 'bg-purple-600 border-purple-600 text-white' : 'bg-white border-gray-100 text-gray-700'}`}>
+                <button onClick={() => setShowFilters(!showFilters)} className={`flex items-center space-x-2 px-6 py-3 rounded-2xl font-bold transition-all border ${showFilters ? 'bg-purple-600 border-purple-600 text-white' : 'bg-white dark:bg-slate-900 border-gray-100 dark:border-slate-800 text-gray-700 dark:text-slate-300'}`}>
                   <Filter className="w-4 h-4" />
                   <span>Tools</span>
                 </button>
-                <div className="bg-gray-100 p-1.5 rounded-2xl flex space-x-1">
-                  <button onClick={() => setViewMode('grid')} className={`p-2.5 rounded-xl transition-all ${viewMode === 'grid' ? 'bg-white text-purple-600 shadow-sm' : 'text-gray-400'}`}><Grid className="w-5 h-5" /></button>
-                  <button onClick={() => setViewMode('list')} className={`p-2.5 rounded-xl transition-all ${viewMode === 'list' ? 'bg-white text-purple-600 shadow-sm' : 'text-gray-400'}`}><List className="w-5 h-5" /></button>
+                <div className="bg-gray-100 dark:bg-slate-900 p-1.5 rounded-2xl flex space-x-1">
+                  <button onClick={() => setViewMode('grid')} className={`p-2.5 rounded-xl transition-all ${viewMode === 'grid' ? 'bg-white dark:bg-slate-800 text-purple-600 dark:text-purple-400 shadow-sm' : 'text-gray-400 dark:text-slate-500 hover:bg-white/50 dark:hover:bg-slate-800/50'}`}><Grid className="w-5 h-5" /></button>
+                  <button onClick={() => setViewMode('list')} className={`p-2.5 rounded-xl transition-all ${viewMode === 'list' ? 'bg-white dark:bg-slate-800 text-purple-600 dark:text-purple-400 shadow-sm' : 'text-gray-400 dark:text-slate-500 hover:bg-white/50 dark:hover:bg-slate-800/50'}`}><List className="w-5 h-5" /></button>
                 </div>
               </div>
             </div>
 
             {/* Agents Display */}
             {filteredAgents.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-24 px-6 text-center bg-white/40 backdrop-blur-md rounded-[40px] border border-white/60 agents-list-empty">
+              <div className="flex flex-col items-center justify-center py-24 px-6 text-center bg-white/40 dark:bg-slate-800/40 backdrop-blur-md rounded-[40px] border border-white/60 dark:border-slate-700/50 agents-list-empty transition-colors">
                 <div className="relative mb-10">
                   <div className="absolute inset-0 bg-purple-500/20 blur-3xl rounded-full scale-150 animate-pulse"></div>
-                  <div className="relative p-8 bg-white border border-purple-100 shadow-2xl rounded-[2.5rem] transform hover:rotate-6 transition-transform duration-500">
+                  <div className="relative p-8 bg-white dark:bg-slate-900 border border-purple-100 dark:border-purple-500/20 shadow-2xl rounded-[2.5rem] transform hover:rotate-6 transition-transform duration-500">
                     <Bot className="w-16 h-16 text-purple-600" />
                     <div className="absolute -top-2 -right-2 w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center shadow-lg border-2 border-white">
                       <Plus className="w-4 h-4 text-white" />
                     </div>
                   </div>
                 </div>
-                <h3 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">Your fleet is empty</h3>
-                <p className="text-gray-500 mb-10 max-w-md font-medium leading-relaxed">
+                <h3 className="text-3xl font-black text-gray-900 dark:text-white mb-4 tracking-tight transition-colors">Your fleet is empty</h3>
+                <p className="text-gray-500 dark:text-slate-400 mb-10 max-w-md font-medium leading-relaxed transition-colors">
                   You haven't deployed any autonomous agents yet. Start by creating an agent from one of your workflows.
                 </p>
                 <button
                   onClick={() => setShowCreateModal(true)}
-                  className="group relative inline-flex items-center justify-center space-x-3 px-10 py-5 bg-gray-900 text-white rounded-[2rem] hover:shadow-[0_20px_40px_rgba(0,0,0,0.2)] transition-all duration-300 transform hover:-translate-y-1 overflow-hidden"
+                  className="group relative inline-flex items-center justify-center space-x-3 px-10 py-5 bg-gray-900 dark:bg-purple-600 text-white rounded-[2rem] hover:shadow-[0_20px_40px_rgba(0,0,0,0.2)] dark:hover:shadow-[0_20px_40px_rgba(147,51,234,0.3)] transition-all duration-300 transform hover:-translate-y-1 overflow-hidden"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600 dark:from-purple-500 dark:to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                   <Plus className="relative w-5 h-5 transition-transform group-hover:rotate-90" />
                   <span className="relative font-bold">Deploy Your First Agent</span>
                 </button>
@@ -625,16 +627,16 @@ const Agents: React.FC = () => {
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Autonomous Productivity Agents */}
 
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6 bg-white/50 backdrop-blur-md p-8 rounded-[32px] border border-gray-100 shadow-sm">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6 bg-white/50 dark:bg-slate-800/50 backdrop-blur-md p-8 rounded-[32px] border border-gray-100 dark:border-slate-700/50 shadow-sm transition-colors">
               <div>
-                <h2 className="text-3xl font-black text-gray-900 tracking-tight mb-2">Autonomous Hub</h2>
-                <p className="text-gray-500 font-medium text-lg">Your fleet of specialized AI agents working 24/7.</p>
+                <h2 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight mb-2 transition-colors">Autonomous Hub</h2>
+                <p className="text-gray-500 dark:text-slate-400 font-medium text-lg transition-colors">Your fleet of specialized AI agents working 24/7.</p>
               </div>
               <button
                 onClick={() => toast.success('Agents are running in the background')}
-                className="flex items-center space-x-2 bg-white text-gray-700 px-6 py-4 rounded-2xl font-bold border border-gray-200 shadow-sm hover:shadow-md hover:bg-gray-50 transition-all active:scale-95"
+                className="flex items-center space-x-2 bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-300 px-6 py-4 rounded-2xl font-bold border border-gray-200 dark:border-slate-700 shadow-sm hover:shadow-md hover:bg-gray-50 dark:hover:bg-slate-800 transition-all active:scale-95"
               >
-                <RefreshCw className="w-5 h-5 text-purple-600" />
+                <RefreshCw className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                 <span>Refresh Status</span>
               </button>
             </div>
@@ -697,50 +699,50 @@ const Agents: React.FC = () => {
                   metrics: { lastRun: '3d ago', success: '100%', frequency: 'Weekly' }
                 }
               ].map((agent) => (
-                <div key={agent.id} className="group relative bg-white rounded-[32px] p-8 border border-gray-100 shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 overflow-hidden">
-                  <div className={`absolute top-0 right-0 w-40 h-40 bg-gradient-to-br ${agent.color} opacity-[0.03] rounded-bl-[100px] group-hover:scale-110 transition-transform duration-700`} />
+                <div key={agent.id} className="group relative bg-white dark:bg-slate-800 rounded-[32px] p-8 border border-gray-100 dark:border-slate-700 shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 overflow-hidden">
+                  <div className={`absolute top-0 right-0 w-40 h-40 bg-gradient-to-br ${agent.color} opacity-[0.03] dark:opacity-10 rounded-bl-[100px] group-hover:scale-110 transition-transform duration-700`} />
 
                   <div className="relative z-10">
                     <div className="flex items-start justify-between mb-6">
-                      <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${agent.color} flex items-center justify-center text-white shadow-lg shadow-gray-200 group-hover:scale-110 transition-transform duration-500`}>
+                      <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${agent.color} flex items-center justify-center text-white shadow-lg shadow-gray-200 dark:shadow-none group-hover:scale-110 transition-transform duration-500`}>
                         {agent.icon}
                       </div>
-                      <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${agent.status === 'active' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-yellow-50 text-yellow-600 border-yellow-100'}`}>
+                      <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${agent.status === 'active' ? 'bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 border-green-100 dark:border-green-500/20' : 'bg-yellow-50 dark:bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-100 dark:border-yellow-500/20'}`}>
                         {agent.status}
                       </span>
                     </div>
 
-                    <h3 className="text-2xl font-black text-gray-900 mb-3 group-hover:text-purple-600 transition-colors">
+                    <h3 className="text-2xl font-black text-gray-900 dark:text-white mb-3 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
                       {agent.name}
                     </h3>
-                    <p className="text-gray-500 font-medium leading-relaxed mb-8 h-20">
+                    <p className="text-gray-500 dark:text-slate-400 font-medium leading-relaxed mb-8 h-20 transition-colors">
                       {agent.description}
                     </p>
 
-                    <div className="grid grid-cols-3 gap-2 mb-8 bg-gray-50/80 rounded-2xl p-4 border border-gray-100">
+                    <div className="grid grid-cols-3 gap-2 mb-8 bg-gray-50/80 dark:bg-slate-900/80 rounded-2xl p-4 border border-gray-100 dark:border-slate-700/50">
                       <div className="text-center">
-                        <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Last Run</p>
-                        <p className="font-bold text-gray-900 text-xs">{agent.metrics.lastRun}</p>
+                        <p className="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase mb-1">Last Run</p>
+                        <p className="font-bold text-gray-900 dark:text-white text-xs">{agent.metrics.lastRun}</p>
                       </div>
-                      <div className="text-center border-l border-gray-200">
-                        <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Success</p>
-                        <p className="font-bold text-gray-900 text-xs text-green-600">{agent.metrics.success}</p>
+                      <div className="text-center border-l border-gray-200 dark:border-slate-700">
+                        <p className="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase mb-1">Success</p>
+                        <p className="font-bold text-gray-900 dark:text-green-400 text-xs text-green-600">{agent.metrics.success}</p>
                       </div>
-                      <div className="text-center border-l border-gray-200">
-                        <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Schedule</p>
-                        <p className="font-bold text-gray-900 text-xs truncate px-1">{agent.metrics.frequency}</p>
+                      <div className="text-center border-l border-gray-200 dark:border-slate-700">
+                        <p className="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase mb-1">Schedule</p>
+                        <p className="font-bold text-gray-900 dark:text-white text-xs truncate px-1">{agent.metrics.frequency}</p>
                       </div>
                     </div>
 
                     <div className="flex items-center space-x-3">
                       <button
                         onClick={() => toast.success(`Running ${agent.name}...`)}
-                        className="flex-1 flex items-center justify-center space-x-2 bg-gray-900 text-white py-4 rounded-2xl font-bold hover:bg-purple-600 transition-all shadow-lg active:scale-95 group/btn"
+                        className="flex-1 flex items-center justify-center space-x-2 bg-gray-900 dark:bg-purple-600 text-white py-4 rounded-2xl font-bold hover:bg-purple-600 dark:hover:bg-purple-700 transition-all shadow-lg dark:shadow-none active:scale-95 group/btn"
                       >
                         <Zap className="w-4 h-4 group-hover/btn:fill-current" />
                         <span>Run Trigger</span>
                       </button>
-                      <button className="p-4 bg-gray-100 text-gray-500 rounded-2xl hover:bg-gray-200 transition-all active:scale-95">
+                      <button className="p-4 bg-gray-100 dark:bg-slate-900 text-gray-500 dark:text-slate-400 rounded-2xl hover:bg-gray-200 dark:hover:bg-slate-800 transition-all active:scale-95">
                         <Settings className="w-5 h-5" />
                       </button>
                     </div>
@@ -753,40 +755,40 @@ const Agents: React.FC = () => {
 
         {/* Modals */}
         {showCreateModal && (
-          <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-[40px] p-10 w-full max-w-2xl shadow-2xl border border-gray-100 animate-in zoom-in-95 duration-300">
+          <div className="fixed inset-0 bg-gray-900/60 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-colors duration-300">
+            <div className="bg-white dark:bg-slate-900 rounded-[40px] p-10 w-full max-w-2xl shadow-2xl border border-gray-100 dark:border-slate-800 animate-in zoom-in-95 duration-300 transition-colors">
               <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center space-x-4">
-                  <div className="p-3 bg-purple-100 rounded-2xl"><Plus className="w-8 h-8 text-purple-600" /></div>
-                  <h2 className="text-3xl font-black text-gray-900">Deploy Agent</h2>
+                  <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-2xl"><Plus className="w-8 h-8 text-purple-600 dark:text-purple-400" /></div>
+                  <h2 className="text-3xl font-black text-gray-900 dark:text-white transition-colors">Deploy Agent</h2>
                 </div>
-                <button onClick={() => setShowCreateModal(false)} className="p-3 hover:bg-gray-100 rounded-full transition-colors"><XCircle className="w-8 h-8 text-gray-400" /></button>
+                <button onClick={() => setShowCreateModal(false)} className="p-3 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-full transition-colors"><XCircle className="w-8 h-8 text-gray-400 dark:text-slate-500" /></button>
               </div>
               <div className="space-y-8">
                 <div className="space-y-3">
-                  <label className="text-sm font-black uppercase tracking-widest text-gray-400 ml-1">Protocol Selection</label>
+                  <label className="text-sm font-black uppercase tracking-widest text-gray-400 dark:text-slate-500 ml-1">Protocol Selection</label>
                   <select
                     value={newAgent.workflow_id}
                     onChange={(e) => setNewAgent({ ...newAgent, workflow_id: parseInt(e.target.value) })}
-                    className="w-full px-6 py-5 bg-gray-50 border-none rounded-[20px] focus:ring-2 focus:ring-purple-500 font-bold text-lg"
+                    className="w-full px-6 py-5 bg-gray-50 dark:bg-slate-800 border-none rounded-[20px] focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-500/20 font-bold text-lg text-gray-900 dark:text-white outline-none transition-colors"
                   >
                     <option value={0}>Select a core workflow...</option>
                     {workflows.map(workflow => (<option key={workflow.id} value={workflow.id}>{workflow.name} (v{workflow.version})</option>))}
                   </select>
                 </div>
                 <div className="space-y-3">
-                  <label className="text-sm font-black uppercase tracking-widest text-gray-400 ml-1">Logic Configuration (JSON)</label>
+                  <label className="text-sm font-black uppercase tracking-widest text-gray-400 dark:text-slate-500 ml-1">Logic Configuration (JSON)</label>
                   <textarea
                     value={JSON.stringify(newAgent.agent_config, null, 2)}
                     onChange={(e) => { try { const parsed = JSON.parse(e.target.value); setNewAgent({ ...newAgent, agent_config: parsed }); } catch (e) { } }}
-                    className="w-full px-6 py-5 bg-gray-50 border-none rounded-[20px] focus:ring-2 focus:ring-purple-500 font-mono text-sm leading-relaxed"
+                    className="w-full px-6 py-5 bg-gray-50 dark:bg-slate-800 border-none rounded-[20px] focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-500/20 font-mono text-sm leading-relaxed text-gray-900 dark:text-white outline-none transition-colors"
                     rows={8}
                     placeholder="{}"
                   />
                 </div>
                 <button
                   onClick={handleCreateAgent}
-                  className="w-full py-6 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-[24px] font-black text-xl shadow-xl shadow-purple-200 hover:scale-[1.01] active:scale-[0.98] transition-all"
+                  className="w-full py-6 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-[24px] font-black text-xl shadow-xl shadow-purple-200 dark:shadow-none hover:scale-[1.01] active:scale-[0.98] transition-all"
                 >
                   Initiate Deployment
                 </button>
@@ -797,39 +799,39 @@ const Agents: React.FC = () => {
 
         {/* Agent Details Modal */}
         {selectedAgent && (
-          <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-[40px] p-10 w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-100">
+          <div className="fixed inset-0 bg-gray-900/60 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-colors duration-300">
+            <div className="bg-white dark:bg-slate-900 rounded-[40px] p-10 w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-100 dark:border-slate-800 transition-colors">
               <div className="flex items-center justify-between mb-10">
                 <div className="flex items-center space-x-4">
                   <div className="w-16 h-16 rounded-[24px] bg-purple-600 flex items-center justify-center text-white"><Bot className="w-10 h-10" /></div>
                   <div>
-                    <h2 className="text-3xl font-black text-gray-900">{selectedAgent.workflow_name || 'Agent Detail'}</h2>
-                    <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">System ID: {selectedAgent.agent_id}</p>
+                    <h2 className="text-3xl font-black text-gray-900 dark:text-white transition-colors">{selectedAgent.workflow_name || 'Agent Detail'}</h2>
+                    <p className="text-gray-400 dark:text-slate-500 font-bold uppercase tracking-widest text-xs transition-colors">System ID: {selectedAgent.agent_id}</p>
                   </div>
                 </div>
-                <button onClick={() => setSelectedAgent(null)} className="p-3 hover:bg-gray-100 rounded-full"><XCircle className="w-8 h-8 text-gray-400" /></button>
+                <button onClick={() => setSelectedAgent(null)} className="p-3 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-full transition-colors"><XCircle className="w-8 h-8 text-gray-400 dark:text-slate-500" /></button>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                 <div className="space-y-8">
-                  <div className="bg-gray-50 rounded-[32px] p-8 space-y-4">
-                    <h3 className="text-lg font-black uppercase tracking-tight flex items-center space-x-2"><Settings className="w-5 h-5 text-purple-600" /><span>Environment</span></h3>
+                  <div className="bg-gray-50 dark:bg-slate-800/50 rounded-[32px] p-8 space-y-4 border border-transparent dark:border-slate-700/50 transition-colors">
+                    <h3 className="text-lg font-black uppercase tracking-tight flex items-center space-x-2 text-gray-900 dark:text-white transition-colors"><Settings className="w-5 h-5 text-purple-600 dark:text-purple-400" /><span>Environment</span></h3>
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="p-4 bg-white rounded-2xl border border-gray-100"><p className="text-[10px] font-black text-gray-400 uppercase">Status</p><p className="font-black text-purple-600">{selectedAgent.status}</p></div>
-                      <div className="p-4 bg-white rounded-2xl border border-gray-100"><p className="text-[10px] font-black text-gray-400 uppercase">Workflow</p><p className="font-black">{selectedAgent.workflow_id}</p></div>
+                      <div className="p-4 bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 transition-colors"><p className="text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase">Status</p><p className="font-black text-purple-600 dark:text-purple-400">{selectedAgent.status}</p></div>
+                      <div className="p-4 bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 transition-colors"><p className="text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase">Workflow</p><p className="font-black text-gray-900 dark:text-white">{selectedAgent.workflow_id}</p></div>
                     </div>
                   </div>
                 </div>
-                <div className="bg-gray-50 rounded-[32px] p-8">
-                  <h3 className="text-lg font-black uppercase tracking-tight flex items-center space-x-2 mb-6"><BarChart3 className="w-5 h-5 text-purple-600" /><span>Performance</span></h3>
+                <div className="bg-gray-50 dark:bg-slate-800/50 rounded-[32px] p-8 border border-transparent dark:border-slate-700/50 transition-colors">
+                  <h3 className="text-lg font-black uppercase tracking-tight flex items-center space-x-2 mb-6 text-gray-900 dark:text-white transition-colors"><BarChart3 className="w-5 h-5 text-purple-600 dark:text-purple-400" /><span>Performance</span></h3>
                   {agentStatus ? (
                     <div className="space-y-4">
-                      <div className="p-6 bg-white rounded-2xl border border-gray-100 flex items-center justify-between">
-                        <div className="flex items-center space-x-3"><Activity className="w-5 h-5 text-purple-500" /> <span className="font-bold">Execution History</span></div>
-                        <span className="text-2xl font-black">{selectedAgent.performance_metrics?.execution_count || 0}</span>
+                      <div className="p-6 bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 flex items-center justify-between transition-colors">
+                        <div className="flex items-center space-x-3"><Activity className="w-5 h-5 text-purple-500 dark:text-purple-400" /> <span className="font-bold text-gray-900 dark:text-white transition-colors">Execution History</span></div>
+                        <span className="text-2xl font-black text-gray-900 dark:text-white transition-colors">{selectedAgent.performance_metrics?.execution_count || 0}</span>
                       </div>
                     </div>
-                  ) : <p className="text-gray-400 font-bold italic">Gathering telemetry...</p>}
+                  ) : <p className="text-gray-400 dark:text-slate-500 font-bold italic transition-colors">Gathering telemetry...</p>}
                 </div>
               </div>
             </div>

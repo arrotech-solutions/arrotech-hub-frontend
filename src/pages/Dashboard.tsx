@@ -173,11 +173,11 @@ const Dashboard: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-orange-50/30">
+        <div className="min-h-screen bg-transparent transition-colors duration-300">
             {/* Main Content */}
             <main className="max-w-7xl mx-auto px-6 md:px-10 py-10">
                 {/* Header with Mesh Gradient */}
-                <div className="relative overflow-hidden bg-white rounded-[32px] border border-gray-200 shadow-sm mb-10 group dashboard-header">
+                <div className="relative overflow-hidden bg-white dark:bg-slate-900 rounded-[32px] border border-gray-200 dark:border-slate-800 shadow-sm mb-10 group dashboard-header transition-colors duration-300">
                     <div className="absolute top-0 right-0 -mt-20 -mr-20 w-96 h-96 bg-blue-400/20 rounded-full blur-3xl animate-pulse group-hover:bg-blue-400/30 transition-colors duration-1000"></div>
                     <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-80 h-80 bg-orange-400/20 rounded-full blur-3xl animate-pulse group-hover:bg-orange-400/30 transition-colors duration-1000" style={{ animationDelay: '2s' }}></div>
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_center,_transparent_0%,_white_100%)] opacity-50"></div>
@@ -186,27 +186,27 @@ const Dashboard: React.FC = () => {
                         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-10">
                             <div className="flex-1">
                                 <div className="flex items-center space-x-3 mb-4 animate-fade-in">
-                                    <div className="p-2 bg-blue-100/80 rounded-xl">
+                                    <div className="p-2 bg-blue-100/80 dark:bg-blue-500/20 rounded-xl">
                                         <Sparkles className="w-5 h-5 text-blue-600" />
                                     </div>
                                     <span className="text-xs font-black text-blue-600 uppercase tracking-[0.2em]">Operational Nexus</span>
                                 </div>
-                                <h1 className="text-4xl md:text-5xl font-black text-gray-900 mb-4 tracking-tight leading-tight">
-                                    Welcome back, <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">{user?.name || 'Commander'}</span> 👋
+                                <h1 className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-4 tracking-tight leading-tight transition-colors">
+                                    Welcome back, <span className="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">{user?.name || 'Commander'}</span> 👋
                                 </h1>
-                                <p className="text-gray-500 max-w-xl font-medium text-lg leading-relaxed">
+                                <p className="text-gray-500 dark:text-slate-400 max-w-xl font-medium text-lg leading-relaxed">
                                     Your autonomous infrastructure is performing optimally. Here is your real-time telemetry and command center.
                                 </p>
                             </div>
                             <div className="shrink-0">
-                                <div className="bg-white/80 backdrop-blur-md p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center space-x-6">
+                                <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md p-6 rounded-3xl border border-gray-100 dark:border-slate-700 shadow-sm flex items-center space-x-6 transition-colors duration-300">
                                     <div className="text-right">
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Last Payload</p>
-                                        <p className="text-xl font-black text-gray-900 tabular-nums">
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-slate-500 mb-1">Last Payload</p>
+                                        <p className="text-xl font-black text-gray-900 dark:text-white tabular-nums">
                                             {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                                         </p>
                                     </div>
-                                    <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center border border-gray-100 text-gray-400 overflow-hidden">
+                                    <div className="w-12 h-12 bg-gray-50 dark:bg-slate-900/50 rounded-2xl flex items-center justify-center border border-gray-100 dark:border-slate-700/50 text-gray-400 dark:text-slate-500 overflow-hidden transition-colors">
                                         <Clock className="w-6 h-6 animate-pulse" />
                                     </div>
                                 </div>
@@ -269,16 +269,16 @@ const Dashboard: React.FC = () => {
                         return (
                             <div
                                 key={index}
-                                className="relative bg-white/60 backdrop-blur-xl rounded-[32px] border border-white p-8 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group overflow-hidden"
+                                className="relative bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl rounded-[32px] border border-white dark:border-slate-700/50 p-8 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group overflow-hidden"
                             >
                                 <div className={`absolute top-0 right-0 w-24 h-24 -mr-10 -mt-10 rounded-full blur-2xl opacity-20 group-hover:opacity-40 transition-opacity ${stat.color}`}></div>
                                 <div className="flex flex-col">
-                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-white/50 bg-white group-hover:scale-110 transition-transform duration-500`}>
+                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-white/50 dark:border-slate-700/50 bg-white dark:bg-slate-800 group-hover:scale-110 transition-transform duration-500`}>
                                         <Icon className={`w-6 h-6 ${stat.color.replace('bg-gradient-to-r from-', 'text-').split(' ')[0]}`} />
                                     </div>
-                                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-1">{stat.label}</p>
+                                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-slate-500 mb-1">{stat.label}</p>
                                     <div className="flex items-baseline space-x-2">
-                                        <p className="text-3xl font-black text-gray-900 tracking-tight">{stat.value}</p>
+                                        <p className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">{stat.value}</p>
                                         <div className={`flex items-center text-xs font-black ${stat.change >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
                                             <TrendingUp className={`w-3 h-3 mr-1 ${stat.change < 0 ? 'rotate-180' : ''}`} />
                                             <span>{Math.abs(stat.change)}%</span>
@@ -297,27 +297,27 @@ const Dashboard: React.FC = () => {
                         {/* Quick Actions - Design Overhaul */}
                         <section className="quick-actions">
                             <div className="flex items-center space-x-3 mb-6">
-                                <div className="p-1 bgColor bg-indigo-100 rounded-lg">
-                                    <Zap className="w-4 h-4 text-indigo-600" />
+                                <div className="p-1 bgColor bg-indigo-100 dark:bg-indigo-500/20 rounded-lg">
+                                    <Zap className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                                 </div>
-                                <h2 className="text-xl font-black text-gray-900 uppercase tracking-tight">Active Commands</h2>
+                                <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">Active Commands</h2>
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 {quickActions.map((action, index) => (
                                     <button
                                         key={index}
                                         onClick={action.onClick}
-                                        className="group relative flex items-center space-x-4 p-6 bg-white/40 backdrop-blur-md rounded-[28px] border border-white/60 hover:bg-white/80 hover:shadow-lg hover:border-white transition-all duration-300 text-left"
+                                        className="group relative flex items-center space-x-4 p-6 bg-white/40 dark:bg-slate-800/40 backdrop-blur-md rounded-[28px] border border-white/60 dark:border-slate-700/50 hover:bg-white/80 dark:hover:bg-slate-700/80 hover:shadow-lg transition-all duration-300 text-left"
                                     >
                                         <div className={`w-14 h-14 rounded-2xl ${action.color} flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-500`}>
                                             <action.icon className="w-7 h-7 text-white" />
                                         </div>
                                         <div>
-                                            <h3 className="font-black text-gray-900 tracking-tight text-lg">{action.title}</h3>
-                                            <p className="text-sm text-gray-500 font-medium">{action.description}</p>
+                                            <h3 className="font-black text-gray-900 dark:text-white tracking-tight text-lg">{action.title}</h3>
+                                            <p className="text-sm text-gray-500 dark:text-slate-400 font-medium">{action.description}</p>
                                         </div>
                                         <div className="absolute right-6 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all">
-                                            <ChevronRight className="w-5 h-5 text-gray-400" />
+                                            <ChevronRight className="w-5 h-5 text-gray-400 dark:text-slate-500" />
                                         </div>
                                     </button>
                                 ))}
@@ -325,30 +325,30 @@ const Dashboard: React.FC = () => {
                         </section>
 
                         {/* Recent Activity - Telemetry Style */}
-                        <section className="bg-white/60 backdrop-blur-xl rounded-[40px] border border-white p-8 recent-activity">
+                        <section className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl rounded-[40px] border border-white dark:border-slate-700/50 p-8 recent-activity transition-colors duration-300">
                             <div className="flex items-center justify-between mb-8">
                                 <div className="flex items-center space-x-3">
-                                    <div className="p-1 bg-blue-100 rounded-lg">
-                                        <Activity className="w-4 h-4 text-blue-600" />
+                                    <div className="p-1 bg-blue-100 dark:bg-blue-500/20 rounded-lg">
+                                        <Activity className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                                     </div>
-                                    <h2 className="text-xl font-black text-gray-900 uppercase tracking-tight">Live Telemetry</h2>
+                                    <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">Live Telemetry</h2>
                                 </div>
-                                <button className="text-xs font-black text-blue-600 uppercase tracking-widest hover:underline" onClick={() => navigate('/activity')}>
+                                <button className="text-xs font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest hover:underline" onClick={() => navigate('/activity')}>
                                     Full Audit Log
                                 </button>
                             </div>
                             <div className="space-y-6">
                                 {recentActivity.map((activity, index) => (
                                     <div key={index} className="flex items-start space-x-5 group/item">
-                                        <div className={`p-4 rounded-3xl ${activity.bgColor} ${activity.color} group-hover/item:scale-110 transition-transform duration-300`}>
+                                        <div className={`p-4 rounded-3xl ${activity.bgColor} dark:bg-opacity-20 ${activity.color} group-hover/item:scale-110 transition-transform duration-300`}>
                                             <activity.icon className="w-6 h-6" />
                                         </div>
                                         <div className="flex-1 py-1">
                                             <div className="flex items-center justify-between mb-1">
-                                                <p className="font-black text-gray-900 tracking-tight">{activity.title}</p>
-                                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{activity.time}</span>
+                                                <p className="font-black text-gray-900 dark:text-white tracking-tight">{activity.title}</p>
+                                                <span className="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest">{activity.time}</span>
                                             </div>
-                                            <p className="text-sm text-gray-500 font-medium">{activity.desc}</p>
+                                            <p className="text-sm text-gray-500 dark:text-slate-400 font-medium">{activity.desc}</p>
                                         </div>
                                     </div>
                                 ))}
@@ -403,21 +403,21 @@ const Dashboard: React.FC = () => {
                         </section>
 
                         {/* Node Analytics Mini-Card */}
-                        <section className="bg-white/60 backdrop-blur-xl rounded-[40px] border border-white p-8">
+                        <section className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl rounded-[40px] border border-white dark:border-slate-700/50 p-8 transition-colors duration-300">
                             <div className="flex items-center space-x-3 mb-6">
-                                <div className="p-1 bg-orange-100 rounded-lg">
-                                    <TrendingUp className="w-4 h-4 text-orange-600" />
+                                <div className="p-1 bg-orange-100 dark:bg-orange-500/20 rounded-lg">
+                                    <TrendingUp className="w-4 h-4 text-orange-600 dark:text-orange-400" />
                                 </div>
-                                <h2 className="text-sm font-black uppercase tracking-[0.2em] text-gray-900">Throughput</h2>
+                                <h2 className="text-sm font-black uppercase tracking-[0.2em] text-gray-900 dark:text-white">Throughput</h2>
                             </div>
                             <div className="flex items-center space-x-4 mb-4">
-                                <div className="h-16 w-full bg-gray-50 rounded-2xl flex items-end justify-between p-2 gap-1 overflow-hidden">
+                                <div className="h-16 w-full bg-gray-50 dark:bg-slate-900/50 rounded-2xl flex items-end justify-between p-2 gap-1 overflow-hidden border border-gray-100 dark:border-slate-700/50 transition-colors">
                                     {[40, 70, 45, 90, 65, 80, 50, 85, 95, 60].map((h, i) => (
-                                        <div key={i} className="w-full bg-blue-100 rounded-sm group-hover:bg-blue-200 transition-colors" style={{ height: `${h}%` }}></div>
+                                        <div key={i} className="w-full bg-blue-100 dark:bg-blue-500/30 rounded-sm group-hover:bg-blue-200 dark:group-hover:bg-blue-500/50 transition-colors" style={{ height: `${h}%` }}></div>
                                     ))}
                                 </div>
                             </div>
-                            <p className="text-xs font-medium text-gray-500 text-center">Average response time: <span className="text-gray-900 font-black">124ms</span></p>
+                            <p className="text-xs font-medium text-gray-500 dark:text-slate-400 text-center">Average response time: <span className="text-gray-900 dark:text-white font-black">124ms</span></p>
                         </section>
                     </div>
                 </div>
