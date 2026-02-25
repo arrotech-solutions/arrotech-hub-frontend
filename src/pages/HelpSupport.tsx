@@ -237,7 +237,7 @@ const HelpSupport: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+        <div className="min-h-screen bg-transparent transition-colors">
             <SEO
                 title="Help Center"
                 description="Get help with Arrotech Hub. Browse FAQs, contact support, or join our community. We're here to help you succeed."
@@ -246,8 +246,9 @@ const HelpSupport: React.FC = () => {
                 schema={{
                     "@context": "https://schema.org",
                     "@type": "FAQPage",
-                    "mainEntity": faqCategories.flatMap(category =>
-                        category.faqs.map(faq => ({
+                    "mainEntity": faqCategories.reduce((acc: any[], category: any) => [
+                        ...acc,
+                        ...category.faqs.map((faq: any) => ({
                             "@type": "Question",
                             "name": faq.question,
                             "acceptedAnswer": {
@@ -255,27 +256,27 @@ const HelpSupport: React.FC = () => {
                                 "text": faq.answer
                             }
                         }))
-                    )
+                    ], [])
                 }}
             />
             {/* Hero Section */}
-            <div className="bg-gradient-to-r from-primary-600 to-primary-700 text-white">
+            <div className="bg-transparent transition-colors text-slate-900 dark:text-white pb-6 pt-8">
                 <div className="max-w-5xl mx-auto px-4 py-16 text-center">
-                    <Headphones className="w-16 h-16 mx-auto mb-6 opacity-90" />
-                    <h1 className="text-4xl font-bold mb-4">How can we help you?</h1>
-                    <p className="text-lg text-primary-100 mb-8 max-w-2xl mx-auto">
+                    <Headphones className="w-16 h-16 mx-auto mb-6 opacity-90 text-blue-600 dark:text-blue-400" />
+                    <h1 className="text-4xl font-bold mb-4 tracking-tight">How can we help you?</h1>
+                    <p className="text-lg text-slate-600 dark:text-slate-300 mb-8 max-w-2xl mx-auto transition-colors">
                         Search our knowledge base or browse FAQs. Can't find what you need? We're here to help.
                     </p>
 
                     {/* Search Bar */}
-                    <div className="max-w-xl mx-auto relative">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                    <div className="max-w-xl mx-auto relative group">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 dark:text-slate-500 group-focus-within:text-blue-500 transition-colors" />
                         <input
                             type="text"
                             placeholder="Search for help (e.g., 'withdraw earnings', 'connect TikTok')"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-12 pr-4 py-4 rounded-xl text-slate-900 placeholder-slate-400 shadow-lg focus:ring-4 focus:ring-white/30 focus:outline-none"
+                            className="w-full pl-12 pr-4 py-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 shadow-lg focus:ring-4 focus:ring-blue-500/20 dark:focus:ring-blue-500/10 focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none transition-all"
                         />
                     </div>
                 </div>
@@ -292,17 +293,17 @@ const HelpSupport: React.FC = () => {
                                 e.preventDefault();
                                 setShowContactForm(true);
                             } : undefined}
-                            className="bg-white rounded-xl p-6 shadow-lg border border-slate-100 hover:shadow-xl transition-shadow group"
+                            className="bg-white/80 dark:bg-slate-800/40 backdrop-blur-md rounded-xl p-6 shadow-lg border border-slate-100 dark:border-slate-700/50 hover:shadow-xl dark:hover:shadow-2xl transition-all group hover:-translate-y-1"
                         >
                             <div className="flex items-start gap-4">
-                                <div className="p-3 bg-primary-50 rounded-lg text-primary-600 group-hover:bg-primary-100 transition-colors">
+                                <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg text-blue-600 dark:text-blue-400 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/40 transition-colors shadow-sm">
                                     <option.icon className="w-6 h-6" />
                                 </div>
                                 <div className="flex-1">
-                                    <h3 className="font-semibold text-slate-900">{option.title}</h3>
-                                    <p className="text-sm text-slate-500">{option.description}</p>
-                                    <p className="text-sm font-medium text-primary-600 mt-1">{option.detail}</p>
-                                    <div className="flex items-center gap-1 mt-2 text-xs text-slate-400">
+                                    <h3 className="font-semibold text-slate-900 dark:text-white transition-colors">{option.title}</h3>
+                                    <p className="text-sm text-slate-500 dark:text-slate-400 transition-colors">{option.description}</p>
+                                    <p className="text-sm font-medium text-blue-600 dark:text-blue-400 mt-1 transition-colors">{option.detail}</p>
+                                    <div className="flex items-center gap-1 mt-2 text-xs text-slate-400 dark:text-slate-500 transition-colors">
                                         <Clock className="w-3 h-3" />
                                         {option.responseTime}
                                     </div>
@@ -319,9 +320,9 @@ const HelpSupport: React.FC = () => {
                 <div className="flex flex-wrap gap-2 mb-8 justify-center">
                     <button
                         onClick={() => setActiveCategory(null)}
-                        className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${activeCategory === null
-                            ? 'bg-primary-600 text-white'
-                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                        className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${activeCategory === null
+                            ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-md transform hover:scale-105'
+                            : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50'
                             }`}
                     >
                         All Topics
@@ -330,9 +331,9 @@ const HelpSupport: React.FC = () => {
                         <button
                             key={category.id}
                             onClick={() => setActiveCategory(category.id)}
-                            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2 ${activeCategory === category.id
-                                ? 'bg-primary-600 text-white'
-                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                            className={`px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 ${activeCategory === category.id
+                                ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-md transform hover:scale-105'
+                                : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50'
                                 }`}
                         >
                             <category.icon className="w-4 h-4" />
@@ -346,35 +347,35 @@ const HelpSupport: React.FC = () => {
                     {(searchQuery ? filteredCategories : faqCategories)
                         .filter(category => !activeCategory || category.id === activeCategory)
                         .map(category => (
-                            <div key={category.id} className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                                <div className="bg-slate-50 px-6 py-4 border-b border-slate-100 flex items-center gap-3">
-                                    <div className="p-2 bg-white rounded-lg shadow-sm">
-                                        <category.icon className="w-5 h-5 text-primary-600" />
+                            <div key={category.id} className="bg-white dark:bg-slate-900/50 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden transition-colors">
+                                <div className="bg-slate-50 dark:bg-slate-800/50 px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3 transition-colors">
+                                    <div className="p-2 bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-slate-100 dark:border-slate-700 transition-colors">
+                                        <category.icon className="w-5 h-5 text-primary-600 dark:text-primary-400 transition-colors" />
                                     </div>
-                                    <h2 className="text-lg font-semibold text-slate-900">{category.title}</h2>
+                                    <h2 className="text-lg font-semibold text-slate-900 dark:text-white transition-colors">{category.title}</h2>
                                 </div>
-                                <div className="divide-y divide-slate-100">
+                                <div className="divide-y divide-slate-100 dark:divide-slate-800 transition-colors">
                                     {category.faqs.map((faq, index) => {
                                         const key = `${category.id}-${index}`;
                                         const isExpanded = expandedFaqs.has(key);
                                         return (
-                                            <div key={index} className="hover:bg-slate-50 transition-colors">
+                                            <div key={index} className="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
                                                 <button
                                                     onClick={() => toggleFaq(category.id, index)}
-                                                    className="w-full px-6 py-4 text-left flex items-center justify-between gap-4"
+                                                    className="w-full px-6 py-4 text-left flex items-center justify-between gap-4 group"
                                                 >
-                                                    <span className="font-medium text-slate-900 flex items-center gap-3">
-                                                        <HelpCircle className="w-5 h-5 text-slate-400 flex-shrink-0" />
+                                                    <span className="font-medium text-slate-900 dark:text-slate-200 flex items-center gap-3 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                                                        <HelpCircle className="w-5 h-5 text-slate-400 dark:text-slate-500 flex-shrink-0 transition-colors" />
                                                         {faq.question}
                                                     </span>
                                                     {isExpanded ? (
-                                                        <ChevronUp className="w-5 h-5 text-slate-400 flex-shrink-0" />
+                                                        <ChevronUp className="w-5 h-5 text-slate-400 dark:text-slate-500 flex-shrink-0 transition-all" />
                                                     ) : (
-                                                        <ChevronDown className="w-5 h-5 text-slate-400 flex-shrink-0" />
+                                                        <ChevronDown className="w-5 h-5 text-slate-400 dark:text-slate-500 flex-shrink-0 transition-all" />
                                                     )}
                                                 </button>
                                                 {isExpanded && (
-                                                    <div className="px-6 pb-4 pl-14 text-slate-600 leading-relaxed">
+                                                    <div className="px-6 pb-4 pl-14 text-slate-600 dark:text-slate-400 leading-relaxed transition-colors">
                                                         {faq.answer}
                                                     </div>
                                                 )}
@@ -389,13 +390,15 @@ const HelpSupport: React.FC = () => {
                 {/* No Results */}
                 {searchQuery && filteredCategories.length === 0 && (
                     <div className="text-center py-12">
-                        <HelpCircle className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                        <h3 className="text-lg font-medium text-slate-700">No results found</h3>
-                        <p className="text-slate-500 mt-2">
+                        <div className="p-4 bg-slate-100 dark:bg-slate-800 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center transition-colors">
+                            <HelpCircle className="w-10 h-10 text-slate-400 dark:text-slate-500" />
+                        </div>
+                        <h3 className="text-lg font-medium text-slate-700 dark:text-slate-300 transition-colors">No results found</h3>
+                        <p className="text-slate-500 dark:text-slate-400 mt-2 transition-colors">
                             Can't find what you're looking for?{' '}
                             <button
                                 onClick={() => setShowContactForm(true)}
-                                className="text-primary-600 hover:underline"
+                                className="text-blue-600 dark:text-blue-400 hover:underline font-medium transition-colors"
                             >
                                 Contact our support team
                             </button>
@@ -404,16 +407,16 @@ const HelpSupport: React.FC = () => {
                 )}
 
                 {/* Still Need Help CTA */}
-                <div className="mt-12 bg-gradient-to-r from-primary-50 to-blue-50 rounded-2xl p-8 text-center border border-primary-100">
-                    <Book className="w-12 h-12 text-primary-600 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold text-slate-900 mb-2">Still need help?</h3>
-                    <p className="text-slate-600 mb-6 max-w-lg mx-auto">
+                <div className="mt-12 bg-slate-900 dark:bg-slate-800/80 rounded-2xl p-8 text-center border border-slate-800 dark:border-slate-700 shadow-xl transition-all">
+                    <Book className="w-12 h-12 text-blue-400 mx-auto mb-4 animate-pulse" />
+                    <h3 className="text-xl font-semibold text-white mb-2">Still need help?</h3>
+                    <p className="text-slate-400 dark:text-slate-300 mb-6 max-w-lg mx-auto transition-colors">
                         Our support team is here to help you get the most out of Arrotech Hub.
                         We typically respond within 24 hours.
                     </p>
                     <button
                         onClick={() => setShowContactForm(true)}
-                        className="px-6 py-3 bg-primary-600 text-white font-medium rounded-xl hover:bg-primary-700 transition-colors inline-flex items-center gap-2"
+                        className="px-6 py-3 bg-white dark:bg-slate-100 text-slate-900 font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-white shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all inline-flex items-center gap-2"
                     >
                         <Mail className="w-5 h-5" />
                         Contact Support
@@ -423,10 +426,10 @@ const HelpSupport: React.FC = () => {
 
             {/* Contact Form Modal */}
             {showContactForm && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl w-full max-w-lg shadow-xl">
-                        <div className="p-6 border-b border-slate-100">
-                            <h3 className="text-xl font-semibold text-slate-900">Contact Support</h3>
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-all">
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-lg shadow-xl border border-slate-200 dark:border-slate-800 transition-colors">
+                        <div className="p-6 border-b border-slate-100 dark:border-slate-800 transition-colors">
+                            <h3 className="text-xl font-semibold text-slate-900 dark:text-white transition-colors">Contact Support</h3>
                             <p className="text-sm text-slate-500 mt-1">
                                 We'll get back to you at support@arrotechsolutions.com
                             </p>
@@ -434,7 +437,7 @@ const HelpSupport: React.FC = () => {
                         <form onSubmit={handleSubmitTicket} className="p-6 space-y-4">
                             <div className="grid md:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 transition-colors">
                                         Your Name
                                     </label>
                                     <input
@@ -442,11 +445,11 @@ const HelpSupport: React.FC = () => {
                                         value={contactForm.name}
                                         onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
                                         placeholder="John Doe"
-                                        className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                        className="w-full px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 transition-colors">
                                         Email Address <span className="text-red-500">*</span>
                                     </label>
                                     <input
@@ -455,31 +458,31 @@ const HelpSupport: React.FC = () => {
                                         onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
                                         placeholder="you@example.com"
                                         required
-                                        className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                        className="w-full px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
                                     />
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 transition-colors">
                                     Subject
                                 </label>
                                 <select
                                     value={contactForm.subject}
                                     onChange={(e) => setContactForm({ ...contactForm, subject: e.target.value })}
-                                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                    className="w-full px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500/50 focus:border-transparent transition-colors"
                                 >
-                                    <option value="">Select a topic...</option>
-                                    <option value="Account Issue">Account Issue</option>
-                                    <option value="TikTok Monetization">TikTok Monetization</option>
-                                    <option value="Payment / Withdrawal">Payment / Withdrawal</option>
-                                    <option value="Integration Problem">Integration Problem</option>
-                                    <option value="Feature Request">Feature Request</option>
-                                    <option value="Bug Report">Bug Report</option>
-                                    <option value="Other">Other</option>
+                                    <option value="" className="bg-white dark:bg-slate-900">Select a topic...</option>
+                                    <option value="Account Issue" className="bg-white dark:bg-slate-900">Account Issue</option>
+                                    <option value="TikTok Monetization" className="bg-white dark:bg-slate-900">TikTok Monetization</option>
+                                    <option value="Payment / Withdrawal" className="bg-white dark:bg-slate-900">Payment / Withdrawal</option>
+                                    <option value="Integration Problem" className="bg-white dark:bg-slate-900">Integration Problem</option>
+                                    <option value="Feature Request" className="bg-white dark:bg-slate-900">Feature Request</option>
+                                    <option value="Bug Report" className="bg-white dark:bg-slate-900">Bug Report</option>
+                                    <option value="Other" className="bg-white dark:bg-slate-900">Other</option>
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 transition-colors">
                                     Message <span className="text-red-500">*</span>
                                 </label>
                                 <textarea
@@ -488,21 +491,21 @@ const HelpSupport: React.FC = () => {
                                     placeholder="Describe your issue or question in detail..."
                                     rows={5}
                                     required
-                                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
+                                    className="w-full px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500/50 focus:border-transparent resize-none transition-colors"
                                 />
                             </div>
                             <div className="flex gap-3 pt-4">
                                 <button
                                     type="button"
                                     onClick={() => setShowContactForm(false)}
-                                    className="flex-1 px-4 py-2 border border-slate-200 rounded-lg font-medium hover:bg-slate-50 transition-colors"
+                                    className="flex-1 px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={submitting}
-                                    className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                                    className="flex-1 px-4 py-2 bg-slate-900 dark:bg-blue-600 text-white rounded-xl font-bold hover:bg-slate-800 dark:hover:bg-blue-500 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-50 flex items-center justify-center gap-2"
                                 >
                                     {submitting ? (
                                         <>Sending...</>
@@ -520,20 +523,20 @@ const HelpSupport: React.FC = () => {
             )}
 
             {/* Footer */}
-            <div className="bg-slate-50 border-t border-slate-100 mt-12">
+            <div className="bg-transparent mt-12 transition-colors">
                 <div className="max-w-5xl mx-auto px-4 py-8 text-center">
-                    <p className="text-slate-600">
+                    <p className="text-slate-600 dark:text-slate-400 transition-colors">
                         Need urgent help? Email us directly at{' '}
-                        <a href="mailto:support@arrotechsolutions.com" className="text-primary-600 font-medium hover:underline">
+                        <a href="mailto:support@arrotechsolutions.com" className="text-primary-600 dark:text-primary-400 font-medium hover:underline transition-colors">
                             support@arrotechsolutions.com
                         </a>
                     </p>
-                    <div className="flex items-center justify-center gap-6 mt-4 text-sm text-slate-500">
-                        <Link to="/privacy" className="hover:text-primary-600">Privacy Policy</Link>
+                    <div className="flex items-center justify-center gap-6 mt-4 text-sm text-slate-500 dark:text-slate-400 transition-colors">
+                        <Link to="/privacy" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Privacy Policy</Link>
                         <span>•</span>
-                        <Link to="/terms" className="hover:text-primary-600">Terms of Service</Link>
+                        <Link to="/terms" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Terms of Service</Link>
                         <span>•</span>
-                        <Link to="/" className="hover:text-primary-600">Back to Home</Link>
+                        <Link to="/" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Back to Home</Link>
                     </div>
                 </div>
             </div>

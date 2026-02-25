@@ -174,37 +174,37 @@ const TaskWidget: React.FC<TaskWidgetProps> = ({ openModalTrigger }) => {
 
   const getPlatformIcon = (platform: string) => {
     switch (platform) {
-      case 'clickup': return <span className="text-[10px] font-bold text-purple-600 bg-purple-100 px-1.5 py-0.5 rounded">CU</span>;
-      case 'asana': return <span className="text-[10px] font-bold text-red-600 bg-red-100 px-1.5 py-0.5 rounded">AS</span>;
-      default: return <span className="text-[10px] font-bold text-gray-600 bg-gray-100 px-1.5 py-0.5 rounded">TASK</span>;
+      case 'clickup': return <span className="text-[10px] font-bold text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-500/20 px-2 py-0.5 rounded-full uppercase tracking-tighter">CU</span>;
+      case 'asana': return <span className="text-[10px] font-bold text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-500/20 px-2 py-0.5 rounded-full uppercase tracking-tighter">AS</span>;
+      default: return <span className="text-[10px] font-bold text-gray-600 dark:text-slate-400 bg-gray-100 dark:bg-slate-800 px-2 py-0.5 rounded-full uppercase tracking-tighter">TASK</span>;
     }
   };
 
   const getPriorityColor = (priority: string) => {
     // ClickUp priorities: urgent (red), high (yellow), normal (cyan), low (grey)
     // Normalized to high/medium/low
-    if (['urgent', 'high'].includes(priority)) return 'bg-red-50 text-red-600';
-    if (['normal', 'medium'].includes(priority)) return 'bg-orange-50 text-orange-600';
-    return 'bg-blue-50 text-blue-600';
+    if (['urgent', 'high'].includes(priority)) return 'bg-red-50 dark:bg-red-500/20 text-red-600 dark:text-red-400';
+    if (['normal', 'medium'].includes(priority)) return 'bg-orange-50 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400';
+    return 'bg-blue-50 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400';
   }
 
   return (
     <>
-      <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-100 flex flex-col h-full transition-all duration-300 hover:shadow-md min-h-[300px]">
+      <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 flex flex-col h-full transition-all duration-300 hover:shadow-md min-h-[300px]">
         {/* Header */}
-        <div className="p-5 border-b border-gray-100 flex items-center justify-between bg-white/50 rounded-t-2xl">
-          <div className="flex items-center space-x-2">
-            <div className="p-2 bg-emerald-50 rounded-lg">
-              <CheckCircle className="w-5 h-5 text-emerald-600" />
+        <div className="p-5 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between bg-white/50 dark:bg-slate-900/50 rounded-t-2xl">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-emerald-50 dark:bg-emerald-500/20 rounded-xl">
+              <CheckCircle className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
             </div>
-            <h2 className="text-lg font-bold text-gray-900 tracking-tight">Task Hub</h2>
-            <span className="bg-emerald-100 text-emerald-700 text-xs px-2.5 py-1 rounded-full font-medium">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white tracking-tight">Task Hub</h2>
+            <span className="bg-emerald-100 dark:bg-emerald-500/30 text-emerald-700 dark:text-emerald-300 text-[10px] px-2.5 py-1 rounded-full font-bold uppercase tracking-wider">
               {tasks.length} active
             </span>
           </div>
           <button
             onClick={addNewTask}
-            className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all duration-200"
+            className="p-2 text-gray-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all duration-200"
           >
             <Plus className="w-4 h-4" />
           </button>
@@ -212,45 +212,50 @@ const TaskWidget: React.FC<TaskWidgetProps> = ({ openModalTrigger }) => {
 
         <div className="flex-1 overflow-y-auto p-2 space-y-1">
           {loading ? (
-            <div className="flex items-center justify-center h-full">
+            <div className="flex items-center justify-center h-full py-12">
               <Loader2 className="w-6 h-6 text-emerald-500 animate-spin" />
             </div>
           ) : tasks.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-gray-400 text-sm">
-              <p>No tasks found.</p>
-              <p className="text-xs mt-1">Connect ClickUp or add a task.</p>
+            <div className="flex flex-col items-center justify-center h-full text-gray-400 dark:text-slate-600 space-y-3">
+              <div className="p-4 bg-gray-50 dark:bg-slate-800/50 rounded-2xl">
+                <CheckCircle className="w-8 h-8 opacity-40" />
+              </div>
+              <div className="text-center">
+                <p className="text-[10px] font-bold uppercase tracking-widest">Workspace Clear</p>
+                <p className="text-[9px] font-medium mt-1">Connect ClickUp or add a task to begin.</p>
+              </div>
             </div>
           ) : (
             tasks.map((task) => (
               <div
                 key={task.id}
-                className="group p-3 rounded-xl border border-transparent hover:bg-emerald-50/50 hover:border-emerald-100 transition-all flex items-start space-x-3 cursor-pointer"
+                className="group p-4 rounded-2xl border border-transparent hover:bg-emerald-50/50 dark:hover:bg-emerald-500/10 hover:border-emerald-100 dark:hover:border-emerald-500/20 transition-all flex items-start space-x-4 cursor-pointer"
               >
                 <button
                   onClick={() => toggleTask(task.id)}
-                  className="mt-1 w-5 h-5 rounded-md border-2 border-gray-300 hover:border-emerald-500 flex items-center justify-center transition-colors"
+                  className="mt-1 w-5 h-5 rounded-lg border-2 border-gray-300 dark:border-slate-700 hover:border-emerald-500 dark:hover:border-emerald-400 flex items-center justify-center transition-all bg-white dark:bg-slate-800 shadow-sm"
                 >
                 </button>
                 <div className="flex-1">
                   <div className="flex items-center space-x-2 mb-0.5">
                     {getPlatformIcon(task.platform)}
-                    <span className="text-sm font-medium text-gray-900 line-clamp-1">
+                    <span className="text-sm font-bold text-gray-900 dark:text-white line-clamp-1 tracking-tight">
                       {task.title}
                     </span>
                   </div>
 
-                  <div className="flex items-center space-x-2 mt-1">
-                    <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${getPriorityColor(task.priority || '')}`}>
+                  <div className="flex items-center space-x-3 mt-2">
+                    <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${getPriorityColor(task.priority || '')}`}>
                       {task.priority || 'Normal'}
                     </span>
-                    <span className="text-xs text-gray-400">{task.dueDate}</span>
+                    <span className="text-[10px] text-gray-400 dark:text-slate-500 font-bold uppercase tracking-tighter">{task.dueDate}</span>
                   </div>
                 </div>
                 <button
                   onClick={() => deleteTask(task.id)}
-                  className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                  className="p-2 text-gray-300 dark:text-slate-600 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-all active:scale-90"
                 >
-                  <Trash className="w-3.5 h-3.5" />
+                  <Trash className="w-4 h-4" />
                 </button>
               </div>
             ))

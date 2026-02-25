@@ -274,11 +274,11 @@ const Activity: React.FC = () => {
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case 'success': return <CheckCircle className="w-4 h-4 text-green-600" />;
-      case 'error': return <AlertCircle className="w-4 h-4 text-red-600" />;
-      case 'warning': return <AlertTriangle className="w-4 h-4 text-yellow-600" />;
-      case 'info': return <Info className="w-4 h-4 text-blue-600" />;
-      default: return <ActivityIcon className="w-4 h-4 text-gray-600" />;
+      case 'success': return <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400" />;
+      case 'error': return <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400" />;
+      case 'warning': return <AlertTriangle className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />;
+      case 'info': return <Info className="w-4 h-4 text-blue-600 dark:text-blue-400" />;
+      default: return <ActivityIcon className="w-4 h-4 text-gray-600 dark:text-slate-400" />;
     }
   };
 
@@ -297,21 +297,21 @@ const Activity: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return 'bg-green-100 text-green-800 border-green-200';
-      case 'running': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'failed': return 'bg-red-100 text-red-800 border-red-200';
-      case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+      case 'completed': return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 border-green-200 dark:border-green-800/50';
+      case 'running': return 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400 border-blue-200 dark:border-blue-800/50';
+      case 'failed': return 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400 border-red-200 dark:border-red-800/50';
+      case 'pending': return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800/50';
+      default: return 'bg-gray-100 dark:bg-slate-800 text-gray-800 dark:text-slate-300 border-gray-200 dark:border-slate-700';
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'critical': return 'bg-red-100 text-red-800 border-red-200';
-      case 'high': return 'bg-orange-100 text-orange-800 border-orange-200';
-      case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'low': return 'bg-green-100 text-green-800 border-green-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+      case 'critical': return 'bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-400 border-red-200 dark:border-red-800/50';
+      case 'high': return 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-400 border-orange-200 dark:border-orange-800/50';
+      case 'medium': return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800/50';
+      case 'low': return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 border-green-200 dark:border-green-800/50';
+      default: return 'bg-gray-100 dark:bg-slate-800 text-gray-800 dark:text-slate-300 border-gray-200 dark:border-slate-700';
     }
   };
 
@@ -347,26 +347,26 @@ const Activity: React.FC = () => {
   };
 
   const renderActivityCard = (activity: ActivityItem) => (
-    <div key={activity.id} className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-200 hover:border-blue-300 group">
+    <div key={activity.id} className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700/50 hover:shadow-lg transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-500/50 group">
       <div className="p-6">
         {/* Header */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center space-x-3">
-            <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
+            <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg shadow-sm">
               {getCategoryIcon(activity.category)}
             </div>
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                 {activity.title}
               </h3>
-              <p className="text-sm text-gray-600 mt-1">{activity.description}</p>
+              <p className="text-sm text-gray-600 dark:text-slate-400 mt-1 transition-colors">{activity.description}</p>
             </div>
           </div>
           <div className="flex items-center space-x-2">
             {getTypeIcon(activity.type)}
             <button
               onClick={() => toggleExpandedItem(activity.id)}
-              className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+              className="p-1 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 transition-colors"
             >
               {expandedItems.has(activity.id) ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
             </button>
@@ -390,14 +390,14 @@ const Activity: React.FC = () => {
         </div>
 
         {/* Metadata */}
-        <div className="flex items-center justify-between text-xs text-gray-500">
+        <div className="flex items-center justify-between text-xs text-gray-500 dark:text-slate-500">
           <div className="flex items-center space-x-4">
-            <span className="flex items-center space-x-1">
+            <span className="flex items-center space-x-1 transition-colors">
               <Clock className="w-3 h-3" />
               <span>{formatTimestamp(activity.timestamp)}</span>
             </span>
             {activity.user && (
-              <span className="flex items-center space-x-1">
+              <span className="flex items-center space-x-1 transition-colors">
                 <Users className="w-3 h-3" />
                 <span>{activity.user}</span>
               </span>
@@ -407,13 +407,13 @@ const Activity: React.FC = () => {
 
         {/* Expanded Details */}
         {expandedItems.has(activity.id) && activity.metadata && (
-          <div className="mt-4 pt-4 border-t border-gray-100">
-            <h4 className="text-sm font-medium text-gray-900 mb-2">Details</h4>
+          <div className="mt-4 pt-4 border-t border-gray-100 dark:border-slate-700/50 transition-colors">
+            <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2 transition-colors">Details</h4>
             <div className="grid grid-cols-2 gap-3">
               {Object.entries(activity.metadata).map(([key, value]) => (
                 <div key={key} className="text-xs">
-                  <span className="font-medium text-gray-700 capitalize">{key.replace(/_/g, ' ')}:</span>
-                  <span className="ml-1 text-gray-600">{String(value)}</span>
+                  <span className="font-medium text-gray-700 dark:text-slate-300 capitalize transition-colors">{key.replace(/_/g, ' ')}:</span>
+                  <span className="ml-1 text-gray-600 dark:text-slate-400 transition-colors">{String(value)}</span>
                 </div>
               ))}
             </div>
@@ -426,12 +426,12 @@ const Activity: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 transition-colors">
         <div className="max-w-7xl mx-auto p-6">
           <div className="flex items-center justify-center py-16">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading activity data...</p>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400 mx-auto mb-4"></div>
+              <p className="text-gray-600 dark:text-slate-400 transition-colors">Loading activity data...</p>
             </div>
           </div>
         </div>
@@ -440,26 +440,26 @@ const Activity: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-indigo-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 transition-colors">
       <div className="max-w-7xl mx-auto p-6 md:p-10">
         {/* Header with Mesh Gradient */}
-        <div className="relative overflow-hidden bg-white rounded-3xl border border-gray-200 shadow-sm mb-8">
-          <div className="absolute top-0 right-0 -mt-20 -mr-20 w-80 h-80 bg-blue-400/20 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-64 h-64 bg-indigo-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div className="relative overflow-hidden bg-white dark:bg-slate-800 rounded-3xl border border-gray-200 dark:border-slate-700/50 shadow-sm mb-8 transition-colors">
+          <div className="absolute top-0 right-0 -mt-20 -mr-20 w-80 h-80 bg-blue-400/20 dark:bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-64 h-64 bg-indigo-400/20 dark:bg-indigo-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
 
           <div className="relative px-8 py-10 activity-header">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
               <div className="flex-1 text-center sm:text-left">
                 <div className="flex items-center justify-center sm:justify-start space-x-2 mb-3">
-                  <div className="p-1.5 bg-blue-100/80 rounded-lg">
-                    <Sparkles className="w-4 h-4 text-blue-600" />
+                  <div className="p-1.5 bg-blue-100/80 dark:bg-blue-900/30 rounded-lg transition-colors">
+                    <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                   </div>
-                  <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">System Telemetry</span>
+                  <span className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider transition-colors">System Telemetry</span>
                 </div>
-                <h1 className="text-3xl sm:text-4xl font-black text-gray-900 mb-2 tracking-tight">
-                  Activity <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Monitor</span>
+                <h1 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mb-2 tracking-tight transition-colors">
+                  Activity <span className="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">Monitor</span>
                 </h1>
-                <p className="text-gray-500 max-w-md font-medium mx-auto sm:mx-0">
+                <p className="text-gray-500 dark:text-slate-400 max-w-md font-medium mx-auto sm:mx-0 transition-colors">
                   Track system performance, audit logs, and workflow executions in real-time.
                 </p>
               </div>
@@ -467,19 +467,19 @@ const Activity: React.FC = () => {
                 <button
                   onClick={handleRefresh}
                   disabled={loading}
-                  className="flex items-center space-x-2 px-6 py-4 bg-white text-gray-700 rounded-2xl border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 shadow-sm group disabled:opacity-50"
+                  className="flex items-center space-x-2 px-6 py-4 bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-200 rounded-2xl border border-gray-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-500/50 hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-all duration-200 shadow-sm group disabled:opacity-50"
                 >
                   <RefreshCw className={`w-5 h-5 group-hover:rotate-180 transition-transform duration-500 ${loading ? 'animate-spin' : ''}`} />
                   <span className="font-bold">Refresh</span>
                 </button>
-                <label className="flex items-center space-x-3 px-4 py-2 bg-gray-50 rounded-xl border border-gray-100 cursor-pointer hover:bg-gray-100 transition-colors">
+                <label className="flex items-center space-x-3 px-4 py-2 bg-gray-50 dark:bg-slate-900/50 rounded-xl border border-gray-100 dark:border-slate-700/50 cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors">
                   <input
                     type="checkbox"
                     checked={autoRefresh}
                     onChange={(e) => setAutoRefresh(e.target.checked)}
-                    className="w-5 h-5 text-blue-600 border-gray-300 rounded-lg focus:ring-blue-500 focus:ring-offset-0"
+                    className="w-5 h-5 text-blue-600 dark:text-blue-500 border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg focus:ring-blue-500 focus:ring-offset-0 transition-colors"
                   />
-                  <span className="text-sm font-bold text-gray-600 whitespace-nowrap">Auto refresh</span>
+                  <span className="text-sm font-bold text-gray-600 dark:text-slate-400 whitespace-nowrap transition-colors">Auto refresh</span>
                 </label>
               </div>
             </div>
@@ -496,22 +496,22 @@ const Activity: React.FC = () => {
           ].map((metric, idx) => {
             const Icon = metric.icon;
             return (
-              <div key={idx} className="relative group overflow-hidden bg-white/60 backdrop-blur-xl rounded-2xl p-6 border border-white/50 shadow-sm hover:shadow-xl transition-all duration-500">
-                <div className={`absolute top-0 right-0 w-24 h-24 ${metric.bgColor}/10 rounded-full -mr-12 -mt-12 blur-2xl group-hover:blur-3xl transition-all duration-500`}></div>
+              <div key={idx} className="relative group overflow-hidden bg-white/60 dark:bg-slate-800/40 backdrop-blur-xl rounded-2xl p-6 border border-white/50 dark:border-slate-700/50 shadow-sm hover:shadow-xl transition-all duration-500">
+                <div className={`absolute top-0 right-0 w-24 h-24 ${metric.bgColor}/10 dark:${metric.bgColor}/5 rounded-full -mr-12 -mt-12 blur-2xl group-hover:blur-3xl transition-all duration-500`}></div>
                 <div className="relative flex items-center justify-between mb-4">
                   <div>
-                    <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">{metric.label}</p>
-                    <p className="text-3xl font-black text-gray-900 tracking-tight">{metric.value}</p>
+                    <p className="text-xs font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-1 transition-colors">{metric.label}</p>
+                    <p className="text-3xl font-black text-gray-900 dark:text-white tracking-tight transition-colors">{metric.value}</p>
                   </div>
-                  <div className={`p-3 rounded-xl bg-white shadow-sm border border-gray-100 group-hover:scale-110 transition-transform duration-500 group-hover:shadow-md ${metric.color === 'blue' ? 'text-blue-600' :
-                    metric.color === 'emerald' ? 'text-emerald-600' :
-                      metric.color === 'purple' ? 'text-purple-600' :
-                        'text-red-600'
+                  <div className={`p-3 rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-gray-100 dark:border-slate-700 group-hover:scale-110 transition-all duration-500 group-hover:shadow-md ${metric.color === 'blue' ? 'text-blue-600 dark:text-blue-400' :
+                    metric.color === 'emerald' ? 'text-emerald-600 dark:text-emerald-400' :
+                      metric.color === 'purple' ? 'text-purple-600 dark:text-purple-400' :
+                        'text-red-600 dark:text-red-400'
                     }`}>
                     <Icon className="w-6 h-6" />
                   </div>
                 </div>
-                <div className="relative w-full bg-gray-200/50 rounded-full h-1.5 overflow-hidden">
+                <div className="relative w-full bg-gray-200/50 dark:bg-slate-700/50 rounded-full h-1.5 overflow-hidden transition-colors">
                   <div
                     className={`h-1.5 rounded-full transition-all duration-1000 ${metric.color === 'blue' ? 'bg-blue-600' :
                       metric.color === 'emerald' ? 'bg-emerald-600' :
@@ -536,17 +536,17 @@ const Activity: React.FC = () => {
           ].map((stat, idx) => {
             const Icon = stat.icon;
             return (
-              <div key={idx} className="relative group overflow-hidden bg-white/60 backdrop-blur-xl rounded-2xl p-6 border border-white/50 shadow-sm hover:shadow-xl transition-all duration-500">
-                <div className={`absolute top-0 right-0 w-24 h-24 ${stat.bgColor}/10 rounded-full -mr-12 -mt-12 blur-2xl group-hover:blur-3xl transition-all duration-500`}></div>
+              <div key={idx} className="relative group overflow-hidden bg-white/60 dark:bg-slate-800/40 backdrop-blur-xl rounded-2xl p-6 border border-white/50 dark:border-slate-700/50 shadow-sm hover:shadow-xl transition-all duration-500">
+                <div className={`absolute top-0 right-0 w-24 h-24 ${stat.bgColor}/10 dark:${stat.bgColor}/5 rounded-full -mr-12 -mt-12 blur-2xl group-hover:blur-3xl transition-all duration-500`}></div>
                 <div className="relative flex items-center justify-between">
                   <div>
-                    <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">{stat.label}</p>
-                    <p className="text-3xl font-black text-gray-900 tracking-tight">{stat.value}</p>
+                    <p className="text-xs font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-1 transition-colors">{stat.label}</p>
+                    <p className="text-3xl font-black text-gray-900 dark:text-white tracking-tight transition-colors">{stat.value}</p>
                   </div>
-                  <div className={`p-3 rounded-xl bg-white shadow-sm border border-gray-100 group-hover:scale-110 transition-transform duration-500 group-hover:shadow-md ${stat.color === 'blue' ? 'text-blue-600' :
-                    stat.color === 'emerald' ? 'text-emerald-600' :
-                      stat.color === 'red' ? 'text-red-600' :
-                        'text-indigo-600'
+                  <div className={`p-3 rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-gray-100 dark:border-slate-700 group-hover:scale-110 transition-all duration-500 group-hover:shadow-md ${stat.color === 'blue' ? 'text-blue-600 dark:text-blue-400' :
+                    stat.color === 'emerald' ? 'text-emerald-600 dark:text-emerald-400' :
+                      stat.color === 'red' ? 'text-red-600 dark:text-red-400' :
+                        'text-indigo-600 dark:text-indigo-400'
                     }`}>
                     <Icon className="w-6 h-6" />
                   </div>
@@ -557,44 +557,44 @@ const Activity: React.FC = () => {
         </div>
 
         {/* Filters and Search */}
-        <div className="activity-filters bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 mb-6">
+        <div className="activity-filters bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700/50 p-4 sm:p-6 mb-6 transition-colors">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 flex-1">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-slate-500 w-4 h-4" />
                 <input
                   type="text"
                   placeholder="Search activities..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500/50 focus:border-transparent transition-colors placeholder:text-gray-400 dark:placeholder:text-slate-500"
                 />
               </div>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setShowFilters(!showFilters)}
-                  className="flex-1 sm:flex-none flex items-center justify-center space-x-2 px-4 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex-1 sm:flex-none flex items-center justify-center space-x-2 px-4 py-2.5 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 text-gray-700 dark:text-slate-200 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors shadow-sm"
                 >
                   <Filter className="w-4 h-4" />
                   <span>Filters</span>
                   {showFilters ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                 </button>
-                <div className="flex items-center bg-gray-50 rounded-lg p-1 border border-gray-200">
+                <div className="flex items-center bg-gray-50 dark:bg-slate-900 rounded-lg p-1 border border-gray-200 dark:border-slate-700 transition-colors">
                   <button
                     onClick={() => setViewMode('list')}
-                    className={`p-1.5 rounded transition-colors ${viewMode === 'list' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+                    className={`p-1.5 rounded transition-all duration-200 ${viewMode === 'list' ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300'}`}
                   >
                     <List className="w-5 h-5" />
                   </button>
                   <button
                     onClick={() => setViewMode('grid')}
-                    className={`p-1.5 rounded transition-colors ${viewMode === 'grid' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+                    className={`p-1.5 rounded transition-all duration-200 ${viewMode === 'grid' ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300'}`}
                   >
                     <Grid className="w-5 h-5" />
                   </button>
                   <button
                     onClick={() => setViewMode('timeline')}
-                    className={`p-1.5 rounded transition-colors ${viewMode === 'timeline' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+                    className={`p-1.5 rounded transition-all duration-200 ${viewMode === 'timeline' ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300'}`}
                   >
                     <Clock className="w-5 h-5" />
                   </button>
@@ -604,12 +604,12 @@ const Activity: React.FC = () => {
           </div>
 
           {showFilters && (
-            <div className="mt-4 pt-4 border-t border-gray-200">
+            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-slate-700/50 transition-colors">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-4 py-2.5 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500/50 focus:border-transparent transition-colors"
                 >
                   <option value="all">All Categories</option>
                   <option value="workflow">Workflow</option>
@@ -624,7 +624,7 @@ const Activity: React.FC = () => {
                 <select
                   value={selectedStatus}
                   onChange={(e) => setSelectedStatus(e.target.value)}
-                  className="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-4 py-2.5 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500/50 focus:border-transparent transition-colors"
                 >
                   <option value="all">All Status</option>
                   <option value="completed">Completed</option>
@@ -636,7 +636,7 @@ const Activity: React.FC = () => {
                 <select
                   value={selectedPriority}
                   onChange={(e) => setSelectedPriority(e.target.value)}
-                  className="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-4 py-2.5 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500/50 focus:border-transparent transition-colors"
                 >
                   <option value="all">All Priorities</option>
                   <option value="critical">Critical</option>
@@ -656,12 +656,12 @@ const Activity: React.FC = () => {
               {filteredActivities.map(renderActivityCard)}
             </div>
           ) : (
-            <div className="text-center py-16 activity-list-empty">
-              <div className="p-4 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
-                <ActivityIcon className="w-10 h-10 text-blue-600" />
+            <div className="text-center py-16 activity-list-empty transition-all duration-500">
+              <div className="p-4 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/40 dark:to-purple-900/40 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center shadow-lg">
+                <ActivityIcon className="w-10 h-10 text-blue-600 dark:text-blue-400" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">No activities found</h3>
-              <p className="text-gray-600 mb-6 max-w-md mx-auto">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2 transition-colors">No activities found</h3>
+              <p className="text-gray-600 dark:text-slate-400 mb-6 max-w-md mx-auto transition-colors">
                 {searchTerm || selectedCategory !== 'all' || selectedStatus !== 'all' || selectedPriority !== 'all'
                   ? 'Try adjusting your search or filters to find what you\'re looking for.'
                   : 'No activities have been recorded yet.'

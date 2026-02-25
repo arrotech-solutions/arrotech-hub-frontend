@@ -169,7 +169,7 @@ export default function SmartScheduler({ onEventCreated, onClose }: SmartSchedul
     ];
 
     return (
-        <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden max-w-lg w-full max-h-[85vh] flex flex-col mx-4 md:mx-0">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 overflow-hidden max-w-lg w-full max-h-[85vh] flex flex-col mx-4 md:mx-0">
             {/* Header */}
             <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4 flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-3">
@@ -201,7 +201,7 @@ export default function SmartScheduler({ onEventCreated, onClose }: SmartSchedul
                             onChange={(e) => setQuery(e.target.value)}
                             onKeyPress={(e) => e.key === 'Enter' && handleSchedule()}
                             placeholder="Schedule a 1 hour meeting tomorrow afternoon..."
-                            className="w-full px-4 py-3 pr-12 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-slate-700 placeholder:text-slate-400"
+                            className="w-full px-4 py-3 pr-12 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-slate-700 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-all outline-none"
                             disabled={isProcessing}
                         />
                         <button
@@ -223,7 +223,7 @@ export default function SmartScheduler({ onEventCreated, onClose }: SmartSchedul
                             <button
                                 key={idx}
                                 onClick={() => setQuery(prompt.query)}
-                                className="px-3 py-1.5 text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-full transition-colors"
+                                className="px-3 py-1.5 text-xs bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 rounded-full transition-colors"
                             >
                                 {prompt.label}
                             </button>
@@ -235,20 +235,20 @@ export default function SmartScheduler({ onEventCreated, onClose }: SmartSchedul
                 <div>
                     <button
                         onClick={() => setShowPrefs(!showPrefs)}
-                        className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700"
+                        className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
                     >
                         <ChevronDown className={`w-4 h-4 transition-transform ${showPrefs ? 'rotate-180' : ''}`} />
                         Preferences
                     </button>
 
                     {showPrefs && (
-                        <div className="mt-2 p-3 bg-slate-50 rounded-xl space-y-2">
-                            <label className="flex items-center gap-2 text-sm cursor-pointer">
+                        <div className="mt-2 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl space-y-2 border border-slate-100 dark:border-slate-800">
+                            <label className="flex items-center gap-2 text-sm cursor-pointer text-slate-600 dark:text-slate-300">
                                 <input
                                     type="checkbox"
                                     checked={preferences.prefer_morning}
                                     onChange={(e) => setPreferences(p => ({ ...p, prefer_morning: e.target.checked, prefer_afternoon: false }))}
-                                    className="rounded text-indigo-600"
+                                    className="rounded text-indigo-600 dark:bg-slate-700 dark:border-slate-600"
                                 />
                                 Prefer morning slots
                             </label>
@@ -276,7 +276,7 @@ export default function SmartScheduler({ onEventCreated, onClose }: SmartSchedul
 
                 {/* Message / Results */}
                 {message && (
-                    <div className={`p-3 rounded-xl text-sm ${createdEvent ? 'bg-green-50 text-green-700' : 'bg-indigo-50 text-indigo-700'
+                    <div className={`p-3 rounded-xl text-sm ${createdEvent ? 'bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-400 border border-green-100 dark:border-green-500/20' : 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-500/20'
                         }`}>
                         {message}
                     </div>
@@ -284,13 +284,13 @@ export default function SmartScheduler({ onEventCreated, onClose }: SmartSchedul
 
                 {/* Created Event Display */}
                 {createdEvent && (
-                    <div className="p-4 bg-green-50 border border-green-200 rounded-xl">
-                        <div className="flex items-center gap-2 text-green-700 mb-2">
-                            <Check className="w-5 h-5" />
-                            <span className="font-semibold">Event Created!</span>
+                    <div className="p-4 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-xl shadow-sm">
+                        <div className="flex items-center gap-2 text-green-700 dark:text-green-400 mb-2">
+                            <Check className="w-5 h-5 font-bold" />
+                            <span className="font-bold">Event Created!</span>
                         </div>
-                        <p className="text-green-800 font-medium">{createdEvent.summary}</p>
-                        <p className="text-green-600 text-sm">
+                        <p className="text-green-800 dark:text-green-300 font-bold">{createdEvent.summary}</p>
+                        <p className="text-green-600 dark:text-green-500 text-sm font-medium">
                             {formatDateTime(createdEvent.start?.dateTime || createdEvent.start?.date)}
                         </p>
                     </div>
@@ -308,20 +308,20 @@ export default function SmartScheduler({ onEventCreated, onClose }: SmartSchedul
                                 <button
                                     key={idx}
                                     onClick={() => handleSelectSlot(slot)}
-                                    className="w-full p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-300 rounded-xl text-left transition-all group"
+                                    className="w-full p-3 bg-slate-50 dark:bg-slate-800/50 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 border border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-500/30 rounded-xl text-left transition-all group shadow-sm hover:shadow-md"
                                 >
                                     <div className="flex items-center justify-between">
                                         <div>
-                                            <p className="font-medium text-slate-800">
+                                            <p className="font-bold text-slate-800 dark:text-slate-200 group-hover:text-indigo-700 dark:group-hover:text-indigo-400 transition-colors">
                                                 {formatDateTime(slot.start)}
                                             </p>
-                                            <p className="text-xs text-slate-500">{slot.reason}</p>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400">{slot.reason}</p>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <span className="text-xs px-2 py-1 bg-indigo-100 text-indigo-700 rounded-full">
+                                            <span className="text-[10px] font-bold px-2 py-1 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 rounded-full border border-indigo-200 dark:border-indigo-500/20">
                                                 {Math.round(slot.score)}% match
                                             </span>
-                                            <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-indigo-600 transition-colors" />
+                                            <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" />
                                         </div>
                                     </div>
                                 </button>
@@ -331,43 +331,43 @@ export default function SmartScheduler({ onEventCreated, onClose }: SmartSchedul
                 )}
 
                 {/* Divider */}
-                <div className="border-t border-slate-100 pt-4">
+                <div className="border-t border-slate-100 dark:border-slate-800 pt-4">
                     <div className="flex items-center gap-2 mb-3">
-                        <Brain className="w-4 h-4 text-purple-600" />
-                        <span className="text-sm font-medium text-slate-700">Quick Actions</span>
+                        <Brain className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                        <span className="text-sm font-bold text-slate-700 dark:text-slate-200">Quick Actions</span>
                     </div>
 
                     {/* Focus Time Protection */}
                     <div className="space-y-2">
                         <button
                             onClick={() => setShowFocusTime(!showFocusTime)}
-                            className="w-full flex items-center justify-between p-3 bg-purple-50 hover:bg-purple-100 rounded-xl border border-purple-200 transition-colors"
+                            className="w-full flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-900/10 hover:bg-purple-100 dark:hover:bg-purple-900/20 rounded-xl border border-purple-200 dark:border-purple-800 transition-colors"
                         >
                             <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 bg-purple-200 rounded-lg flex items-center justify-center">
-                                    <Coffee className="w-4 h-4 text-purple-700" />
+                                <div className="w-8 h-8 bg-purple-200 dark:bg-purple-900/40 rounded-lg flex items-center justify-center">
+                                    <Coffee className="w-4 h-4 text-purple-700 dark:text-purple-300" />
                                 </div>
-                                <span className="font-medium text-purple-800">Protect Focus Time</span>
+                                <span className="font-bold text-purple-800 dark:text-purple-200">Protect Focus Time</span>
                             </div>
-                            <ChevronDown className={`w-4 h-4 text-purple-600 transition-transform ${showFocusTime ? 'rotate-180' : ''}`} />
+                            <ChevronDown className={`w-4 h-4 text-purple-600 dark:text-purple-400 transition-transform ${showFocusTime ? 'rotate-180' : ''}`} />
                         </button>
 
                         {showFocusTime && (
-                            <div className="p-3 bg-purple-50 rounded-xl space-y-3">
+                            <div className="p-4 bg-purple-50 dark:bg-purple-900/5 rounded-xl space-y-4 border border-purple-100 dark:border-purple-900/20">
                                 <div className="flex flex-wrap items-center gap-3">
-                                    <label className="text-sm text-purple-800">Hours per week:</label>
+                                    <label className="text-sm font-bold text-purple-800 dark:text-purple-300">Hours per week:</label>
                                     <input
                                         type="number"
                                         value={focusHours}
                                         onChange={(e) => setFocusHours(parseInt(e.target.value) || 10)}
                                         min={1}
                                         max={40}
-                                        className="w-20 px-2 py-1 border border-purple-200 rounded-lg text-center"
+                                        className="w-20 px-2 py-1.5 bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-700 rounded-lg text-center font-bold text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-purple-500/20"
                                     />
                                     <button
                                         onClick={handleProtectFocusTime}
                                         disabled={isProcessing}
-                                        className="px-4 py-1.5 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded-lg transition-colors"
+                                        className="px-4 py-1.5 bg-purple-600 hover:bg-purple-700 text-white text-sm font-bold rounded-lg transition-all shadow-md active:scale-[0.98]"
                                     >
                                         {isProcessing ? 'Finding...' : 'Find Slots'}
                                     </button>
@@ -377,15 +377,15 @@ export default function SmartScheduler({ onEventCreated, onClose }: SmartSchedul
                                 {focusBlocks.length > 0 && (
                                     <div className="space-y-2 mt-2">
                                         {focusBlocks.map((block, idx) => (
-                                            <div key={idx} className="flex items-center justify-between p-2 bg-white rounded-lg border border-purple-200">
+                                            <div key={idx} className="flex items-center justify-between p-3 bg-white dark:bg-slate-900 rounded-lg border border-purple-200 dark:border-purple-800 shadow-sm">
                                                 <div>
-                                                    <p className="text-sm font-medium text-purple-800">{block.title}</p>
-                                                    <p className="text-xs text-purple-600">{formatDateTime(block.start)}</p>
+                                                    <p className="text-sm font-bold text-purple-800 dark:text-purple-200">{block.title}</p>
+                                                    <p className="text-xs text-purple-600 dark:text-purple-400 font-medium">{formatDateTime(block.start)}</p>
                                                 </div>
                                                 <button
                                                     onClick={() => handleCreateFocusBlock(block)}
                                                     disabled={addingBlockId === block.start}
-                                                    className="px-3 py-1 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400 text-white text-xs rounded-lg transition-all flex items-center gap-1"
+                                                    className="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400 text-white text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 shadow-sm active:scale-[0.98]"
                                                 >
                                                     {addingBlockId === block.start ? (
                                                         <>
