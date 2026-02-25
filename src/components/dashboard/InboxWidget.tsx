@@ -193,33 +193,33 @@ const InboxWidget: React.FC = () => {
 
 
   return (
-    <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-100 flex flex-col h-[600px] transition-all duration-300 hover:shadow-md">
+    <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 flex flex-col h-[600px] transition-all duration-300 hover:shadow-md">
       {/* Header */}
-      <div className="p-5 border-b border-gray-100 flex items-center justify-between bg-white/50 rounded-t-2xl">
-        <div className="flex items-center space-x-2">
-          <div className="p-2 bg-indigo-50 rounded-lg">
-            <MessageSquare className="w-5 h-5 text-indigo-600" />
+      <div className="p-5 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between bg-white/50 dark:bg-slate-900/50 rounded-t-2xl">
+        <div className="flex items-center space-x-3">
+          <div className="p-2 bg-indigo-50 dark:bg-indigo-500/20 rounded-xl">
+            <MessageSquare className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
           </div>
-          <h2 className="text-lg font-bold text-gray-900 tracking-tight">Inbox</h2>
-          <span className="bg-indigo-100 text-indigo-700 text-xs px-2.5 py-1 rounded-full font-medium">
+          <h2 className="text-lg font-bold text-gray-900 dark:text-white tracking-tight">Inbox</h2>
+          <span className="bg-indigo-100 dark:bg-indigo-500/30 text-indigo-700 dark:text-indigo-300 text-[10px] px-2.5 py-1 rounded-full font-bold uppercase tracking-wider">
             {messages.filter(m => !m.read).length} new
           </span>
         </div>
 
         <div className="flex items-center space-x-2">
-          <div className="relative">
-            <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+          <div className="relative group">
+            <Search className="w-4 h-4 text-gray-400 dark:text-slate-500 absolute left-3 top-1/2 transform -translate-y-1/2 transition-colors group-focus-within:text-indigo-500" />
             <input
               type="text"
               placeholder="Search..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 pr-4 py-2 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all w-48"
+              className="pl-9 pr-4 py-2 text-sm bg-gray-50/50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-600 focus:bg-white dark:focus:bg-slate-800 transition-all w-48 dark:text-white"
             />
           </div>
           <button
             onClick={fetchMessages}
-            className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all duration-200"
+            className="p-2 text-gray-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-xl transition-all duration-200"
             title="Refresh"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
@@ -229,54 +229,54 @@ const InboxWidget: React.FC = () => {
 
       {/* Tabs */}
       <div className="px-5 pt-4 pb-2">
-        <div className="flex space-x-1 bg-gray-100/50 p-1 rounded-xl w-fit">
+        <div className="flex space-x-1 bg-gray-100/50 dark:bg-slate-800/50 p-1 rounded-xl w-fit overflow-x-auto custom-scrollbar">
           <button
             onClick={() => setActiveTab('all')}
-            className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-all duration-200 ${activeTab === 'all'
-              ? 'bg-white text-gray-900 shadow-sm'
-              : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'
+            className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all duration-200 ${activeTab === 'all'
+              ? 'bg-white dark:bg-slate-700 text-gray-900 dark:text-white shadow-sm ring-1 ring-gray-900/5 dark:ring-white/10'
+              : 'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 hover:bg-gray-200/50 dark:hover:bg-slate-700/30'
               }`}
           >
             All
           </button>
           <button
             onClick={() => setActiveTab('gmail')}
-            className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-all duration-200 flex items-center space-x-2 ${activeTab === 'gmail'
-              ? 'bg-white text-gray-900 shadow-sm'
-              : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'
+            className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all duration-200 flex items-center space-x-2 ${activeTab === 'gmail'
+              ? 'bg-white dark:bg-slate-700 text-gray-900 dark:text-white shadow-sm ring-1 ring-gray-900/5 dark:ring-white/10'
+              : 'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 hover:bg-gray-200/50 dark:hover:bg-slate-700/30'
               }`}
           >
-            <Mail className="w-3.5 h-3.5" />
+            <Mail className="w-3 h-3" />
             <span>Gmail</span>
           </button>
           <button
             onClick={() => setActiveTab('slack')}
-            className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-all duration-200 flex items-center space-x-2 ${activeTab === 'slack'
-              ? 'bg-white text-gray-900 shadow-sm'
-              : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'
+            className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all duration-200 flex items-center space-x-2 ${activeTab === 'slack'
+              ? 'bg-white dark:bg-slate-700 text-gray-900 dark:text-white shadow-sm ring-1 ring-gray-900/5 dark:ring-white/10'
+              : 'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 hover:bg-gray-200/50 dark:hover:bg-slate-700/30'
               }`}
           >
-            <MessageCircle className="w-3.5 h-3.5" />
+            <MessageCircle className="w-3 h-3" />
             <span>Slack</span>
           </button>
           <button
             onClick={() => setActiveTab('teams')}
-            className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-all duration-200 flex items-center space-x-2 ${activeTab === 'teams'
-              ? 'bg-white text-gray-900 shadow-sm'
-              : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'
+            className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all duration-200 flex items-center space-x-2 ${activeTab === 'teams'
+              ? 'bg-white dark:bg-slate-700 text-gray-900 dark:text-white shadow-sm ring-1 ring-gray-900/5 dark:ring-white/10'
+              : 'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 hover:bg-gray-200/50 dark:hover:bg-slate-700/30'
               }`}
           >
-            <MessageSquare className="w-3.5 h-3.5" />
+            <MessageSquare className="w-3 h-3" />
             <span>Teams</span>
           </button>
           <button
             onClick={() => setActiveTab('outlook')}
-            className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-all duration-200 flex items-center space-x-2 ${activeTab === 'outlook'
-              ? 'bg-white text-gray-900 shadow-sm'
-              : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'
+            className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all duration-200 flex items-center space-x-2 ${activeTab === 'outlook'
+              ? 'bg-white dark:bg-slate-700 text-gray-900 dark:text-white shadow-sm ring-1 ring-gray-900/5 dark:ring-white/10'
+              : 'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 hover:bg-gray-200/50 dark:hover:bg-slate-700/30'
               }`}
           >
-            <OutlookLogo className="w-3.5 h-3.5" />
+            <OutlookLogo className="w-3 h-3" />
             <span>Outlook</span>
           </button>
         </div>
@@ -285,16 +285,16 @@ const InboxWidget: React.FC = () => {
       {/* Message List */}
       <div className="flex-1 overflow-y-auto p-2 space-y-1">
         {loading && messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-48 text-gray-400">
-            <Loader2 className="w-8 h-8 animate-spin mb-2" />
-            <span className="text-sm">Loading messages...</span>
+          <div className="flex flex-col items-center justify-center h-48 text-gray-400 dark:text-slate-600">
+            <Loader2 className="w-8 h-8 animate-spin mb-4 text-indigo-500" />
+            <span className="text-[10px] font-bold uppercase tracking-widest">Hydrating Inbox...</span>
           </div>
         ) : messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-48 text-gray-400">
-            <div className="p-4 bg-gray-50 rounded-full mb-3">
-              <Mail className="w-6 h-6" />
+          <div className="flex flex-col items-center justify-center h-48 text-gray-400 dark:text-slate-600">
+            <div className="p-4 bg-gray-50 dark:bg-slate-800/50 rounded-2xl mb-4">
+              <Mail className="w-8 h-8 opacity-40" />
             </div>
-            <span className="text-sm font-medium">No messages found</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest">Quiet in here...</span>
           </div>
         ) : (
           messages
@@ -309,46 +309,50 @@ const InboxWidget: React.FC = () => {
             .map((message) => (
               <div
                 key={message.id}
-                className={`group p-3 rounded-xl hover:bg-indigo-50/50 border border-transparent hover:border-indigo-100 transition-all cursor-pointer ${!message.read ? 'bg-blue-50/30' : ''
+                className={`group p-4 rounded-2xl hover:bg-indigo-50/50 dark:hover:bg-indigo-500/10 border border-transparent hover:border-indigo-100 dark:hover:border-indigo-500/20 transition-all cursor-pointer relative ${!message.read ? 'bg-indigo-50/30 dark:bg-indigo-500/5' : ''
                   }`}
               >
-                <div className="flex items-start justify-between mb-1">
-                  <div className="flex items-center space-x-2">
-                    <span className={`p-1.5 rounded-lg ${message.source === 'gmail' ? 'bg-red-50 text-red-600' :
-                      message.source === 'slack' ? 'bg-purple-50 text-purple-600' :
-                        message.source === 'teams' ? 'bg-indigo-50 text-indigo-600' :
-                          'bg-blue-50 text-blue-600'
+                {!message.read && (
+                  <div className="absolute left-1 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-indigo-500 rounded-full shadow-[0_0_8px_rgba(99,102,241,0.8)]" />
+                )}
+
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex items-center space-x-3">
+                    <span className={`p-2 rounded-xl shadow-sm ${message.source === 'gmail' ? 'bg-red-50 dark:bg-red-500/20 text-red-600 dark:text-red-400' :
+                      message.source === 'slack' ? 'bg-purple-50 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400' :
+                        message.source === 'teams' ? 'bg-indigo-50 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400' :
+                          'bg-blue-50 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400'
                       }`}>
-                      {message.source === 'gmail' ? <Mail className="w-3 h-3" /> :
-                        message.source === 'slack' ? <MessageCircle className="w-3 h-3" /> :
-                          message.source === 'teams' ? <MessageSquare className="w-3 h-3" /> :
-                            <OutlookLogo className="w-3 h-3" />}
+                      {message.source === 'gmail' ? <Mail className="w-3.5 h-3.5" /> :
+                        message.source === 'slack' ? <MessageCircle className="w-3.5 h-3.5" /> :
+                          message.source === 'teams' ? <MessageSquare className="w-3.5 h-3.5" /> :
+                            <OutlookLogo className="w-3.5 h-3.5" />}
                     </span>
-                    <span className={`font-semibold text-sm ${!message.read ? 'text-gray-900' : 'text-gray-700'}`}>
+                    <span className={`font-bold text-sm tracking-tight ${!message.read ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-slate-300'}`}>
                       {message.sender}
                     </span>
                   </div>
-                  <span className="text-xs text-gray-400 font-medium">{message.time}</span>
+                  <span className="text-[10px] text-gray-400 dark:text-slate-500 font-bold uppercase tracking-tighter">{message.time}</span>
                 </div>
 
-                <h3 className={`text-sm mb-1 ${!message.read ? 'font-semibold text-gray-900' : 'font-medium text-gray-800'}`}>
+                <h3 className={`text-sm mb-1.5 line-clamp-1 ${!message.read ? 'font-bold text-gray-900 dark:text-white' : 'font-semibold text-gray-800 dark:text-slate-200'}`}>
                   {message.subject}
                 </h3>
 
-                <p className="text-xs text-gray-500 line-clamp-1 group-hover:text-gray-600">
+                <p className="text-xs text-gray-500 dark:text-slate-400 line-clamp-1 leading-relaxed capitalize">
                   {message.preview}
                 </p>
 
                 {/* Hover Actions */}
-                <div className="mt-2 flex items-center justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button className="p-1.5 text-gray-400 hover:text-yellow-500 hover:bg-yellow-50 rounded-lg transition-colors">
-                    <Star className="w-3.5 h-3.5" />
+                <div className="mt-3 flex items-center justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                  <button className="p-2 text-gray-400 dark:text-slate-500 hover:text-yellow-500 dark:hover:text-amber-400 hover:bg-yellow-50 dark:hover:bg-amber-500/10 rounded-xl transition-all active:scale-90">
+                    <Star className="w-4 h-4" />
                   </button>
-                  <button className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
-                    <Trash className="w-3.5 h-3.5" />
+                  <button className="p-2 text-gray-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-all active:scale-90">
+                    <Trash className="w-4 h-4" />
                   </button>
-                  <button className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-                    <MoreHorizontal className="w-3.5 h-3.5" />
+                  <button className="p-2 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-all active:scale-90">
+                    <MoreHorizontal className="w-4 h-4" />
                   </button>
                 </div>
               </div>

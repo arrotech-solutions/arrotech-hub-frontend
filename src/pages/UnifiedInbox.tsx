@@ -47,7 +47,7 @@ const PriorityBadge: React.FC<{ level: number }> = ({ level }) => {
         4: { bg: 'bg-orange-500', text: 'text-white', label: 'High' },
         3: { bg: 'bg-yellow-400', text: 'text-yellow-900', label: 'Medium' },
         2: { bg: 'bg-green-500', text: 'text-white', label: 'Low' },
-        1: { bg: 'bg-gray-300', text: 'text-gray-700', label: 'Info' }
+        1: { bg: 'bg-gray-300 dark:bg-slate-700', text: 'text-gray-700 dark:text-slate-300', label: 'Info' }
     };
     const config = configs[level] || configs[3];
     return (
@@ -60,17 +60,17 @@ const PriorityBadge: React.FC<{ level: number }> = ({ level }) => {
 // Smart Label Component
 const SmartLabel: React.FC<{ label: string }> = ({ label }) => {
     const styles: Record<string, string> = {
-        'Action Required': 'bg-red-50 text-red-700 border-red-200',
-        'Waiting': 'bg-yellow-50 text-yellow-700 border-yellow-200',
-        'FYI': 'bg-blue-50 text-blue-700 border-blue-200',
-        'Marketing': 'bg-purple-50 text-purple-700 border-purple-200',
-        'Personal': 'bg-green-50 text-green-700 border-green-200',
-        'Financial': 'bg-emerald-50 text-emerald-700 border-emerald-200',
-        'Meeting': 'bg-indigo-50 text-indigo-700 border-indigo-200',
-        'Newsletter': 'bg-gray-50 text-gray-600 border-gray-200'
+        'Action Required': 'bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border-red-200 dark:border-red-500/30',
+        'Waiting': 'bg-yellow-50 dark:bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-200 dark:border-yellow-500/30',
+        'FYI': 'bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-500/30',
+        'Marketing': 'bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-500/30',
+        'Personal': 'bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-400 border-green-200 dark:border-green-500/30',
+        'Financial': 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30',
+        'Meeting': 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border-indigo-200 dark:border-indigo-500/30',
+        'Newsletter': 'bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-slate-400 border-gray-200 dark:border-slate-700'
     };
     return (
-        <span className={`px-1.5 py-0.5 rounded border text-[10px] font-medium ${styles[label] || 'bg-gray-50 text-gray-600 border-gray-200'}`}>
+        <span className={`px-1.5 py-0.5 rounded border text-[10px] font-medium ${styles[label] || 'bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-slate-400 border-gray-200 dark:border-slate-700'}`}>
             {label}
         </span>
     );
@@ -245,11 +245,11 @@ const UnifiedInbox: React.FC = () => {
     };
 
     const tabs = [
-        { id: 'all', label: 'All', icon: Inbox, color: 'text-gray-900', bg: 'bg-gray-100' },
-        { id: 'gmail', label: 'Gmail', logo: gmailLogo, bg: 'bg-white' }, // Logos have their own colors
-        { id: 'slack', label: 'Slack', logo: slackLogo, bg: 'bg-white' },
-        { id: 'teams', label: 'Teams', logo: teamsLogo, bg: 'bg-white' },
-        { id: 'outlook', label: 'Outlook', logo: outlookLogo, bg: 'bg-white' },
+        { id: 'all', label: 'All', icon: Inbox, color: 'text-gray-900 dark:text-gray-100', bg: 'bg-gray-100 dark:bg-slate-800' },
+        { id: 'gmail', label: 'Gmail', logo: gmailLogo, bg: 'bg-white dark:bg-slate-900' }, // Logos have their own colors
+        { id: 'slack', label: 'Slack', logo: slackLogo, bg: 'bg-white dark:bg-slate-900' },
+        { id: 'teams', label: 'Teams', logo: teamsLogo, bg: 'bg-white dark:bg-slate-900' },
+        { id: 'outlook', label: 'Outlook', logo: outlookLogo, bg: 'bg-white dark:bg-slate-900' },
     ];
 
     const fetchMessages = async () => {
@@ -880,31 +880,31 @@ const UnifiedInbox: React.FC = () => {
 
     const getSourceStyle = (source: string) => {
         switch (source) {
-            case 'gmail': return 'text-rose-600 bg-rose-50 border-rose-100';
-            case 'slack': return 'text-purple-600 bg-purple-50 border-purple-100';
-            case 'teams': return 'text-indigo-600 bg-indigo-50 border-indigo-100';
-            case 'outlook': return 'text-sky-600 bg-sky-50 border-sky-100';
-            default: return 'text-gray-600 bg-gray-50 border-gray-100';
+            case 'gmail': return 'text-rose-600 bg-rose-50 border-rose-100 dark:text-rose-400 dark:bg-rose-500/10 dark:border-rose-500/20';
+            case 'slack': return 'text-purple-600 bg-purple-50 border-purple-100 dark:text-purple-400 dark:bg-purple-500/10 dark:border-purple-500/20';
+            case 'teams': return 'text-indigo-600 bg-indigo-50 border-indigo-100 dark:text-indigo-400 dark:bg-indigo-500/10 dark:border-indigo-500/20';
+            case 'outlook': return 'text-sky-600 bg-sky-50 border-sky-100 dark:text-sky-400 dark:bg-sky-500/10 dark:border-sky-500/20';
+            default: return 'text-gray-600 bg-gray-50 border-gray-100 dark:text-slate-400 dark:bg-slate-800 dark:border-slate-700';
         }
     }
 
     return (
-        <div className="flex h-screen bg-[conic-gradient(at_top_left,_var(--tw-gradient-stops))] from-slate-50 via-indigo-50/20 to-slate-50 overflow-hidden font-sans text-slate-900 relative">
+        <div className="flex h-screen bg-[conic-gradient(at_top_left,_var(--tw-gradient-stops))] from-slate-50 via-indigo-50/20 to-slate-50 dark:from-slate-900 dark:via-indigo-950/20 dark:to-slate-900 overflow-hidden font-sans text-slate-900 dark:text-white relative transition-colors duration-500">
 
             {/* Compose Modal */}
             {isComposeOpen && (
-                <div className="absolute inset-0 z-[60] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col animate-in fade-in zoom-in-95 duration-200">
-                        <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 shrink-0">
-                            <h3 className="font-bold text-lg text-gray-800">New Message</h3>
-                            <button onClick={() => setIsComposeOpen(false)} className="p-2 hover:bg-gray-200/50 rounded-full text-gray-500 transition-colors">
+                <div className="absolute inset-0 z-[60] bg-slate-900/40 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col animate-in fade-in zoom-in-95 duration-200 border border-transparent dark:border-slate-800">
+                        <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-gray-50/50 dark:bg-slate-800/50 shrink-0">
+                            <h3 className="font-bold text-lg text-gray-800 dark:text-white">New Message</h3>
+                            <button onClick={() => setIsComposeOpen(false)} className="p-2 hover:bg-gray-200/50 dark:hover:bg-slate-700/50 rounded-full text-gray-500 dark:text-slate-400 transition-colors">
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
                         <div className="p-4 md:p-6 space-y-4 overflow-y-auto custom-scrollbar">
                             {/* Channel Selector */}
-                            <div className="flex items-center gap-4 border-b border-gray-200 pb-4">
-                                <span className="text-gray-400 text-sm font-medium">Via:</span>
+                            <div className="flex items-center gap-4 border-b border-gray-200 dark:border-slate-800 pb-4">
+                                <span className="text-gray-400 dark:text-slate-500 text-sm font-medium">Via:</span>
                                 <div className="flex gap-2">
                                     {(['gmail', 'outlook', 'slack', 'teams'] as const).map(channel => (
                                         <button
@@ -915,7 +915,7 @@ const UnifiedInbox: React.FC = () => {
                                                     channel === 'slack' ? 'bg-purple-100 text-purple-700 ring-2 ring-purple-500/20' :
                                                         channel === 'teams' ? 'bg-indigo-100 text-indigo-700 ring-2 ring-indigo-500/20' :
                                                             'bg-blue-100 text-blue-700 ring-2 ring-blue-500/20')
-                                                : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                                : 'bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 hover:bg-gray-200 dark:hover:bg-slate-700'
                                                 }`}
                                         >
                                             {channel === 'gmail' && <img src={gmailLogo} alt="Gmail" className="w-4 h-4 object-contain" />}
@@ -929,20 +929,20 @@ const UnifiedInbox: React.FC = () => {
                             </div>
 
                             {/* Dynamic Fields */}
-                            <div className="flex items-center border-b border-gray-200 focus-within:border-blue-500 transition-colors">
-                                <span className="text-gray-400 text-sm font-medium mr-2">
+                            <div className="flex items-center border-b border-gray-200 dark:border-slate-800 focus-within:border-blue-500 dark:focus-within:border-blue-400 transition-colors">
+                                <span className="text-gray-400 dark:text-slate-500 text-sm font-medium mr-2">
                                     {composeChannel === 'slack' || composeChannel === 'teams' ? 'Channel:' : 'To:'}
                                 </span>
                                 <input
                                     type="text" value={composeTo} onChange={(e) => setComposeTo(e.target.value)}
                                     placeholder={composeChannel === 'slack' ? '#general or @user' : composeChannel === 'teams' ? 'Channel ID or User' : 'recipient@example.com'}
-                                    className="flex-1 text-sm font-medium py-2 focus:outline-none" autoFocus
+                                    className="flex-1 text-sm font-medium py-2 focus:outline-none bg-transparent dark:text-white" autoFocus
 
                                 />
                                 {(composeChannel === 'gmail' || composeChannel === 'outlook') && (
                                     <button
                                         onClick={() => setShowCcBcc(!showCcBcc)}
-                                        className="text-xs font-semibold text-gray-400 hover:text-gray-600 px-2 py-1 rounded hover:bg-gray-100 transition-colors"
+                                        className="text-xs font-semibold text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
                                     >
                                         Cc/Bcc
                                     </button>
@@ -951,18 +951,18 @@ const UnifiedInbox: React.FC = () => {
 
                             {showCcBcc && (composeChannel === 'gmail' || composeChannel === 'outlook') && (
                                 <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
-                                    <div className="flex items-center border-b border-gray-200 focus-within:border-blue-500 transition-colors">
-                                        <span className="text-gray-400 text-sm font-medium mr-2">Cc:</span>
+                                    <div className="flex items-center border-b border-gray-200 dark:border-slate-800 focus-within:border-blue-500 dark:focus-within:border-blue-400 transition-colors">
+                                        <span className="text-gray-400 dark:text-slate-500 text-sm font-medium mr-2">Cc:</span>
                                         <input
                                             type="text" value={composeCc} onChange={(e) => setComposeCc(e.target.value)}
-                                            className="flex-1 text-sm font-medium py-2 focus:outline-none"
+                                            className="flex-1 text-sm font-medium py-2 focus:outline-none bg-transparent dark:text-white"
                                         />
                                     </div>
-                                    <div className="flex items-center border-b border-gray-200 focus-within:border-blue-500 transition-colors">
-                                        <span className="text-gray-400 text-sm font-medium mr-2">Bcc:</span>
+                                    <div className="flex items-center border-b border-gray-200 dark:border-slate-800 focus-within:border-blue-500 dark:focus-within:border-blue-400 transition-colors">
+                                        <span className="text-gray-400 dark:text-slate-500 text-sm font-medium mr-2">Bcc:</span>
                                         <input
                                             type="text" value={composeBcc} onChange={(e) => setComposeBcc(e.target.value)}
-                                            className="flex-1 text-sm font-medium py-2 focus:outline-none"
+                                            className="flex-1 text-sm font-medium py-2 focus:outline-none bg-transparent dark:text-white"
                                         />
                                     </div>
                                 </div>
@@ -971,19 +971,19 @@ const UnifiedInbox: React.FC = () => {
                             {(composeChannel === 'gmail' || composeChannel === 'outlook') && (
                                 <input
                                     type="text" placeholder="Subject" value={composeSubject} onChange={(e) => setComposeSubject(e.target.value)}
-                                    className="w-full text-lg font-bold border-b border-gray-200 py-2 focus:outline-none focus:border-blue-500 placeholder:text-gray-300"
+                                    className="w-full text-lg font-bold border-b border-gray-200 dark:border-slate-800 py-2 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 bg-transparent text-gray-900 dark:text-white placeholder:text-gray-300 dark:placeholder:text-slate-700"
                                 />
                             )}
                             <textarea
                                 placeholder="Write your message..." value={composeBody} onChange={(e) => setComposeBody(e.target.value)}
-                                className="w-full h-48 md:h-64 resize-none focus:outline-none text-slate-700 leading-relaxed placeholder:text-gray-300"
+                                className="w-full h-48 md:h-64 resize-none focus:outline-none text-slate-700 dark:text-slate-300 leading-relaxed placeholder:text-gray-300 dark:placeholder:text-slate-700 bg-transparent"
                             />
 
                             {/* Compose Attachments Preview */}
                             {composeAttachments.length > 0 && (
-                                <div className="px-3 pb-3 pt-1 border-t border-slate-100 bg-slate-50/30 mx-[-24px] px-[24px]">
+                                <div className="px-3 pb-3 pt-1 border-t border-slate-100 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-800/30 mx-[-24px] px-[24px]">
                                     <div className="flex items-center gap-2 mb-2">
-                                        <span className="text-xs font-medium text-slate-500">
+                                        <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
                                             📎 {composeAttachments.length} file{composeAttachments.length > 1 ? 's' : ''} ready to send
                                         </span>
                                     </div>
@@ -1032,7 +1032,7 @@ const UnifiedInbox: React.FC = () => {
                                 </div>
                             )}
                         </div>
-                        <div className="px-6 py-4 border-t border-gray-100 flex justify-between items-center bg-gray-50/30">
+                        <div className="px-6 py-4 border-t border-gray-100 dark:border-slate-800 flex justify-between items-center bg-gray-50/30 dark:bg-slate-800/30">
                             <div className="flex gap-2 text-gray-400">
                                 <input
                                     type="file"
@@ -1084,7 +1084,7 @@ const UnifiedInbox: React.FC = () => {
 
             {/* 1. Sidebar (Navigation) */}
             <div className={`
-                absolute md:relative inset-y-0 left-0 z-40 bg-white/70 backdrop-blur-2xl border-r border-indigo-50/50 flex flex-col transition-all duration-300 shadow-2xl md:shadow-none
+                absolute md:relative inset-y-0 left-0 z-40 bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl border-r border-indigo-50/50 dark:border-slate-800/50 flex flex-col transition-all duration-300 shadow-2xl md:shadow-none
                 ${sidebarCollapsed ? 'w-20' : 'w-64'}
                 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
             `}>
@@ -1092,7 +1092,7 @@ const UnifiedInbox: React.FC = () => {
                     {/* Header Removed */}
                     <button
                         onClick={() => window.innerWidth < 768 ? setMobileMenuOpen(false) : setSidebarCollapsed(!sidebarCollapsed)}
-                        className={`p-2 hover:bg-white/80 rounded-xl text-slate-400 hover:text-indigo-600 transition-all duration-200 border border-transparent hover:border-slate-100/50 hover:shadow-sm ${sidebarCollapsed ? 'mx-auto' : ''}`}
+                        className={`p-2 hover:bg-white/80 dark:hover:bg-slate-800 rounded-xl text-slate-400 hover:text-indigo-600 transition-all duration-200 border border-transparent hover:border-slate-100/50 dark:hover:border-slate-700/50 hover:shadow-sm ${sidebarCollapsed ? 'mx-auto' : ''}`}
                     >
                         {window.innerWidth < 768 ? <X className="w-5 h-5" /> : sidebarCollapsed ? <Menu className="w-5 h-5" /> : <div className="p-0.5"><Menu className="w-4 h-4" /></div>}
                     </button>
@@ -1102,18 +1102,18 @@ const UnifiedInbox: React.FC = () => {
                     {/* Compose Button */}
                     <button
                         onClick={() => { setIsComposeOpen(true); setMobileMenuOpen(false); }}
-                        className={`w-full flex items-center group relative overflow-hidden transition-all duration-300 mb-8
+                        className={`unified-inbox-compose-tut w-full flex items-center group relative overflow-hidden transition-all duration-300 mb-8
                         ${sidebarCollapsed
                                 ? 'justify-center h-12 w-12 rounded-2xl mx-auto bg-indigo-600 shadow-lg shadow-indigo-500/30 hover:scale-105 active:scale-95'
-                                : 'px-4 py-3.5 rounded-2xl bg-white shadow-[0_2px_10px_rgba(99,102,241,0.15)] hover:shadow-[0_4px_15px_rgba(99,102,241,0.25)] border border-indigo-50 text-indigo-600 hover:border-indigo-100 hover:-translate-y-0.5'
+                                : 'px-4 py-3.5 rounded-2xl bg-white dark:bg-slate-800 shadow-[0_2px_10px_rgba(99,102,241,0.15)] hover:shadow-[0_4px_15px_rgba(99,102,241,0.25)] border border-indigo-50 dark:border-slate-700 text-indigo-600 dark:text-indigo-400 hover:border-indigo-100 dark:hover:border-indigo-500/30 hover:-translate-y-0.5'
                             }`}
                     >
                         {sidebarCollapsed ? (
                             <PenSquare className="w-5 h-5 text-white" />
                         ) : (
                             <>
-                                <div className="w-8 h-8 rounded-xl bg-indigo-50 flex items-center justify-center group-hover:bg-indigo-100 transition-colors">
-                                    <PenSquare className="w-4 h-4 text-indigo-600" />
+                                <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center group-hover:bg-indigo-100 dark:group-hover:bg-indigo-500/20 transition-colors">
+                                    <PenSquare className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                                 </div>
                                 <span className="ml-3 font-bold text-[15px] tracking-wide">Compose</span>
                             </>
@@ -1121,7 +1121,7 @@ const UnifiedInbox: React.FC = () => {
                     </button>
 
                     {/* Navigation Items */}
-                    <div className="space-y-1.5">
+                    <div className="unified-inbox-tabs-tut space-y-1.5">
                         {tabs.map(tab => {
                             const Icon = (tab as any).icon;
                             // Update icon color logic for active state
@@ -1134,33 +1134,33 @@ const UnifiedInbox: React.FC = () => {
                                     className={`w-full flex items-center transition-all duration-200 group
                                     ${sidebarCollapsed ? 'justify-center px-0 h-10 w-10 mx-auto rounded-xl' : 'px-3 py-2.5 justify-between rounded-xl'}
                                     ${isActive
-                                            ? 'bg-white shadow-sm ring-1 ring-slate-100 z-10'
-                                            : 'hover:bg-white/60 hover:ring-1 hover:ring-slate-100/50 text-slate-500 hover:text-slate-900'
+                                            ? 'bg-white dark:bg-slate-800 shadow-sm ring-1 ring-slate-100 dark:ring-slate-700 z-10 text-slate-900 dark:text-white'
+                                            : 'hover:bg-white/60 dark:hover:bg-slate-800/60 hover:ring-1 hover:ring-slate-100/50 dark:hover:ring-slate-700/50 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                                         }`}
                                 >
                                     <div className="flex items-center">
                                         <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-300
-                                            ${isActive ? 'bg-indigo-50 scale-100' : 'bg-transparent group-hover:bg-slate-50 scale-95 group-hover:scale-100'}
+                                            ${isActive ? 'bg-indigo-50 dark:bg-indigo-500/20 scale-100' : 'bg-transparent group-hover:bg-slate-50 dark:group-hover:bg-slate-800 scale-95 group-hover:scale-100'}
                                         `}>
                                             {(tab as any).logo ? (
-                                                <img src={(tab as any).logo} alt={tab.label} className={`w-4 h-4 object-contain transition-all ${!isActive && 'opacity-70 group-hover:opacity-100 grayscale group-hover:grayscale-0'}`} />
+                                                <img src={(tab as any).logo} alt={tab.label} className={`w-4 h-4 object-contain transition-all ${!isActive && 'opacity-70 group-hover:opacity-100 grayscale hover:grayscale-0'}`} />
                                             ) : (
-                                                Icon && <Icon className={`w-4 h-4 transition-colors ${isActive ? 'text-indigo-600' : 'text-slate-400 group-hover:text-slate-600'}`} />
+                                                Icon && <Icon className={`w-4 h-4 transition-colors ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300'}`} />
                                             )}
                                         </div>
 
                                         {!sidebarCollapsed && (
-                                            <span className={`ml-3 text-[14px] ${isActive ? 'font-bold text-slate-800' : 'font-medium text-slate-500 group-hover:text-slate-700'}`}>
+                                            <span className={`ml-3 text-[14px] transition-colors ${isActive ? 'font-bold text-slate-800 dark:text-white' : 'font-medium text-slate-500 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200'}`}>
                                                 {tab.label}
                                             </span>
                                         )}
                                     </div>
 
                                     {!sidebarCollapsed && (stats as any)[tab.id] > 0 && (
-                                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full transition-colors
+                                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full transition-all
                                             ${isActive
-                                                ? 'bg-indigo-100 text-indigo-700 shadow-sm'
-                                                : 'bg-slate-100 text-slate-400 group-hover:bg-slate-200 group-hover:text-slate-600'
+                                                ? 'bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400 shadow-sm'
+                                                : 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 group-hover:bg-slate-200 dark:group-hover:bg-slate-700 group-hover:text-slate-600 dark:group-hover:text-slate-300'
                                             }
                                         `}>
                                             {(stats as any)[tab.id]}
@@ -1175,18 +1175,18 @@ const UnifiedInbox: React.FC = () => {
 
             {/* 2. Message List */}
             <div className={`
-                flex flex-col border-r border-white/40 bg-white/30 backdrop-blur-xl transition-all
+                unified-inbox-list-tut flex flex-col border-r border-white/40 dark:border-slate-800/40 bg-white/30 dark:bg-slate-900/30 backdrop-blur-xl transition-all
                 ${selectedMessage ? 'hidden md:flex' : 'flex w-full'} 
                 md:w-[450px] relative z-0
             `}>
                 {/* Modern Glass Header */}
-                <div className="h-16 px-4 flex items-center justify-between border-b border-indigo-50/50 bg-white/80 backdrop-blur-xl sticky top-0 z-20 transition-all duration-300">
-                    <button className="md:hidden p-2 -ml-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors" onClick={() => setMobileMenuOpen(true)}>
+                <div className="unified-inbox-header-tut h-16 px-4 flex items-center justify-between border-b border-indigo-50/50 dark:border-slate-800/50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl sticky top-0 z-20 transition-all duration-300">
+                    <button className="md:hidden p-2 -ml-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors" onClick={() => setMobileMenuOpen(true)}>
                         <Menu className="w-5 h-5" />
                     </button>
 
-                    <div className="flex-1 relative group max-w-sm mx-auto md:mx-0 md:max-w-none md:w-full">
-                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors duration-200">
+                    <div className="unified-inbox-search-tut flex-1 relative group max-w-sm mx-auto md:mx-0 md:max-w-none md:w-full font-sans">
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 group-focus-within:text-indigo-500 transition-colors duration-200">
                             <Search className="w-4 h-4" />
                         </div>
                         <input
@@ -1194,7 +1194,7 @@ const UnifiedInbox: React.FC = () => {
                             placeholder="Search inbox..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 bg-slate-100/60 border-none hover:bg-slate-100 focus:bg-white focus:ring-2 focus:ring-indigo-500/10 focus:shadow-sm rounded-xl text-sm font-medium transition-all duration-200 placeholder:text-slate-400"
+                            className="w-full pl-10 pr-4 py-2 bg-slate-100/60 dark:bg-slate-800/60 border-none hover:bg-slate-100 dark:hover:bg-slate-800 focus:bg-white dark:focus:bg-slate-700 focus:ring-2 focus:ring-indigo-500/10 dark:focus:ring-indigo-400/10 focus:shadow-sm rounded-xl text-sm font-medium transition-all duration-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 dark:text-white"
                         />
                     </div>
                 </div>
@@ -1203,28 +1203,28 @@ const UnifiedInbox: React.FC = () => {
                     {loading && filteredMessages.length === 0 ? (
                         <div className="space-y-2 mt-2">
                             {[1, 2, 3, 4, 5].map((i) => (
-                                <div key={i} className="flex gap-4 p-4 mx-1 rounded-xl bg-white shimmer-effect">
-                                    <div className="w-10 h-10 rounded-full bg-slate-200/50 shrink-0" />
+                                <div key={i} className="flex gap-4 p-4 mx-1 rounded-xl bg-white dark:bg-slate-800/50 shimmer-effect border border-transparent dark:border-slate-800/50">
+                                    <div className="w-10 h-10 rounded-full bg-slate-200/50 dark:bg-slate-700/50 shrink-0" />
                                     <div className="flex-1 space-y-2">
-                                        <div className="h-4 bg-slate-200/50 rounded w-1/3" />
-                                        <div className="h-3 bg-slate-200/50 rounded w-3/4" />
+                                        <div className="h-4 bg-slate-200/50 dark:bg-slate-700/50 rounded w-1/3" />
+                                        <div className="h-3 bg-slate-200/50 dark:bg-slate-700/50 rounded w-3/4" />
                                     </div>
                                 </div>
                             ))}
                         </div>
                     ) : filteredMessages.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center h-[60vh] text-slate-400">
-                            <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 text-slate-300">
+                        <div className="flex flex-col items-center justify-center h-[60vh] text-slate-400 dark:text-slate-500">
+                            <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-2xl flex items-center justify-center mb-4 text-slate-300 dark:text-slate-600">
                                 <Inbox className="w-8 h-8" />
                             </div>
-                            <p className="font-semibold text-slate-600">All caught up!</p>
-                            <p className="text-sm text-slate-400 mt-1">No messages found</p>
+                            <p className="font-semibold text-slate-600 dark:text-slate-400">All caught up!</p>
+                            <p className="text-sm text-slate-400 dark:text-slate-500 mt-1">No messages found</p>
                         </div>
                     ) : (
                         <div className="space-y-1 pb-20 md:pb-2">
                             {/* AI Analysis Indicator */}
                             {analyzingMessages && (
-                                <div className="flex items-center gap-2 px-4 py-2 text-xs text-indigo-600 bg-indigo-50 rounded-lg mx-2 mb-2">
+                                <div className="flex items-center gap-2 px-4 py-2 text-xs text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 rounded-lg mx-2 mb-2">
                                     <Sparkles className="w-3.5 h-3.5 animate-pulse" />
                                     <span>AI analyzing messages...</span>
                                 </div>
@@ -1249,10 +1249,10 @@ const UnifiedInbox: React.FC = () => {
                                             onClick={() => handleSelectMessage(msg)}
                                             className={`group relative p-3 mx-1 rounded-xl cursor-pointer transition-all duration-200 ease-out border border-transparent
                                         ${selectedMessage?.id === msg.id
-                                                    ? 'bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)] ring-1 ring-black/[0.04]'
+                                                    ? 'bg-white dark:bg-slate-800 shadow-[0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.2)] ring-1 ring-black/[0.04] dark:ring-white/[0.04]'
                                                     : !msg.read
-                                                        ? 'bg-white border-slate-100 shadow-sm hover:shadow-md hover:border-slate-200 hover:-translate-y-0.5'
-                                                        : 'hover:bg-slate-50/80 hover:border-slate-200/50'
+                                                        ? 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md hover:border-slate-200 dark:hover:border-slate-600 hover:-translate-y-0.5'
+                                                        : 'hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:border-slate-200/50 dark:hover:border-slate-700/50'
                                                 }`}
                                         >
                                             {/* Selection Indicator */}
@@ -1262,21 +1262,21 @@ const UnifiedInbox: React.FC = () => {
 
                                             {/* Unread Dot */}
                                             {!msg.read && selectedMessage?.id !== msg.id && (
-                                                <div className="absolute left-2 top-4 w-2 h-2 bg-indigo-500 rounded-full ring-4 ring-white shadow-sm z-10" />
+                                                <div className="absolute left-2 top-4 w-2 h-2 bg-indigo-500 rounded-full ring-4 ring-white dark:ring-slate-800 shadow-sm z-10" />
                                             )}
 
                                             <div className="flex gap-3 relative pl-3">
                                                 {/* Avatar Area */}
                                                 <div className="relative shrink-0 mt-1">
                                                     {msg.avatar ? (
-                                                        <img src={msg.avatar} alt="" className="w-10 h-10 rounded-full object-cover ring-2 ring-white shadow-sm bg-slate-100" />
+                                                        <img src={msg.avatar} alt="" className="w-10 h-10 rounded-full object-cover ring-2 ring-white dark:ring-slate-700 shadow-sm bg-slate-100 dark:bg-slate-800" />
                                                     ) : (
-                                                        <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-sm ring-2 ring-white">
+                                                        <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 font-bold text-sm ring-2 ring-white dark:ring-slate-700">
                                                             {msg.sender[0]}
                                                         </div>
                                                     )}
                                                     {/* App Icon Badge */}
-                                                    <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-sm border border-slate-50">
+                                                    <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-white dark:bg-slate-900 rounded-full flex items-center justify-center shadow-sm border border-slate-50 dark:border-slate-800">
                                                         <img src={sourceLogo} alt={msg.source} className="w-3.5 h-3.5 object-contain" />
                                                     </div>
                                                 </div>
@@ -1285,14 +1285,14 @@ const UnifiedInbox: React.FC = () => {
                                                 <div className="flex-1 min-w-0 pr-1">
                                                     <div className="flex justify-between items-start mb-0.5">
                                                         <div className="flex items-center gap-2 min-w-0">
-                                                            <h3 className={`text-[15px] truncate max-w-[140px] leading-tight ${!msg.read ? 'font-bold text-slate-900' : 'font-medium text-slate-700'}`}>
+                                                            <h3 className={`text-[15px] truncate max-w-[140px] leading-tight transition-colors ${!msg.read ? 'font-bold text-slate-900 dark:text-white' : 'font-medium text-slate-700 dark:text-slate-300'}`}>
                                                                 {msg.sender}
                                                             </h3>
                                                             {/* Priority Badge */}
                                                             {enrichment && <PriorityBadge level={enrichment.priority} />}
                                                         </div>
                                                         <div className="flex items-center gap-1">
-                                                            <span className={`text-[11px] font-medium whitespace-nowrap ${!msg.read ? 'text-indigo-600' : 'text-slate-400'}`}>
+                                                            <span className={`text-[11px] font-medium whitespace-nowrap transition-colors ${!msg.read ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500'}`}>
                                                                 {msg.time}
                                                             </span>
                                                             {/* Snooze Button */}
@@ -1302,7 +1302,7 @@ const UnifiedInbox: React.FC = () => {
                                                                         e.stopPropagation();
                                                                         setSnoozeDropdownOpen(snoozeDropdownOpen === msg.id ? null : msg.id);
                                                                     }}
-                                                                    className="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-600 opacity-0 group-hover:opacity-100 transition-all"
+                                                                    className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 opacity-0 group-hover:opacity-100 transition-all font-sans"
                                                                     title="Snooze"
                                                                 >
                                                                     <Clock className="w-3.5 h-3.5" />
@@ -1310,7 +1310,7 @@ const UnifiedInbox: React.FC = () => {
 
                                                                 {/* Snooze Dropdown */}
                                                                 {snoozeDropdownOpen === msg.id && (
-                                                                    <div className="absolute right-0 top-full mt-1 bg-white rounded-lg shadow-lg border border-slate-200 py-1 z-50 min-w-[140px]">
+                                                                    <div className="absolute right-0 top-full mt-1 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 py-1 z-50 min-w-[140px] animate-in fade-in zoom-in-95 duration-100">
                                                                         {[
                                                                             { id: '1h', label: '1 hour' },
                                                                             { id: '4h', label: '4 hours' },
@@ -1323,7 +1323,7 @@ const UnifiedInbox: React.FC = () => {
                                                                                     e.stopPropagation();
                                                                                     handleSnooze(msg.id, opt.id);
                                                                                 }}
-                                                                                className="w-full px-3 py-1.5 text-left text-sm hover:bg-slate-50 text-slate-700"
+                                                                                className="w-full px-3 py-1.5 text-left text-sm hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-700 dark:text-slate-300 transition-colors"
                                                                             >
                                                                                 {opt.label}
                                                                             </button>
@@ -1334,12 +1334,12 @@ const UnifiedInbox: React.FC = () => {
                                                         </div>
                                                     </div>
 
-                                                    <p className={`text-[13px] leading-snug truncate mb-0.5 ${!msg.read ? 'text-slate-800 font-medium' : 'text-slate-600'}`}>
+                                                    <p className={`text-[13px] leading-snug truncate mb-0.5 transition-colors ${!msg.read ? 'text-slate-800 dark:text-white font-medium' : 'text-slate-600 dark:text-slate-400'}`}>
                                                         {msg.subject}
                                                     </p>
 
                                                     <div className="flex items-center gap-2">
-                                                        <p className="text-[12px] text-slate-400 line-clamp-1 leading-relaxed flex-1">
+                                                        <p className="text-[12px] text-slate-400 dark:text-slate-500 line-clamp-1 leading-relaxed flex-1 transition-colors">
                                                             {msg.preview}
                                                         </p>
                                                         {/* Smart Labels */}
@@ -1363,44 +1363,44 @@ const UnifiedInbox: React.FC = () => {
 
             {/* 3. Reading Pane (Detail) */}
             <div className={`
-                flex-1 bg-white flex-col h-full overflow-hidden relative z-20 
+                unified-inbox-detail-tut flex-1 bg-white dark:bg-slate-900 flex-col h-full overflow-hidden relative z-20 
                 ${selectedMessage ? 'flex fixed inset-0 md:static' : 'hidden md:flex'}
             `}>
                 {selectedMessage ? (
                     <>
-                        <div className="h-20 px-4 md:px-10 border-b border-white/50 flex items-center justify-between bg-white/60 backdrop-blur-md sticky top-0 z-10 shadow-sm">
+                        <div className="h-20 px-4 md:px-10 border-b border-white/50 dark:border-slate-800/50 flex items-center justify-between bg-white/60 dark:bg-slate-900/60 backdrop-blur-md sticky top-0 z-10 shadow-sm transition-colors duration-300">
                             <div className="flex items-center gap-2">
-                                <button onClick={() => setSelectedMessage(null)} className="md:hidden p-2 mr-2 text-slate-600 hover:bg-white hover:shadow-sm rounded-xl transition-all">
+                                <button onClick={() => setSelectedMessage(null)} className="md:hidden p-2 mr-2 text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 hover:shadow-sm rounded-xl transition-all">
                                     <ArrowLeft className="w-5 h-5" />
                                 </button>
-                                <div className="flex items-center bg-white/50 p-1 rounded-xl border border-white/60 shadow-sm">
-                                    <button onClick={() => handleArchive(selectedMessage.id)} className="p-2 text-slate-400 hover:text-slate-700 hover:bg-white rounded-lg transition-all" title="Archive"><Archive className="w-5 h-5" /></button>
-                                    <button onClick={() => handleStar(selectedMessage.id)} className="p-2 text-slate-400 hover:text-amber-500 hover:bg-white rounded-lg transition-all" title="Star"><Star className={`w-5 h-5 ${selectedMessage.starred ? 'fill-amber-500 text-amber-500' : ''}`} /></button>
-                                    <button onClick={() => handleDelete(selectedMessage.id)} className="p-2 text-slate-400 hover:text-rose-500 hover:bg-white rounded-lg transition-all" title="Delete"><Trash className="w-5 h-5" /></button>
+                                <div className="flex items-center bg-white/50 dark:bg-slate-800/50 p-1 rounded-xl border border-white/60 dark:border-slate-700/60 shadow-sm">
+                                    <button onClick={() => handleArchive(selectedMessage.id)} className="p-2 text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-white dark:hover:bg-slate-700 rounded-lg transition-all" title="Archive"><Archive className="w-5 h-5" /></button>
+                                    <button onClick={() => handleStar(selectedMessage.id)} className="p-2 text-slate-400 dark:text-slate-500 hover:text-amber-500 dark:hover:text-amber-400 hover:bg-white dark:hover:bg-slate-700 rounded-lg transition-all" title="Star"><Star className={`w-5 h-5 ${selectedMessage.starred ? 'fill-amber-500 text-amber-500' : ''}`} /></button>
+                                    <button onClick={() => handleDelete(selectedMessage.id)} className="p-2 text-slate-400 dark:text-slate-500 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-white dark:hover:bg-slate-700 rounded-lg transition-all" title="Delete"><Trash className="w-5 h-5" /></button>
                                 </div>
-                                <div className="h-6 w-px bg-slate-200 mx-2 hidden md:block" />
+                                <div className="h-6 w-px bg-slate-200 dark:bg-slate-700 mx-2 hidden md:block" />
                                 <button
                                     onClick={() => {
                                         replyInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                                         setTimeout(() => replyInputRef.current?.focus(), 300);
                                     }}
-                                    className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-white rounded-xl border border-transparent hover:border-slate-100 hover:shadow-sm transition-all"
+                                    className="p-2 text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white dark:hover:bg-slate-700 rounded-xl border border-transparent hover:border-slate-100 dark:hover:border-slate-600 hover:shadow-sm transition-all"
                                 ><Reply className="w-5 h-5" /></button>
                             </div>
-                            <button onClick={() => setSelectedMessage(null)} className="hidden md:block p-2 text-slate-400 hover:bg-slate-50 rounded-lg"><X className="w-5 h-5" /></button>
+                            <button onClick={() => setSelectedMessage(null)} className="hidden md:block p-2 text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors"><X className="w-5 h-5" /></button>
                         </div>
 
-                        <div className="flex-1 overflow-y-auto p-6 md:p-10 custom-scrollbar">
+                        <div className="flex-1 overflow-y-auto p-6 md:p-10 custom-scrollbar dark:bg-slate-900 transition-colors">
                             <div className="max-w-3xl mx-auto">
                                 <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-8 gap-4">
-                                    <h1 className="text-xl md:text-2xl font-bold text-slate-900 leading-tight">{selectedMessage.subject}</h1>
-                                    <span className={`self-start px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ${getSourceStyle(selectedMessage.source)}`}>{selectedMessage.source}</span>
+                                    <h1 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white leading-tight transition-colors">{selectedMessage.subject}</h1>
+                                    <span className={`self-start px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider border transition-colors ${getSourceStyle(selectedMessage.source)}`}>{selectedMessage.source}</span>
                                 </div>
-                                <div className="flex items-center gap-4 mb-8 pb-8 border-b border-slate-100">
-                                    <img src={selectedMessage.avatar} alt="" className="w-12 h-12 rounded-xl shadow-sm object-cover" />
+                                <div className="flex items-center gap-4 mb-8 pb-8 border-b border-slate-100 dark:border-slate-800 transition-colors">
+                                    <img src={selectedMessage.avatar} alt="" className="w-12 h-12 rounded-xl shadow-sm object-cover ring-2 ring-white dark:ring-slate-800" />
                                     <div>
-                                        <div className="font-bold text-slate-900 text-lg">{selectedMessage.sender}</div>
-                                        <div className="text-sm text-slate-400 font-medium">To: Me • {selectedMessage.time}</div>
+                                        <div className="font-bold text-slate-900 dark:text-white text-lg transition-colors">{selectedMessage.sender}</div>
+                                        <div className="text-sm text-slate-400 dark:text-slate-500 font-medium transition-colors">To: Me • {selectedMessage.time}</div>
                                     </div>
                                 </div>
 
@@ -1410,10 +1410,10 @@ const UnifiedInbox: React.FC = () => {
                                         <span className="ml-3 text-slate-500 font-medium">Loading full message...</span>
                                     </div>
                                 ) : (
-                                    <div className="prose prose-slate prose-lg max-w-none text-slate-600 leading-relaxed whitespace-pre-wrap">
+                                    <div className="prose prose-slate dark:prose-invert prose-lg max-w-none text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-wrap transition-colors">
                                         {/* Dangerous HTML rendering if source is trusted (Gmail), otherwise text */}
                                         {['gmail', 'outlook', 'teams'].includes(selectedMessage.source) ? (
-                                            <div dangerouslySetInnerHTML={{ __html: selectedMessage.fullContent || selectedMessage.preview }} />
+                                            <div dangerouslySetInnerHTML={{ __html: selectedMessage.fullContent || selectedMessage.preview }} className="dark:text-slate-300" />
                                         ) : (
                                             selectedMessage.fullContent || selectedMessage.preview
                                         )}
@@ -1423,14 +1423,14 @@ const UnifiedInbox: React.FC = () => {
                         </div>
 
                         {/* Modern Reply Input Section */}
-                        <div className="p-3 md:p-5 bg-gradient-to-t from-slate-100 via-slate-50 to-white border-t border-slate-200/60 sticky bottom-0">
+                        <div className="p-3 md:p-5 bg-gradient-to-t from-slate-100 via-slate-50 to-white dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 border-t border-slate-200/60 dark:border-slate-800/60 sticky bottom-0 transition-colors duration-300">
                             <div className="max-w-3xl mx-auto">
                                 {/* Reply Context Badge */}
                                 <div className="flex items-center gap-2 mb-3">
-                                    <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${selectedMessage.source === 'gmail' ? 'bg-red-50 text-red-600' :
-                                        selectedMessage.source === 'slack' ? 'bg-purple-50 text-purple-600' :
-                                            selectedMessage.source === 'outlook' ? 'bg-blue-50 text-blue-600' :
-                                                'bg-green-50 text-green-600'
+                                    <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all ${selectedMessage.source === 'gmail' ? 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400' :
+                                        selectedMessage.source === 'slack' ? 'bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400' :
+                                            selectedMessage.source === 'outlook' ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400' :
+                                                'bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400'
                                         }`}>
                                         <Reply className="w-3 h-3" />
                                         Replying to {selectedMessage.source === 'slack' ? selectedMessage.subject : selectedMessage.sender}
@@ -1439,17 +1439,18 @@ const UnifiedInbox: React.FC = () => {
 
                                 {/* Phase 3: Quick Reply Suggestions */}
                                 {enrichments[selectedMessage.id]?.quick_replies && enrichments[selectedMessage.id].quick_replies!.length > 0 && (
-                                    <div className="mb-3">
+                                    <div className="unified-inbox-ai-tut mb-3">
                                         <div className="flex items-center gap-2 text-xs text-slate-500 mb-2">
                                             <Sparkles className="w-3 h-3 text-indigo-500" />
                                             <span>Quick replies</span>
                                         </div>
+
                                         <div className="flex flex-wrap gap-2">
                                             {enrichments[selectedMessage.id].quick_replies!.map((reply, idx) => (
                                                 <button
                                                     key={idx}
                                                     onClick={() => setReplyText(reply)}
-                                                    className="px-3 py-1.5 text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg border border-indigo-200 transition-colors"
+                                                    className="px-3 py-1.5 text-xs bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400 rounded-lg border border-indigo-200 dark:border-indigo-500/30 transition-colors"
                                                 >
                                                     {reply}
                                                 </button>
@@ -1459,23 +1460,23 @@ const UnifiedInbox: React.FC = () => {
                                 )}
 
                                 {/* Input Card */}
-                                <div className="bg-white rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-200/80 overflow-hidden transition-all duration-200 focus-within:shadow-xl focus-within:border-indigo-300 focus-within:ring-2 focus-within:ring-indigo-100">
+                                <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg shadow-slate-200/50 dark:shadow-black/20 border border-slate-200/80 dark:border-slate-700/80 overflow-hidden transition-all duration-200 focus-within:shadow-xl focus-within:border-indigo-300 dark:focus-within:border-indigo-500/50 focus-within:ring-2 focus-within:ring-indigo-100 dark:focus-within:ring-indigo-500/10">
                                     {/* Textarea */}
                                     <textarea
                                         ref={replyInputRef}
                                         placeholder="Write your reply..."
                                         value={replyText}
                                         onChange={(e) => setReplyText(e.target.value)}
-                                        className="w-full px-4 pt-4 pb-2 min-h-[80px] md:min-h-[100px] resize-none border-none focus:ring-0 text-sm md:text-base text-slate-700 placeholder:text-slate-400 bg-transparent leading-relaxed"
+                                        className="w-full px-4 pt-4 pb-2 min-h-[80px] md:min-h-[100px] resize-none border-none focus:ring-0 text-sm md:text-base text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-600 bg-transparent leading-relaxed"
                                         disabled={replySending}
                                         rows={3}
                                     />
 
                                     {/* Attachments Preview */}
                                     {attachments.length > 0 && (
-                                        <div className="px-3 pb-3 pt-1 border-t border-slate-100 bg-slate-50/30">
+                                        <div className="px-3 pb-3 pt-1 border-t border-slate-100 dark:border-slate-700 bg-slate-50/30 dark:bg-slate-900/30 transition-colors">
                                             <div className="flex items-center gap-2 mb-2">
-                                                <span className="text-xs font-medium text-slate-500">
+                                                <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
                                                     📎 {attachments.length} file{attachments.length > 1 ? 's' : ''} ready to send
                                                 </span>
                                             </div>
@@ -1485,11 +1486,11 @@ const UnifiedInbox: React.FC = () => {
                                                     return (
                                                         <div
                                                             key={index}
-                                                            className="group relative flex items-center gap-2 p-2 bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md hover:border-indigo-200 transition-all"
+                                                            className="group relative flex items-center gap-2 p-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl shadow-sm hover:shadow-md dark:hover:shadow-black/20 hover:border-indigo-200 dark:hover:border-indigo-500/30 transition-all font-sans"
                                                         >
                                                             {/* Image thumbnail or file icon */}
                                                             {isImage ? (
-                                                                <div className="w-10 h-10 rounded-lg overflow-hidden bg-slate-100 flex-shrink-0">
+                                                                <div className="w-10 h-10 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800 flex-shrink-0">
                                                                     <img
                                                                         src={URL.createObjectURL(file)}
                                                                         alt={file.name}
@@ -1497,17 +1498,17 @@ const UnifiedInbox: React.FC = () => {
                                                                     />
                                                                 </div>
                                                             ) : (
-                                                                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center flex-shrink-0">
-                                                                    <Paperclip className="w-4 h-4 text-indigo-600" />
+                                                                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-500/20 dark:to-purple-500/20 flex items-center justify-center flex-shrink-0">
+                                                                    <Paperclip className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                                                                 </div>
                                                             )}
 
                                                             {/* File info */}
                                                             <div className="flex flex-col min-w-0 pr-6">
-                                                                <span className="text-xs font-medium text-slate-700 truncate max-w-[100px] md:max-w-[150px]">
+                                                                <span className="text-xs font-medium text-slate-700 dark:text-slate-200 truncate max-w-[100px] md:max-w-[150px]">
                                                                     {file.name}
                                                                 </span>
-                                                                <span className="text-[10px] text-slate-400">
+                                                                <span className="text-[10px] text-slate-400 dark:text-slate-500">
                                                                     {formatFileSize(file.size)}
                                                                 </span>
                                                             </div>
@@ -1528,7 +1529,7 @@ const UnifiedInbox: React.FC = () => {
                                     )}
 
                                     {/* Action Bar */}
-                                    <div className="flex items-center justify-between px-3 py-2.5 bg-slate-50/50 border-t border-slate-100">
+                                    <div className="flex items-center justify-between px-3 py-2.5 bg-slate-50/50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-700 transition-colors">
                                         {/* Left Actions */}
                                         <div className="flex items-center gap-1">
                                             {/* Hidden file input */}
@@ -1543,14 +1544,14 @@ const UnifiedInbox: React.FC = () => {
                                             <button
                                                 type="button"
                                                 onClick={() => fileInputRef.current?.click()}
-                                                className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all duration-150"
+                                                className="p-2 text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-lg transition-all duration-150"
                                                 title="Attach file"
                                             >
                                                 <Paperclip className="w-4 h-4 md:w-5 md:h-5" />
                                             </button>
-                                            <div className="hidden sm:block h-4 w-px bg-slate-200 mx-1" />
-                                            <span className="hidden sm:flex items-center text-xs text-slate-400 px-2">
-                                                Press <kbd className="mx-1 px-1.5 py-0.5 bg-slate-100 rounded text-[10px] font-mono border border-slate-200">⌘</kbd> + <kbd className="mx-1 px-1.5 py-0.5 bg-slate-100 rounded text-[10px] font-mono border border-slate-200">↵</kbd> to send
+                                            <div className="hidden sm:block h-4 w-px bg-slate-200 dark:bg-slate-700 mx-1" />
+                                            <span className="hidden sm:flex items-center text-xs text-slate-400 dark:text-slate-500 px-2 font-sans">
+                                                Press <kbd className="mx-1 px-1.5 py-0.5 bg-slate-100 dark:bg-slate-700 rounded text-[10px] font-mono border border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400">⌘</kbd> + <kbd className="mx-1 px-1.5 py-0.5 bg-slate-100 dark:bg-slate-700 rounded text-[10px] font-mono border border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400">↵</kbd> to send
                                             </span>
                                         </div>
 
@@ -1569,10 +1570,10 @@ const UnifiedInbox: React.FC = () => {
                                                 disabled={replySending || !replyText.trim()}
                                                 className={`
                                                     group relative inline-flex items-center gap-2 px-4 md:px-5 py-2 md:py-2.5 rounded-xl text-sm font-semibold
-                                                    transition-all duration-200 transform
+                                                    transition-all duration-200 transform font-sans
                                                     ${replyText.trim() && !replySending
-                                                        ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-200 hover:shadow-lg hover:shadow-indigo-300 hover:scale-[1.02] active:scale-[0.98]'
-                                                        : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                                                        ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-200 dark:shadow-black/40 hover:shadow-lg hover:shadow-indigo-300 dark:hover:shadow-indigo-500/20 hover:scale-[1.02] active:scale-[0.98]'
+                                                        : 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed'
                                                     }
                                                 `}
                                             >

@@ -490,7 +490,7 @@ const KraDashboard: React.FC = () => {
 
             <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 {/* Header Section */}
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12 animate-in slide-in-from-top-4 fade-in duration-700">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12 animate-in slide-in-from-top-4 fade-in duration-700 kra-header-tut">
                     <div>
                         <div className="flex items-center gap-3 mb-2">
                             {/* Fallback to simple icon if KRALogo not available, but user said it works in modal */}
@@ -506,7 +506,7 @@ const KraDashboard: React.FC = () => {
                         </p>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 kra-status-tut">
                         <div className="px-4 py-2 bg-white/50 dark:bg-white/5 backdrop-blur-md rounded-full border border-slate-200 dark:border-slate-800 flex items-center gap-2">
                             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                             <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">System Online</span>
@@ -517,7 +517,7 @@ const KraDashboard: React.FC = () => {
                 {/* Styled Tab Navigation */}
                 <div className="flex flex-col md:flex-row gap-8">
                     {/* Sidebar Tabs for Desktop / Top Scroll for Mobile */}
-                    <nav className="w-full md:w-64 flex-shrink-0 z-30">
+                    <nav className="w-full md:w-64 flex-shrink-0 z-30 kra-tabs-tut">
                         <div className="md:sticky md:top-8 space-y-2 p-2 bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl rounded-2xl border border-slate-200 dark:border-slate-800">
                             {tabs.map((tab) => (
                                 <button
@@ -539,7 +539,7 @@ const KraDashboard: React.FC = () => {
                         </div>
 
                         {/* Help / Support box */}
-                        <div className="mt-8 p-6 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl text-white shadow-xl hidden md:block">
+                        <div className="mt-8 p-6 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl text-white shadow-xl hidden md:block kra-help-tut">
                             <h4 className="font-bold text-lg mb-2">Need Help?</h4>
                             <p className="text-indigo-100 text-sm mb-4 leading-relaxed">
                                 Not sure which obligation to file? Consult the digital tax assistant.
@@ -551,7 +551,7 @@ const KraDashboard: React.FC = () => {
                     </nav>
 
                     {/* Main Content Area */}
-                    <div className="flex-1 min-w-0 animate-in fade-in slide-in-from-right-4 duration-500">
+                    <div className="flex-1 min-w-0 animate-in fade-in slide-in-from-right-4 duration-500 kra-content-tut">
                         {activeTab === 'pin' && <PinChecker />}
                         {activeTab === 'nil-return' && <NilFiling />}
                         {activeTab === 'self-register' && <PinGeneration />}

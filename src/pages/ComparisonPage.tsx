@@ -129,7 +129,7 @@ const ComparisonPage: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white">
+        <div className="min-h-screen bg-transparent transition-colors">
             <SEO
                 title={compData.title}
                 description={compData.description}
@@ -139,30 +139,30 @@ const ComparisonPage: React.FC = () => {
 
             {/* Hero */}
             <section className="pt-20 pb-16 px-4 sm:px-6 lg:px-8 text-center max-w-7xl mx-auto">
-                <h1 className="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tight">
+                <h1 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white mb-6 tracking-tight transition-colors">
                     Switch to the <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">Better Alternative</span>
                 </h1>
-                <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-10">
+                <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-10 transition-colors">
                     Why businesses are choosing Arrotech Hub over {compData.name} for unified productivity and payments.
                 </p>
             </section>
 
             {/* Comparison Table */}
             <section className="px-4 pb-24 max-w-5xl mx-auto">
-                <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
-                    <div className="grid grid-cols-3 bg-gray-50 p-6 border-b border-gray-100">
-                        <div className="col-span-1 font-bold text-gray-500 uppercase tracking-wider text-xs pt-2">Feature</div>
-                        <div className="col-span-1 text-center font-black text-xl text-purple-600">Arrotech Hub</div>
-                        <div className="col-span-1 text-center font-bold text-xl text-gray-500">{compData.name}</div>
+                <div className="bg-white dark:bg-slate-900/50 backdrop-blur-md rounded-3xl shadow-xl overflow-hidden border border-gray-100 dark:border-slate-800 transition-colors">
+                    <div className="grid grid-cols-3 bg-transparent p-6 transition-colors">
+                        <div className="col-span-1 font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-xs pt-2 transition-colors">Feature</div>
+                        <div className="col-span-1 text-center font-black text-xl text-purple-600 dark:text-purple-400 transition-colors">Arrotech Hub</div>
+                        <div className="col-span-1 text-center font-bold text-xl text-gray-500 dark:text-gray-400 transition-colors">{compData.name}</div>
                     </div>
 
                     {/* Price Row */}
-                    <div className="grid grid-cols-3 p-6 border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                        <div className="col-span-1 font-semibold text-gray-700 flex items-center gap-2">
-                            <Wallet className="w-4 h-4 text-gray-400" /> Starting Price
+                    <div className="grid grid-cols-3 p-6 border-b border-gray-50 dark:border-slate-800/50 hover:bg-gray-50/50 dark:hover:bg-slate-800/30 transition-colors">
+                        <div className="col-span-1 font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2 transition-colors">
+                            <Wallet className="w-4 h-4 text-gray-400 dark:text-gray-500 transition-colors" /> Starting Price
                         </div>
-                        <div className="col-span-1 text-center font-bold text-green-600 text-lg">Free / Affordable</div>
-                        <div className="col-span-1 text-center font-medium text-gray-600">{compData.price}</div>
+                        <div className="col-span-1 text-center font-bold text-green-600 dark:text-green-400 text-lg transition-colors">Free / Affordable</div>
+                        <div className="col-span-1 text-center font-medium text-gray-600 dark:text-gray-400 transition-colors">{compData.price}</div>
                     </div>
 
                     {FEATURES.map((feature, idx) => {
@@ -172,26 +172,26 @@ const ComparisonPage: React.FC = () => {
                         const compVal = compData.features[feature.key];
 
                         return (
-                            <div key={idx} className="grid grid-cols-3 p-6 border-b border-gray-50 hover:bg-gray-50/50 transition-colors items-center">
-                                <div className="col-span-1 font-medium text-gray-600 text-sm md:text-base pr-2">{feature.label}</div>
+                            <div key={idx} className="grid grid-cols-3 p-6 border-b border-gray-50 dark:border-slate-800/50 hover:bg-gray-50/50 dark:hover:bg-slate-800/30 transition-colors items-center">
+                                <div className="col-span-1 font-medium text-gray-600 dark:text-gray-300 text-sm md:text-base pr-2 transition-colors">{feature.label}</div>
 
                                 {/* Arrotech Column */}
                                 <div className="col-span-1 flex justify-center">
                                     {arrotechVal === true ? (
-                                        <div className="bg-green-100 text-green-700 p-1.5 rounded-full"><Check className="w-5 h-5" /></div>
+                                        <div className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 p-1.5 rounded-full transition-colors"><Check className="w-5 h-5" /></div>
                                     ) : (
-                                        <span className="font-bold text-gray-900">{arrotechVal}</span>
+                                        <span className="font-bold text-gray-900 dark:text-white transition-colors">{arrotechVal}</span>
                                     )}
                                 </div>
 
                                 {/* Competitor Column */}
                                 <div className="col-span-1 flex justify-center">
                                     {compVal === true ? (
-                                        <div className="bg-gray-100 text-gray-600 p-1.5 rounded-full"><Check className="w-5 h-5" /></div>
+                                        <div className="bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-300 p-1.5 rounded-full transition-colors"><Check className="w-5 h-5" /></div>
                                     ) : compVal === false ? (
-                                        <div className="bg-red-50 text-red-400 p-1.5 rounded-full"><X className="w-5 h-5" /></div>
+                                        <div className="bg-red-50 dark:bg-red-900/20 text-red-400 dark:text-red-500 p-1.5 rounded-full transition-colors"><X className="w-5 h-5" /></div>
                                     ) : (
-                                        <span className="text-gray-500 font-medium">{compVal}</span>
+                                        <span className="text-gray-500 dark:text-gray-400 font-medium transition-colors">{compVal}</span>
                                     )}
                                 </div>
                             </div>
@@ -204,7 +204,7 @@ const ComparisonPage: React.FC = () => {
                         Start for Free
                         <ArrowRight className="w-5 h-5" />
                     </Link>
-                    <p className="mt-4 text-gray-500 text-sm">No credit card required • 14-day free trial on Pro plans</p>
+                    <p className="mt-4 text-gray-500 dark:text-gray-400 text-sm transition-colors">No credit card required • 14-day free trial on Pro plans</p>
                 </div>
             </section>
         </div>

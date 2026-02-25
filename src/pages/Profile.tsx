@@ -1,27 +1,27 @@
 import {
-    Activity,
-    AlertCircle,
-    Calendar,
-    Check,
-    Clock,
-    Copy,
-    CreditCard,
-    Crown,
-    Download,
-    Edit3,
-    Eye,
-    EyeOff,
-    Key,
-    Lock,
-    Mail,
-    RefreshCw,
-    Save,
-    Settings,
-    Shield,
-    Sparkles,
-    Trash2,
-    User,
-    Zap
+  Activity,
+  AlertCircle,
+  Calendar,
+  Check,
+  Clock,
+  Copy,
+  CreditCard,
+  Crown,
+  Download,
+  Edit3,
+  Eye,
+  EyeOff,
+  Key,
+  Lock,
+  Mail,
+  RefreshCw,
+  Save,
+  Settings,
+  Shield,
+  Sparkles,
+  Trash2,
+  User,
+  Zap
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -207,12 +207,12 @@ const Profile: React.FC = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-center py-16">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading profile...</p>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-500 mx-auto mb-4"></div>
+              <p className="text-gray-600 dark:text-slate-400">Loading profile...</p>
             </div>
           </div>
         </div>
@@ -221,24 +221,24 @@ const Profile: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 transition-colors">
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="profile-header mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white transition-colors">
                 Profile Settings
               </h1>
-              <p className="text-gray-600">
+              <p className="text-gray-600 dark:text-slate-400 transition-colors">
                 Manage your account information and preferences
               </p>
             </div>
             <div className="flex items-center space-x-4">
               <div className="text-right">
-                <p className="text-sm text-gray-500">Last updated</p>
-                <p className="text-sm font-medium text-gray-900">
+                <p className="text-sm text-gray-500 dark:text-slate-400 transition-colors">Last updated</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-white transition-colors">
                   {user.updated_at ? new Date(user.updated_at).toLocaleDateString() : 'N/A'}
                 </p>
               </div>
@@ -250,15 +250,15 @@ const Profile: React.FC = () => {
           {/* Main Content - 3 columns */}
           <div className="xl:col-span-3 space-y-8">
             {/* Personal Information Card */}
-            <div className="personal-info-section bg-white rounded-2xl p-6 shadow-sm border border-gray-200/50 hover:shadow-md transition-shadow">
+            <div className="personal-info-section bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-gray-200/50 dark:border-slate-700/50 hover:shadow-md transition-all">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center space-x-4">
                   <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl">
                     <User className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-900">Personal Information</h3>
-                    <p className="text-gray-600">Update your name and email address</p>
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white transition-colors">Personal Information</h3>
+                    <p className="text-gray-600 dark:text-slate-400 transition-colors">Update your name and email address</p>
                   </div>
                 </div>
                 {hasProfileChanges() && (
@@ -279,27 +279,27 @@ const Profile: React.FC = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2 transition-colors">
                     Full Name
                   </label>
                   <input
                     type="text"
                     value={profileData.name}
                     onChange={(e) => handleProfileChange('name', e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500/50 focus:border-transparent transition-colors placeholder:text-gray-400 dark:placeholder:text-slate-500"
                     placeholder="Enter your full name"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2 transition-colors">
                     Email Address
                   </label>
                   <input
                     type="email"
                     value={profileData.email}
                     onChange={(e) => handleProfileChange('email', e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500/50 focus:border-transparent transition-colors placeholder:text-gray-400 dark:placeholder:text-slate-500"
                     placeholder="Enter your email address"
                   />
                 </div>
@@ -307,15 +307,15 @@ const Profile: React.FC = () => {
             </div>
 
             {/* API Key Management Card */}
-            <div className="api-key-section bg-white rounded-2xl p-6 shadow-sm border border-gray-200/50 hover:shadow-md transition-shadow">
+            <div className="api-key-section bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-gray-200/50 dark:border-slate-700/50 hover:shadow-md transition-all">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center space-x-4">
                   <div className="p-3 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl">
                     <Key className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-900">API Key Management</h3>
-                    <p className="text-gray-600">Secure access to your integrations</p>
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white transition-colors">API Key Management</h3>
+                    <p className="text-gray-600 dark:text-slate-400 transition-colors">Secure access to your integrations</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
@@ -348,27 +348,27 @@ const Profile: React.FC = () => {
                 </div>
               </div>
 
-              <div className="bg-gray-50 rounded-lg p-4">
+              <div className="bg-gray-50 dark:bg-slate-900/50 rounded-lg p-4 border border-transparent dark:border-slate-700/50 transition-colors">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-gray-700">API Key</span>
-                  <span className="text-xs text-gray-500">Keep secure</span>
+                  <span className="text-sm font-medium text-gray-700 dark:text-slate-300 transition-colors">API Key</span>
+                  <span className="text-xs text-gray-500 dark:text-slate-400 transition-colors">Keep secure</span>
                 </div>
-                <div className="font-mono text-sm break-all">
+                <div className="font-mono text-sm break-all text-gray-900 dark:text-white transition-colors">
                   {showApiKey ? (
                     user.api_key || 'No API key generated'
                   ) : (
-                    <span className="text-gray-400">••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••</span>
+                    <span className="text-gray-400 dark:text-slate-500 transition-colors">••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••</span>
                   )}
                 </div>
               </div>
 
-              <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <div className="mt-4 p-4 bg-yellow-50 dark:bg-yellow-500/10 border border-yellow-200 dark:border-yellow-500/20 rounded-lg transition-colors">
                 <div className="flex items-start space-x-3">
-                  <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5" />
+                  <AlertCircle className="w-5 h-5 text-yellow-600 dark:text-yellow-500 mt-0.5 transition-colors" />
                   <div>
-                    <h4 className="text-sm font-medium text-yellow-800">Security Notice</h4>
-                    <p className="text-sm text-yellow-700 mt-1">
-                      Your API key provides full access to your account. Keep it secure and never share it publicly. 
+                    <h4 className="text-sm font-medium text-yellow-800 dark:text-yellow-400 transition-colors">Security Notice</h4>
+                    <p className="text-sm text-yellow-700 dark:text-yellow-500/80 mt-1 transition-colors">
+                      Your API key provides full access to your account. Keep it secure and never share it publicly.
                       If compromised, regenerate it immediately.
                     </p>
                   </div>
@@ -377,15 +377,15 @@ const Profile: React.FC = () => {
             </div>
 
             {/* Password Change Card */}
-            <div className="security-section bg-white rounded-2xl p-6 shadow-sm border border-gray-200/50 hover:shadow-md transition-shadow">
+            <div className="security-section bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-gray-200/50 dark:border-slate-700/50 hover:shadow-md transition-all">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center space-x-4">
                   <div className="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-xl">
                     <Lock className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-900">Password Security</h3>
-                    <p className="text-gray-600">Update your account password</p>
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white transition-colors">Password Security</h3>
+                    <p className="text-gray-600 dark:text-slate-400 transition-colors">Update your account password</p>
                   </div>
                 </div>
                 <button
@@ -398,43 +398,43 @@ const Profile: React.FC = () => {
               </div>
 
               {showPasswordForm && (
-                <div className="space-y-4 bg-green-50 rounded-lg p-4 border border-green-200">
+                <div className="space-y-4 bg-green-50 dark:bg-green-500/10 rounded-lg p-4 border border-green-200 dark:border-green-500/20 transition-colors">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2 transition-colors">
                       Current Password
                     </label>
                     <input
                       type="password"
                       value={passwordData.currentPassword}
                       onChange={(e) => handlePasswordChange('currentPassword', e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
+                      className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-500/50 focus:border-transparent transition-colors placeholder:text-gray-400 dark:placeholder:text-slate-500"
                       placeholder="Enter your current password"
                     />
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2 transition-colors">
                         New Password
                       </label>
                       <input
                         type="password"
                         value={passwordData.newPassword}
                         onChange={(e) => handlePasswordChange('newPassword', e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
+                        className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-500/50 focus:border-transparent transition-colors placeholder:text-gray-400 dark:placeholder:text-slate-500"
                         placeholder="Enter your new password"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2 transition-colors">
                         Confirm New Password
                       </label>
                       <input
                         type="password"
                         value={passwordData.confirmPassword}
                         onChange={(e) => handlePasswordChange('confirmPassword', e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
+                        className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-500/50 focus:border-transparent transition-colors placeholder:text-gray-400 dark:placeholder:text-slate-500"
                         placeholder="Confirm your new password"
                       />
                     </div>
@@ -460,46 +460,46 @@ const Profile: React.FC = () => {
           {/* Sidebar - 1 column */}
           <div className="space-y-8">
             {/* Account Overview Card */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200/50 hover:shadow-md transition-shadow">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-gray-200/50 dark:border-slate-700/50 hover:shadow-md transition-all">
               <div className="flex items-center space-x-4 mb-6">
                 <div className="p-3 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl">
                   <Shield className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-900">Account Overview</h3>
-                  <p className="text-gray-600">Your account details</p>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white transition-colors">Account Overview</h3>
+                  <p className="text-gray-600 dark:text-slate-400 transition-colors">Your account details</p>
                 </div>
               </div>
 
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <span className="text-sm font-medium text-gray-700">User ID</span>
-                  <span className="text-sm text-gray-900 font-mono bg-white px-2 py-1 rounded">#{user.id}</span>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-900/50 rounded-lg border border-transparent dark:border-slate-700/50 transition-colors">
+                  <span className="text-sm font-medium text-gray-700 dark:text-slate-300 transition-colors">User ID</span>
+                  <span className="text-sm text-gray-900 dark:text-white font-mono bg-white dark:bg-slate-800 px-2 py-1 rounded border border-transparent dark:border-slate-700 transition-colors">#{user.id}</span>
                 </div>
 
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <span className="text-sm font-medium text-gray-700">Subscription</span>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-900/50 rounded-lg border border-transparent dark:border-slate-700/50 transition-colors">
+                  <span className="text-sm font-medium text-gray-700 dark:text-slate-300 transition-colors">Subscription</span>
                   <div className={`px-3 py-1 text-xs font-medium text-white rounded-full ${getSubscriptionColor(user.subscription_tier)} flex items-center space-x-1`}>
                     {getSubscriptionIcon(user.subscription_tier)}
                     <span>{getSubscriptionName(user.subscription_tier)}</span>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <span className="text-sm font-medium text-gray-700">Member Since</span>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-900/50 rounded-lg border border-transparent dark:border-slate-700/50 transition-colors">
+                  <span className="text-sm font-medium text-gray-700 dark:text-slate-300 transition-colors">Member Since</span>
                   <div className="flex items-center space-x-2">
-                    <Calendar className="w-4 h-4 text-gray-400" />
-                    <span className="text-sm text-gray-900">
+                    <Calendar className="w-4 h-4 text-gray-400 dark:text-slate-500 transition-colors" />
+                    <span className="text-sm text-gray-900 dark:text-white transition-colors">
                       {user.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}
                     </span>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <span className="text-sm font-medium text-gray-700">Last Updated</span>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-900/50 rounded-lg border border-transparent dark:border-slate-700/50 transition-colors">
+                  <span className="text-sm font-medium text-gray-700 dark:text-slate-300 transition-colors">Last Updated</span>
                   <div className="flex items-center space-x-2">
-                    <Clock className="w-4 h-4 text-gray-400" />
-                    <span className="text-sm text-gray-900">
+                    <Clock className="w-4 h-4 text-gray-400 dark:text-slate-500 transition-colors" />
+                    <span className="text-sm text-gray-900 dark:text-white transition-colors">
                       {user.updated_at ? new Date(user.updated_at).toLocaleDateString() : 'N/A'}
                     </span>
                   </div>
@@ -508,81 +508,81 @@ const Profile: React.FC = () => {
             </div>
 
             {/* Quick Actions Card */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200/50 hover:shadow-md transition-shadow">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-gray-200/50 dark:border-slate-700/50 hover:shadow-md transition-all">
               <div className="flex items-center space-x-4 mb-6">
                 <div className="p-3 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl">
                   <Settings className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-900">Quick Actions</h3>
-                  <p className="text-gray-600">Account management</p>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white transition-colors">Quick Actions</h3>
+                  <p className="text-gray-600 dark:text-slate-400 transition-colors">Account management</p>
                 </div>
               </div>
 
               <div className="space-y-3">
-                <button className="w-full flex items-center justify-between p-3 text-left text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                <button className="w-full flex items-center justify-between p-3 text-left text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700/50 rounded-lg transition-colors">
                   <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-blue-100 rounded-lg">
-                      <Mail className="w-4 h-4 text-blue-600" />
+                    <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg transition-colors">
+                      <Mail className="w-4 h-4 text-blue-600 dark:text-blue-400 transition-colors" />
                     </div>
                     <span className="text-sm font-medium">Email Preferences</span>
                   </div>
-                  <span className="text-xs text-gray-400">→</span>
+                  <span className="text-xs text-gray-400 dark:text-slate-600 transition-colors">→</span>
                 </button>
 
-                <button className="w-full flex items-center justify-between p-3 text-left text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                <button className="w-full flex items-center justify-between p-3 text-left text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700/50 rounded-lg transition-colors">
                   <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-green-100 rounded-lg">
-                      <Activity className="w-4 h-4 text-green-600" />
+                    <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg transition-colors">
+                      <Activity className="w-4 h-4 text-green-600 dark:text-green-400 transition-colors" />
                     </div>
                     <span className="text-sm font-medium">Usage Analytics</span>
                   </div>
-                  <span className="text-xs text-gray-400">→</span>
+                  <span className="text-xs text-gray-400 dark:text-slate-600 transition-colors">→</span>
                 </button>
 
-                <button className="w-full flex items-center justify-between p-3 text-left text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                <button className="w-full flex items-center justify-between p-3 text-left text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700/50 rounded-lg transition-colors">
                   <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-purple-100 rounded-lg">
-                      <CreditCard className="w-4 h-4 text-purple-600" />
+                    <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg transition-colors">
+                      <CreditCard className="w-4 h-4 text-purple-600 dark:text-purple-400 transition-colors" />
                     </div>
                     <span className="text-sm font-medium">Billing History</span>
                   </div>
-                  <span className="text-xs text-gray-400">→</span>
+                  <span className="text-xs text-gray-400 dark:text-slate-600 transition-colors">→</span>
                 </button>
 
-                <button className="w-full flex items-center justify-between p-3 text-left text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                <button className="w-full flex items-center justify-between p-3 text-left text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700/50 rounded-lg transition-colors">
                   <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-indigo-100 rounded-lg">
-                      <Download className="w-4 h-4 text-indigo-600" />
+                    <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg transition-colors">
+                      <Download className="w-4 h-4 text-indigo-600 dark:text-indigo-400 transition-colors" />
                     </div>
                     <span className="text-sm font-medium">Export Data</span>
                   </div>
-                  <span className="text-xs text-gray-400">→</span>
+                  <span className="text-xs text-gray-400 dark:text-slate-600 transition-colors">→</span>
                 </button>
               </div>
             </div>
 
             {/* Danger Zone Card */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-red-200/50 hover:shadow-md transition-shadow">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-red-200/50 dark:border-red-500/20 hover:shadow-md transition-all">
               <div className="flex items-center space-x-4 mb-6">
                 <div className="p-3 bg-gradient-to-br from-red-500 to-red-600 rounded-xl">
                   <AlertCircle className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-900">Danger Zone</h3>
-                  <p className="text-gray-600">Irreversible actions</p>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white transition-colors">Danger Zone</h3>
+                  <p className="text-gray-600 dark:text-slate-400 transition-colors">Irreversible actions</p>
                 </div>
               </div>
 
               <div className="space-y-3">
-                <button className="w-full flex items-center justify-between p-3 text-left text-red-700 hover:bg-red-50 rounded-lg transition-colors">
+                <button className="w-full flex items-center justify-between p-3 text-left text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors">
                   <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-red-100 rounded-lg">
-                      <Trash2 className="w-4 h-4 text-red-600" />
+                    <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg transition-colors">
+                      <Trash2 className="w-4 h-4 text-red-600 dark:text-red-400 transition-colors" />
                     </div>
                     <span className="text-sm font-medium">Delete Account</span>
                   </div>
-                  <span className="text-xs text-red-400">→</span>
+                  <span className="text-xs text-red-400 dark:text-red-500/50 transition-colors">→</span>
                 </button>
               </div>
             </div>
@@ -593,4 +593,4 @@ const Profile: React.FC = () => {
   );
 };
 
-export default Profile; 
+export default Profile;
