@@ -434,12 +434,12 @@ const UnifiedCalendar: React.FC = () => {
 
 
     return (
-        <div className={`flex h-screen bg-slate-50 relative overflow-hidden font-sans transition-colors duration-500 ${focusMode ? 'bg-slate-900 text-white' : 'text-slate-900'}`}>
+        <div className={`flex h-screen bg-slate-50 dark:bg-slate-950 relative overflow-hidden font-sans transition-colors duration-500 ${focusMode ? 'bg-slate-900 text-white' : 'text-slate-900 dark:text-white'}`}>
             {/* Ambient Background - "Glassmorphism Command Center" Vibe */}
             <div className={`fixed inset-0 pointer-events-none transition-opacity duration-1000 ${focusMode ? 'opacity-20' : 'opacity-100'}`}>
-                <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-indigo-50/60 to-transparent" />
-                <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-purple-200/30 rounded-full blur-[100px]" />
-                <div className="absolute top-[20%] left-[-10%] w-[500px] h-[500px] bg-indigo-200/30 rounded-full blur-[100px]" />
+                <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-indigo-50/60 dark:from-indigo-900/10 to-transparent" />
+                <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-purple-200/30 dark:bg-purple-900/10 rounded-full blur-[100px]" />
+                <div className="absolute top-[20%] left-[-10%] w-[500px] h-[500px] bg-indigo-200/30 dark:bg-indigo-900/10 rounded-full blur-[100px]" />
             </div>
 
             {/* Mobile Sidebar Overlay */}
@@ -456,27 +456,27 @@ const UnifiedCalendar: React.FC = () => {
                 {/* 1. SUPERIOR HEADER (Smart Input & Navigation) */}
                 <div className={`
                     min-h-[5rem] h-auto py-4 px-4 md:px-6 flex flex-col md:flex-row items-center justify-between sticky top-0 z-30 transition-all duration-300 gap-4
-                    ${focusMode ? 'bg-slate-900/80 border-b border-slate-800' : 'bg-white/70 border-b border-white/50'}
+                    ${focusMode ? 'bg-slate-900/80 border-b border-slate-800' : 'bg-white/70 dark:bg-slate-900/80 border-b border-white/50 dark:border-slate-800'}
                     backdrop-blur-xl
                 `}>
                     <div className="flex items-center gap-3 md:gap-6 shrink-0">
                         {/* Toggle Sidebar Trigger (Mobile/Desktop) */}
-                        <button onClick={() => setShowSidebar(!showSidebar)} className={`p-2 rounded-xl transition-all ${focusMode ? 'hover:bg-slate-800 text-slate-400' : 'hover:bg-gray-100 text-slate-500'}`}>
+                        <button onClick={() => setShowSidebar(!showSidebar)} className={`p-2 rounded-xl transition-all ${focusMode ? 'hover:bg-slate-800 text-slate-400' : 'hover:bg-gray-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400'}`}>
                             <Menu className="w-5 h-5" />
                         </button>
 
                         {/* Title & Nav */}
                         <div className="flex items-center gap-2 md:gap-4">
-                            <h2 className={`text-xl md:text-2xl font-bold tracking-tight ${focusMode ? 'text-white' : 'text-slate-900'}`}>
+                            <h2 className="unified-calendar-header-tut text-xl md:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
                                 {monthNames[viewDate.getMonth()]} <span className="font-normal opacity-60">{viewDate.getFullYear()}</span>
                             </h2>
                             <div className="flex items-center gap-1">
-                                <button onClick={prev} className={`p-1.5 rounded-lg transition-all ${focusMode ? 'hover:bg-slate-800 text-white' : 'hover:bg-gray-100 text-slate-600'}`}><ChevronLeft className="w-5 h-5" /></button>
-                                <button onClick={next} className={`p-1.5 rounded-lg transition-all ${focusMode ? 'hover:bg-slate-800 text-white' : 'hover:bg-gray-100 text-slate-600'}`}><ChevronRight className="w-5 h-5" /></button>
+                                <button onClick={prev} className={`p-1.5 rounded-lg transition-all ${focusMode ? 'hover:bg-slate-800 text-white' : 'hover:bg-gray-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400'}`}><ChevronLeft className="w-5 h-5" /></button>
+                                <button onClick={next} className={`p-1.5 rounded-lg transition-all ${focusMode ? 'hover:bg-slate-800 text-white' : 'hover:bg-gray-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400'}`}><ChevronRight className="w-5 h-5" /></button>
                             </div>
                             <button
                                 onClick={() => { setViewDate(new Date()); setViewMode('day'); }}
-                                className={`ml-1 md:ml-2 text-xs font-bold px-2 py-1 md:px-3 md:py-1.5 rounded-lg border transition-all ${focusMode ? 'border-slate-700 hover:bg-slate-800 text-slate-300' : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-600 hover:shadow-sm'}`}
+                                className={`ml-1 md:ml-2 text-xs font-bold px-2 py-1 md:px-3 md:py-1.5 rounded-lg border transition-all ${focusMode ? 'border-slate-700 hover:bg-slate-800 text-slate-300' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 hover:shadow-sm'}`}
                             >
                                 <span className="hidden sm:inline">Today</span>
                                 <span className="sm:hidden">T</span>
@@ -489,32 +489,32 @@ const UnifiedCalendar: React.FC = () => {
                         {/* Mobile Trigger */}
                         <button
                             onClick={() => setShowSmartScheduler(true)}
-                            className={`md:hidden w-full flex items-center justify-center gap-2 p-2 rounded-xl border ${focusMode ? 'bg-slate-800 border-slate-700 text-indigo-400' : 'bg-white border-indigo-100 text-indigo-600 shadow-sm'}`}
+                            className={`md:hidden w-full flex items-center justify-center gap-2 p-2 rounded-xl border ${focusMode ? 'bg-slate-800 border-slate-700 text-indigo-400' : 'bg-white dark:bg-slate-800 border-indigo-100 dark:border-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm'}`}
                         >
                             <Sparkles className="w-4 h-4" />
                             <span className="text-sm font-medium">Ask AI to schedule...</span>
                         </button>
 
                         {/* Desktop Bar */}
-                        <div className={`hidden md:block absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity ${focusMode ? 'opacity-10' : ''}`} />
+                        <div className={`hidden md:block absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity ${focusMode ? 'opacity-10' : 'dark:opacity-10'}`} />
                         <button
                             onClick={() => setShowSmartScheduler(true)}
-                            className={`hidden md:flex relative items-center w-full h-11 px-4 rounded-2xl transition-all border text-left ${focusMode ? 'bg-slate-800/50 border-slate-700 text-white placeholder-slate-500' : 'bg-white/80 border-indigo-100 text-slate-700 placeholder-indigo-300 shadow-sm hover:shadow-md hover:border-indigo-200'}`}
+                            className={`calendar-smart-scheduler-tut hidden md:flex relative items-center w-full h-11 px-4 rounded-2xl transition-all border text-left ${focusMode ? 'bg-slate-800/50 border-slate-700 text-white placeholder-slate-500' : 'bg-white/80 dark:bg-slate-800/80 border-indigo-100 dark:border-slate-700 text-slate-700 dark:text-slate-200 placeholder-indigo-300 dark:placeholder-slate-500 shadow-sm hover:shadow-md hover:border-indigo-200 dark:hover:border-indigo-500/50'}`}
                         >
                             <Sparkles className={`w-4 h-4 mr-3 shrink-0 ${focusMode ? 'text-indigo-400' : 'text-indigo-500'}`} />
-                            <span className={`text-sm font-medium truncate ${focusMode ? 'text-slate-400' : 'text-indigo-400'}`}>
+                            <span className={`text-sm font-medium truncate ${focusMode ? 'text-slate-400' : 'text-indigo-400 dark:text-indigo-300'}`}>
                                 <span className="hidden lg:inline">Ask AI to schedule... "Lunch with Sarah tomorrow at 12"</span>
                                 <span className="lg:hidden">Ask AI to schedule...</span>
                             </span>
                             <div className="ml-auto flex items-center gap-2">
-                                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${focusMode ? 'bg-slate-700 text-slate-400' : 'bg-indigo-50 text-indigo-400'}`}>⌘K</span>
+                                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${focusMode ? 'bg-slate-700 text-slate-400' : 'bg-indigo-50 dark:bg-indigo-500/20 text-indigo-400 dark:text-indigo-300'}`}>⌘K</span>
                             </div>
                         </button>
                     </div>
 
                     {/* View Toggles & Actions */}
                     <div className="flex items-center gap-1.5 md:gap-2 lg:gap-3 order-2 md:order-3 shrink-0">
-                        <div className={`flex p-1 rounded-xl border ${focusMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-100/50 border-gray-200/50'}`}>
+                        <div className={`calendar-view-modes-tut flex p-1 rounded-xl border ${focusMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-100/50 dark:bg-slate-800/50 border-gray-200/50 dark:border-slate-700'}`}>
                             {(['month', 'week', 'day'] as const).map(m => (
                                 <button
                                     key={m}
@@ -522,8 +522,8 @@ const UnifiedCalendar: React.FC = () => {
                                     className={`
                                         px-2 md:px-3 py-1 md:py-1.5 text-[10px] md:text-xs font-semibold rounded-lg capitalize transition-all
                                         ${viewMode === m
-                                            ? (focusMode ? 'bg-slate-700 text-white shadow-sm' : 'bg-white text-indigo-600 shadow-sm')
-                                            : (focusMode ? 'text-slate-400 hover:text-white' : 'text-gray-500 hover:text-gray-900')}
+                                            ? (focusMode ? 'bg-slate-700 text-white shadow-sm' : 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm')
+                                            : (focusMode ? 'text-slate-400 hover:text-white' : 'text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white')}
                                     `}
                                 >
                                     {m}
@@ -533,7 +533,7 @@ const UnifiedCalendar: React.FC = () => {
 
                         <button
                             onClick={() => setFocusMode(!focusMode)}
-                            className={`flex p-2 md:p-2.5 rounded-xl border transition-all ${focusMode ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'bg-white border-gray-200 text-gray-500 hover:text-indigo-600 hover:border-indigo-100'}`}
+                            className={`flex p-2 md:p-2.5 rounded-xl border transition-all ${focusMode ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-100 dark:hover:border-indigo-500/50'}`}
                             title="Toggle Focus Mode"
                         >
                             <Zap className={`w-4 h-4 ${focusMode ? 'fill-current' : ''}`} />
@@ -541,14 +541,14 @@ const UnifiedCalendar: React.FC = () => {
 
                         <button
                             onClick={() => setShowTaskTray(!showTaskTray)}
-                            className={`hidden sm:flex p-2 md:p-2.5 rounded-xl border transition-all ${showTaskTray ? (focusMode ? 'bg-slate-800 border-slate-700 text-indigo-400' : 'bg-indigo-50 border-indigo-200 text-indigo-600') : (focusMode ? 'bg-slate-900 border-slate-800 text-slate-500' : 'bg-white border-gray-200 text-gray-500')}`}
+                            className={`hidden sm:flex p-2 md:p-2.5 rounded-xl border transition-all ${showTaskTray ? (focusMode ? 'bg-slate-800 border-slate-700 text-indigo-400' : 'bg-indigo-50 dark:bg-indigo-500/10 border-indigo-200 dark:border-indigo-500/30 text-indigo-600 dark:text-indigo-400') : (focusMode ? 'bg-slate-900 border-slate-800 text-slate-500' : 'bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-500 dark:text-slate-400')}`}
                         >
                             <LayoutGrid className="w-4 h-4" />
                         </button>
 
                         <button
                             onClick={() => setIsEventModalOpen(true)}
-                            className="bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-2 md:px-4 md:py-2.5 rounded-xl text-xs md:text-sm font-semibold shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center gap-1.5 md:gap-2"
+                            className="calendar-create-btn-tut bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-2 md:px-4 md:py-2.5 rounded-xl text-xs md:text-sm font-semibold shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center gap-1.5 md:gap-2"
                         >
                             <Plus className="w-4 h-4" />
                             <span className="hidden md:inline">Create</span>
@@ -565,15 +565,15 @@ const UnifiedCalendar: React.FC = () => {
                     )}
                     {/* Left Mini Sidebar (Collapsible) */}
                     <div className={`
-                        transition-all duration-300 ease-in-out border-r flex-col z-50 h-full
+                        calendar-sidebar-tut transition-all duration-300 ease-in-out border-r flex-col z-50 h-full
                         ${showSidebar ? 'w-64 max-w-[80vw] opacity-100 translate-x-0' : 'w-0 opacity-0 -translate-x-4 overflow-hidden'}
-                        ${focusMode ? 'bg-slate-900/95 border-slate-800' : 'bg-white/95 border-white/40'}
+                        ${focusMode ? 'bg-slate-900/95 border-slate-800' : 'bg-white/95 dark:bg-slate-900/95 border-white/40 dark:border-slate-800'}
                         backdrop-blur-xl flex absolute lg:relative
                     `}>
                         <div className="p-6">
-                            <div className={`text-xs font-bold uppercase tracking-wider mb-4 ${focusMode ? 'text-slate-500' : 'text-gray-400'}`}>Mini Calendar</div>
+                            <div className={`text-xs font-bold uppercase tracking-wider mb-4 ${focusMode ? 'text-slate-500' : 'text-gray-400 dark:text-slate-500'}`}>Mini Calendar</div>
                             <div className="grid grid-cols-7 gap-y-3 gap-x-1 text-center text-xs mb-6">
-                                {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => <div key={i} className={`font-medium ${focusMode ? 'text-slate-500' : 'text-gray-400'}`}>{d}</div>)}
+                                {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => <div key={i} className={`font-medium ${focusMode ? 'text-slate-500' : 'text-gray-400 dark:text-slate-500'}`}>{d}</div>)}
                                 {getMonthDays(viewDate).map((d, i) => (
                                     <div key={i}
                                         onClick={() => d && setViewDate(d)}
@@ -581,7 +581,7 @@ const UnifiedCalendar: React.FC = () => {
                                             w-7 h-7 flex items-center justify-center rounded-full mx-auto transition-all
                                             ${!d ? '' : 'cursor-pointer'}
                                             ${d && isToday(d) ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20' : ''}
-                                            ${d && !isToday(d) && (focusMode ? 'text-slate-300 hover:bg-slate-800' : 'text-slate-700 hover:bg-indigo-50')}
+                                            ${d && !isToday(d) && (focusMode ? 'text-slate-300 hover:bg-slate-800' : 'text-slate-700 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-slate-800')}
                                         `}
                                     >
                                         {d ? d.getDate() : ''}
@@ -589,9 +589,9 @@ const UnifiedCalendar: React.FC = () => {
                                 ))}
                             </div>
 
-                            <div className={`h-px w-full my-6 ${focusMode ? 'bg-slate-800' : 'bg-indigo-50'}`} />
+                            <div className={`h-px w-full my-6 ${focusMode ? 'bg-slate-800' : 'bg-indigo-50 dark:bg-slate-800'}`} />
 
-                            <div className={`text-xs font-bold uppercase tracking-wider mb-4 ${focusMode ? 'text-slate-500' : 'text-gray-400'}`}>Calendars</div>
+                            <div className={`text-xs font-bold uppercase tracking-wider mb-4 ${focusMode ? 'text-slate-500' : 'text-gray-400 dark:text-slate-500'}`}>Calendars</div>
                             <div className="space-y-3">
                                 <label className="flex items-center gap-3 text-sm font-medium cursor-pointer group">
                                     <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${calendarFilters.google ? 'bg-indigo-500 border-indigo-500' : (focusMode ? 'border-slate-600' : 'border-gray-300')}`}>
@@ -615,14 +615,14 @@ const UnifiedCalendar: React.FC = () => {
                         {/* MONTH VIEW V2 */}
                         {viewMode === 'month' && (
                             <div className="h-full flex flex-col min-w-[800px] lg:min-w-0">
-                                <div className={`grid grid-cols-7 border-b ${focusMode ? 'bg-slate-900/50 border-slate-800 text-slate-500' : 'bg-white/60 border-indigo-50/50 text-gray-500'} backdrop-blur-sm sticky top-0 z-10`}>
+                                <div className={`grid grid-cols-7 border-b ${focusMode ? 'bg-slate-900/50 border-slate-800 text-slate-500' : 'bg-white/60 dark:bg-slate-900/60 border-indigo-50/50 dark:border-slate-800 text-gray-500 dark:text-slate-400'} backdrop-blur-sm sticky top-0 z-10`}>
                                     {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
                                         <div key={d} className="py-3 text-center text-xs font-bold uppercase tracking-widest opacity-70">{d}</div>
                                     ))}
                                 </div>
                                 <div className="grid grid-cols-7 flex-1 auto-rows-fr">
                                     {getMonthDays(viewDate).map((date, i) => {
-                                        if (!date) return <div key={i} className={`border-b border-r ${focusMode ? 'border-slate-800/50 bg-slate-800/20' : 'border-indigo-50/30 bg-indigo-50/10'} ${i % 7 === 6 ? 'border-r-0' : ''}`} />;
+                                        if (!date) return <div key={i} className={`border-b border-r ${focusMode ? 'border-slate-800/50 bg-slate-800/20' : 'border-indigo-50/30 dark:border-slate-800/30 bg-indigo-50/10 dark:bg-slate-900/20'} ${i % 7 === 6 ? 'border-r-0' : ''}`} />;
 
                                         const dayEvents = events.filter(e => e.date.toDateString() === date.toDateString());
                                         const isCurrentMonth = date.getMonth() === viewDate.getMonth();
@@ -630,7 +630,7 @@ const UnifiedCalendar: React.FC = () => {
                                         return (
                                             <div key={i} onClick={() => date && setViewDate(date)} className={`
                                                 relative border-b border-r p-2 transition-all duration-200 group
-                                                ${focusMode ? 'border-slate-800/50 hover:bg-slate-800/30' : 'border-indigo-50/50 hover:bg-white/80'}
+                                                ${focusMode ? 'border-slate-800/50 hover:bg-slate-800/30' : 'border-indigo-50/50 dark:border-slate-800/50 hover:bg-white/80 dark:hover:bg-slate-800/50'}
                                                 ${i % 7 === 6 ? 'border-r-0' : ''}
                                                 ${!isCurrentMonth ? 'opacity-40 grayscale' : ''}
                                             `}>
@@ -638,7 +638,7 @@ const UnifiedCalendar: React.FC = () => {
                                                     w-7 h-7 mb-2 flex items-center justify-center rounded-full text-sm font-semibold transition-all
                                                     ${isToday(date)
                                                         ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/40 scale-110'
-                                                        : (focusMode ? 'text-slate-400 group-hover:text-white' : 'text-slate-700 group-hover:text-indigo-600 group-hover:bg-indigo-50')}
+                                                        : (focusMode ? 'text-slate-400 group-hover:text-white' : 'text-slate-700 dark:text-slate-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 group-hover:bg-indigo-50 dark:group-hover:bg-slate-800')}
                                                 `}>
                                                     {date.getDate()}
                                                 </div>
@@ -646,7 +646,7 @@ const UnifiedCalendar: React.FC = () => {
                                                     {dayEvents.slice(0, 4).map(e => (
                                                         <div key={e.id} onClick={(ev) => { ev.stopPropagation(); setSelectedEvent(e); }} className={`
                                                             group/event flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-all hover:scale-[1.02]
-                                                            ${focusMode ? 'bg-indigo-500/10 text-indigo-300 hover:bg-indigo-500/20 border border-indigo-500/20' : 'bg-indigo-50/80 text-indigo-700 hover:bg-indigo-100 border border-indigo-100 hover:shadow-sm'}
+                                                            ${focusMode ? 'bg-indigo-500/10 text-indigo-300 hover:bg-indigo-500/20 border border-indigo-500/20' : 'bg-indigo-50/80 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800 hover:shadow-sm'}
                                                         `}>
                                                             <div className={`w-1.5 h-1.5 rounded-full ${focusMode ? 'bg-indigo-400' : 'bg-indigo-500'}`} />
                                                             <span className="truncate font-semibold">{e.time.replace(':00 ', ' ')}</span>
@@ -654,7 +654,7 @@ const UnifiedCalendar: React.FC = () => {
                                                         </div>
                                                     ))}
                                                     {dayEvents.length > 4 && (
-                                                        <div className={`text-[10px] font-bold px-2 ${focusMode ? 'text-slate-500' : 'text-slate-400'}`}>+{dayEvents.length - 4} more</div>
+                                                        <div className={`text-[10px] font-bold px-2 ${focusMode ? 'text-slate-500' : 'text-slate-400 dark:text-slate-500'}`}>+{dayEvents.length - 4} more</div>
                                                     )}
                                                 </div>
                                             </div>
@@ -667,32 +667,32 @@ const UnifiedCalendar: React.FC = () => {
                         {/* WEEK VIEW V2 */}
                         {viewMode === 'week' && (
                             <div className="flex flex-col h-full min-w-[800px] lg:min-w-0">
-                                <div className={`grid grid-cols-8 border-b sticky top-0 z-20 ${focusMode ? 'bg-slate-900/90 border-slate-800' : 'bg-white/80 border-indigo-50'} backdrop-blur-md`}>
-                                    <div className={`p-4 text-center text-xs font-bold border-r ${focusMode ? 'text-slate-500 border-slate-800' : 'text-slate-400 border-indigo-50'}`}>UTC+3</div>
+                                <div className={`grid grid-cols-8 border-b sticky top-0 z-20 ${focusMode ? 'bg-slate-900/90 border-slate-800' : 'bg-white/80 dark:bg-slate-950/80 border-indigo-50 dark:border-slate-800'} backdrop-blur-md`}>
+                                    <div className={`p-4 text-center text-xs font-bold border-r ${focusMode ? 'text-slate-500 border-slate-800' : 'text-slate-400 dark:text-slate-500 border-indigo-50 dark:border-slate-800'}`}>UTC+3</div>
                                     {getWeekDays(viewDate).map((d, i) => (
                                         <div key={i}
                                             onClick={() => setViewDate(d)}
-                                            className={`py-3 text-center border-r cursor-pointer transition-colors ${focusMode ? 'border-slate-800 hover:bg-slate-800' : 'border-indigo-50 hover:bg-indigo-50'} ${i === 6 ? 'border-r-0' : ''}`}>
-                                            <div className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${focusMode ? 'text-slate-500' : 'text-indigo-400'}`}>{['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getDay()]}</div>
-                                            <div className={`w-8 h-8 mx-auto flex items-center justify-center rounded-full text-sm font-bold transition-all ${isToday(d) ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30' : (focusMode ? 'text-slate-200' : 'text-slate-800')}`}>{d.getDate()}</div>
+                                            className={`py-3 text-center border-r cursor-pointer transition-colors ${focusMode ? 'border-slate-800 hover:bg-slate-800' : 'border-indigo-50 dark:border-slate-800 hover:bg-indigo-50 dark:hover:bg-slate-800'} ${i === 6 ? 'border-r-0' : ''}`}>
+                                            <div className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${focusMode ? 'text-slate-500' : 'text-indigo-400 dark:text-indigo-400'}`}>{['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getDay()]}</div>
+                                            <div className={`w-8 h-8 mx-auto flex items-center justify-center rounded-full text-sm font-bold transition-all ${isToday(d) ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30' : (focusMode ? 'text-slate-200' : 'text-slate-800 dark:text-slate-200')}`}>{d.getDate()}</div>
                                         </div>
                                     ))}
                                 </div>
                                 <div className="flex-1 overflow-y-auto relative custom-scrollbar">
                                     <div className="grid grid-cols-8 auto-rows-[60px]">
                                         {/* Time Column with Current Time Line Mockup */}
-                                        <div className={`col-span-1 border-r ${focusMode ? 'border-slate-800 bg-slate-800/20' : 'border-indigo-50 bg-indigo-50/30'}`}>
+                                        <div className={`col-span-1 border-r ${focusMode ? 'border-slate-800 bg-slate-800/20' : 'border-indigo-50 dark:border-slate-800 bg-indigo-50/30 dark:bg-slate-900/30'}`}>
                                             {getHours().map(h => (
-                                                <div key={h} className={`h-[60px] text-[10px] font-medium p-2 text-right -mt-2.5 ${focusMode ? 'text-slate-600' : 'text-slate-400'}`}>
+                                                <div key={h} className={`h-[60px] text-[10px] font-medium p-2 text-right -mt-2.5 ${focusMode ? 'text-slate-600' : 'text-slate-400 dark:text-slate-500'}`}>
                                                     {h === 0 ? '12 AM' : h < 12 ? `${h} AM` : h === 12 ? '12 PM' : `${h - 12} PM`}
                                                 </div>
                                             ))}
                                         </div>
                                         {/* Days Columns */}
                                         {getWeekDays(viewDate).map((d, colIndex) => (
-                                            <div key={colIndex} className={`col-span-1 border-r relative group ${focusMode ? 'border-slate-800 hover:bg-white/5' : 'border-indigo-50 hover:bg-indigo-50/30'}`}>
+                                            <div key={colIndex} className={`col-span-1 border-r relative group ${focusMode ? 'border-slate-800 hover:bg-white/5' : 'border-indigo-50 dark:border-slate-800 hover:bg-indigo-50/30 dark:hover:bg-slate-800/30'}`}>
                                                 {getHours().map(h => (
-                                                    <div key={h} className={`h-[60px] border-b ${focusMode ? 'border-slate-800/50' : 'border-indigo-50/50'}`} />
+                                                    <div key={h} className={`h-[60px] border-b ${focusMode ? 'border-slate-800/50' : 'border-indigo-50/50 dark:border-slate-800/50'}`} />
                                                 ))}
 
                                                 {/* Current Time Indicator for Today */}
@@ -721,7 +721,7 @@ const UnifiedCalendar: React.FC = () => {
                                                                     flex flex-col justify-center overflow-hidden
                                                                     ${focusMode
                                                                         ? 'bg-indigo-600/20 border-indigo-500/30 text-indigo-100 hover:bg-indigo-600/30 shadow-lg shadow-black/20'
-                                                                        : 'bg-white/90 border-indigo-100 text-indigo-900 hover:bg-indigo-50 hover:border-indigo-200 shadow-md shadow-indigo-100'}
+                                                                        : 'bg-white/90 dark:bg-slate-900 border-indigo-100 dark:border-slate-700 text-indigo-900 dark:text-indigo-100 hover:bg-indigo-50 dark:hover:bg-slate-800 hover:border-indigo-200 dark:hover:border-indigo-400 shadow-md shadow-indigo-100 dark:shadow-none'}
                                                                 `}
                                                                 style={{
                                                                     top: `${top}px`,
@@ -731,7 +731,7 @@ const UnifiedCalendar: React.FC = () => {
                                                                 }}
                                                             >
                                                                 <div className="font-bold text-xs truncate leading-tight mb-0.5">{e.title}</div>
-                                                                <div className={`text-[10px] truncate flex items-center gap-1 ${focusMode ? 'text-indigo-300' : 'text-indigo-500'}`}>
+                                                                <div className={`text-[10px] truncate flex items-center gap-1 ${focusMode ? 'text-indigo-300' : 'text-indigo-500 dark:text-indigo-400'}`}>
                                                                     <Clock className="w-2.5 h-2.5" />
                                                                     {e.time}
                                                                 </div>
@@ -749,24 +749,24 @@ const UnifiedCalendar: React.FC = () => {
                         {/* DAY VIEW V2 */}
                         {viewMode === 'day' && (
                             <div className="flex flex-col h-full">
-                                <div className={`p-6 border-b flex items-center justify-center ${focusMode ? 'bg-slate-900/90 border-slate-800' : 'bg-white/80 border-indigo-50'}`}>
+                                <div className={`p-6 border-b flex items-center justify-center ${focusMode ? 'bg-slate-900/90 border-slate-800' : 'bg-white/80 dark:bg-slate-950/80 border-indigo-50 dark:border-slate-800'}`}>
                                     <div className="text-center">
-                                        <div className={`text-sm font-bold uppercase tracking-widest mb-1 ${focusMode ? 'text-slate-500' : 'text-indigo-400'}`}>{['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][viewDate.getDay()]}</div>
-                                        <div className={`text-4xl font-extrabold ${focusMode ? 'text-white' : 'text-slate-900'}`}>{viewDate.getDate()}</div>
+                                        <div className={`text-sm font-bold uppercase tracking-widest mb-1 ${focusMode ? 'text-slate-500' : 'text-indigo-400 dark:text-indigo-400'}`}>{['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][viewDate.getDay()]}</div>
+                                        <div className={`text-4xl font-extrabold ${focusMode ? 'text-white' : 'text-slate-900 dark:text-white'}`}>{viewDate.getDate()}</div>
                                     </div>
                                 </div>
                                 <div className="flex-1 overflow-y-auto relative custom-scrollbar">
                                     <div className="flex min-h-[1440px]">
-                                        <div className={`w-20 border-r shrink-0 ${focusMode ? 'border-slate-800 bg-slate-800/20' : 'border-indigo-50 bg-indigo-50/30'}`}>
+                                        <div className={`w-20 border-r shrink-0 ${focusMode ? 'border-slate-800 bg-slate-800/20' : 'border-indigo-50 dark:border-slate-800 bg-indigo-50/30 dark:bg-slate-900/30'}`}>
                                             {getHours().map(h => (
-                                                <div key={h} className={`h-[60px] text-xs font-medium p-3 text-right ${focusMode ? 'text-slate-600' : 'text-slate-400'}`}>
+                                                <div key={h} className={`h-[60px] text-xs font-medium p-3 text-right ${focusMode ? 'text-slate-600' : 'text-slate-400 dark:text-slate-500'}`}>
                                                     {h === 0 ? '12 AM' : h < 12 ? `${h} AM` : h === 12 ? '12 PM' : `${h - 12} PM`}
                                                 </div>
                                             ))}
                                         </div>
-                                        <div className={`flex-1 relative ${focusMode ? 'bg-slate-900' : 'bg-white'}`}>
+                                        <div className={`flex-1 relative ${focusMode ? 'bg-slate-900' : 'bg-white dark:bg-slate-950'}`}>
                                             {getHours().map(h => (
-                                                <div key={h} className={`h-[60px] border-b ${focusMode ? 'border-slate-800/50' : 'border-indigo-50/50'}`} />
+                                                <div key={h} className={`h-[60px] border-b ${focusMode ? 'border-slate-800/50' : 'border-indigo-50/50 dark:border-slate-800/50'}`} />
                                             ))}
                                             {(() => {
                                                 const dayEvents = events.filter(e => e.date.toDateString() === viewDate.toDateString());
@@ -784,7 +784,7 @@ const UnifiedCalendar: React.FC = () => {
                                                             className={`
                                                                  absolute p-4 rounded-2xl border z-10 shadow-lg cursor-pointer
                                                                  transition-all hover:scale-[1.01] hover:-translate-y-1
-                                                                 ${focusMode ? 'bg-indigo-600/20 border-indigo-500/40 text-white shadow-indigo-900/20' : 'bg-white border-indigo-100 text-indigo-900 shadow-indigo-100/50'}
+                                                                 ${focusMode ? 'bg-indigo-600/20 border-indigo-500/40 text-white shadow-indigo-900/20' : 'bg-white dark:bg-slate-900 border-indigo-100 dark:border-slate-800 text-indigo-900 dark:text-white shadow-indigo-100/50 dark:shadow-none'}
                                                              `}
                                                             style={{
                                                                 top: `${top}px`,
@@ -796,19 +796,19 @@ const UnifiedCalendar: React.FC = () => {
                                                             <div className="flex justify-between items-start">
                                                                 <div>
                                                                     <h3 className="font-bold text-base mb-1">{e.title}</h3>
-                                                                    <div className={`flex items-center gap-2 text-xs font-medium ${focusMode ? 'text-indigo-300' : 'text-indigo-500'}`}>
+                                                                    <div className={`flex items-center gap-2 text-xs font-medium ${focusMode ? 'text-indigo-300' : 'text-indigo-500 dark:text-indigo-400'}`}>
                                                                         <Clock className="w-3.5 h-3.5" />
                                                                         {e.time} - {e.endTime}
                                                                     </div>
                                                                 </div>
                                                                 {e.isOnline && (
-                                                                    <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${focusMode ? 'bg-indigo-500/30 text-indigo-200' : 'bg-indigo-50 text-indigo-600'}`}>
+                                                                    <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${focusMode ? 'bg-indigo-500/30 text-indigo-200' : 'bg-indigo-50 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400'}`}>
                                                                         Online
                                                                     </span>
                                                                 )}
                                                             </div>
                                                             {e.location && (
-                                                                <div className={`flex items-center gap-1.5 mt-3 text-xs ${focusMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                                                                <div className={`flex items-center gap-1.5 mt-3 text-xs ${focusMode ? 'text-slate-400' : 'text-slate-500 dark:text-slate-400'}`}>
                                                                     <MapPin className="w-3.5 h-3.5" /> {e.location}
                                                                 </div>
                                                             )}
@@ -825,19 +825,19 @@ const UnifiedCalendar: React.FC = () => {
 
                     {/* 3. AMIE-STYLE TASK SIDEBAR (Right) */}
                     <div className={`
-                         transition-all duration-300 border-l flex flex-col z-50 h-full right-0
+                         calendar-task-tray-tut transition-all duration-300 border-l flex flex-col z-50 h-full right-0
                          ${showTaskTray ? 'w-[340px] max-w-[85vw] opacity-100 translate-x-0' : 'w-0 opacity-0 translate-x-4 overflow-hidden'}
-                         ${focusMode ? 'bg-slate-900/95 border-slate-800' : 'bg-white/95 border-indigo-50'}
+                         ${focusMode ? 'bg-slate-900/95 border-slate-800' : 'bg-white/95 dark:bg-slate-900/95 border-indigo-50 dark:border-slate-800'}
                          backdrop-blur-xl flex absolute lg:relative
                     `}>
-                        <div className={`p-5 border-b flex items-center justify-between ${focusMode ? 'border-slate-800' : 'border-indigo-50'}`}>
+                        <div className={`p-5 border-b flex items-center justify-between ${focusMode ? 'border-slate-800' : 'border-indigo-50 dark:border-slate-800'}`}>
                             <div className="flex items-center gap-2">
-                                <div className={`p-1.5 rounded-lg ${focusMode ? 'bg-emerald-500/20 text-emerald-400' : 'bg-emerald-50 text-emerald-600'}`}>
+                                <div className={`p-1.5 rounded-lg ${focusMode ? 'bg-emerald-500/20 text-emerald-400' : 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'}`}>
                                     <CheckSquare className="w-4 h-4" />
                                 </div>
-                                <h3 className={`font-bold ${focusMode ? 'text-white' : 'text-slate-900'}`}>Unscheduled Tasks</h3>
+                                <h3 className={`font-bold ${focusMode ? 'text-white' : 'text-slate-900 dark:text-white'}`}>Unscheduled Tasks</h3>
                             </div>
-                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${focusMode ? 'bg-slate-800 text-slate-400' : 'bg-gray-100 text-gray-500'}`}>{tasks.length}</span>
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${focusMode ? 'bg-slate-800 text-slate-400' : 'bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400'}`}>{tasks.length}</span>
                         </div>
 
                         {/* Task Filters */}
@@ -871,23 +871,23 @@ const UnifiedCalendar: React.FC = () => {
                                         group relative p-4 rounded-2xl border transition-all duration-200 cursor-grab active:cursor-grabbing
                                         ${focusMode
                                                 ? 'bg-slate-800/40 border-slate-700/50 hover:bg-slate-800 hover:border-emerald-500/30 text-slate-300'
-                                                : 'bg-white/80 border-indigo-50 hover:bg-white hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-100/40'}
+                                                : 'bg-white/80 dark:bg-slate-800/40 border-indigo-50 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 hover:border-emerald-200 dark:hover:border-emerald-500/30 hover:shadow-lg dark:hover:shadow-none hover:shadow-emerald-100/40'}
                                     `}>
                                             <div className="flex justify-between items-start mb-2">
                                                 <div className="flex items-center gap-1.5">
                                                     {getPlatformIcon(task.platform)}
-                                                    <span className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${focusMode ? 'bg-slate-900 text-slate-500' : 'bg-gray-100 text-gray-400'}`}>
+                                                    <span className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${focusMode ? 'bg-slate-900 text-slate-500' : 'bg-gray-100 dark:bg-slate-900 text-gray-400 dark:text-slate-500'}`}>
                                                         {task.platform}
                                                     </span>
                                                 </div>
                                             </div>
-                                            <h4 className={`text-sm font-semibold mb-1 leading-snug line-clamp-2 ${focusMode ? 'text-white group-hover:text-emerald-400' : 'text-slate-800 group-hover:text-emerald-600'}`}>
+                                            <h4 className={`text-sm font-semibold mb-1 leading-snug line-clamp-2 ${focusMode ? 'text-white group-hover:text-emerald-400' : 'text-slate-800 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400'}`}>
                                                 {task.title}
                                             </h4>
 
                                             <div className="flex items-center justify-between mt-2">
-                                                <p className={`text-[10px] truncate ${focusMode ? 'text-slate-500' : 'text-slate-400'}`}>{task.subtitle}</p>
-                                                <div className={`flex items-center gap-1 text-[10px] font-medium ${focusMode ? (task.dueDate ? 'text-emerald-400' : 'text-slate-500') : (task.dueDate ? 'text-emerald-600' : 'text-slate-400')}`}>
+                                                <p className={`text-[10px] truncate ${focusMode ? 'text-slate-500' : 'text-slate-400 dark:text-slate-500'}`}>{task.subtitle}</p>
+                                                <div className={`flex items-center gap-1 text-[10px] font-medium ${focusMode ? (task.dueDate ? 'text-emerald-400' : 'text-slate-500') : (task.dueDate ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500')}`}>
                                                     <Clock className="w-2.5 h-2.5" />
                                                     {task.dueDate || "set due date"}
                                                 </div>
@@ -912,8 +912,8 @@ const UnifiedCalendar: React.FC = () => {
                         </div>
 
                         {/* Task Footer */}
-                        <div className={`p-4 border-t ${focusMode ? 'border-slate-800 bg-slate-900/50' : 'border-indigo-50 bg-gray-50/50'}`}>
-                            <button className={`w-full py-2.5 rounded-xl font-semibold text-xs border border-dashed transition-all flex items-center justify-center gap-2 ${focusMode ? 'border-slate-700 text-slate-400 hover:text-white hover:border-emerald-500/50' : 'border-gray-300 text-gray-500 hover:text-emerald-600 hover:border-emerald-300 hover:bg-emerald-50/30'}`}>
+                        <div className={`p-4 border-t ${focusMode ? 'border-slate-800 bg-slate-900/50' : 'border-indigo-50 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-900/50'}`}>
+                            <button className={`w-full py-2.5 rounded-xl font-semibold text-xs border border-dashed transition-all flex items-center justify-center gap-2 ${focusMode ? 'border-slate-700 text-slate-400 hover:text-white hover:border-emerald-500/50' : 'border-gray-300 dark:border-slate-700 text-gray-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:border-emerald-300 dark:hover:border-emerald-500/50 hover:bg-emerald-50/30 dark:hover:bg-emerald-500/10'}`}>
                                 <Plus className="w-3.5 h-3.5" /> Add Task Manually
                             </button>
                         </div>

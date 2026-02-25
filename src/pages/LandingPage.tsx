@@ -172,7 +172,7 @@ const LandingPage: React.FC = () => {
     ];
 
     return (
-        <div className="text-slate-900 overflow-x-hidden">
+        <div className="text-slate-900 dark:text-slate-50 overflow-x-hidden transition-colors duration-300">
             <SEO
                 title="Unified Inbox & Workspace Platform"
                 description="Manage emails, messages, and workflows in one unified workspace. Connect Slack, Gmail, M-Pesa, and 50+ apps with AI-powered automation. Built for modern teams."
@@ -183,41 +183,41 @@ const LandingPage: React.FC = () => {
             <section className="relative z-10 pt-2 pb-12 sm:pb-16 px-4 sm:px-6 lg:px-8 flex flex-col items-center overflow-hidden">
 
                 {/* Animated floating orbs — subtle to avoid navbar clash */}
-                <div className="absolute top-[15%] left-[15%] w-72 h-72 bg-purple-400/10 rounded-full blur-[120px] animate-float pointer-events-none"></div>
-                <div className="absolute top-[25%] right-[10%] w-64 h-64 bg-blue-400/8 rounded-full blur-[100px] animate-float pointer-events-none" style={{ animationDelay: '2s' }}></div>
-                <div className="absolute bottom-[20%] left-[40%] w-56 h-56 bg-cyan-400/6 rounded-full blur-[90px] animate-float pointer-events-none" style={{ animationDelay: '4s' }}></div>
+                <div className="absolute top-[15%] left-[15%] w-72 h-72 bg-purple-400/10 dark:bg-purple-900/20 rounded-full blur-[120px] animate-float pointer-events-none"></div>
+                <div className="absolute top-[25%] right-[10%] w-64 h-64 bg-blue-400/8 dark:bg-blue-900/20 rounded-full blur-[100px] animate-float pointer-events-none" style={{ animationDelay: '2s' }}></div>
+                <div className="absolute bottom-[20%] left-[40%] w-56 h-56 bg-cyan-400/6 dark:bg-cyan-900/20 rounded-full blur-[90px] animate-float pointer-events-none" style={{ animationDelay: '4s' }}></div>
                 {/* Subtle grid pattern */}
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,_rgba(0,0,0,0.02)_1px,_transparent_0)] bg-[size:32px_32px] pointer-events-none"></div>
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,_rgba(0,0,0,0.02)_1px,_transparent_0)] dark:bg-[radial-gradient(circle_at_1px_1px,_rgba(255,255,255,0.05)_1px,_transparent_0)] bg-[size:32px_32px] pointer-events-none transition-colors"></div>
 
                 <div ref={heroReveal.ref} className={`max-w-6xl mx-auto text-center relative z-20 transition-all duration-700 ${heroReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
 
                     {/* Main Headline */}
-                    <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6 sm:mb-8 leading-[1.15] tracking-tight">
-                        <span className="block text-slate-900">Automate your</span>
-                        <div className="h-[1.15em] overflow-hidden relative">
+                    <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 sm:mb-8 tracking-tighter leading-[1.1] text-slate-900 dark:text-white transition-colors">
+                        <span className="block">Automate your</span>
+                        <div className="h-[1.1em] overflow-hidden relative mt-1">
                             <span
-                                className="block bg-gradient-to-r from-purple-600 via-blue-500 to-cyan-500 bg-clip-text text-transparent bg-[length:200%_200%] animate-gradient-shift transition-transform duration-500 ease-in-out"
-                                style={{ transform: `translateY(-${heroTextIndex * 1.15}em)` }}
+                                className="block bg-gradient-to-r from-slate-800 via-slate-600 to-slate-900 dark:from-slate-200 dark:via-white dark:to-slate-300 bg-clip-text text-transparent transition-transform duration-500 ease-in-out"
+                                style={{ transform: `translateY(-${heroTextIndex * 1.1}em)` }}
                             >
                                 {heroWords.map((word) => (
-                                    <span key={word} className="block h-[1.15em]"> {word}</span>
+                                    <span key={word} className="block h-[1.1em]"> {word}</span>
                                 ))}
                             </span>
                         </div>
                     </h1>
 
                     {/* Subheadline */}
-                    <p className="text-base sm:text-lg md:text-xl text-slate-500 max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed font-medium">
+                    <p className="text-lg sm:text-xl text-slate-500/90 dark:text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed font-medium transition-colors">
                         Stop switching apps. The intelligent workspace that unifies your <br className="hidden sm:block" />tools, tasks, and teams in one place.
                     </p>
 
 
                     {/* CTAs */}
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full sm:w-auto">
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto">
                         {user ? (
                             <Link
                                 to="/unified"
-                                className="group w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-6 sm:px-8 py-3 sm:py-3.5 rounded-full font-bold text-sm sm:text-base transition-all duration-300 hover:shadow-2xl hover:shadow-slate-900/20 hover:scale-[1.02]"
+                                className="group w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 px-8 py-3.5 rounded-full font-semibold text-sm sm:text-base transition-all duration-300 shadow-[0_4px_14px_0_rgb(0,0,0,0.1)] dark:shadow-none hover:shadow-[0_6px_20px_rgba(0,0,0,0.15)] hover:-translate-y-0.5"
                             >
                                 Open Dashboard
                                 <LayoutDashboard className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -225,66 +225,51 @@ const LandingPage: React.FC = () => {
                         ) : (
                             <Link
                                 to="/register"
-                                className="group w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-6 sm:px-8 py-3 sm:py-3.5 rounded-full font-bold text-sm sm:text-base transition-all duration-300 shadow-xl shadow-purple-500/25 hover:shadow-2xl hover:shadow-purple-500/40 hover:scale-[1.02]"
+                                className="group w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 px-8 py-3.5 rounded-full font-semibold text-sm sm:text-base transition-all duration-300 shadow-[0_4px_14px_0_rgb(0,0,0,0.1)] dark:shadow-none hover:shadow-[0_6px_20px_rgba(0,0,0,0.15)] hover:-translate-y-0.5"
                             >
                                 Get Started Free
-                                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                <ArrowRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
                             </Link>
                         )}
                         <button
                             onClick={() => {
                                 document.getElementById('demo-video')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                             }}
-                            className="group w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white hover:bg-gray-50 border border-gray-200 text-slate-700 px-6 sm:px-8 py-3 sm:py-3.5 rounded-full font-bold text-sm sm:text-base transition-all duration-300 shadow-md hover:shadow-lg hover:scale-[1.02]"
+                            className="group w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700 border border-slate-200/60 dark:border-slate-700 text-slate-600 dark:text-slate-300 px-8 py-3.5 rounded-full font-semibold text-sm sm:text-base transition-all duration-300 hover:shadow-[0_4px_14px_0_rgb(0,0,0,0.05)] hover:-translate-y-0.5"
                         >
-                            <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center group-hover:bg-purple-200 transition-colors">
-                                <Play className="w-4 h-4 text-purple-600 fill-current ml-0.5" />
-                            </div>
+                            <Play className="w-4 h-4 text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors fill-current" />
                             See how it works
                         </button>
                     </div>
 
                     {/* Social Proof Stats */}
-                    <div className="mt-8 sm:mt-10 flex flex-wrap items-center justify-center gap-3 sm:gap-5 md:gap-8">
-                        <div className="flex items-center gap-3 bg-white/60 backdrop-blur-md border border-gray-100 rounded-2xl px-5 py-3 shadow-sm hover:shadow-md transition-all">
-                            <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center text-purple-600">
-                                <Users className="w-5 h-5" />
-                            </div>
-                            <div className="text-left">
-                                <div className="text-xl font-extrabold text-slate-900 leading-tight">{teamCount.toLocaleString()}+</div>
-                                <div className="text-xs text-slate-500 font-medium">Teams worldwide</div>
-                            </div>
+                    <div className="mt-12 sm:mt-16 flex flex-wrap items-center justify-center gap-6 sm:gap-10 opacity-80 mix-blend-multiply dark:mix-blend-normal transition-all">
+                        <div className="flex flex-col items-center">
+                            <div className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">{teamCount.toLocaleString()}+</div>
+                            <div className="text-xs text-slate-500/80 dark:text-slate-400 font-medium tracking-wide">TEAMS WORLDWIDE</div>
                         </div>
-                        <div className="flex items-center gap-3 bg-white/60 backdrop-blur-md border border-gray-100 rounded-2xl px-5 py-3 shadow-sm hover:shadow-md transition-all">
-                            <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600">
-                                <Globe className="w-5 h-5" />
-                            </div>
-                            <div className="text-left">
-                                <div className="text-xl font-extrabold text-slate-900 leading-tight">{integrationCount}+</div>
-                                <div className="text-xs text-slate-500 font-medium">Integrations</div>
-                            </div>
+                        <div className="w-px h-8 bg-slate-200 hidden sm:block"></div>
+                        <div className="flex flex-col items-center">
+                            <div className="text-2xl font-bold text-slate-800 tracking-tight">{integrationCount}+</div>
+                            <div className="text-xs text-slate-500/80 font-medium tracking-wide">INTEGRATIONS</div>
                         </div>
-                        <div className="flex items-center gap-3 bg-white/60 backdrop-blur-md border border-gray-100 rounded-2xl px-5 py-3 shadow-sm hover:shadow-md transition-all">
-                            <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center text-green-600">
-                                <Shield className="w-5 h-5" />
-                            </div>
-                            <div className="text-left">
-                                <div className="text-xl font-extrabold text-slate-900 leading-tight">{uptimeCount}.9%</div>
-                                <div className="text-xs text-slate-500 font-medium">Uptime SLA</div>
-                            </div>
+                        <div className="w-px h-8 bg-slate-200 hidden sm:block"></div>
+                        <div className="flex flex-col items-center">
+                            <div className="text-2xl font-bold text-slate-800 tracking-tight">{uptimeCount}.9%</div>
+                            <div className="text-xs text-slate-500/80 font-medium tracking-wide">UPTIME SLA</div>
                         </div>
                     </div>
                 </div>
             </section>
 
             {/* Video Demo Section */}
-            <section id="demo-video" className="pb-16 md:pb-24 px-4 sm:px-6 lg:px-8 bg-transparent relative z-20 w-full overflow-hidden -mt-4 sm:-mt-8 md:-mt-12">
+            <section id="demo-video" className="pb-16 md:pb-24 px-4 sm:px-6 lg:px-8 bg-transparent relative z-20 w-full overflow-hidden -mt-4 sm:-mt-8 md:-mt-12 transition-colors">
                 {/* Decorative Background Elements */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-5xl h-[300px] bg-gradient-to-b from-purple-500/10 to-transparent blur-3xl pointer-events-none"></div>
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-5xl h-[300px] bg-gradient-to-b from-purple-500/10 dark:from-purple-900/20 to-transparent blur-3xl pointer-events-none"></div>
 
                 <div className="max-w-6xl mx-auto relative">
                     {/* Video Container */}
-                    <div className="relative group rounded-[2rem] sm:rounded-[3rem] p-2 sm:p-4 bg-white/50 backdrop-blur-3xl border border-white shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] hover:shadow-[0_30px_80px_-20px_rgba(100,50,255,0.2)] transition-shadow duration-700">
+                    <div className="relative group rounded-[2rem] sm:rounded-[3rem] p-2 sm:p-4 bg-white/50 dark:bg-slate-900/50 backdrop-blur-3xl border border-white dark:border-slate-800 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] dark:shadow-none hover:shadow-[0_30px_80px_-20px_rgba(100,50,255,0.2)] dark:hover:shadow-[0_30px_80px_-20px_rgba(100,50,255,0.1)] transition-all duration-700">
                         {/* Inner Video Wrapper */}
                         <div className="relative rounded-2xl sm:rounded-[2rem] overflow-hidden bg-slate-900 aspect-video shadow-2xl ring-1 ring-slate-900/10 group-hover:ring-purple-500/30 transition-all duration-700 w-full transform group-hover:-translate-y-1">
                             {/* Subtle Inner Glow */}
@@ -304,14 +289,14 @@ const LandingPage: React.FC = () => {
             </section>
 
             {/* Scrolling Marquee */}
-            <section className="py-8 border-y border-gray-100 bg-white/50 backdrop-blur-sm overflow-hidden">
-                <p className="text-center text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-6">Trusted by modern teams</p>
+            <section className="py-8 overflow-hidden transition-colors">
+                <p className="text-center text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-6">Trusted by modern teams</p>
                 <div className="relative flex overflow-x-hidden group">
                     <div className="py-2 animate-marquee whitespace-nowrap flex items-center">
                         {[...integrations, ...integrations, ...integrations].map((integration, index) => (
-                            <div key={`${integration.name}-${index}`} className="mx-8 flex items-center gap-2 opacity-60 hover:opacity-100 transition-opacity grayscale hover:grayscale-0">
-                                <img src={integration.logo} alt={integration.name} className="h-8 w-auto object-contain" />
-                                <span className="text-lg font-bold text-slate-700 hidden sm:inline">{integration.name}</span>
+                            <div key={`${integration.name}-${index}`} className="mx-8 flex items-center gap-2 opacity-60 dark:opacity-40 hover:opacity-100 dark:hover:opacity-100 transition-opacity grayscale hover:grayscale-0">
+                                <img src={integration.logo} alt={integration.name} className="h-8 w-auto object-contain dark:brightness-200 dark:grayscale-0 dark:hover:brightness-100" />
+                                <span className="text-lg font-bold text-slate-700 dark:text-slate-300 hidden sm:inline">{integration.name}</span>
                             </div>
                         ))}
                     </div>
@@ -319,44 +304,44 @@ const LandingPage: React.FC = () => {
             </section>
 
             {/* Bento Grid Features */}
-            <section id="features" className="relative z-10 py-14 md:py-20 px-4 sm:px-6 lg:px-8 bg-gray-50/50">
+            <section id="features" className="relative z-10 py-14 md:py-20 px-4 sm:px-6 lg:px-8 bg-transparent transition-colors">
                 <div ref={bentoReveal.ref} className={`max-w-7xl mx-auto transition-all duration-700 ${bentoReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                     <div className="text-center mb-10 md:mb-16">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 text-purple-700 text-xs font-bold uppercase tracking-wider mb-6">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 text-slate-700 dark:text-slate-300 text-xs font-semibold uppercase tracking-widest mb-6">
                             <Sparkles className="w-3.5 h-3.5" />
                             Core Platform
                         </div>
-                        <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 mb-4 sm:mb-5 tracking-tight leading-[1.1]">
-                            The OS for <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600">high-performance</span> teams.
+                        <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4 sm:mb-5 tracking-tighter leading-[1.1] transition-colors">
+                            The OS for <span className="text-slate-500 dark:text-slate-400">high-performance teams.</span>
                         </h2>
-                        <p className="text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed">
+                        <p className="text-lg text-slate-500/90 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed font-medium transition-colors">
                             Unified inbox, AI agents, workflow automation, and 50+ integrations — all in one intelligent workspace.
                         </p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-4 sm:gap-6 h-auto md:h-[850px]">
                         {/* Large Main Card: Unified Dashboard */}
-                        <div className="md:col-span-2 md:row-span-2 bg-white rounded-2xl sm:rounded-[2.5rem] p-6 sm:p-8 md:p-12 shadow-xl shadow-purple-500/5 hover:shadow-2xl hover:shadow-purple-500/10 transition-all duration-500 flex flex-col overflow-hidden border border-gray-100 relative group hover:-translate-y-1">
-                            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-br from-purple-50 to-blue-50 rounded-full blur-[80px] -mr-20 -mt-20 pointer-events-none"></div>
+                        <div className="md:col-span-2 md:row-span-2 bg-white dark:bg-slate-900/50 rounded-2xl sm:rounded-[2.5rem] p-6 sm:p-8 md:p-12 shadow-[0_4px_20px_rgb(0,0,0,0.03)] dark:shadow-[0_4px_20px_rgb(0,0,0,0.2)] hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] dark:hover:shadow-[0_12px_40px_rgb(0,0,0,0.3)] transition-all duration-500 flex flex-col overflow-hidden border border-slate-100 dark:border-slate-800 relative group hover:-translate-y-1.5 backdrop-blur-xl">
+                            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-br from-purple-50 dark:from-purple-900/20 to-blue-50 dark:to-blue-900/20 rounded-full blur-[80px] -mr-20 -mt-20 pointer-events-none"></div>
 
                             <div className="relative z-10 mb-8">
-                                <span className="inline-flex items-center justify-center p-4 bg-purple-100 rounded-2xl mb-6 text-purple-600 shadow-sm">
-                                    <LayoutDashboard className="w-10 h-10" />
+                                <span className="inline-flex items-center justify-center p-4 bg-slate-100 dark:bg-slate-800 rounded-2xl mb-6 text-slate-700 dark:text-slate-300 shadow-[0_2px_8px_rgb(0,0,0,0.04)] dark:shadow-none border border-slate-200/50 dark:border-slate-700/50">
+                                    <LayoutDashboard className="w-8 h-8" />
                                 </span>
-                                <h3 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 mb-3 sm:mb-4 tracking-tight leading-tight">Unified & Synchronized</h3>
-                                <p className="text-lg text-slate-500 max-w-md leading-relaxed">
+                                <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-3 sm:mb-4 tracking-tight leading-tight transition-colors">Unified & Synchronized</h3>
+                                <p className="text-lg text-slate-500/90 dark:text-slate-400 max-w-md leading-relaxed transition-colors">
                                     Your emails, assignments, and calendar events in one intelligent stream.
                                 </p>
                             </div>
 
                             {/* Live Data Dashboard Mockup */}
-                            <div className="flex-1 bg-slate-50 border border-gray-200 rounded-t-3xl shadow-sm relative overflow-hidden group-hover:scale-[1.02] transition-transform duration-500">
-                                <div className="absolute top-4 left-4 right-4 bottom-0 bg-white rounded-t-2xl shadow-lg border border-gray-200 p-6 flex flex-col">
+                            <div className="flex-1 bg-slate-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700/50 rounded-t-3xl shadow-sm relative overflow-hidden group-hover:scale-[1.02] transition-transform duration-500">
+                                <div className="absolute top-4 left-4 right-4 bottom-0 bg-white dark:bg-slate-900 rounded-t-2xl shadow-lg border border-gray-200 dark:border-slate-700/50 p-6 flex flex-col">
                                     <div className="flex items-center justify-between mb-6">
                                         <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold text-lg">JD</div>
+                                            <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 font-bold text-lg">JD</div>
                                             <div>
-                                                <div className="text-base font-bold text-slate-900">John Doe</div>
+                                                <div className="text-base font-bold text-slate-900 dark:text-white">John Doe</div>
                                                 <div className="text-xs text-green-600 flex items-center gap-1 font-medium">
                                                     <span className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse"></span>
                                                     Online
@@ -364,27 +349,27 @@ const LandingPage: React.FC = () => {
                                             </div>
                                         </div>
                                         <div className="flex gap-2">
-                                            <div className="px-4 py-1.5 bg-slate-100 rounded-full text-xs font-bold text-slate-600">Inbox (4)</div>
-                                            <div className="px-4 py-1.5 bg-purple-100 text-purple-700 rounded-full text-xs font-bold">Tasks (12)</div>
+                                            <div className="px-4 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-full text-xs font-bold text-slate-600 dark:text-slate-400">Inbox (4)</div>
+                                            <div className="px-4 py-1.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded-full text-xs font-bold">Tasks (12)</div>
                                         </div>
                                     </div>
 
                                     <div className="space-y-4 flex-1 overflow-visible">
-                                        <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Recent Activity</div>
+                                        <div className="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-2">Recent Activity</div>
                                         {activities.map((activity) => (
-                                            <div key={activity.id} className="flex items-center gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100 animate-slide-in-right hover:bg-white hover:shadow-md transition-all cursor-pointer group/item">
-                                                <div className={`w-10 h-10 rounded-xl ${activity.bg} flex items-center justify-center ${activity.color} shadow-sm`}>
+                                            <div key={activity.id} className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-800/80 rounded-xl border border-slate-100 dark:border-slate-700/50 animate-slide-in-right hover:bg-white dark:hover:bg-slate-800 hover:shadow-md transition-all cursor-pointer group/item">
+                                                <div className={`w-10 h-10 rounded-xl ${activity.bg.replace('100', '100 dark:bg-opacity-20 ')} flex items-center justify-center ${activity.color} shadow-sm`}>
                                                     <activity.icon className="w-5 h-5" />
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex justify-between items-center mb-1">
-                                                        <p className="text-base font-bold text-slate-900">{activity.user}</p>
-                                                        <span className="text-[11px] font-medium text-slate-400">{activity.time}</span>
+                                                        <p className="text-base font-bold text-slate-900 dark:text-white">{activity.user}</p>
+                                                        <span className="text-[11px] font-medium text-slate-400 dark:text-slate-500">{activity.time}</span>
                                                     </div>
-                                                    <p className="text-sm text-slate-600 truncate font-medium">{activity.action}</p>
+                                                    <p className="text-sm text-slate-600 dark:text-slate-400 truncate font-medium">{activity.action}</p>
                                                 </div>
-                                                <button className="opacity-0 group-hover/item:opacity-100 p-2 hover:bg-slate-200 rounded-full transition-all">
-                                                    <ArrowRight className="w-4 h-4 text-slate-500" />
+                                                <button className="opacity-0 group-hover/item:opacity-100 p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-all">
+                                                    <ArrowRight className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                                                 </button>
                                             </div>
                                         ))}
@@ -394,28 +379,28 @@ const LandingPage: React.FC = () => {
                         </div>
 
                         {/* Top Right Card: AI Agents */}
-                        <div className="md:col-span-2 bg-slate-900 text-white rounded-2xl sm:rounded-[2.5rem] p-6 sm:p-10 shadow-xl overflow-hidden relative group hover:-translate-y-1 transition-all duration-500">
+                        <div className="md:col-span-2 bg-slate-900 dark:bg-slate-950 text-white rounded-2xl sm:rounded-[2.5rem] p-6 sm:p-10 shadow-[0_4px_20px_rgb(0,0,0,0.2)] hover:shadow-[0_12px_40px_rgb(0,0,0,0.3)] overflow-hidden relative group hover:-translate-y-1.5 transition-all duration-500 dark:border border-slate-800">
                             <div className="absolute top-0 right-0 w-64 h-64 bg-purple-600/30 rounded-full blur-[60px] pointer-events-none"></div>
                             <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-600/20 rounded-full blur-[50px] pointer-events-none"></div>
 
                             <div className="relative z-10 h-full flex flex-col">
                                 <div className="flex justify-between items-start mb-6">
                                     <div>
-                                        <h3 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2 flex items-center gap-2 sm:gap-3 tracking-tight">
-                                            <Bot className="w-8 h-8 text-purple-400" />
+                                        <h3 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2 flex items-center gap-2 sm:gap-3 tracking-tight text-white">
+                                            <Bot className="w-7 h-7 text-indigo-400" />
                                             AI Agents
                                         </h3>
-                                        <p className="text-slate-400 text-sm sm:text-base">Autonomous agents that handle support, sales, and ops 24/7.</p>
+                                        <p className="text-slate-400 text-sm sm:text-base leading-relaxed">Autonomous agents that handle support, sales, and ops 24/7.</p>
                                     </div>
                                     <div className="flex -space-x-2">
-                                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 border-2 border-slate-900 flex items-center justify-center text-[10px] font-bold shadow-lg" title="Sales Agent">SA</div>
-                                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 border-2 border-slate-900 flex items-center justify-center text-[10px] font-bold shadow-lg" title="Support Agent">CS</div>
-                                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 border-2 border-slate-900 flex items-center justify-center text-[10px] font-bold shadow-lg" title="DevOps Agent">DO</div>
+                                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 border-2 border-slate-900 dark:border-slate-950 flex items-center justify-center text-[10px] font-bold shadow-lg" title="Sales Agent">SA</div>
+                                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 border-2 border-slate-900 dark:border-slate-950 flex items-center justify-center text-[10px] font-bold shadow-lg" title="Support Agent">CS</div>
+                                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 border-2 border-slate-900 dark:border-slate-950 flex items-center justify-center text-[10px] font-bold shadow-lg" title="DevOps Agent">DO</div>
                                     </div>
                                 </div>
 
                                 {/* Simulated Chat Interface */}
-                                <div className="flex-1 bg-slate-800/80 rounded-2xl p-5 border border-slate-700/50 space-y-4 shadow-inner backdrop-blur-sm">
+                                <div className="flex-1 bg-slate-800/80 dark:bg-slate-900/80 rounded-2xl p-5 border border-slate-700/50 dark:border-slate-700/30 space-y-4 shadow-inner backdrop-blur-sm">
                                     <div className="flex justify-end">
                                         <div className="bg-purple-600 text-white px-5 py-3 rounded-2xl rounded-tr-sm text-sm font-medium max-w-[85%] shadow-lg">
                                             Book a meeting with sales for top leads.
@@ -423,7 +408,7 @@ const LandingPage: React.FC = () => {
                                     </div>
                                     <div className="flex justify-start items-end gap-2">
                                         <div className="w-7 h-7 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center shadow-lg flex-shrink-0"><Bot className="w-3.5 h-3.5 text-white" /></div>
-                                        <div className="bg-slate-700 text-slate-200 px-4 py-2.5 rounded-2xl rounded-tl-sm text-sm font-medium shadow-md">
+                                        <div className="bg-slate-700 dark:bg-slate-800 text-slate-200 px-4 py-2.5 rounded-2xl rounded-tl-sm text-sm font-medium shadow-md">
                                             <div className="flex items-center gap-2">
                                                 <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
                                                 Scanning CRM... Found <span className="text-green-400 font-bold">3 hot leads</span>.
@@ -432,7 +417,7 @@ const LandingPage: React.FC = () => {
                                     </div>
                                     <div className="flex justify-start items-end gap-2 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
                                         <div className="w-7 h-7 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center shadow-lg flex-shrink-0"><Bot className="w-3.5 h-3.5 text-white" /></div>
-                                        <div className="bg-slate-700 text-slate-200 px-4 py-2.5 rounded-2xl rounded-tl-sm text-sm font-medium shadow-md">
+                                        <div className="bg-slate-700 dark:bg-slate-800 text-slate-200 px-4 py-2.5 rounded-2xl rounded-tl-sm text-sm font-medium shadow-md">
                                             Sending calendar invites... <span className="text-green-400 font-bold">Done! ✓</span>
                                         </div>
                                     </div>
@@ -441,14 +426,14 @@ const LandingPage: React.FC = () => {
                         </div>
 
                         {/* Bottom Middle Card: Automation */}
-                        <div className="md:col-span-1 bg-white rounded-2xl sm:rounded-[2.5rem] p-6 sm:p-10 border border-gray-200 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all flex flex-col justify-between group overflow-hidden min-h-[280px] sm:min-h-[320px] relative">
+                        <div className="md:col-span-1 bg-white dark:bg-slate-900/50 rounded-2xl sm:rounded-[2.5rem] p-6 sm:p-10 border border-slate-100 dark:border-slate-800 shadow-[0_4px_20px_rgb(0,0,0,0.03)] dark:shadow-[0_4px_20px_rgb(0,0,0,0.2)] hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] dark:hover:shadow-[0_12px_40px_rgb(0,0,0,0.3)] hover:-translate-y-1.5 transition-all duration-500 flex flex-col justify-between group overflow-hidden min-h-[280px] sm:min-h-[320px] relative backdrop-blur-xl">
                             <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-400 to-purple-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
-                            <div className="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center mb-5 text-blue-600 group-hover:rotate-12 transition-transform shadow-sm">
+                            <div className="w-14 h-14 bg-blue-100 dark:bg-blue-900/40 rounded-2xl flex items-center justify-center mb-5 text-blue-600 dark:text-blue-400 group-hover:rotate-12 transition-transform shadow-sm">
                                 <Zap className="w-7 h-7" />
                             </div>
                             <div className="mb-6">
-                                <h3 className="text-2xl font-bold text-slate-900 mb-2 tracking-tight">Automation</h3>
-                                <p className="text-slate-500 text-sm font-medium">Visual workflow builder with drag-and-drop.</p>
+                                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2 tracking-tight transition-colors">Automation</h3>
+                                <p className="text-slate-500/90 dark:text-slate-400 text-sm font-medium leading-relaxed transition-colors">Visual workflow builder with drag-and-drop.</p>
                             </div>
                             {/* 3-Step Pipeline Visual */}
                             <div className="flex items-center gap-1 mt-auto">
@@ -480,20 +465,20 @@ const LandingPage: React.FC = () => {
                         </div>
 
                         {/* Bottom Right Card: Connect */}
-                        <div className="md:col-span-1 bg-gradient-to-br from-pink-50 to-orange-50 rounded-2xl sm:rounded-[2.5rem] p-6 sm:p-10 border border-pink-100 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all flex flex-col justify-between group min-h-[280px] sm:min-h-[320px] relative">
-                            <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,_var(--tw-gradient-stops))] from-orange-100/50 via-transparent to-transparent rounded-[2.5rem] pointer-events-none"></div>
+                        <div className="md:col-span-1 bg-gradient-to-br from-pink-50 to-orange-50 dark:from-pink-900/20 dark:to-orange-900/10 rounded-2xl sm:rounded-[2.5rem] p-6 sm:p-10 border border-pink-100 dark:border-pink-900/30 shadow-[0_4px_20px_rgb(249,168,212,0.2)] dark:shadow-none hover:shadow-[0_12px_40px_rgb(249,168,212,0.4)] dark:hover:shadow-[0_12px_40px_rgb(249,168,212,0.1)] hover:-translate-y-1.5 transition-all duration-500 flex flex-col justify-between group min-h-[280px] sm:min-h-[320px] relative backdrop-blur-xl">
+                            <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,_var(--tw-gradient-stops))] from-orange-100/50 dark:from-orange-500/10 via-transparent to-transparent rounded-[2.5rem] pointer-events-none"></div>
                             <div className="relative z-10">
-                                <div className="w-14 h-14 bg-pink-100 rounded-2xl flex items-center justify-center mb-5 text-pink-600 group-hover:scale-110 transition-transform shadow-sm">
+                                <div className="w-14 h-14 bg-pink-100 dark:bg-pink-900/40 rounded-2xl flex items-center justify-center mb-5 text-pink-600 dark:text-pink-400 group-hover:scale-110 transition-transform shadow-sm">
                                     <GitBranch className="w-7 h-7" />
                                 </div>
-                                <h3 className="text-2xl font-bold text-slate-900 mb-2 tracking-tight">Connect</h3>
-                                <p className="text-slate-500 text-sm font-medium mb-6">Integrate with 50+ apps your team already uses.</p>
+                                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2 tracking-tight transition-colors">Connect</h3>
+                                <p className="text-slate-500/90 dark:text-slate-400 text-sm font-medium mb-6 leading-relaxed transition-colors">Integrate with 50+ apps your team already uses.</p>
                             </div>
                             <div className="flex -space-x-2 mt-auto relative z-10">
                                 {[slackLogo, gmailLogo, notionLogo, asanaLogo].map((logo, i) => (
-                                    <img key={i} src={logo} alt="app" className="w-11 h-11 rounded-full border-3 border-white bg-white object-contain shadow-md transition-all duration-300 hover:scale-125 hover:z-10 hover:-translate-y-1" style={{ animationDelay: `${i * 0.1}s` }} />
+                                    <img key={i} src={logo} alt="app" className="w-11 h-11 rounded-full border-3 border-white dark:border-slate-800 bg-white dark:bg-slate-800 object-contain shadow-md transition-all duration-300 hover:scale-125 hover:z-10 hover:-translate-y-1" style={{ animationDelay: `${i * 0.1}s` }} />
                                 ))}
-                                <div className="w-11 h-11 rounded-full bg-white border-3 border-white flex items-center justify-center text-xs font-extrabold text-slate-500 shadow-md hover:scale-125 hover:-translate-y-1 transition-all duration-300 cursor-pointer">+47</div>
+                                <div className="w-11 h-11 rounded-full bg-white dark:bg-slate-800 border-3 border-white dark:border-slate-800 flex items-center justify-center text-xs font-extrabold text-slate-500 dark:text-slate-400 shadow-md hover:scale-125 hover:-translate-y-1 transition-all duration-300 cursor-pointer">+47</div>
                             </div>
                         </div>
                     </div>
@@ -501,19 +486,19 @@ const LandingPage: React.FC = () => {
             </section>
 
             {/* AI Powerhouse Section */}
-            <section className="py-14 md:py-20 px-4 sm:px-6 lg:px-8 bg-slate-950 text-white relative overflow-hidden">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-indigo-900/20 via-slate-950 to-slate-950"></div>
+            <section className="py-14 md:py-20 px-4 sm:px-6 lg:px-8 bg-transparent text-slate-900 dark:text-white relative overflow-hidden transition-colors">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-indigo-900/5 dark:from-indigo-900/20 via-transparent dark:via-transparent to-transparent pointer-events-none"></div>
 
                 <div ref={aiReveal.ref} className={`max-w-7xl mx-auto relative z-10 transition-all duration-700 ${aiReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                     <div className="text-center mb-10 md:mb-16">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-bold uppercase tracking-wider mb-6">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-xs font-bold uppercase tracking-wider mb-6">
                             <Cpu className="w-4 h-4" />
                             <span>Total Control</span>
                         </div>
-                        <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-5 sm:mb-6 tracking-tight leading-[1.1]">
+                        <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-5 sm:mb-6 tracking-tight leading-[1.1] transition-colors">
                             The AI Powerhouse.
                         </h2>
-                        <p className="text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed">
+                        <p className="text-lg text-slate-500/90 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed transition-colors">
                             Choose your intelligence. Run local models for maximum privacy or cloud models for maximum power.
                         </p>
                     </div>
@@ -586,13 +571,13 @@ const LandingPage: React.FC = () => {
             </section>
 
             {/* "Built for Teams" Tabs Section (Monday.com style) */}
-            <section className="py-14 md:py-20 px-4 sm:px-6 lg:px-8 bg-white">
+            <section className="py-14 md:py-20 px-4 sm:px-6 lg:px-8 bg-transparent transition-colors">
                 <div ref={teamsReveal.ref} className={`max-w-7xl mx-auto transition-all duration-700 ${teamsReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                     <div className="text-center mb-16">
-                        <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 mb-4 sm:mb-5 tracking-tight leading-[1.1]">
+                        <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4 sm:mb-5 tracking-tighter leading-[1.1] transition-colors">
                             Built for every team
                         </h2>
-                        <p className="text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed">
+                        <p className="text-lg text-slate-500/90 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed font-medium transition-colors">
                             From engineering sprints to marketing launches — one platform that adapts to how your team actually works.
                         </p>
 
@@ -609,7 +594,7 @@ const LandingPage: React.FC = () => {
                                     onClick={() => setActiveTab(tab.id)}
                                     className={`flex items-center gap-2 px-6 py-3 rounded-full text-sm font-bold transition-all duration-300 ${activeTab === tab.id
                                         ? `bg-gradient-to-r ${tab.color} text-white shadow-lg shadow-black/10 scale-105 ring-4 ${tab.ring}`
-                                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:scale-[1.02]'
+                                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700 hover:scale-[1.02]'
                                         }`}
                                 >
                                     <tab.icon className="w-4 h-4" />
@@ -620,18 +605,18 @@ const LandingPage: React.FC = () => {
                     </div>
 
                     {/* Tab Content Area */}
-                    <div className="bg-gradient-to-br from-slate-50 to-white rounded-2xl sm:rounded-[2.5rem] p-5 sm:p-8 md:p-14 border border-gray-100 shadow-xl shadow-gray-200/50 overflow-hidden relative">
-                        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-white rounded-full blur-[100px] opacity-70 pointer-events-none"></div>
+                    <div className="bg-gradient-to-br from-slate-50 to-white dark:from-slate-900/50 dark:to-slate-800/50 rounded-2xl sm:rounded-[2.5rem] p-5 sm:p-8 md:p-14 border border-gray-100 dark:border-slate-800 shadow-xl shadow-gray-200/50 dark:shadow-none overflow-hidden relative backdrop-blur-xl transition-colors">
+                        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-white dark:bg-purple-900/20 rounded-full blur-[100px] opacity-70 pointer-events-none"></div>
 
                         <div className="grid md:grid-cols-2 gap-12 items-center relative z-10">
                             <div>
-                                <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-900 mb-4 sm:mb-6 tracking-tight leading-tight">
+                                <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mb-4 sm:mb-6 tracking-tight leading-tight transition-colors">
                                     {activeTab === 'engineering' && "Ship faster with automated workflows."}
                                     {activeTab === 'marketing' && "Launch campaigns in record time."}
                                     {activeTab === 'sales' && "Close deals without the busywork."}
                                     {activeTab === 'support' && "Delight customers with instant answers."}
                                 </h3>
-                                <p className="text-base text-slate-500 mb-8 leading-relaxed">
+                                <p className="text-base text-slate-500/90 dark:text-slate-400 mb-8 leading-relaxed transition-colors">
                                     {activeTab === 'engineering' && "Connect Jira, GitHub, and Slack. Automatically create tickets from bug reports and sync status updates tailored for developers."}
                                     {activeTab === 'marketing' && "Sync leads from Facebook Ads to HubSpot. Auto-generate social posts with AI and approve them in one click."}
                                     {activeTab === 'sales' && "Enrich leads automatically. Schedule meetings and follow up with prospects without leaving your dashboard."}
@@ -646,7 +631,7 @@ const LandingPage: React.FC = () => {
                                             support: ["Omnichannel inbox", "SLA monitoring & alerts", "AI auto-responses"],
                                         };
                                         return (features[activeTab] || []).map((feature, i) => (
-                                            <li key={`${activeTab}-${i}`} className="flex items-center gap-3 text-slate-700 font-medium animate-fade-in-up" style={{ animationDelay: `${i * 0.1}s` }}>
+                                            <li key={`${activeTab}-${i}`} className="flex items-center gap-3 text-slate-700 dark:text-slate-300 font-medium animate-fade-in-up transition-colors" style={{ animationDelay: `${i * 0.1}s` }}>
                                                 <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-green-600 flex-shrink-0">
                                                     <CheckCircle className="w-4 h-4" />
                                                 </div>
@@ -655,40 +640,40 @@ const LandingPage: React.FC = () => {
                                         ));
                                     })()}
                                 </ul>
-                                <Link to="/register" className="inline-flex items-center gap-2 text-purple-600 font-bold hover:text-purple-700 transition-colors group">
+                                <Link to="/register" className="inline-flex items-center gap-2 text-slate-900 dark:text-white font-semibold hover:text-purple-600 transition-colors group">
                                     Learn more <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                                 </Link>
                             </div>
                             {/* Rich Dashboard Mockup */}
-                            <div className="bg-white rounded-2xl shadow-2xl border border-gray-200/80 overflow-hidden relative">
+                            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-gray-200/80 dark:border-slate-800 overflow-hidden relative transition-colors">
                                 {/* Window Chrome */}
-                                <div className="bg-slate-100 border-b border-gray-200 px-4 py-3 flex items-center gap-2">
+                                <div className="bg-slate-100 dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 px-4 py-3 flex items-center gap-2">
                                     <div className="w-3 h-3 rounded-full bg-red-400"></div>
                                     <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
                                     <div className="w-3 h-3 rounded-full bg-green-400"></div>
-                                    <span className="ml-3 text-xs text-slate-400 font-medium">Arrotech Hub — {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</span>
+                                    <span className="ml-3 text-xs text-slate-400 dark:text-slate-500 font-medium">Arrotech Hub — {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</span>
                                 </div>
 
                                 <div className="p-6 min-h-[320px]">
                                     {activeTab === 'engineering' && (
                                         <div className="space-y-3 animate-fade-in-up">
                                             <div className="flex items-center justify-between mb-4">
-                                                <span className="text-sm font-bold text-slate-800">Sprint Board</span>
+                                                <span className="text-sm font-bold text-slate-800 dark:text-slate-200">Sprint Board</span>
                                                 <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full font-bold">Sprint 24</span>
                                             </div>
                                             {[
                                                 { title: 'Fix auth middleware', status: 'In Review', color: 'bg-yellow-100 text-yellow-700', pr: 'PR #342' },
                                                 { title: 'Deploy v2.4 to staging', status: 'Deployed', color: 'bg-green-100 text-green-700', pr: 'PR #340' },
                                                 { title: 'API rate limiter', status: 'In Progress', color: 'bg-blue-100 text-blue-700', pr: 'PR #345' },
-                                                { title: 'Database migration', status: 'Queued', color: 'bg-slate-100 text-slate-600', pr: 'PR #347' },
+                                                { title: 'Database migration', status: 'Queued', color: 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300', pr: 'PR #347' },
                                             ].map((item, i) => (
-                                                <div key={i} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-gray-100 hover:bg-slate-100 transition-colors animate-fade-in-up" style={{ animationDelay: `${i * 0.08}s` }}>
+                                                <div key={i} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-gray-100 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors animate-fade-in-up" style={{ animationDelay: `${i * 0.08}s` }}>
                                                     <div className="flex items-center gap-3">
                                                         <div className="w-2 h-2 rounded-full bg-purple-500"></div>
-                                                        <span className="text-sm font-medium text-slate-800">{item.title}</span>
+                                                        <span className="text-sm font-medium text-slate-800 dark:text-slate-200">{item.title}</span>
                                                     </div>
                                                     <div className="flex items-center gap-2">
-                                                        <span className="text-[10px] text-slate-400 font-mono">{item.pr}</span>
+                                                        <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">{item.pr}</span>
                                                         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${item.color}`}>{item.status}</span>
                                                     </div>
                                                 </div>
@@ -699,25 +684,25 @@ const LandingPage: React.FC = () => {
                                     {activeTab === 'marketing' && (
                                         <div className="space-y-3 animate-fade-in-up">
                                             <div className="flex items-center justify-between mb-4">
-                                                <span className="text-sm font-bold text-slate-800">Campaign Dashboard</span>
+                                                <span className="text-sm font-bold text-slate-800 dark:text-slate-200">Campaign Dashboard</span>
                                                 <span className="text-xs bg-pink-100 text-pink-700 px-2 py-1 rounded-full font-bold">Q1 2026</span>
                                             </div>
                                             <div className="grid grid-cols-2 gap-3 mb-4">
-                                                <div className="bg-gradient-to-br from-pink-50 to-rose-50 rounded-xl p-4 border border-pink-100">
+                                                <div className="bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/10 rounded-xl p-4 border border-pink-100 dark:border-pink-900/30">
                                                     <p className="text-xs text-pink-600 font-bold">Total Reach</p>
-                                                    <p className="text-2xl font-extrabold text-slate-900">2.4M</p>
+                                                    <p className="text-2xl font-extrabold text-slate-900 dark:text-white">2.4M</p>
                                                     <p className="text-xs text-green-600 font-bold">+18%</p>
                                                 </div>
-                                                <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl p-4 border border-purple-100">
+                                                <div className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/10 rounded-xl p-4 border border-purple-100 dark:border-purple-900/30">
                                                     <p className="text-xs text-purple-600 font-bold">Conversions</p>
-                                                    <p className="text-2xl font-extrabold text-slate-900">12.8K</p>
+                                                    <p className="text-2xl font-extrabold text-slate-900 dark:text-white">12.8K</p>
                                                     <p className="text-xs text-green-600 font-bold">+24%</p>
                                                 </div>
                                             </div>
                                             {['Email Drip — Product Launch', 'Instagram Reels — Brand', 'LinkedIn Ads — B2B'].map((campaign, i) => (
-                                                <div key={i} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-gray-100 animate-fade-in-up" style={{ animationDelay: `${i * 0.08}s` }}>
-                                                    <span className="text-sm font-medium text-slate-800">{campaign}</span>
-                                                    <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                                <div key={i} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-gray-100 dark:border-slate-700 animate-fade-in-up" style={{ animationDelay: `${i * 0.08}s` }}>
+                                                    <span className="text-sm font-medium text-slate-800 dark:text-slate-200">{campaign}</span>
+                                                    <div className="w-24 h-2 bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden">
                                                         <div className="h-full bg-gradient-to-r from-pink-500 to-rose-400 rounded-full" style={{ width: `${[85, 62, 45][i]}%` }}></div>
                                                     </div>
                                                 </div>
@@ -728,7 +713,7 @@ const LandingPage: React.FC = () => {
                                     {activeTab === 'sales' && (
                                         <div className="space-y-3 animate-fade-in-up">
                                             <div className="flex items-center justify-between mb-4">
-                                                <span className="text-sm font-bold text-slate-800">Deal Pipeline</span>
+                                                <span className="text-sm font-bold text-slate-800 dark:text-slate-200">Deal Pipeline</span>
                                                 <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-bold">$284K ARR</span>
                                             </div>
                                             {[
@@ -737,17 +722,17 @@ const LandingPage: React.FC = () => {
                                                 { name: 'DataBridge', stage: 'Proposal Sent', value: '$65K', avatar: 'DB', hot: false },
                                                 { name: 'CloudSync Ltd', stage: 'Qualifying', value: '$22K', avatar: 'CS', hot: false },
                                             ].map((deal, i) => (
-                                                <div key={i} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-gray-100 hover:bg-slate-100 transition-colors animate-fade-in-up" style={{ animationDelay: `${i * 0.08}s` }}>
+                                                <div key={i} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-gray-100 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors animate-fade-in-up" style={{ animationDelay: `${i * 0.08}s` }}>
                                                     <div className="flex items-center gap-3">
                                                         <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-white text-[10px] font-bold">{deal.avatar}</div>
                                                         <div>
-                                                            <p className="text-sm font-bold text-slate-800">{deal.name}</p>
-                                                            <p className="text-xs text-slate-400">{deal.stage}</p>
+                                                            <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{deal.name}</p>
+                                                            <p className="text-xs text-slate-400 dark:text-slate-500">{deal.stage}</p>
                                                         </div>
                                                     </div>
                                                     <div className="flex items-center gap-2">
                                                         {deal.hot && <span className="text-[10px] bg-orange-100 text-orange-600 px-1.5 py-0.5 rounded font-bold">HOT</span>}
-                                                        <span className="text-sm font-bold text-slate-900">{deal.value}</span>
+                                                        <span className="text-sm font-bold text-slate-900 dark:text-white">{deal.value}</span>
                                                     </div>
                                                 </div>
                                             ))}
@@ -757,7 +742,7 @@ const LandingPage: React.FC = () => {
                                     {activeTab === 'support' && (
                                         <div className="space-y-3 animate-fade-in-up">
                                             <div className="flex items-center justify-between mb-4">
-                                                <span className="text-sm font-bold text-slate-800">Ticket Queue</span>
+                                                <span className="text-sm font-bold text-slate-800 dark:text-slate-200">Ticket Queue</span>
                                                 <div className="flex items-center gap-2">
                                                     <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
                                                     <span className="text-xs text-green-600 font-bold">AI Active</span>
@@ -769,12 +754,12 @@ const LandingPage: React.FC = () => {
                                                 { subject: 'Billing discrepancy', from: 'finance@acme.co', urgency: 'Med', channel: 'Email', aiResolved: false },
                                                 { subject: 'API rate limit question', from: '@dev_sarah', urgency: 'Low', channel: 'Slack', aiResolved: true },
                                             ].map((ticket, i) => (
-                                                <div key={i} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-gray-100 hover:bg-slate-100 transition-colors animate-fade-in-up" style={{ animationDelay: `${i * 0.08}s` }}>
+                                                <div key={i} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-gray-100 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors animate-fade-in-up" style={{ animationDelay: `${i * 0.08}s` }}>
                                                     <div className="flex items-center gap-3 flex-1 min-w-0">
                                                         <div className={`w-2 h-2 rounded-full flex-shrink-0 ${ticket.urgency === 'High' ? 'bg-red-500' : ticket.urgency === 'Med' ? 'bg-yellow-500' : 'bg-green-500'}`}></div>
                                                         <div className="min-w-0">
-                                                            <p className="text-sm font-medium text-slate-800 truncate">{ticket.subject}</p>
-                                                            <p className="text-xs text-slate-400 truncate">{ticket.from} via {ticket.channel}</p>
+                                                            <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">{ticket.subject}</p>
+                                                            <p className="text-xs text-slate-400 dark:text-slate-500 truncate">{ticket.from} via {ticket.channel}</p>
                                                         </div>
                                                     </div>
                                                     {ticket.aiResolved && (
@@ -794,16 +779,16 @@ const LandingPage: React.FC = () => {
             </section>
 
             {/* Creator Economy Section */}
-            <section className="py-14 md:py-20 px-4 sm:px-6 lg:px-8 bg-slate-50 relative overflow-hidden">
+            <section className="py-14 md:py-20 px-4 sm:px-6 lg:px-8 bg-transparent relative overflow-hidden transition-colors">
                 <div ref={creatorReveal.ref} className={`max-w-7xl mx-auto transition-all duration-700 ${creatorReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                     <div className="grid md:grid-cols-2 gap-16 items-center">
                         <div className="order-2 md:order-1">
                             {/* Visual for Creator Economy */}
                             <div className="relative">
                                 <div className="absolute -inset-4 bg-gradient-to-r from-pink-500 to-purple-600 rounded-[2rem] opacity-30 blur-xl"></div>
-                                <div className="relative bg-white rounded-[2rem] shadow-2xl p-8 border border-gray-100">
+                                <div className="relative bg-white dark:bg-slate-900/50 rounded-[2rem] shadow-2xl dark:shadow-none p-8 border border-gray-100 dark:border-slate-800 backdrop-blur-xl transition-colors">
                                     {/* Earnings Card */}
-                                    <div className="bg-slate-900 text-white rounded-2xl p-6 mb-6 shadow-lg transform rotate-[-2deg] hover:rotate-0 transition-transform duration-300 relative overflow-hidden">
+                                    <div className="bg-slate-900 text-white rounded-2xl p-6 mb-6 shadow-lg transform rotate-[-2deg] hover:rotate-0 transition-transform duration-300 relative overflow-hidden dark:border dark:border-slate-700/50">
                                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer bg-[length:200%_100%]"></div>
                                         <div className="flex justify-between items-start mb-4">
                                             <div>
@@ -822,65 +807,65 @@ const LandingPage: React.FC = () => {
 
                                     {/* Recent Transactions */}
                                     <div className="space-y-4">
-                                        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Recent</p>
-                                        <div className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-xl transition-colors cursor-pointer">
+                                        <p className="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider">Recent</p>
+                                        <div className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-slate-800/80 rounded-xl transition-colors cursor-pointer">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
+                                                <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center text-purple-600 dark:text-purple-400">
                                                     <Lock className="w-5 h-5" />
                                                 </div>
                                                 <div>
-                                                    <p className="font-bold text-slate-800">Premium Template</p>
-                                                    <p className="text-xs text-slate-500">Unlocked by @alex_d</p>
+                                                    <p className="font-bold text-slate-800 dark:text-slate-200">Premium Template</p>
+                                                    <p className="text-xs text-slate-500 dark:text-slate-400">Unlocked by @alex_d</p>
                                                 </div>
                                             </div>
-                                            <span className="font-bold text-slate-900">+$49.00</span>
+                                            <span className="font-bold text-slate-900 dark:text-white">+$49.00</span>
                                         </div>
-                                        <div className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-xl transition-colors cursor-pointer">
+                                        <div className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-slate-800/80 rounded-xl transition-colors cursor-pointer">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center text-pink-600">
+                                                <div className="w-10 h-10 rounded-full bg-pink-100 dark:bg-pink-900/40 flex items-center justify-center text-pink-600 dark:text-pink-400">
                                                     <Sparkles className="w-5 h-5" />
                                                 </div>
                                                 <div>
-                                                    <p className="font-bold text-slate-800">Tip Received</p>
-                                                    <p className="text-xs text-slate-500">From happy client</p>
+                                                    <p className="font-bold text-slate-800 dark:text-slate-200">Tip Received</p>
+                                                    <p className="text-xs text-slate-500 dark:text-slate-400">From happy client</p>
                                                 </div>
                                             </div>
-                                            <span className="font-bold text-slate-900">+$15.00</span>
+                                            <span className="font-bold text-slate-900 dark:text-white">+$15.00</span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div className="order-1 md:order-2">
-                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pink-100 text-pink-600 text-xs font-bold uppercase tracking-wider mb-6">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 text-xs font-bold uppercase tracking-wider mb-6">
                                 <DollarSign className="w-4 h-4" />
                                 <span>Monetization</span>
                             </div>
-                            <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 mb-5 sm:mb-6 tracking-tight leading-[1.1]">
+                            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-5 sm:mb-6 tracking-tighter leading-[1.1] transition-colors">
                                 The Creator Economy OS.
                             </h2>
-                            <p className="text-base sm:text-lg text-slate-500 mb-6 sm:mb-8 leading-relaxed">
+                            <p className="text-base sm:text-lg text-slate-500/90 dark:text-slate-400 mb-6 sm:mb-8 leading-relaxed font-medium transition-colors">
                                 Don't just work—get paid. Arrotech comes with built-in tools to monetize your expertise. Send invoices, receive tips, and sell premium digital assets directly from your dashboard.
                             </p>
 
                             <ul className="space-y-4">
                                 <li className="flex items-center gap-3">
-                                    <div className="w-6 h-6 rounded-full bg-pink-100 flex items-center justify-center text-pink-600">
+                                    <div className="w-6 h-6 rounded-full bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center text-pink-600 dark:text-pink-400">
                                         <CheckCircle2 className="w-4 h-4" />
                                     </div>
-                                    <span className="text-slate-700 font-medium">Integrated Invoicing & Payments</span>
+                                    <span className="text-slate-700 dark:text-slate-300 font-medium transition-colors">Integrated Invoicing & Payments</span>
                                 </li>
                                 <li className="flex items-center gap-3">
-                                    <div className="w-6 h-6 rounded-full bg-pink-100 flex items-center justify-center text-pink-600">
+                                    <div className="w-6 h-6 rounded-full bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center text-pink-600 dark:text-pink-400">
                                         <CheckCircle2 className="w-4 h-4" />
                                     </div>
-                                    <span className="text-slate-700 font-medium">Sell Digital Products & Templates</span>
+                                    <span className="text-slate-700 dark:text-slate-300 font-medium transition-colors">Sell Digital Products & Templates</span>
                                 </li>
                                 <li className="flex items-center gap-3">
-                                    <div className="w-6 h-6 rounded-full bg-pink-100 flex items-center justify-center text-pink-600">
+                                    <div className="w-6 h-6 rounded-full bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center text-pink-600 dark:text-pink-400">
                                         <CheckCircle2 className="w-4 h-4" />
                                     </div>
-                                    <span className="text-slate-700 font-medium">Accept Tips & Donations</span>
+                                    <span className="text-slate-700 dark:text-slate-300 font-medium transition-colors">Accept Tips & Donations</span>
                                 </li>
                             </ul>
                         </div>
@@ -889,22 +874,22 @@ const LandingPage: React.FC = () => {
             </section>
 
             {/* "Chaos vs Order" Comparison (ClickUp style) */}
-            <section className="py-14 md:py-20 px-4 sm:px-6 lg:px-8 bg-slate-900 text-white overflow-hidden relative">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-900/20 via-slate-900 to-slate-900"></div>
+            <section className="py-14 md:py-20 px-4 sm:px-6 lg:px-8 bg-transparent text-slate-900 dark:text-white overflow-hidden relative transition-colors">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-900/5 via-transparent to-transparent dark:from-blue-900/20 dark:via-transparent dark:to-transparent pointer-events-none"></div>
                 {/* Floating ambient orbs */}
-                <div className="absolute top-20 left-[10%] w-72 h-72 bg-red-500/10 rounded-full blur-[100px] animate-float pointer-events-none"></div>
-                <div className="absolute bottom-20 right-[10%] w-72 h-72 bg-purple-500/10 rounded-full blur-[100px] animate-float pointer-events-none" style={{ animationDelay: '3s' }}></div>
+                <div className="absolute top-20 left-[10%] w-72 h-72 bg-red-500/5 dark:bg-red-500/10 rounded-full blur-[100px] animate-float pointer-events-none"></div>
+                <div className="absolute bottom-20 right-[10%] w-72 h-72 bg-purple-500/5 dark:bg-purple-500/10 rounded-full blur-[100px] animate-float pointer-events-none" style={{ animationDelay: '3s' }}></div>
 
                 <div ref={chaosReveal.ref} className={`max-w-7xl mx-auto relative z-10 transition-all duration-700 ${chaosReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                     <div className="text-center mb-16">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-slate-400 text-xs font-bold uppercase tracking-wider mb-6">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/5 dark:bg-white/5 border border-slate-800/10 dark:border-white/10 text-slate-600 dark:text-slate-400 text-xs font-bold uppercase tracking-wider mb-6">
                             <Activity className="w-3.5 h-3.5" />
                             Before &amp; After
                         </div>
-                        <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-4 sm:mb-5 tracking-tight leading-[1.1]">
-                            Stop the chaos. <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">Start flowing.</span>
+                        <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-5 tracking-tighter leading-[1.1] text-slate-900 dark:text-white transition-colors">
+                            Stop the chaos. <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-blue-500 dark:from-purple-400 dark:to-blue-400">Start flowing.</span>
                         </h2>
-                        <p className="text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed">
+                        <p className="text-lg text-slate-500/90 dark:text-slate-400/90 max-w-2xl mx-auto leading-relaxed font-medium transition-colors">
                             Your team juggles 10+ tools daily. We consolidate them into one intelligent platform — so you can focus on what matters.
                         </p>
                     </div>
@@ -912,15 +897,15 @@ const LandingPage: React.FC = () => {
                     <div className="grid md:grid-cols-2 gap-6 md:gap-0 relative">
                         {/* Center VS Divider (desktop only) */}
                         <div className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
-                            <div className="w-16 h-16 rounded-full bg-slate-800 border-2 border-slate-600 flex items-center justify-center shadow-2xl">
-                                <span className="text-sm font-extrabold text-slate-300">VS</span>
+                            <div className="w-16 h-16 rounded-full bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-600 flex items-center justify-center shadow-2xl transition-colors">
+                                <span className="text-sm font-extrabold text-slate-400 dark:text-slate-300">VS</span>
                             </div>
                         </div>
 
                         {/* Before Side */}
-                        <div className="bg-white/[0.03] border border-white/10 rounded-3xl md:rounded-r-none p-8 md:p-10 relative group">
+                        <div className="bg-slate-100/50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-3xl md:rounded-r-none p-8 md:p-10 relative group backdrop-blur-xl transition-colors">
                             <div className="flex items-center gap-3 mb-8">
-                                <span className="px-3 py-1.5 bg-red-500/15 text-red-400 rounded-full text-xs font-bold border border-red-500/20 flex items-center gap-1.5">
+                                <span className="px-3 py-1.5 bg-red-500/15 text-red-600 dark:text-red-400 rounded-full text-xs font-bold border border-red-500/20 flex items-center gap-1.5">
                                     <XCircle className="w-3.5 h-3.5" /> WITHOUT US
                                 </span>
                                 <div className="flex-1 h-px bg-gradient-to-r from-red-500/20 to-transparent"></div>
@@ -933,39 +918,39 @@ const LandingPage: React.FC = () => {
                                     { text: 'Notification overload from every channel', icon: MessageSquare },
                                     { text: 'Scattered docs nobody can find', icon: Search },
                                 ].map((item, i) => (
-                                    <div key={i} className="p-4 bg-white/[0.03] rounded-xl border border-dashed border-white/10 flex items-center gap-4 group/item hover:bg-red-500/5 hover:border-red-500/20 transition-all duration-300 cursor-default">
-                                        <div className="w-9 h-9 rounded-lg bg-red-500/10 flex items-center justify-center text-red-400 flex-shrink-0">
+                                    <div key={i} className="p-4 bg-white dark:bg-white/[0.03] rounded-xl border border-dashed border-slate-200 dark:border-white/10 flex items-center gap-4 group/item hover:bg-red-50 dark:hover:bg-red-500/5 hover:border-red-200 dark:hover:border-red-500/20 transition-all duration-300 cursor-default">
+                                        <div className="w-9 h-9 rounded-lg bg-red-100 dark:bg-red-500/10 flex items-center justify-center text-red-500 dark:text-red-400 flex-shrink-0">
                                             <item.icon className="w-4.5 h-4.5" />
                                         </div>
-                                        <span className="text-slate-400 font-medium text-sm group-hover/item:line-through group-hover/item:text-red-400/60 transition-all">{item.text}</span>
+                                        <span className="text-slate-600 dark:text-slate-400 font-medium text-sm group-hover/item:line-through group-hover/item:text-red-400 transition-all">{item.text}</span>
                                     </div>
                                 ))}
                             </div>
                         </div>
 
                         {/* After Side */}
-                        <div className="bg-gradient-to-br from-purple-900/30 to-blue-900/30 border border-purple-500/30 rounded-3xl md:rounded-l-none p-8 md:p-10 relative shadow-2xl ring-1 ring-purple-500/20">
+                        <div className="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/30 dark:to-blue-900/30 border border-purple-200 dark:border-purple-500/30 rounded-3xl md:rounded-l-none p-8 md:p-10 relative shadow-2xl ring-1 ring-purple-200 dark:ring-purple-500/20 transition-colors">
                             <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-blue-500/5 rounded-3xl md:rounded-l-none pointer-events-none"></div>
                             <div className="relative z-10">
                                 <div className="flex items-center gap-3 mb-8">
-                                    <span className="px-3 py-1.5 bg-green-500/15 text-green-400 rounded-full text-xs font-bold border border-green-500/20 flex items-center gap-1.5">
+                                    <span className="px-3 py-1.5 bg-green-500/15 text-green-600 dark:text-green-400 rounded-full text-xs font-bold border border-green-500/20 flex items-center gap-1.5">
                                         <CheckCircle2 className="w-3.5 h-3.5" /> WITH ARROTECH
                                     </span>
                                     <div className="flex-1 h-px bg-gradient-to-r from-green-500/20 to-transparent"></div>
                                 </div>
                                 <div className="flex flex-col gap-4">
                                     {[
-                                        { text: 'One unified dashboard for everything', icon: LayoutDashboard, gradient: 'from-purple-600/20 to-indigo-600/20', border: 'border-purple-500/20' },
-                                        { text: 'AI-prioritized inbox, zero clutter', icon: Mail, gradient: 'from-blue-600/20 to-cyan-600/20', border: 'border-blue-500/20' },
-                                        { text: 'Automated workflows save 4+ hrs/day', icon: Zap, gradient: 'from-amber-600/20 to-orange-600/20', border: 'border-amber-500/20' },
-                                        { text: 'Smart scheduling across all calendars', icon: Calendar, gradient: 'from-green-600/20 to-emerald-600/20', border: 'border-green-500/20' },
-                                        { text: 'Integrated docs, wikis & knowledge base', icon: FileText, gradient: 'from-pink-600/20 to-rose-600/20', border: 'border-pink-500/20' },
+                                        { text: 'One unified dashboard for everything', icon: LayoutDashboard, gradient: 'from-purple-100 to-indigo-100 dark:from-purple-600/20 dark:to-indigo-600/20', border: 'border-purple-200 dark:border-purple-500/20' },
+                                        { text: 'AI-prioritized inbox, zero clutter', icon: Mail, gradient: 'from-blue-100 to-cyan-100 dark:from-blue-600/20 dark:to-cyan-600/20', border: 'border-blue-200 dark:border-blue-500/20' },
+                                        { text: 'Automated workflows save 4+ hrs/day', icon: Zap, gradient: 'from-amber-100 to-orange-100 dark:from-amber-600/20 dark:to-orange-600/20', border: 'border-amber-200 dark:border-amber-500/20' },
+                                        { text: 'Smart scheduling across all calendars', icon: Calendar, gradient: 'from-green-100 to-emerald-100 dark:from-green-600/20 dark:to-emerald-600/20', border: 'border-green-200 dark:border-green-500/20' },
+                                        { text: 'Integrated docs, wikis & knowledge base', icon: FileText, gradient: 'from-pink-100 to-rose-100 dark:from-pink-600/20 dark:to-rose-600/20', border: 'border-pink-200 dark:border-pink-500/20' },
                                     ].map((item, i) => (
                                         <div key={i} className={`p-4 bg-gradient-to-r ${item.gradient} rounded-xl border ${item.border} flex items-center gap-4 animate-pop-in hover:scale-[1.02] transition-transform`} style={{ animationDelay: `${i * 0.1}s` }}>
-                                            <div className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center text-green-400 flex-shrink-0">
+                                            <div className="w-9 h-9 rounded-lg bg-white/50 dark:bg-white/10 flex items-center justify-center text-green-600 dark:text-green-400 flex-shrink-0">
                                                 <item.icon className="w-4.5 h-4.5" />
                                             </div>
-                                            <span className="font-semibold text-white text-sm">{item.text}</span>
+                                            <span className="font-semibold text-slate-800 dark:text-white text-sm">{item.text}</span>
                                         </div>
                                     ))}
                                 </div>
@@ -980,11 +965,11 @@ const LandingPage: React.FC = () => {
                             { value: '60', unit: '%', label: 'fewer missed items' },
                             { value: '10', unit: 'x', label: 'faster team onboarding' },
                         ].map((metric, i) => (
-                            <div key={i} className="text-center p-6 bg-white/[0.03] rounded-2xl border border-white/5 hover:border-purple-500/20 transition-colors">
-                                <div className="text-3xl md:text-4xl font-extrabold text-white mb-1">
-                                    {metric.value}<span className="text-purple-400">{metric.unit}</span>
+                            <div key={i} className="text-center p-6 bg-slate-100/50 dark:bg-white/[0.03] rounded-2xl border border-slate-200 dark:border-white/5 hover:border-purple-300 dark:hover:border-purple-500/20 transition-colors">
+                                <div className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white mb-1">
+                                    {metric.value}<span className="text-purple-600 dark:text-purple-400">{metric.unit}</span>
                                 </div>
-                                <p className="text-sm text-slate-400 font-medium">{metric.label}</p>
+                                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">{metric.label}</p>
                             </div>
                         ))}
                     </div>
@@ -992,52 +977,52 @@ const LandingPage: React.FC = () => {
             </section>
 
             {/* Security Section */}
-            <section className="py-14 md:py-20 px-4 sm:px-6 lg:px-8 bg-white border-b border-gray-100 relative">
+            <section className="py-14 md:py-20 px-4 sm:px-6 lg:px-8 relative transition-colors">
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
                 <div ref={securityReveal.ref} className={`max-w-7xl mx-auto relative z-10 transition-all duration-700 ${securityReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                     <div className="text-center mb-16">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-600 text-xs font-bold uppercase tracking-wider mb-6">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-wider mb-6">
                             <Shield className="w-4 h-4" />
                             <span>Enterprise Trust</span>
                         </div>
-                        <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 mb-5 sm:mb-6 tracking-tight leading-[1.1]">
+                        <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-5 sm:mb-6 tracking-tighter leading-[1.1] transition-colors">
                             Security at the core.
                         </h2>
-                        <p className="text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed">
+                        <p className="text-lg text-slate-500/90 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed font-medium transition-colors">
                             We prioritize the safety of your data with bank-grade encryption and strict compliance standards.
                         </p>
                     </div>
 
                     <div className="grid md:grid-cols-3 gap-8">
                         {/* SOC 2 */}
-                        <div className="bg-slate-50 rounded-2xl p-8 border border-gray-100 hover:shadow-lg transition-shadow">
-                            <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 mb-6">
+                        <div className="bg-white dark:bg-slate-900/50 rounded-2xl p-8 border border-gray-100 dark:border-slate-800 hover:shadow-lg dark:hover:shadow-none transition-all">
+                            <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 mb-6">
                                 <Shield className="w-6 h-6" />
                             </div>
-                            <h3 className="text-lg font-bold text-slate-900 mb-3 tracking-tight">SOC 2 Type II Compliant</h3>
-                            <p className="text-sm text-slate-500 leading-relaxed">
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-3 tracking-tight">SOC 2 Type II Compliant</h3>
+                            <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
                                 Independently audited to ensure your data is managed with the highest standard of security and privacy.
                             </p>
                         </div>
 
                         {/* Encryption */}
-                        <div className="bg-slate-50 rounded-2xl p-8 border border-gray-100 hover:shadow-lg transition-shadow">
-                            <div className="w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-600 mb-6">
+                        <div className="bg-white dark:bg-slate-900/50 rounded-2xl p-8 border border-gray-100 dark:border-slate-800 hover:shadow-lg dark:hover:shadow-none transition-all">
+                            <div className="w-12 h-12 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 mb-6">
                                 <Lock className="w-6 h-6" />
                             </div>
-                            <h3 className="text-lg font-bold text-slate-900 mb-3 tracking-tight">End-to-End Encryption</h3>
-                            <p className="text-sm text-slate-500 leading-relaxed">
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-3 tracking-tight">End-to-End Encryption</h3>
+                            <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
                                 Your data is encrypted at rest and in transit using AES-256 using industry-standard keys.
                             </p>
                         </div>
 
                         {/* Uptime */}
-                        <div className="bg-slate-50 rounded-2xl p-8 border border-gray-100 hover:shadow-lg transition-shadow">
-                            <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center text-green-600 mb-6">
+                        <div className="bg-white dark:bg-slate-900/50 rounded-2xl p-8 border border-gray-100 dark:border-slate-800 hover:shadow-lg dark:hover:shadow-none transition-all">
+                            <div className="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400 mb-6">
                                 <Activity className="w-6 h-6" />
                             </div>
-                            <h3 className="text-lg font-bold text-slate-900 mb-3 tracking-tight">99.99% Uptime SLA</h3>
-                            <p className="text-sm text-slate-500 leading-relaxed">
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-3 tracking-tight">99.99% Uptime SLA</h3>
+                            <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
                                 Redundant infrastructure across multiple regions ensures your workspace is always available.
                             </p>
                         </div>
@@ -1046,7 +1031,7 @@ const LandingPage: React.FC = () => {
             </section>
 
             {/* Final CTA */}
-            <section className="relative z-10 py-14 md:py-20 px-4 sm:px-6 lg:px-8 overflow-hidden bg-white">
+            <section className="relative z-10 py-14 md:py-20 px-4 sm:px-6 lg:px-8 overflow-hidden bg-transparent transition-colors">
                 <div ref={ctaReveal.ref} className={`max-w-5xl mx-auto transition-all duration-700 ${ctaReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                     <div className="bg-slate-900 rounded-2xl sm:rounded-[3rem] p-8 sm:p-12 md:p-20 text-center relative overflow-hidden shadow-2xl">
                         {/* Decorative Background */}
@@ -1056,21 +1041,24 @@ const LandingPage: React.FC = () => {
                         </div>
 
                         <div className="relative z-10">
-                            <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mb-6 sm:mb-8 tracking-tight leading-[1.1]">
+                            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-6 sm:mb-8 tracking-tighter leading-[1.1]">
                                 Ready for the <span className="text-purple-400">future of work?</span>
                             </h2>
-                            <p className="text-lg text-slate-400 mb-12 max-w-2xl mx-auto leading-relaxed">
+                            <p className="text-lg text-slate-400/90 mb-12 max-w-2xl mx-auto leading-relaxed font-medium">
                                 Join thousands of teams using Arrotech to boost productivity and reclaim their time.
                             </p>
 
                             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                                 <Link
                                     to="/register"
-                                    className="w-full sm:w-auto bg-white text-slate-900 hover:bg-gray-100 px-6 sm:px-10 py-3.5 sm:py-4 rounded-full font-bold text-sm sm:text-base transition-all transform hover:scale-[1.02] shadow-xl hover:shadow-2xl"
+                                    className="w-full sm:w-auto bg-white text-slate-900 hover:bg-slate-100 px-6 sm:px-10 py-3.5 sm:py-4 rounded-xl font-bold text-sm sm:text-base transition-all shadow-xl hover:shadow-2xl hover:-translate-y-0.5"
                                 >
                                     Get Started Free
                                 </Link>
-                                <button className="w-full sm:w-auto bg-white/10 hover:bg-white/20 text-white border border-white/20 px-6 sm:px-10 py-3.5 sm:py-4 rounded-full font-bold text-sm sm:text-base transition-all backdrop-blur-md hover:scale-[1.02] hover:border-white/40">
+                                <button onClick={() => scrollToSection('features')} className="w-full sm:w-auto bg-white/10 hover:bg-white/20 text-white border border-white/20 px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl font-semibold text-[15px] sm:text-[16px] transition-all backdrop-blur-md hover:scale-[1.02] hover:border-white/40">
+                                    See Features
+                                </button>
+                                <button className="w-full sm:w-auto bg-white/10 hover:bg-white/20 text-white border border-white/20 px-6 sm:px-10 py-3.5 sm:py-4 rounded-xl font-semibold text-[15px] sm:text-[16px] transition-all backdrop-blur-md hover:scale-[1.02] hover:border-white/40">
                                     Contact Sales
                                 </button>
                             </div>

@@ -81,7 +81,7 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({ isOpen, onClose, 
             {/* Modal Content */}
             <div className={`
                 relative w-full max-w-md rounded-3xl shadow-2xl overflow-hidden transform transition-all scale-100
-                ${focusMode ? 'bg-slate-900 border border-slate-700 text-white' : 'bg-white border border-white/50 text-slate-900'}
+                ${focusMode ? 'bg-slate-900 border border-slate-700 text-white' : 'bg-white dark:bg-slate-900 border border-white/50 dark:border-slate-800 text-slate-900 dark:text-white'}
             `}>
                 {/* Decorative Header Bar */}
                 <div className={`h-2 w-full ${style.bg}`} />
@@ -89,7 +89,7 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({ isOpen, onClose, 
                 {/* Close Button */}
                 <button
                     onClick={onClose}
-                    className={`absolute top-4 right-4 p-2 rounded-full transition-colors ${focusMode ? 'hover:bg-slate-800 text-slate-400' : 'hover:bg-gray-100 text-gray-400'}`}
+                    className={`absolute top-4 right-4 p-2 rounded-full transition-colors ${focusMode ? 'hover:bg-slate-800 text-slate-400' : 'hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-400 dark:text-slate-500'}`}
                 >
                     <X className="w-5 h-5" />
                 </button>
@@ -97,29 +97,29 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({ isOpen, onClose, 
                 <div className="p-6 md:p-8">
                     {/* Platform Badge */}
                     {event.type === 'google' && (
-                        <div className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider mb-4 ${focusMode ? 'bg-slate-800 text-slate-400' : 'bg-gray-100 text-gray-500'}`}>
+                        <div className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider mb-4 ${focusMode ? 'bg-slate-800 text-slate-400' : 'bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400'}`}>
                             <CalendarIcon className="w-3 h-3" /> Google Calendar
                         </div>
                     )}
 
                     {/* Title */}
-                    <h2 className="text-2xl font-bold leading-tight mb-2">{event.title}</h2>
+                    <h2 className="text-2xl font-bold leading-tight mb-2 tracking-tight">{event.title}</h2>
 
                     {/* Time & Date (Dynamic) */}
                     {isRescheduling ? (
-                        <div className={`mb-6 p-5 rounded-2xl border space-y-4 transition-all duration-300 ${focusMode ? 'border-slate-700 bg-slate-800/50' : 'border-indigo-100 bg-indigo-50/50'}`}>
+                        <div className={`mb-6 p-5 rounded-2xl border space-y-4 transition-all duration-300 ${focusMode ? 'border-slate-700 bg-slate-800/50' : 'border-indigo-100 dark:border-slate-800 bg-indigo-50/50 dark:bg-slate-800/30'}`}>
                             <div className="flex items-center gap-2 mb-2">
-                                <div className={`p-1.5 rounded-lg ${focusMode ? 'bg-indigo-500/20 text-indigo-400' : 'bg-indigo-100 text-indigo-600'}`}>
+                                <div className={`p-1.5 rounded-lg ${focusMode ? 'bg-indigo-500/20 text-indigo-400' : 'bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400'}`}>
                                     <Sparkles className="w-4 h-4" />
                                 </div>
-                                <h3 className={`text-sm font-bold ${focusMode ? 'text-slate-200' : 'text-indigo-900'}`}>Reschedule Event</h3>
+                                <h3 className={`text-sm font-bold ${focusMode ? 'text-slate-200' : 'text-indigo-900 dark:text-white'}`}>Reschedule Event</h3>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1.5">
-                                    <label className={`text-[10px] font-bold uppercase tracking-wider ml-1 ${focusMode ? 'text-slate-500' : 'text-indigo-400'}`}>New Date</label>
+                                    <label className={`text-[10px] font-bold uppercase tracking-wider ml-1 ${focusMode ? 'text-slate-500' : 'text-indigo-400 dark:text-indigo-400'}`}>New Date</label>
                                     <div className="relative group">
-                                        <div className={`absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none ${focusMode ? 'text-slate-500 group-focus-within:text-indigo-400' : 'text-indigo-400 group-focus-within:text-indigo-600'}`}>
+                                        <div className={`absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none ${focusMode ? 'text-slate-500 group-focus-within:text-indigo-400' : 'text-indigo-400 dark:text-slate-500 group-focus-within:text-indigo-600 dark:group-focus-within:text-indigo-400'}`}>
                                             <CalendarIcon className="w-4 h-4" />
                                         </div>
                                         <input
@@ -130,7 +130,7 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({ isOpen, onClose, 
                                                 w-full pl-10 pr-3 py-2.5 rounded-xl border text-sm font-bold transition-all outline-none
                                                 ${focusMode
                                                     ? 'bg-slate-900/50 border-slate-700 text-white focus:border-indigo-500 focus:bg-slate-900 focus:shadow-[0_0_15px_rgba(99,102,241,0.3)]'
-                                                    : 'bg-white border-indigo-100 text-slate-700 focus:border-indigo-500 focus:shadow-md'
+                                                    : 'bg-white dark:bg-slate-800 border-indigo-100 dark:border-slate-700 text-slate-700 dark:text-white focus:border-indigo-500 dark:focus:border-indigo-500 focus:shadow-md dark:shadow-none'
                                                 }
                                             `}
                                         />
@@ -138,9 +138,9 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({ isOpen, onClose, 
                                 </div>
 
                                 <div className="space-y-1.5">
-                                    <label className={`text-[10px] font-bold uppercase tracking-wider ml-1 ${focusMode ? 'text-slate-500' : 'text-indigo-400'}`}>New Time</label>
+                                    <label className={`text-[10px] font-bold uppercase tracking-wider ml-1 ${focusMode ? 'text-slate-500' : 'text-indigo-400 dark:text-indigo-400'}`}>New Time</label>
                                     <div className="relative group">
-                                        <div className={`absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none ${focusMode ? 'text-slate-500 group-focus-within:text-indigo-400' : 'text-indigo-400 group-focus-within:text-indigo-600'}`}>
+                                        <div className={`absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none ${focusMode ? 'text-slate-500 group-focus-within:text-indigo-400' : 'text-indigo-400 dark:text-slate-500 group-focus-within:text-indigo-600 dark:group-focus-within:text-indigo-400'}`}>
                                             <Clock className="w-4 h-4" />
                                         </div>
                                         <input
@@ -151,7 +151,7 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({ isOpen, onClose, 
                                                 w-full pl-10 pr-3 py-2.5 rounded-xl border text-sm font-bold transition-all outline-none
                                                 ${focusMode
                                                     ? 'bg-slate-900/50 border-slate-700 text-white focus:border-indigo-500 focus:bg-slate-900 focus:shadow-[0_0_15px_rgba(99,102,241,0.3)]'
-                                                    : 'bg-white border-indigo-100 text-slate-700 focus:border-indigo-500 focus:shadow-md'
+                                                    : 'bg-white dark:bg-slate-800 border-indigo-100 dark:border-slate-700 text-slate-700 dark:text-white focus:border-indigo-500 dark:focus:border-indigo-500 focus:shadow-md dark:shadow-none'
                                                 }
                                             `}
                                         />
@@ -160,7 +160,7 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({ isOpen, onClose, 
                             </div>
                         </div>
                     ) : (
-                        <div className={`text-base font-medium mb-6 ${focusMode ? 'text-indigo-300' : 'text-indigo-600'}`}>
+                        <div className={`text-base font-medium mb-6 ${focusMode ? 'text-indigo-300' : 'text-indigo-600 dark:text-indigo-400'}`}>
                             {event.date.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
                             <span className="mx-2 opacity-50">•</span>
                             {event.time} - {event.endTime || '1h'}
@@ -171,8 +171,8 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({ isOpen, onClose, 
                     {event.isOnline && !isRescheduling && (
                         <div className="mb-8">
                             <button className={`
-                                w-full py-3 px-4 rounded-xl flex items-center justify-center gap-2 font-bold transition-all shadow-lg hover:translate-y-[-2px]
-                                ${style.bg} text-white shadow-${style.bg}/30
+                                w-full py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 font-bold transition-all shadow-lg hover:translate-y-[-2px]
+                                ${style.bg} text-white shadow-${style.bg}/30 active:scale-[0.98]
                             `}>
                                 <Video className="w-5 h-5" />
                                 Join {style.name}
@@ -182,15 +182,15 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({ isOpen, onClose, 
 
                     {/* Details List */}
                     {!isRescheduling && (
-                        <div className="space-y-4">
+                        <div className="space-y-5">
                             {/* Description/Context */}
                             {event.description && (
                                 <div className="flex gap-4">
-                                    <div className={`p-2 rounded-lg h-fit ${focusMode ? 'bg-slate-800 text-slate-400' : 'bg-gray-50 text-gray-400'}`}>
+                                    <div className={`p-2 rounded-lg h-fit ${focusMode ? 'bg-slate-800 text-slate-400' : 'bg-gray-50 dark:bg-slate-800 text-gray-400 dark:text-slate-500'}`}>
                                         <div className="h-1.5 w-4 rounded-full bg-current opacity-50" />
                                         <div className="h-1.5 w-2.5 rounded-full bg-current opacity-50 mt-1" />
                                     </div>
-                                    <p className={`text-sm leading-relaxed ${focusMode ? 'text-slate-400' : 'text-gray-600'}`}>
+                                    <p className={`text-sm leading-relaxed ${focusMode ? 'text-slate-400' : 'text-gray-600 dark:text-slate-400'}`}>
                                         {event.description}
                                     </p>
                                 </div>
@@ -198,18 +198,18 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({ isOpen, onClose, 
 
                             {/* Attendees */}
                             <div className="flex gap-4 items-start">
-                                <div className={`p-2 rounded-lg ${focusMode ? 'bg-slate-800 text-slate-400' : 'bg-gray-50 text-gray-400'}`}>
+                                <div className={`p-2 rounded-lg ${focusMode ? 'bg-slate-800 text-slate-400' : 'bg-gray-50 dark:bg-slate-800 text-gray-400 dark:text-slate-500'}`}>
                                     <Users className="w-5 h-5" />
                                 </div>
-                                <div>
-                                    <h4 className={`text-xs font-bold uppercase tracking-wider mb-2 ${focusMode ? 'text-slate-500' : 'text-gray-400'}`}>Attendees</h4>
+                                <div className="flex-1">
+                                    <h4 className={`text-[10px] font-bold uppercase tracking-wider mb-2 ${focusMode ? 'text-slate-500' : 'text-gray-400 dark:text-slate-500'}`}>Attendees</h4>
                                     <div className="flex -space-x-2">
                                         {[1, 2, 3].map((_, i) => (
-                                            <div key={i} className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-xs font-bold ${focusMode ? 'border-slate-900 bg-slate-700' : 'border-white bg-indigo-100 text-indigo-600'}`}>
+                                            <div key={i} className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-xs font-bold ${focusMode ? 'border-slate-900 bg-slate-700' : 'border-white dark:border-slate-900 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400'}`}>
                                                 {String.fromCharCode(65 + i)}
                                             </div>
                                         ))}
-                                        <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-xs font-bold ${focusMode ? 'border-slate-900 bg-slate-800 text-slate-400' : 'border-white bg-gray-100 text-gray-500'}`}>
+                                        <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-xs font-bold ${focusMode ? 'border-slate-900 bg-slate-800 text-slate-400' : 'border-white dark:border-slate-900 bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-500'}`}>
                                             +2
                                         </div>
                                     </div>
@@ -219,29 +219,29 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({ isOpen, onClose, 
                             {/* Location */}
                             {event.location && (
                                 <div className="flex gap-4 items-center">
-                                    <div className={`p-2 rounded-lg ${focusMode ? 'bg-slate-800 text-slate-400' : 'bg-gray-50 text-gray-400'}`}>
+                                    <div className={`p-2 rounded-lg ${focusMode ? 'bg-slate-800 text-slate-400' : 'bg-gray-50 dark:bg-slate-800 text-gray-400 dark:text-slate-500'}`}>
                                         <MapPin className="w-5 h-5" />
                                     </div>
-                                    <span className={`text-sm ${focusMode ? 'text-slate-300' : 'text-slate-700'}`}>{event.location}</span>
+                                    <span className={`text-sm font-medium ${focusMode ? 'text-slate-300' : 'text-slate-700 dark:text-slate-300'}`}>{event.location}</span>
                                 </div>
                             )}
                         </div>
                     )}
 
                     {/* Footer Actions */}
-                    <div className={`mt-8 pt-6 border-t flex justify-end gap-3 ${focusMode ? 'border-slate-800' : 'border-gray-100'}`}>
+                    <div className={`mt-8 pt-6 border-t flex justify-end gap-3 ${focusMode ? 'border-slate-800' : 'border-gray-100 dark:border-slate-800'}`}>
                         {isRescheduling ? (
                             <>
                                 <button
                                     onClick={() => setIsRescheduling(false)}
-                                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors ${focusMode ? 'hover:bg-slate-800 text-slate-400' : 'hover:bg-gray-100 text-gray-500'}`}
+                                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors ${focusMode ? 'hover:bg-slate-800 text-slate-400' : 'hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-500 dark:text-slate-400'}`}
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     onClick={handleSaveReschedule}
                                     disabled={isLoading}
-                                    className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold shadow-lg shadow-indigo-500/20 disabled:opacity-50"
+                                    className="px-6 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold shadow-lg shadow-indigo-500/20 disabled:opacity-50 transition-all active:scale-[0.98]"
                                 >
                                     {isLoading ? 'Saving...' : 'Confirm Change'}
                                 </button>
@@ -249,7 +249,7 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({ isOpen, onClose, 
                         ) : (
                             <button
                                 onClick={() => setIsRescheduling(true)}
-                                className={`text-xs font-bold flex items-center gap-2 py-2 px-3 rounded-lg transition-colors ${focusMode ? 'text-indigo-400 hover:bg-slate-800' : 'text-indigo-600 hover:bg-indigo-50'}`}
+                                className={`text-xs font-bold flex items-center gap-2 py-2 px-3 rounded-lg transition-colors ${focusMode ? 'text-indigo-400 hover:bg-slate-800' : 'text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-slate-800'}`}
                             >
                                 <CalendarIcon className="w-4 h-4" /> Reschedule Event
                             </button>

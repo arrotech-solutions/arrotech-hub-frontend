@@ -705,65 +705,65 @@ const Integrations: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-          <p className="text-slate-500 font-medium animate-pulse">Loading secure integrations...</p>
+          <p className="text-slate-500 dark:text-slate-400 font-medium animate-pulse">Loading secure integrations...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50/50 pb-20 font-sans selection:bg-indigo-100 selection:text-indigo-900">
+    <div className="min-h-screen bg-slate-50/50 dark:bg-slate-950/50 pb-20 font-sans selection:bg-indigo-100 dark:selection:bg-indigo-500/30 selection:text-indigo-900 dark:selection:text-indigo-100">
       {/* 1. HERO SECTION - Lighter Variant */}
-      <div className="relative overflow-hidden bg-white border-b border-slate-200 pb-12">
+      <div className="relative overflow-hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 pb-12">
         {/* Subtle Background Pattern */}
         <div className="absolute inset-0 z-0 opacity-40">
-          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-50/50 rounded-full blur-[100px]"></div>
-          <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-slate-50/50 rounded-full blur-[100px]"></div>
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-50/50 dark:bg-indigo-950/20 rounded-full blur-[100px]"></div>
+          <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-slate-50/50 dark:bg-slate-900/20 rounded-full blur-[100px]"></div>
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 md:pt-16 pb-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div className="max-w-2xl">
-              <div className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 text-[10px] font-bold uppercase tracking-wider mb-4 shadow-sm">
+              <div className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-[10px] font-bold uppercase tracking-wider mb-4 shadow-sm">
                 Integration Marketplace
               </div>
-              <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900 mb-3">
+              <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-3">
                 Connect your tools
               </h1>
-              <p className="text-base text-slate-500 max-w-xl leading-relaxed">
+              <p className="text-base text-slate-500 dark:text-slate-400 max-w-xl leading-relaxed">
                 Supercharge your workflow by syncing data across apps. Secure, reliable, and setup in seconds.
               </p>
             </div>
 
             {/* Stats - Compact */}
-            <div className="flex gap-8 border-l border-slate-100 pl-8">
+            <div className="flex gap-8 border-l border-slate-100 dark:border-slate-800 pl-8">
               <div>
-                <div className="text-2xl font-bold text-slate-900 mb-0.5">{connections.filter(c => c.status === 'active').length}</div>
-                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Active</div>
+                <div className="text-2xl font-bold text-slate-900 dark:text-white mb-0.5">{connections.filter(c => c.status === 'active').length}</div>
+                <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Active</div>
               </div>
               <div>
-                <div className="text-2xl font-bold text-slate-900 mb-0.5">{platforms.length}</div>
-                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Available</div>
+                <div className="text-2xl font-bold text-slate-900 dark:text-white mb-0.5">{platforms.length}</div>
+                <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Available</div>
               </div>
             </div>
           </div>
 
           {/* Search Bar - Compact */}
           <div className="mt-8 relative max-w-xl">
-            <div className="relative bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md hover:border-indigo-300 transition-all flex items-center p-1.5 focus-within:ring-2 focus-within:ring-indigo-100 focus-within:border-indigo-400">
-              <Search className="w-5 h-5 text-slate-400 ml-3 shrink-0" />
+            <div className="relative bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-500/50 transition-all flex items-center p-1.5 focus-within:ring-2 focus-within:ring-indigo-100 dark:focus-within:ring-indigo-500/20 focus-within:border-indigo-400 dark:focus-within:border-indigo-500">
+              <Search className="w-5 h-5 text-slate-400 dark:text-slate-500 ml-3 shrink-0" />
               <input
                 type="text"
                 placeholder="Search apps..."
-                className="w-full bg-transparent border-none text-slate-900 placeholder-slate-400 px-3 py-2 focus:ring-0 text-sm font-medium"
+                className="w-full bg-transparent border-none text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 px-3 py-2 focus:ring-0 text-sm font-medium outline-none"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
-              <div className="hidden md:flex items-center gap-2 px-3 text-[10px] text-slate-400 font-bold border-l border-slate-100 ml-1">
-                <kbd className="px-1.5 py-0.5 rounded bg-slate-50 border border-slate-200 font-sans">⌘K</kbd>
+              <div className="hidden md:flex items-center gap-2 px-3 text-[10px] text-slate-400 dark:text-slate-500 font-bold border-l border-slate-100 dark:border-slate-700 ml-1">
+                <kbd className="px-1.5 py-0.5 rounded bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-sans">⌘K</kbd>
               </div>
             </div>
           </div>
@@ -773,16 +773,16 @@ const Integrations: React.FC = () => {
       {/* 2. CONNECTED APPS BANNER - Overlapping */}
       {connections.length > 0 && (
         <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 mb-8">
-          <div className="bg-white border border-slate-200 shadow-sm rounded-xl p-3 flex items-center gap-4">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap px-2">Your Stack</span>
-            <div className="w-px h-6 bg-slate-100 shrink-0"></div>
+          <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm rounded-xl p-3 flex items-center gap-4 transition-colors">
+            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider whitespace-nowrap px-2">Your Stack</span>
+            <div className="w-px h-6 bg-slate-100 dark:bg-slate-700 shrink-0"></div>
             <div className="flex-1 overflow-x-auto no-scrollbar flex items-center gap-2">
               {connections.filter(c => c.status === 'active').map(conn => (
-                <div key={conn.id} className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg pl-1 pr-3 py-1 hover:border-indigo-300 hover:bg-white transition-all cursor-pointer group" onClick={() => handleConnect({ id: conn.platform, name: conn.name } as any)}>
-                  <div className="w-5 h-5 rounded-md bg-white flex items-center justify-center overflow-hidden border border-slate-100 shadow-sm">
+                <div key={conn.id} className="flex items-center gap-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg pl-1 pr-3 py-1 hover:border-indigo-300 dark:hover:border-indigo-500/50 hover:bg-white dark:hover:bg-slate-800 transition-all cursor-pointer group" onClick={() => handleConnect({ id: conn.platform, name: conn.name } as any)}>
+                  <div className="w-5 h-5 rounded-md bg-white dark:bg-slate-800 flex items-center justify-center overflow-hidden border border-slate-100 dark:border-slate-700 shadow-sm">
                     {getPlatformLogo(conn.platform)}
                   </div>
-                  <span className="text-xs font-semibold text-slate-700 max-w-[80px] truncate">{conn.name}</span>
+                  <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 max-w-[80px] truncate">{conn.name}</span>
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                 </div>
               ))}
@@ -792,7 +792,7 @@ const Integrations: React.FC = () => {
       )}
 
       {/* 3. CATEGORY NAVIGATION - Sticky */}
-      <div className="sticky top-0 z-30 bg-slate-50/90 backdrop-blur-xl border-b border-slate-200/60 shadow-sm transition-all">
+      <div className="sticky top-0 z-30 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur-xl border-b border-slate-200/60 dark:border-slate-800/60 shadow-sm transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-3" style={{ WebkitOverflowScrolling: 'touch' }}>
             {[
@@ -811,13 +811,13 @@ const Integrations: React.FC = () => {
                 onClick={() => setActiveCategory(cat.id)}
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap border
                   ${activeCategory === cat.id
-                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
-                    : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:border-slate-300'
+                    ? 'bg-indigo-600 dark:bg-indigo-500 text-white border-indigo-600 dark:border-indigo-500 shadow-sm'
+                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
                   }`}
               >
                 {cat.id}
                 {cat.id !== 'All' && (
-                  <span className={`text-[10px] px-1 py-px rounded ml-1.5 ${activeCategory === cat.id ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}`}>
+                  <span className={`text-[10px] px-1 py-px rounded ml-1.5 ${activeCategory === cat.id ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-slate-900 text-slate-500 dark:text-slate-400'}`}>
                     {platforms.filter(p => getPlatformCategory(p.id) === cat.id).length}
                   </span>
                 )}
@@ -830,13 +830,13 @@ const Integrations: React.FC = () => {
       {/* 4. MAIN GRID CONTENT */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {filteredPlatforms.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 bg-white rounded-2xl border border-dashed border-slate-200">
-            <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
-              <Search className="h-8 w-8 text-slate-300" />
+          <div className="flex flex-col items-center justify-center py-24 bg-white dark:bg-slate-900/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 transition-colors">
+            <div className="w-16 h-16 bg-slate-50 dark:bg-slate-900 rounded-full flex items-center justify-center mb-4 border border-slate-100 dark:border-slate-800">
+              <Search className="h-8 w-8 text-slate-300 dark:text-slate-700" />
             </div>
-            <h3 className="text-lg font-bold text-slate-900 mb-1">No integrations found</h3>
-            <p className="text-sm text-slate-500">Try adjusting your filters.</p>
-            <button onClick={() => { setSearchTerm(''); setActiveCategory('All'); }} className="mt-4 text-indigo-600 text-sm font-semibold hover:underline">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">No integrations found</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Try adjusting your filters.</p>
+            <button onClick={() => { setSearchTerm(''); setActiveCategory('All'); }} className="mt-4 text-indigo-600 dark:text-indigo-400 text-sm font-semibold hover:underline">
               Clear filters
             </button>
           </div>
@@ -854,32 +854,26 @@ const Integrations: React.FC = () => {
               return (
                 <div
                   key={platform.id}
-                  className={`group relative bg-white rounded-xl border transition-all duration-200 flex flex-col overflow-hidden hover:shadow-lg hover:-translate-y-0.5
+                  className={`group relative flex flex-col bg-white dark:bg-slate-800 rounded-2xl border transition-all duration-300
                     ${isConnected
-                      ? 'border-emerald-200 shadow-sm shadow-emerald-50/50'
-                      : 'border-slate-200 shadow-sm hover:border-indigo-200'
+                      ? 'border-indigo-200 dark:border-indigo-500/30 shadow-[0_4px_20px_-4px_rgba(79,70,229,0.1)] dark:shadow-[0_4px_20px_-4px_rgba(79,70,229,0.2)]'
+                      : 'border-slate-100 dark:border-slate-700 hover:border-slate-200 dark:hover:border-slate-600 hover:shadow-lg'
                     }`}
                 >
-                  {isConnected && (
-                    <div className="absolute top-3 right-3 z-10">
-                      <div className="w-2 h-2 rounded-full bg-emerald-500 ring-4 ring-emerald-50"></div>
-                    </div>
-                  )}
-
-                  <div className="p-4 flex flex-col h-full">
+                  <div className="p-5 flex-1 flex flex-col">
                     {/* Header */}
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center p-1.5 transition-all group-hover:scale-105 border shadow-sm shrink-0
-                         ${isConnected ? 'bg-emerald-50/50 border-emerald-100' : 'bg-white border-slate-100'}`}>
+                    <div className="flex items-start justify-between mb-4">
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center p-2.5 shadow-sm border
+                        ${isConnected ? 'bg-indigo-50/50 dark:bg-indigo-500/10 border-indigo-100 dark:border-indigo-500/20' : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800'}`}>
                         {getPlatformLogo(platform.id)}
                       </div>
                       <div className="min-w-0">
-                        <h3 className="text-sm font-bold text-slate-900 truncate group-hover:text-indigo-600 transition-colors">
+                        <h3 className="text-sm font-bold text-slate-900 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                           {platform.name}
                         </h3>
                         <div className="flex gap-1 mt-0.5">
                           {capabilities.slice(0, 2).map((tag, i) => (
-                            <span key={i} className="text-[9px] font-semibold text-slate-400 uppercase tracking-wide bg-slate-50 px-1 rounded border border-slate-100">
+                            <span key={i} className="text-[9px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wide bg-slate-50 dark:bg-slate-900 px-1 rounded border border-slate-100 dark:border-slate-800">
                               {tag}
                             </span>
                           ))}
@@ -889,27 +883,29 @@ const Integrations: React.FC = () => {
 
                     {/* Content */}
                     <div className="flex-1 mb-4">
-                      <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                      <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
                         {platform.description}
                       </p>
                     </div>
 
-                    {/* Footer / CTA */}
-                    <div className="mt-auto">
-                      <button
-                        onClick={() => handleConnect(platform)}
-                        className={`w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200
-                          ${isConnected
-                            ? 'bg-white border border-slate-200 text-slate-700 hover:border-indigo-300 hover:text-indigo-600'
-                            : 'bg-slate-900 text-white border border-transparent hover:bg-indigo-600 hover:shadow-md hover:shadow-indigo-500/20'
-                          }`}
-                      >
-                        {isConnected ? (
-                          <>Configure</>
-                        ) : (
-                          <>Connect</>
-                        )}
-                      </button>
+                    {/* Action Footer */}
+                    <div className="px-5 py-3 border-t border-slate-100 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-900/50 rounded-b-2xl mt-auto">
+                      {isConnected ? (
+                        <button className="w-full text-center text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors py-1">
+                          Configure connection
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleConnect(platform)}
+                          className={`w-full text-center text-xs font-semibold transition-colors py-1 flex justify-center items-center gap-2
+                        ${platform.status === 'coming_soon'
+                              ? 'text-slate-400 dark:text-slate-500 cursor-not-allowed'
+                              : 'text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300'
+                            }`}
+                        >
+                          {platform.status === 'coming_soon' ? 'Join Waitlist' : 'Connect Account'}
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -934,19 +930,19 @@ const Integrations: React.FC = () => {
 
           <div className="absolute inset-y-0 right-0 max-w-full flex pl-10 pointer-events-none">
             <div className="w-screen max-w-md pointer-events-auto">
-              <div className="h-full flex flex-col bg-white shadow-2xl animate-in slide-in-from-right duration-300">
+              <div className="h-full flex flex-col bg-white dark:bg-slate-900 shadow-2xl animate-in slide-in-from-right duration-300">
 
                 {/* Drawer Header */}
-                <div className="px-6 py-6 border-b border-slate-100 bg-slate-50/50 flex items-start justify-between">
+                <div className="px-6 py-6 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex items-start justify-between">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-white border border-slate-200 shadow-sm p-2 flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm p-2 flex items-center justify-center">
                       {getPlatformLogo(selectedPlatform.id)}
                     </div>
                     <div>
-                      <h2 className="text-xl font-bold text-slate-900">{selectedPlatform.name}</h2>
+                      <h2 className="text-xl font-bold text-slate-900 dark:text-white">{selectedPlatform.name}</h2>
                       <div className="flex items-center gap-1.5 mt-0.5">
-                        <div className={`w-2 h-2 rounded-full ${editingConnection ? 'bg-emerald-500' : 'bg-slate-300'}`}></div>
-                        <span className="text-xs font-medium text-slate-500">
+                        <div className={`w-2 h-2 rounded-full ${editingConnection ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'}`}></div>
+                        <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
                           {editingConnection ? 'Connected' : 'Setup Required'}
                         </span>
                       </div>
@@ -964,38 +960,38 @@ const Integrations: React.FC = () => {
                 <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-semibold text-slate-700 mb-1.5">Connection Name</label>
+                      <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Connection Name</label>
                       <input
                         type="text"
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        className="block w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all shadow-sm"
+                        className="block w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all shadow-sm"
                         placeholder="My Workspace"
                       />
-                      <p className="mt-1.5 text-xs text-slate-500">Give this connection a friendly name to identify it later.</p>
+                      <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">Give this connection a friendly name to identify it later.</p>
                     </div>
 
                     {/* Dynamic Fields */}
                     {Object.keys(selectedPlatform.config_schema || {}).map(key => (
-                      <div key={key} className="bg-indigo-50 border border-indigo-100 rounded-xl p-3 flex items-start gap-3">
-                        <div className="p-1 bg-indigo-100 rounded text-indigo-600 mt-0.5">
+                      <div key={key} className="bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 rounded-xl p-3 flex items-start gap-3">
+                        <div className="p-1 bg-indigo-100 dark:bg-indigo-500/20 rounded text-indigo-600 dark:text-indigo-400 mt-0.5">
                           <Settings className="w-3.5 h-3.5" />
                         </div>
                         <div>
-                          <h4 className="text-xs font-bold text-indigo-900 uppercase tracking-wide mb-0.5">Requirement</h4>
-                          <p className="text-sm text-indigo-700">This integration needs <span className="font-semibold">{key}</span> configuration.</p>
+                          <h4 className="text-xs font-bold text-indigo-900 dark:text-indigo-100 uppercase tracking-wide mb-0.5">Requirement</h4>
+                          <p className="text-sm text-indigo-700 dark:text-indigo-300">This integration needs <span className="font-semibold">{key}</span> configuration.</p>
                         </div>
                       </div>
                     ))}
 
                     {!selectedPlatform.id.includes('oauth') && (
-                      <div className="p-6 bg-slate-50 border border-slate-100 rounded-2xl text-center">
-                        <Database className="w-8 h-8 text-slate-300 mx-auto mb-3" />
-                        <h4 className="text-sm font-semibold text-slate-900 mb-1">Manual Configuration</h4>
-                        <p className="text-xs text-slate-500 mb-4 px-4">
+                      <div className="p-6 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-2xl text-center">
+                        <Database className="w-8 h-8 text-slate-300 dark:text-slate-700 mx-auto mb-3" />
+                        <h4 className="text-sm font-semibold text-slate-900 dark:text-white mb-1">Manual Configuration</h4>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 px-4">
                           We are rolling out secure credential forms for {selectedPlatform.name} soon.
                         </p>
-                        <button className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-600 shadow-sm" disabled>
+                        <button className="px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300 shadow-sm" disabled>
                           Unavailable
                         </button>
                       </div>
@@ -1024,7 +1020,7 @@ const Integrations: React.FC = () => {
                 </div>
 
                 {/* Drawer Footer */}
-                <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex flex-col gap-3">
+                <div className="px-6 py-4 bg-slate-50 dark:bg-slate-950/50 border-t border-slate-200 dark:border-slate-800 flex flex-col gap-3">
                   <button
                     onClick={handleSaveConnection}
                     className="w-full flex justify-center items-center py-3.5 px-4 border border-transparent rounded-xl shadow-lg shadow-indigo-500/20 text-sm font-bold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all transform active:scale-[0.98]"
@@ -1045,7 +1041,7 @@ const Integrations: React.FC = () => {
                           toast.error('Failed to disconnect');
                         }
                       }}
-                      className="w-full flex justify-center items-center py-2.5 px-4 border border-rose-200 rounded-xl text-sm font-semibold text-rose-600 hover:bg-rose-50 hover:border-rose-300 focus:outline-none transition-colors"
+                      className="w-full flex justify-center items-center py-2.5 px-4 border border-rose-200 dark:border-rose-500/30 rounded-xl text-sm font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:border-rose-300 dark:hover:border-rose-400 focus:outline-none transition-colors"
                     >
                       Disconnect Service
                     </button>
@@ -1074,7 +1070,6 @@ const Integrations: React.FC = () => {
         currentTier={upgradeModal.currentTier}
       />
     </div>
-
   );
 };
 

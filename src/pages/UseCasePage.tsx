@@ -60,11 +60,11 @@ const UseCasePage: React.FC = () => {
 
     if (!data) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50">
+            <div className="min-h-screen flex items-center justify-center bg-transparent transition-colors">
                 <div className="text-center">
-                    <h1 className="text-2xl font-bold mb-4 text-gray-900">Use Case Not Found</h1>
-                    <p className="text-gray-500 mb-6">We couldn't find the use case you were looking for.</p>
-                    <Link to="/" className="text-purple-600 font-semibold hover:underline">Return Home</Link>
+                    <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white transition-colors">Use Case Not Found</h1>
+                    <p className="text-gray-500 dark:text-gray-400 mb-6 transition-colors">We couldn't find the use case you were looking for.</p>
+                    <Link to="/" className="text-purple-600 dark:text-purple-400 font-semibold hover:underline transition-colors">Return Home</Link>
                 </div>
             </div>
         );
@@ -73,7 +73,7 @@ const UseCasePage: React.FC = () => {
     const Icon = data.icon;
 
     return (
-        <div className="min-h-screen bg-white">
+        <div className="min-h-screen bg-transparent transition-colors">
             <SEO
                 title={`${data.title} | Arrotech Hub`}
                 description={data.description}
@@ -88,11 +88,11 @@ const UseCasePage: React.FC = () => {
                         <Icon className="w-8 h-8" />
                     </div>
 
-                    <h1 className="text-5xl lg:text-6xl font-black text-gray-900 leading-tight tracking-tight">
+                    <h1 className="text-5xl lg:text-6xl font-black text-gray-900 dark:text-white leading-tight tracking-tight transition-colors">
                         {data.title}
                     </h1>
 
-                    <p className="text-xl text-gray-600 leading-relaxed font-medium max-w-lg">
+                    <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed font-medium max-w-lg transition-colors">
                         {data.description}
                     </p>
 
@@ -101,7 +101,7 @@ const UseCasePage: React.FC = () => {
                             Start Automating
                             <ArrowRight className="w-5 h-5" />
                         </Link>
-                        <Link to="/pricing" className="inline-flex items-center justify-center px-8 py-4 rounded-full font-bold text-lg text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors">
+                        <Link to="/pricing" className="inline-flex items-center justify-center px-8 py-4 rounded-full font-bold text-lg text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors">
                             View Pricing
                         </Link>
                     </div>
@@ -118,20 +118,20 @@ const UseCasePage: React.FC = () => {
             </section>
 
             {/* Benefits Section */}
-            <section className="bg-gray-50 py-24 px-4 sm:px-6 lg:px-8">
+            <section className="bg-transparent py-24 px-4 sm:px-6 lg:px-8 transition-colors">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-16">
-                        <h2 className="text-3xl font-black text-gray-900 mb-4">Why build this with Arrotech Hub?</h2>
-                        <p className="text-gray-500 text-lg">Replace fragmented tools with a single unified workspace.</p>
+                        <h2 className="text-3xl font-black text-gray-900 dark:text-white mb-4 transition-colors">Why build this with Arrotech Hub?</h2>
+                        <p className="text-gray-500 dark:text-gray-400 text-lg transition-colors">Replace fragmented tools with a single unified workspace.</p>
                     </div>
 
                     <div className="grid md:grid-cols-3 gap-8">
                         {data.benefits.map((benefit: string, idx: number) => (
-                            <div key={idx} className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                            <div key={idx} className="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-slate-900/20 transition-all">
                                 <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${data.color} mb-6 flex items-center justify-center text-white`}>
                                     <TrendingUp className="w-6 h-6" />
                                 </div>
-                                <h3 className="text-xl font-bold text-gray-900 leading-snug">{benefit}</h3>
+                                <h3 className="text-xl font-bold text-gray-900 dark:text-white leading-snug transition-colors">{benefit}</h3>
                             </div>
                         ))}
                     </div>
@@ -139,11 +139,11 @@ const UseCasePage: React.FC = () => {
             </section>
 
             {/* CTA */}
-            <section className={`bg-gradient-to-r ${data.color} py-24 px-4 sm:px-6 lg:px-8 text-center`}>
+            <section className="bg-transparent py-24 px-4 sm:px-6 lg:px-8 text-center transition-colors">
                 <div className="max-w-3xl mx-auto space-y-8">
-                    <h2 className="text-4xl font-black text-white">Ready to implement {data.title}?</h2>
-                    <p className="text-white/80 text-xl">Join thousands of businesses automating their workflows with Arrotech Hub.</p>
-                    <Link to="/register" className="inline-block bg-white text-gray-900 px-10 py-5 rounded-full font-bold text-lg hover:shadow-xl transition-all hover:scale-105">
+                    <h2 className="text-4xl font-black text-slate-900 dark:text-white transition-colors">Ready to implement {data.title}?</h2>
+                    <p className="text-slate-600 dark:text-slate-400 text-xl transition-colors">Join thousands of businesses automating their workflows with Arrotech Hub.</p>
+                    <Link to="/register" className={`inline-block bg-gradient-to-r ${data.color} text-white px-10 py-5 rounded-full font-bold text-lg hover:shadow-xl transition-all hover:scale-105`}>
                         Get Started for Free
                     </Link>
                 </div>
