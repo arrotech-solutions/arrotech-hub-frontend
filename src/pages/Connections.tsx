@@ -30,7 +30,16 @@ import {
   NotionLogo,
   TrelloLogo,
   JiraLogo,
-  TikTokLogo
+  TikTokLogo,
+  HubSpotLogo,
+  SlackLogo,
+  WhatsAppLogo,
+  FacebookLogo,
+  TwitterLogo,
+  LinkedInLogo,
+  InstagramLogo,
+  SalesforceLogo,
+  AirtableLogo
 } from '../components/BrandIcons';
 import KraPinModal from '../components/KraPinModal';
 
@@ -57,7 +66,8 @@ const Integrations: React.FC = () => {
     switch (id) {
       case 'google_workspace':
       case 'google': return <GoogleLogo {...props} />;
-      case 'microsoft_teams': return <MicrosoftTeamsLogo {...props} />;
+      case 'microsoft_teams': 
+      case 'teams': return <MicrosoftTeamsLogo {...props} />;
       case 'zoom': return <ZoomLogo {...props} />;
       case 'asana': return <AsanaLogo {...props} />;
       case 'power_bi':
@@ -83,6 +93,15 @@ const Integrations: React.FC = () => {
       case 'trello': return <TrelloLogo {...props} />;
       case 'jira': return <JiraLogo {...props} />;
       case 'tiktok': return <TikTokLogo {...props} />;
+      case 'hubspot': return <HubSpotLogo {...props} />;
+      case 'slack': return <SlackLogo {...props} />;
+      case 'whatsapp': return <WhatsAppLogo {...props} />;
+      case 'facebook': return <FacebookLogo {...props} />;
+      case 'twitter': return <TwitterLogo {...props} />;
+      case 'linkedin': return <LinkedInLogo {...props} />;
+      case 'instagram': return <InstagramLogo {...props} />;
+      case 'salesforce': return <SalesforceLogo {...props} />;
+      case 'airtable': return <AirtableLogo {...props} />;
       default: return <Database {...props} className="text-gray-400 p-2" />;
     }
   };
@@ -95,7 +114,7 @@ const Integrations: React.FC = () => {
     if (id.includes('shopify') || id.includes('jumia')) return 'E-commerce';
     if (id.includes('shopify') || id.includes('jumia')) return 'E-commerce';
     if (id.includes('mpesa') || id.includes('airtel') || id.includes('stripe')) return 'Payment';
-    if (id.includes('clickup') || id.includes('asana') || id.includes('trello') || id.includes('notion') || id.includes('jira')) return 'Productivity';
+    if (id.includes('clickup') || id.includes('asana') || id.includes('trello') || id.includes('notion') || id.includes('jira') || id.includes('airtable')) return 'Productivity';
     return 'Other';
   };
 
@@ -113,7 +132,7 @@ const Integrations: React.FC = () => {
         'Apollo Agriculture', 'Sunculture', 'DigiFarm', 'ShambaSmart', 'Rescue',
         'BambooHR', 'Bitrix24', 'SeamlessHR', 'WorkPay', 'G4S', 'Fargo Courier',
         'Busybee', 'Sendy', 'Lori Systems', 'Amitruck', 'Vyapar', 'Sasapay',
-        'Lipabiz', 'Zoho Books', 'Xero', 'Quickbooks', 'KRA iTax', 'Sky Garden',
+        'Lipabiz', 'Zoho Books', 'Xero', 'KRA iTax', 'Sky Garden',
         'Wasoko', 'Twiga Foods', 'Copia', 'Masoko', 'Jiji', 'Kilimall', 'Jumia',
         'Little Pay', 'Ipay', 'Pesapal', 'Cellulant', 'Kopo Kopo', 'Paystack',
         'Flutterwave', 'Equity Jenga', 'Logistics Hub', 'Business Intelligence',
@@ -182,6 +201,10 @@ const Integrations: React.FC = () => {
         toast.success('TikTok connected successfully!');
       } else if (success === 'hubspot_connected') {
         toast.success('HubSpot CRM connected successfully!');
+      } else if (success === 'quickbooks_connected') {
+        toast.success('QuickBooks connected successfully!');
+      } else if (success === 'airtable_connected') {
+        toast.success('Airtable connected successfully!');
       } else {
         toast.success('Connection successful!');
       }
@@ -617,6 +640,54 @@ const Integrations: React.FC = () => {
       }
     }
 
+    // Redirect to QuickBooks OAuth if it's QuickBooks AND NOT already connected
+    if (platform.id === 'quickbooks' && !existing) {
+      try {
+        toast.loading('Redirecting to QuickBooks...', { id: 'oauth-redirect' });
+        const { auth_url } = await apiService.getQuickBooksAuthUrl();
+        window.location.href = auth_url;
+        return;
+      } catch (error: any) {
+        toast.dismiss('oauth-redirect');
+        if (error.response?.status === 402 || error.response?.data?.error === 'upgrade_required') {
+          const details = error.response?.data?.detail || error.response?.data || {};
+          setUpgradeModal({
+            isOpen: true,
+            feature: details.feature || 'QuickBooks integration',
+            requiredTier: details.required_tier || 'Biashara Lite',
+            currentTier: details.current_tier || 'Free'
+          });
+        } else {
+          toast.error('Failed to initiate QuickBooks connection');
+        }
+        return;
+      }
+    }
+
+    // Redirect to Airtable OAuth if it's Airtable AND NOT already connected
+    if (platform.id === 'airtable' && !existing) {
+      try {
+        toast.loading('Redirecting to Airtable...', { id: 'oauth-redirect' });
+        const { auth_url } = await apiService.getAirtableAuthUrl();
+        window.location.href = auth_url;
+        return;
+      } catch (error: any) {
+        toast.dismiss('oauth-redirect');
+        if (error.response?.status === 402 || error.response?.data?.error === 'upgrade_required') {
+          const details = error.response?.data?.detail || error.response?.data || {};
+          setUpgradeModal({
+            isOpen: true,
+            feature: details.feature || 'Airtable integration',
+            requiredTier: details.required_tier || 'Biashara Lite',
+            currentTier: details.current_tier || 'Free'
+          });
+        } else {
+          toast.error('Failed to initiate Airtable connection');
+        }
+        return;
+      }
+    }
+
     // Handle KRA Portal connection (PIN Entry Modal) - REMOVED
 
     if (existing) {
@@ -891,7 +962,10 @@ const Integrations: React.FC = () => {
                     {/* Action Footer */}
                     <div className="px-5 py-3 border-t border-slate-100 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-900/50 rounded-b-2xl mt-auto">
                       {isConnected ? (
-                        <button className="w-full text-center text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors py-1">
+                        <button
+                          onClick={() => handleConnect(platform)}
+                          className="w-full text-center text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors py-1"
+                        >
                           Configure connection
                         </button>
                       ) : (
