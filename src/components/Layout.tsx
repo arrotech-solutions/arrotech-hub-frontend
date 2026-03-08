@@ -39,6 +39,7 @@ import CookieConsent from './CookieConsent';
 import UsageWarningBanner from './UsageWarningBanner';
 import NoIndex from './NoIndex';
 import { ThemeToggle } from './ThemeToggle';
+import OrgSwitcher from './OrgSwitcher/OrgSwitcher';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -416,6 +417,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             </div>
           </div>
 
+          {/* Org Switcher – Mobile */}
+          <div className="flex-shrink-0 px-6 py-3 border-b border-gray-200/50 dark:border-slate-800/50">
+            <OrgSwitcher />
+          </div>
+
           <nav className="flex-1 min-h-0 p-6 space-y-2 overflow-y-auto">
             {navigation.map((item) => renderNavItem(item, true))}
           </nav>
@@ -486,6 +492,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   </div>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* Org Switcher – Desktop */}
+          {!collapsed && (
+            <div className="flex-shrink-0 px-6 py-3 border-b border-gray-200/50 dark:border-slate-800/50">
+              <OrgSwitcher />
             </div>
           )}
 

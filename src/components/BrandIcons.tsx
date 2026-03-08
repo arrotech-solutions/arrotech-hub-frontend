@@ -33,6 +33,7 @@ import trelloIcon from '../assets/apps/trello.jpg';
 import jiraIcon from '../assets/apps/jira.jpeg';
 import tiktokIcon from '../assets/apps/tiktok.png';
 import kraIcon from '../assets/apps/kra.png';
+import airtableIcon from '../assets/apps/airtable.png';
 
 
 type IconProps = React.SVGProps<SVGSVGElement> | React.ImgHTMLAttributes<HTMLImageElement> | any;
@@ -139,3 +140,5 @@ export const TikTokLogo = (props: IconProps) => (
 );
 
 export const KRALogo = (props: IconProps) => <ImageLogo src={kraIcon} alt="KRA Portal" {...props} />;
+
+export const AirtableLogo = (props: IconProps) => <ImageLogo src={airtableIcon} alt="Airtable" {...props} />;

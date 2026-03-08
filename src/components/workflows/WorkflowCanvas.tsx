@@ -17,7 +17,7 @@ import {
     Save, Loader2, AlertCircle,
     MousePointer, Clock, Webhook, Play,
     ArrowLeft,
-    Layout
+    Layout, Sun, Moon
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import apiService from '../../services/api';
@@ -236,6 +236,23 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
     const [error, setError] = useState<string | null>(null);
     const [showMetaPanel, setShowMetaPanel] = useState(false);
     const isEditing = !!initialData;
+
+    // Dark mode state — synced with document root
+    const [isDark, setIsDark] = useState(() => {
+        return document.documentElement.classList.contains('dark');
+    });
+
+    const toggleTheme = useCallback(() => {
+        const root = document.documentElement;
+        if (isDark) {
+            root.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
+        } else {
+            root.classList.add('dark');
+            localStorage.setItem('theme', 'dark');
+        }
+        setIsDark(!isDark);
+    }, [isDark]);
     const reactFlowRef = useRef<any>(null);
 
     // Load tools on open
@@ -538,16 +555,16 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
     if (!open) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex flex-col bg-gray-50">
+        <div className={`fixed inset-0 z-50 flex flex-col ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
             {/* Top Bar */}
             {/* Top Bar - Scrollable Header */}
-            <div className="flex items-center justify-between px-4 py-3 bg-white border-b border-gray-200 shadow-sm z-10 overflow-x-auto gap-4">
+            <div className={`flex items-center justify-between px-4 py-3 border-b shadow-sm z-10 overflow-x-auto gap-4 ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
                 <div className="flex items-center space-x-4 shrink-0">
                     <button
                         onClick={onClose}
-                        className="p-2 rounded-xl hover:bg-gray-100 transition-colors shrink-0"
+                        className={`p-2 rounded-xl transition-colors shrink-0 ${isDark ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}
                     >
-                        <ArrowLeft className="w-5 h-5 text-gray-600" />
+                        <ArrowLeft className={`w-5 h-5 ${isDark ? 'text-gray-300' : 'text-gray-600'}`} />
                     </button>
                     <div className="shrink-0">
                         <input
@@ -555,14 +572,14 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
                             value={workflowName}
                             onChange={e => setWorkflowName(e.target.value)}
                             placeholder="Untitled Workflow"
-                            className="text-lg font-bold text-gray-900 bg-transparent border-none focus:outline-none focus:ring-0 placeholder:text-gray-300 w-40 sm:w-64 transition-all"
+                            className={`text-lg font-bold bg-transparent border-none focus:outline-none focus:ring-0 w-40 sm:w-64 transition-all ${isDark ? 'text-white placeholder:text-gray-500' : 'text-gray-900 placeholder:text-gray-300'}`}
                         />
                         <div className="flex items-center space-x-2 mt-0.5 whitespace-nowrap">
-                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                            <span className={`text-[10px] font-bold uppercase tracking-widest ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
                                 Canvas Mode
                             </span>
-                            <span className="text-[10px] text-gray-300">•</span>
-                            <span className="text-[10px] font-bold text-gray-400">
+                            <span className={`text-[10px] ${isDark ? 'text-gray-600' : 'text-gray-300'}`}>•</span>
+                            <span className={`text-[10px] font-bold ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
                                 {nodes.filter(n => n.id !== 'trigger').length} steps
                             </span>
                         </div>
@@ -571,7 +588,7 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
 
                 <div className="flex items-center space-x-2 shrink-0 pr-4">
                     {error && (
-                        <div className="flex items-center space-x-1 text-red-600 text-xs font-medium bg-red-50 px-3 py-1.5 rounded-lg shrink-0 overflow-hidden">
+                        <div className={`flex items-center space-x-1 text-xs font-medium px-3 py-1.5 rounded-lg shrink-0 overflow-hidden ${isDark ? 'text-red-400 bg-red-900/30' : 'text-red-600 bg-red-50'}`}>
                             <AlertCircle className="w-3.5 h-3.5" />
                             <span className="whitespace-nowrap">{error}</span>
                         </div>
@@ -579,7 +596,7 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
 
                     <button
                         onClick={handleAutoLayout}
-                        className="flex items-center space-x-1.5 px-3 py-2 text-xs font-bold text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors shrink-0 whitespace-nowrap"
+                        className={`flex items-center space-x-1.5 px-3 py-2 text-xs font-bold rounded-xl transition-colors shrink-0 whitespace-nowrap ${isDark ? 'text-gray-300 bg-gray-700 hover:bg-gray-600' : 'text-gray-600 bg-gray-100 hover:bg-gray-200'}`}
                         title="Auto-layout"
                     >
                         <Layout className="w-3.5 h-3.5" />
@@ -589,7 +606,7 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
                     {onSwitchToForm && (
                         <button
                             onClick={() => onSwitchToForm(getCanvasState())}
-                            className="flex items-center space-x-1.5 px-3 py-2 text-xs font-bold text-purple-600 bg-purple-50 rounded-xl hover:bg-purple-100 transition-colors border border-purple-200 shrink-0 whitespace-nowrap"
+                            className={`flex items-center space-x-1.5 px-3 py-2 text-xs font-bold rounded-xl transition-colors border shrink-0 whitespace-nowrap ${isDark ? 'text-purple-400 bg-purple-900/30 hover:bg-purple-900/50 border-purple-700' : 'text-purple-600 bg-purple-50 hover:bg-purple-100 border-purple-200'}`}
                         >
                             <span>Switch to Form</span>
                         </button>
@@ -597,9 +614,18 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
 
                     <button
                         onClick={() => setShowMetaPanel(!showMetaPanel)}
-                        className="flex items-center space-x-1.5 px-3 py-2 text-xs font-bold text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors shrink-0 whitespace-nowrap"
+                        className={`flex items-center space-x-1.5 px-3 py-2 text-xs font-bold rounded-xl transition-colors shrink-0 whitespace-nowrap ${isDark ? 'text-gray-300 bg-gray-700 hover:bg-gray-600' : 'text-gray-600 bg-gray-100 hover:bg-gray-200'}`}
                     >
                         <span>Details</span>
+                    </button>
+
+                    {/* Theme Toggle */}
+                    <button
+                        onClick={toggleTheme}
+                        className={`p-2 rounded-xl transition-colors shrink-0 ${isDark ? 'text-yellow-400 bg-gray-700 hover:bg-gray-600' : 'text-gray-500 bg-gray-100 hover:bg-gray-200'}`}
+                        title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+                    >
+                        {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
                     </button>
 
                     <button
@@ -621,15 +647,16 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
                     onAddTool={handleAddTool}
                     isCollapsed={toolbarCollapsed}
                     onToggleCollapse={() => setToolbarCollapsed(!toolbarCollapsed)}
+                    isDark={isDark}
                 />
 
                 {/* Center: Canvas */}
                 <div className="flex-1 relative">
                     {loadingTools && (
-                        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-20 flex items-center justify-center">
+                        <div className={`absolute inset-0 backdrop-blur-sm z-20 flex items-center justify-center ${isDark ? 'bg-gray-900/80' : 'bg-white/80'}`}>
                             <div className="text-center">
                                 <Loader2 className="w-8 h-8 text-blue-600 animate-spin mx-auto mb-2" />
-                                <p className="text-sm text-gray-500 font-medium">Loading tools...</p>
+                                <p className={`text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Loading tools...</p>
                             </div>
                         </div>
                     )}
@@ -651,12 +678,12 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
                         proOptions={{ hideAttribution: true }}
                         className="workflow-canvas"
                     >
-                        <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="#e5e7eb" />
+                        <Background variant={BackgroundVariant.Dots} gap={20} size={1} color={isDark ? '#374151' : '#e5e7eb'} />
                         <Controls
                             showZoom={true}
                             showFitView={true}
                             showInteractive={false}
-                            className="!bg-white !rounded-xl !border !border-gray-200 !shadow-lg"
+                            className={isDark ? '!bg-gray-800 !rounded-xl !border !border-gray-700 !shadow-lg [&>button]:!bg-gray-800 [&>button]:!border-gray-700 [&>button]:!fill-gray-300 [&>button:hover]:!bg-gray-700' : '!bg-white !rounded-xl !border !border-gray-200 !shadow-lg'}
                         />
                     </ReactFlow>
                 </div>
@@ -675,39 +702,40 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
                         onUpdateTimeout={handleUpdateTimeout}
                         onDelete={handleDeleteNode}
                         onClose={() => setSelectedNode(null)}
+                        isDark={isDark}
                     />
                 )}
 
                 {/* Workflow Details meta panel */}
                 {showMetaPanel && !selectedNode && (
-                    <div className="w-80 bg-white border-l border-gray-200 flex flex-col h-full shadow-xl shadow-gray-200/20">
-                        <div className="px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
-                            <h3 className="text-sm font-bold text-gray-900">Workflow Details</h3>
-                            <p className="text-[10px] text-gray-400 mt-0.5">Configure workflow metadata</p>
+                    <div className={`w-80 border-l flex flex-col h-full shadow-xl ${isDark ? 'bg-gray-800 border-gray-700 shadow-black/20' : 'bg-white border-gray-200 shadow-gray-200/20'}`}>
+                        <div className={`px-5 py-4 border-b ${isDark ? 'border-gray-700 bg-gradient-to-r from-gray-800 to-gray-800' : 'border-gray-100 bg-gradient-to-r from-gray-50 to-white'}`}>
+                            <h3 className={`text-sm font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Workflow Details</h3>
+                            <p className={`text-[10px] mt-0.5 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>Configure workflow metadata</p>
                         </div>
                         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4" style={{ scrollbarWidth: 'thin' }}>
                             <div>
-                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Name *</label>
+                                <label className={`block text-xs font-bold uppercase tracking-wider mb-1.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Name *</label>
                                 <input
                                     type="text"
                                     value={workflowName}
                                     onChange={e => setWorkflowName(e.target.value)}
-                                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                                    className={`w-full px-3 py-2 text-sm border rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 ${isDark ? 'bg-gray-700 border-gray-600 text-white placeholder:text-gray-500' : 'border-gray-200'}`}
                                     placeholder="My Workflow"
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Description</label>
+                                <label className={`block text-xs font-bold uppercase tracking-wider mb-1.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Description</label>
                                 <textarea
                                     value={workflowDescription}
                                     onChange={e => setWorkflowDescription(e.target.value)}
                                     rows={3}
-                                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                                    className={`w-full px-3 py-2 text-sm border rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 ${isDark ? 'bg-gray-700 border-gray-600 text-white placeholder:text-gray-500' : 'border-gray-200'}`}
                                     placeholder="What does this workflow do?"
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Trigger</label>
+                                <label className={`block text-xs font-bold uppercase tracking-wider mb-2 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Trigger</label>
                                 <div className="grid grid-cols-2 gap-2">
                                     {[
                                         { value: 'manual', label: 'Manual', icon: MousePointer },
@@ -719,8 +747,8 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
                                             key={t.value}
                                             onClick={() => setTriggerType(t.value as TriggerType)}
                                             className={`flex items-center space-x-2 px-3 py-2 rounded-xl text-xs font-bold transition-all ${triggerType === t.value
-                                                ? 'bg-purple-100 text-purple-700 border-2 border-purple-300'
-                                                : 'bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100'
+                                                ? (isDark ? 'bg-purple-900/40 text-purple-300 border-2 border-purple-600' : 'bg-purple-100 text-purple-700 border-2 border-purple-300')
+                                                : (isDark ? 'bg-gray-700 text-gray-300 border border-gray-600 hover:bg-gray-600' : 'bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100')
                                                 }`}
                                         >
                                             <t.icon className="w-3.5 h-3.5" />
@@ -732,12 +760,12 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
 
                             {triggerType === 'scheduled' && (
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Cron Expression *</label>
+                                    <label className={`block text-xs font-bold uppercase tracking-wider mb-1.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Cron Expression *</label>
                                     <input
                                         type="text"
                                         value={triggerConfig.cron_expression || ''}
                                         onChange={e => setTriggerConfig({ ...triggerConfig, cron_expression: e.target.value })}
-                                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl font-mono focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                                        className={`w-full px-3 py-2 text-sm border rounded-xl font-mono focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 ${isDark ? 'bg-gray-700 border-gray-600 text-white placeholder:text-gray-500' : 'border-gray-200'}`}
                                         placeholder="0 9 * * 1-5"
                                     />
                                 </div>
@@ -745,22 +773,22 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
 
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Category</label>
+                                    <label className={`block text-xs font-bold uppercase tracking-wider mb-1.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Category</label>
                                     <input
                                         type="text"
                                         value={category}
                                         onChange={e => setCategory(e.target.value)}
-                                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                                        className={`w-full px-3 py-2 text-sm border rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 ${isDark ? 'bg-gray-700 border-gray-600 text-white placeholder:text-gray-500' : 'border-gray-200'}`}
                                         placeholder="Marketing"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Tags</label>
+                                    <label className={`block text-xs font-bold uppercase tracking-wider mb-1.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Tags</label>
                                     <input
                                         type="text"
                                         value={tags}
                                         onChange={e => setTags(e.target.value)}
-                                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                                        className={`w-full px-3 py-2 text-sm border rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 ${isDark ? 'bg-gray-700 border-gray-600 text-white placeholder:text-gray-500' : 'border-gray-200'}`}
                                         placeholder="slack, reports"
                                     />
                                 </div>
