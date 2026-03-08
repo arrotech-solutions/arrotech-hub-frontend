@@ -449,6 +449,8 @@ export interface IntegrationSettings {
 
 export interface SecuritySettings {
   two_factor_enabled: boolean;
+  email_2fa_enabled?: boolean;
+  default_2fa_method?: 'totp' | 'email';
   session_timeout: number;
   ip_whitelist?: string[];
 }
@@ -1832,3 +1834,76 @@ export interface MpesaPaymentListResponse {
   offset: number;
 }
 
+// ── Organization Types ──────────────────────────────────────────────────
+
+export type OrgRole = 'owner' | 'admin' | 'member' | 'viewer';
+
+export interface Organization {
+  id: number;
+  name: string;
+  slug: string;
+  logo_url?: string;
+  description?: string;
+  website?: string;
+  industry?: string;
+  company_size?: string;
+  billing_email?: string;
+  subscription_tier: string;
+  settings?: Record<string, any>;
+  is_active: boolean;
+  role: OrgRole; // user's role in this org (from membership)
+  created_at: string;
+  updated_at?: string;
+}
+
+export interface OrganizationMember {
+  id: number;
+  user_id: number;
+  email: string;
+  name: string;
+  role: OrgRole;
+  title?: string;
+  department_id?: number;
+  joined_at: string;
+}
+
+export interface OrganizationInvitation {
+  id: number;
+  email: string;
+  role: OrgRole;
+  invited_by_name: string;
+  token: string;
+  expires_at: string;
+  created_at: string;
+}
+
+export interface Department {
+  id: number;
+  name: string;
+  description?: string;
+  head_id?: number;
+  created_at: string;
+}
+
+export interface AuditLogEntry {
+  id: number;
+  action: string;
+  entity_type?: string;
+  entity_id?: string;
+  details?: Record<string, any>;
+  ip_address?: string;
+  actor_name?: string;
+  actor_email?: string;
+  created_at: string;
+}
+
+export interface CreateOrganizationRequest {
+  name: string;
+  slug?: string;
+  description?: string;
+  website?: string;
+  industry?: string;
+  company_size?: string;
+  billing_email?: string;
+  logo_url?: string;
+}

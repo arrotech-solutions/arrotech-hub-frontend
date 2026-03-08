@@ -19,12 +19,13 @@ interface NodeConfigPanelProps {
     onUpdateTimeout: (nodeId: string, timeout: number) => void;
     onDelete: (nodeId: string) => void;
     onClose: () => void;
+    isDark?: boolean;
 }
 
 const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
     nodeId, toolName, tool, parameters, retryConfig, timeout, description,
     onUpdateParams, onUpdateDescription, onUpdateRetry, onUpdateTimeout,
-    onDelete, onClose
+    onDelete, onClose, isDark
 }) => {
     const [localParams, setLocalParams] = useState<Record<string, any>>(parameters || {});
     const [localDescription, setLocalDescription] = useState(description || '');
@@ -65,7 +66,7 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
             return (
                 <div className="relative">
                     <select
-                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 bg-white appearance-none transition-all"
+                        className={`w-full px-3 py-2 text-sm border rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 appearance-none transition-all ${isDark ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-200'}`}
                         value={localParams[name] || ''}
                         onChange={e => handleParamChange(name, e.target.value)}
                     >
@@ -100,7 +101,7 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
                     <input
                         type="text"
                         placeholder={`Enter ${name} or {{variable}}`}
-                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
+                        className={`w-full px-3 py-2 text-sm border rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all ${isDark ? 'bg-gray-700 border-gray-600 text-white placeholder:text-gray-500' : 'border-gray-200'}`}
                         value={localParams[name] ?? ''}
                         onChange={e => {
                             const val = e.target.value;
@@ -118,7 +119,7 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
                     <input
                         type="text"
                         placeholder={`Enter ${name}`}
-                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
+                        className={`w-full px-3 py-2 text-sm border rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all ${isDark ? 'bg-gray-700 border-gray-600 text-white placeholder:text-gray-500' : 'border-gray-200'}`}
                         value={localParams[name] || ''}
                         onChange={e => handleParamChange(name, e.target.value)}
                     />
@@ -127,19 +128,19 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
     };
 
     return (
-        <div className="w-80 bg-white border-l border-gray-200 flex flex-col h-full shadow-xl shadow-gray-200/20 animate-slide-in-right">
+        <div className={`w-80 border-l flex flex-col h-full shadow-xl animate-slide-in-right ${isDark ? 'bg-gray-800 border-gray-700 shadow-black/20' : 'bg-white border-gray-200 shadow-gray-200/20'}`}>
             {/* Header */}
-            <div className="px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+            <div className={`px-5 py-4 border-b ${isDark ? 'border-gray-700 bg-gradient-to-r from-gray-800 to-gray-800' : 'border-gray-100 bg-gradient-to-r from-gray-50 to-white'}`}>
                 <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                         <Settings className="w-4 h-4 text-blue-600" />
-                        <h3 className="text-sm font-bold text-gray-900">Configure Node</h3>
+                        <h3 className={`text-sm font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Configure Node</h3>
                     </div>
-                    <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
-                        <X className="w-4 h-4 text-gray-400" />
+                    <button onClick={onClose} className={`p-1.5 rounded-lg transition-colors ${isDark ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}>
+                        <X className={`w-4 h-4 ${isDark ? 'text-gray-500' : 'text-gray-400'}`} />
                     </button>
                 </div>
-                <p className="text-xs text-gray-500 mt-1 font-medium">
+                <p className={`text-xs mt-1 font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                     {toolName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                 </p>
             </div>
@@ -148,14 +149,14 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
             <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5" style={{ scrollbarWidth: 'thin' }}>
                 {/* Description */}
                 <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                    <label className={`block text-xs font-bold uppercase tracking-wider mb-1.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                         Step Description
                     </label>
                     <input
                         type="text"
                         value={localDescription}
                         onChange={e => { setLocalDescription(e.target.value); setIsDirty(true); }}
-                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
+                        className={`w-full px-3 py-2 text-sm border rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all ${isDark ? 'bg-gray-700 border-gray-600 text-white placeholder:text-gray-500' : 'border-gray-200'}`}
                         placeholder="What does this step do?"
                     />
                 </div>
@@ -163,18 +164,18 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
                 {/* Parameters */}
                 {Object.keys(properties).length > 0 && (
                     <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">
+                        <label className={`block text-xs font-bold uppercase tracking-wider mb-3 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                             Parameters
                         </label>
                         <div className="space-y-3">
                             {Object.entries(properties).map(([name, schema]: [string, any]) => (
                                 <div key={name}>
                                     <div className="flex items-center justify-between mb-1">
-                                        <label className="text-xs font-semibold text-gray-700">
+                                        <label className={`text-xs font-semibold ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                                             {name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                                             {requiredFields.includes(name) && <span className="text-red-500 ml-0.5">*</span>}
                                         </label>
-                                        <span className="text-[9px] text-gray-400 uppercase font-bold">{schema.type}</span>
+                                        <span className={`text-[9px] uppercase font-bold ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>{schema.type}</span>
                                     </div>
                                     {schema.description && (
                                         <p className="text-[10px] text-gray-400 mb-1.5">{schema.description}</p>
@@ -188,9 +189,9 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
 
                 {Object.keys(properties).length === 0 && (
                     <div className="text-center py-6 px-3">
-                        <AlertCircle className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-                        <p className="text-xs text-gray-400 font-medium">No configurable parameters</p>
-                        <p className="text-[10px] text-gray-400">This tool runs with default settings</p>
+                        <AlertCircle className={`w-8 h-8 mx-auto mb-2 ${isDark ? 'text-gray-600' : 'text-gray-300'}`} />
+                        <p className={`text-xs font-medium ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>No configurable parameters</p>
+                        <p className={`text-[10px] ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>This tool runs with default settings</p>
                     </div>
                 )}
 
@@ -198,17 +199,17 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
                 <div>
                     <button
                         onClick={() => setShowAdvanced(!showAdvanced)}
-                        className="flex items-center space-x-2 text-xs font-bold text-gray-500 hover:text-gray-700 transition-colors"
+                        className={`flex items-center space-x-2 text-xs font-bold transition-colors ${isDark ? 'text-gray-400 hover:text-gray-200' : 'text-gray-500 hover:text-gray-700'}`}
                     >
                         {showAdvanced ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5 -rotate-90" />}
                         <span>Advanced Settings</span>
                     </button>
 
                     {showAdvanced && (
-                        <div className="mt-3 space-y-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
+                        <div className={`mt-3 space-y-3 p-3 rounded-xl border ${isDark ? 'bg-gray-900/50 border-gray-700' : 'bg-gray-50 border-gray-100'}`}>
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">
+                                    <label className={`block text-[10px] font-bold uppercase mb-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                                         <RotateCcw className="w-3 h-3 inline mr-1" />
                                         Max Retries
                                     </label>
@@ -218,11 +219,11 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
                                         max="10"
                                         value={localRetry.max_retries}
                                         onChange={e => { setLocalRetry({ ...localRetry, max_retries: parseInt(e.target.value) || 0 }); setIsDirty(true); }}
-                                        className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                                        className={`w-full px-2 py-1.5 text-xs border rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 ${isDark ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-200'}`}
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">
+                                    <label className={`block text-[10px] font-bold uppercase mb-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                                         Retry Delay (s)
                                     </label>
                                     <input
@@ -230,12 +231,12 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
                                         min="0"
                                         value={localRetry.retry_delay}
                                         onChange={e => { setLocalRetry({ ...localRetry, retry_delay: parseInt(e.target.value) || 0 }); setIsDirty(true); }}
-                                        className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                                        className={`w-full px-2 py-1.5 text-xs border rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 ${isDark ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-200'}`}
                                     />
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">
+                                <label className={`block text-[10px] font-bold uppercase mb-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                                     <Clock className="w-3 h-3 inline mr-1" />
                                     Timeout (seconds)
                                 </label>
@@ -244,7 +245,7 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
                                     min="1"
                                     value={localTimeout}
                                     onChange={e => { setLocalTimeout(parseInt(e.target.value) || 60); setIsDirty(true); }}
-                                    className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                                    className={`w-full px-2 py-1.5 text-xs border rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 ${isDark ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-200'}`}
                                 />
                             </div>
                         </div>
@@ -253,13 +254,13 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
             </div>
 
             {/* Footer */}
-            <div className="px-5 py-4 border-t border-gray-100 bg-gray-50/50 space-y-2">
+            <div className={`px-5 py-4 border-t space-y-2 ${isDark ? 'border-gray-700 bg-gray-800/50' : 'border-gray-100 bg-gray-50/50'}`}>
                 <button
                     onClick={handleSave}
                     disabled={!isDirty}
                     className={`w-full flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${isDirty
                         ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-200/50'
-                        : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                        : (isDark ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-gray-100 text-gray-400 cursor-not-allowed')
                         }`}
                 >
                     <Save className="w-3.5 h-3.5" />
@@ -267,7 +268,7 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
                 </button>
                 <button
                     onClick={() => onDelete(nodeId)}
-                    className="w-full flex items-center justify-center space-x-2 px-4 py-2 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 border border-red-200 transition-all"
+                    className={`w-full flex items-center justify-center space-x-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${isDark ? 'text-red-400 hover:bg-red-900/30 border border-red-800' : 'text-red-600 hover:bg-red-50 border border-red-200'}`}
                 >
                     <Trash2 className="w-3.5 h-3.5" />
                     <span>Remove Step</span>
