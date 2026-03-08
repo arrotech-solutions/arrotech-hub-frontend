@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import apiService from '../services/api';
 
 interface ActivityItem {
   id: string;
@@ -120,150 +121,82 @@ const Activity: React.FC = () => {
   const loadActivityData = async () => {
     try {
       setLoading(true);
-      // Mock data for demonstration - replace with actual API calls
-      const mockActivities: ActivityItem[] = [
-        {
-          id: '1',
-          type: 'success',
-          category: 'workflow',
-          title: 'Workflow "Email Campaign" completed successfully',
-          description: 'Automated email campaign sent to 1,250 subscribers with 98.5% delivery rate',
-          timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-          duration: 45,
-          user: 'john.doe@company.com',
-          status: 'completed',
-          priority: 'high',
-          metadata: { subscribers: 1250, delivery_rate: 98.5, open_rate: 23.4 }
-        },
-        {
-          id: '2',
-          type: 'error',
-          category: 'connection',
-          title: 'HubSpot connection failed',
-          description: 'Failed to sync contacts from HubSpot due to authentication error',
-          timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
-          duration: 120,
-          user: 'system',
-          status: 'failed',
-          priority: 'critical',
-          metadata: { error_code: 'AUTH_401', retry_count: 3 }
-        },
-        {
-          id: '3',
-          type: 'warning',
-          category: 'system',
-          title: 'High memory usage detected',
-          description: 'System memory usage reached 85% - consider optimizing resource allocation',
-          timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-          duration: 300,
-          user: 'system',
-          status: 'running',
-          priority: 'medium',
-          metadata: { memory_usage: 85, cpu_usage: 67, disk_usage: 45 }
-        },
-        {
-          id: '4',
-          type: 'info',
-          category: 'agent',
-          title: 'AI Agent "Data Analyzer" started',
-          description: 'Agent initiated to analyze customer behavior patterns and generate insights',
-          timestamp: new Date(Date.now() - 45 * 60 * 1000).toISOString(),
-          duration: 180,
-          user: 'alice.smith@company.com',
-          status: 'running',
-          priority: 'high',
-          metadata: { data_points: 15420, analysis_type: 'behavior_patterns' }
-        },
-        {
-          id: '5',
-          type: 'success',
-          category: 'payment',
-          title: 'Payment processed successfully',
-          description: 'Monthly subscription payment of $99.00 processed for Premium Plan',
-          timestamp: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
-          duration: 5,
-          user: 'billing@company.com',
-          status: 'completed',
-          priority: 'medium',
-          metadata: { amount: 99.00, currency: 'USD', plan: 'Premium' }
-        },
-        {
-          id: '6',
-          type: 'info',
-          category: 'security',
-          title: 'User login from new device',
-          description: 'Successful login from IP 192.168.1.100 - device verified',
-          timestamp: new Date(Date.now() - 90 * 60 * 1000).toISOString(),
-          duration: 2,
-          user: 'john.doe@company.com',
-          status: 'completed',
-          priority: 'low',
-          metadata: { ip_address: '192.168.1.100', device_type: 'desktop', location: 'New York' }
-        },
-        {
-          id: '7',
-          type: 'success',
-          category: 'connection',
-          title: 'Salesforce sync completed',
-          description: 'Successfully synced 2,450 contacts and 156 opportunities from Salesforce',
-          timestamp: new Date(Date.now() - 120 * 60 * 1000).toISOString(),
-          duration: 90,
-          user: 'system',
-          status: 'completed',
-          priority: 'high',
-          metadata: { contacts: 2450, opportunities: 156, sync_time: 90 }
-        },
-        {
-          id: '8',
-          type: 'warning',
-          category: 'system',
-          title: 'API rate limit approaching',
-          description: 'Current API usage at 85% of limit - consider upgrading plan',
-          timestamp: new Date(Date.now() - 150 * 60 * 1000).toISOString(),
-          duration: 60,
-          user: 'system',
-          status: 'pending',
-          priority: 'medium',
-          metadata: { current_usage: 8500, limit: 10000, reset_time: '2024-01-15T00:00:00Z' }
-        }
-      ];
 
-      const mockSystemMetrics: SystemMetrics = {
-        cpu_usage: 67,
-        memory_usage: 85,
-        disk_usage: 45,
-        network_usage: 23,
-        active_connections: 12,
-        total_requests: 15420,
-        error_rate: 2.3,
-        response_time: 145
-      };
+      // Fetch real activity feed items from the backend
+      let activityItems: ActivityItem[] = [];
+      try {
+        const feedRes = await apiService.request({ method: 'GET', url: '/creators/me/activity-feed', params: { limit: 50 } });
+        const feedData = feedRes.data?.data || [];
+        activityItems = feedData.map((item: any, idx: number) => ({
+          id: String(item.id || idx),
+          type: item.activity_type?.includes('fail') || item.activity_type?.includes('error') ? 'error'
+            : item.activity_type?.includes('warn') ? 'warning'
+              : item.activity_type?.includes('info') || item.activity_type?.includes('view') ? 'info'
+                : 'success' as 'success' | 'error' | 'warning' | 'info',
+          category: item.workflow_id ? 'workflow'
+            : item.activity_type?.includes('payment') ? 'payment'
+              : item.activity_type?.includes('security') || item.activity_type?.includes('login') ? 'security'
+                : item.activity_type?.includes('agent') ? 'agent'
+                  : item.activity_type?.includes('connection') ? 'connection'
+                    : 'system' as ActivityItem['category'],
+          title: item.title || item.activity_type || 'Activity',
+          description: item.description || '',
+          timestamp: item.created_at || new Date().toISOString(),
+          duration: item.metadata?.duration,
+          user: item.actor_name || undefined,
+          status: item.metadata?.status || 'completed' as ActivityItem['status'],
+          priority: item.metadata?.priority || 'medium' as ActivityItem['priority'],
+          metadata: item.metadata || undefined,
+        }));
+      } catch (e) {
+        console.warn('Activity feed not available:', e);
+      }
 
-      const mockStats: ActivityStats = {
-        total_activities: 15420,
-        successful_activities: 14850,
-        failed_activities: 320,
-        pending_activities: 250,
-        average_duration: 45,
-        top_categories: [
-          { category: 'workflow', count: 5200 },
-          { category: 'connection', count: 3800 },
-          { category: 'system', count: 2900 },
-          { category: 'agent', count: 2100 },
-          { category: 'payment', count: 1420 }
-        ],
-        recent_trends: [
-          { date: '2024-01-10', count: 1250 },
-          { date: '2024-01-11', count: 1380 },
-          { date: '2024-01-12', count: 1420 },
-          { date: '2024-01-13', count: 1560 },
-          { date: '2024-01-14', count: 1620 }
-        ]
-      };
+      // Fetch usage stats for metrics
+      let usageData: any = null;
+      try {
+        const usageRes = await apiService.request({ method: 'GET', url: '/subscription/usage' });
+        usageData = usageRes.data?.data;
+      } catch (e) {
+        console.warn('Usage stats not available:', e);
+      }
 
-      setActivities(mockActivities);
-      setSystemMetrics(mockSystemMetrics);
-      setStats(mockStats);
+      // Build system metrics from real usage data
+      if (usageData?.usage) {
+        const usage = usageData.usage;
+        setSystemMetrics({
+          cpu_usage: usage.ai_actions?.percentage || 0,
+          memory_usage: usage.automation_runs?.percentage || 0,
+          disk_usage: usage.connections || 0,
+          network_usage: usage.active_workflows || 0,
+          active_connections: usage.connections || 0,
+          total_requests: (usage.ai_actions?.used || 0) + (usage.automation_runs?.used || 0),
+          error_rate: 0,
+          response_time: 0
+        });
+      }
+
+      // Build stats from real usage data
+      if (usageData?.usage) {
+        const usage = usageData.usage;
+        const totalUsed = (usage.ai_actions?.used || 0) + (usage.automation_runs?.used || 0);
+        setStats({
+          total_activities: totalUsed,
+          successful_activities: totalUsed,
+          failed_activities: 0,
+          pending_activities: 0,
+          average_duration: 0,
+          top_categories: [
+            { category: 'AI Actions', count: usage.ai_actions?.used || 0 },
+            { category: 'Automations', count: usage.automation_runs?.used || 0 },
+            { category: 'Workflows', count: usage.active_workflows || 0 },
+            { category: 'Connections', count: usage.connections || 0 },
+          ],
+          recent_trends: []
+        });
+      }
+
+      setActivities(activityItems);
     } catch (error) {
       console.error('Error loading activity data:', error);
       toast.error('Failed to load activity data');
@@ -489,10 +422,10 @@ const Activity: React.FC = () => {
         {/* System Metrics - Glassmorphism */}
         <div className="system-metrics grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
           {[
-            { label: 'CPU Usage', value: systemMetrics ? `${systemMetrics.cpu_usage}%` : '0%', icon: Cpu, color: 'blue', bgColor: 'bg-blue-500', progress: systemMetrics?.cpu_usage || 0 },
-            { label: 'Memory Usage', value: systemMetrics ? `${systemMetrics.memory_usage}%` : '0%', icon: HardDrive, color: 'emerald', bgColor: 'bg-emerald-500', progress: systemMetrics?.memory_usage || 0 },
-            { label: 'Network Load', value: systemMetrics ? `${systemMetrics.network_usage}%` : '0%', icon: Network, color: 'purple', bgColor: 'bg-purple-500', progress: systemMetrics?.network_usage || 0 },
-            { label: 'Error Rate', value: systemMetrics ? `${systemMetrics.error_rate}%` : '0%', icon: AlertTriangle, color: 'red', bgColor: 'bg-red-500', progress: systemMetrics?.error_rate || 0 }
+            { label: 'AI Actions Limit', value: systemMetrics ? `${systemMetrics.cpu_usage}%` : '0%', icon: Cpu, color: 'blue', bgColor: 'bg-blue-500', progress: systemMetrics?.cpu_usage || 0 },
+            { label: 'Automations Limit', value: systemMetrics ? `${systemMetrics.memory_usage}%` : '0%', icon: HardDrive, color: 'emerald', bgColor: 'bg-emerald-500', progress: systemMetrics?.memory_usage || 0 },
+            { label: 'Connections', value: systemMetrics?.disk_usage || 0, icon: Network, color: 'purple', bgColor: 'bg-purple-500', progress: 100 },
+            { label: 'Active Workflows', value: systemMetrics?.network_usage || 0, icon: Workflow, color: 'indigo', bgColor: 'bg-indigo-500', progress: 100 }
           ].map((metric, idx) => {
             const Icon = metric.icon;
             return (
