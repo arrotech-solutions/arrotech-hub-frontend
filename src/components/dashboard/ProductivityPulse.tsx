@@ -1,18 +1,64 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { Activity, TrendingUp } from 'lucide-react';
+import { Activity, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import apiService from '../../services/api';
 
-const data = [
-    { name: 'Mon', activity: 40 },
-    { name: 'Tue', activity: 30 },
-    { name: 'Wed', activity: 20 },
-    { name: 'Thu', activity: 27 },
-    { name: 'Fri', activity: 18 },
-    { name: 'Sat', activity: 23 },
-    { name: 'Sun', activity: 34 },
-];
+interface TrendDay {
+    date: string;
+    score: number;
+}
 
 const ProductivityPulse: React.FC = () => {
+    const [data, setData] = useState<{ name: string; activity: number }[]>([]);
+    const [score, setScore] = useState<number | null>(null);
+    const [changePercent, setChangePercent] = useState<number | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchPulse = async () => {
+            try {
+                // Get 7-day trends for the pulse chart
+                const trendsRes = await apiService.request({ method: 'GET', url: '/productivity/trends', params: { days: 7 } });
+                const scores: TrendDay[] = trendsRes.data?.scores || [];
+
+                const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                const chartData = scores.map((s: TrendDay) => ({
+                    name: dayNames[new Date(s.date).getDay()],
+                    activity: s.score,
+                }));
+                setData(chartData);
+
+                // Get daily score for the hero number
+                const dailyRes = await apiService.request({ method: 'GET', url: '/productivity/score/daily' });
+                if (dailyRes.data?.score !== undefined) {
+                    setScore(dailyRes.data.score);
+                }
+
+                // Get weekly comparison for the change percentage
+                const compRes = await apiService.request({ method: 'GET', url: '/productivity/comparison' });
+                if (compRes.data?.change_percentage !== undefined) {
+                    setChangePercent(compRes.data.change_percentage);
+                }
+            } catch (error) {
+                console.error('Failed to fetch productivity pulse:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchPulse();
+    }, []);
+
+    const TrendIcon = () => {
+        if (changePercent === null) return null;
+        if (changePercent > 0) return <TrendingUp className="w-3.5 h-3.5" />;
+        if (changePercent < 0) return <TrendingDown className="w-3.5 h-3.5" />;
+        return <Minus className="w-3.5 h-3.5" />;
+    };
+
+    const trendColor = changePercent !== null && changePercent >= 0
+        ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10'
+        : 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10';
+
     return (
         <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-md rounded-3xl border border-white/40 dark:border-slate-800/40 shadow-xl p-5 flex flex-col h-full relative overflow-hidden group transition-all duration-300 hover:shadow-2xl">
             {/* Subtle background gradient */}
@@ -27,15 +73,23 @@ const ProductivityPulse: React.FC = () => {
                     <h3 className="font-bold text-gray-800 dark:text-white uppercase tracking-widest text-xs">Pulse</h3>
                 </div>
 
-                <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold bg-emerald-50 dark:bg-emerald-500/10 px-2 py-1 rounded-lg">
-                    <TrendingUp className="w-3.5 h-3.5" />
-                    <span>+12%</span>
-                </div>
+                {changePercent !== null && (
+                    <div className={`flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-lg ${trendColor}`}>
+                        <TrendIcon />
+                        <span>{changePercent > 0 ? '+' : ''}{changePercent.toFixed(1)}%</span>
+                    </div>
+                )}
             </div>
 
             {/* Stats */}
             <div className="mb-4 z-10">
-                <div className="text-4xl font-black text-gray-800 dark:text-white tracking-tighter">82%</div>
+                {loading ? (
+                    <div className="text-4xl font-black text-gray-300 dark:text-slate-600 tracking-tighter animate-pulse">—</div>
+                ) : (
+                    <div className="text-4xl font-black text-gray-800 dark:text-white tracking-tighter">
+                        {score !== null ? `${score}%` : '—'}
+                    </div>
+                )}
                 <p className="text-[10px] text-gray-500 dark:text-slate-400 font-bold uppercase tracking-[0.2em] mt-1">Productivity Score</p>
             </div>
 

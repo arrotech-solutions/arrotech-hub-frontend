@@ -55,8 +55,8 @@ const Register: React.FC = () => {
     setIsLoading(true);
     setFormError(null);
     try {
-      await registerUser(data.email, data.password, data.name);
-      navigate('/unified');
+      const result = await registerUser(data.email, data.password, data.name);
+      navigate(result?.is_new_user ? '/onboarding' : '/unified');
     } catch (error: any) {
       const errorMessage = error.response?.data?.detail || 'Registration failed.';
       setFormError(errorMessage);
@@ -70,8 +70,8 @@ const Register: React.FC = () => {
     setIsOAuthLoading(true);
     setOAuthProvider('Google');
     try {
-      await loginWithGoogle(response.credential);
-      navigate('/unified');
+      const result = await loginWithGoogle(response.credential);
+      navigate(result?.is_new_user ? '/onboarding' : '/unified');
     } catch (error: any) {
       const errorMessage = error.response?.data?.detail || 'Google signup failed.';
       setFormError(errorMessage);
@@ -118,7 +118,8 @@ const Register: React.FC = () => {
             popup.close(); clearInterval(checkPopup);
             if (token) {
               setIsOAuthLoading(true); setOAuthProvider('Microsoft');
-              await loginWithMicrosoft(token); navigate('/unified');
+              const result = await loginWithMicrosoft(token);
+              navigate(result?.is_new_user ? '/onboarding' : '/unified');
             }
           }
         } catch (e) { }

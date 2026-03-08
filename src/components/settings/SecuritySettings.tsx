@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { Shield, Clock, Globe, ChevronDown, ChevronRight, Lock, Key, Copy, Check, Smartphone } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Shield, Clock, Globe, ChevronDown, ChevronRight, Lock, Key, Copy, Check, Smartphone, Mail } from 'lucide-react';
 import { SecuritySettings } from '../../types';
+import apiService from '../../services/api';
 
 interface SecuritySettingsProps {
     settings: SecuritySettings;
@@ -29,67 +30,143 @@ const SecuritySettingsTab: React.FC<SecuritySettingsProps> = ({
     const [backupCodes, setBackupCodes] = useState<string[]>([]);
     const [isCopied, setIsCopied] = useState(false);
 
+    // Fine-grained 2FA states from the backend
+    const [hasTotp, setHasTotp] = useState(false);
+    const [isEmail2FAEnabled, setIsEmail2FAEnabled] = useState(false);
+    const [isLoadingStatus, setIsLoadingStatus] = useState(true);
+
+    useEffect(() => {
+        if (expanded) {
+            fetch2FAStatus();
+        }
+    }, [expanded]);
+
+    const fetch2FAStatus = async () => {
+        try {
+            const res = await apiService.request({
+                method: 'GET',
+                url: '/api/v1/security/2fa/status'
+            });
+            if (res.data.success) {
+                setHasTotp(res.data.data.has_totp);
+                setIsEmail2FAEnabled(res.data.data.has_email_2fa);
+                // Sync the generic flag just in case
+                handleChange('two_factor_enabled', res.data.data.two_factor_enabled);
+            }
+        } catch (error) {
+            console.error('Failed to fetch 2FA status', error);
+        } finally {
+            setIsLoadingStatus(false);
+        }
+    };
+
     // Provide a mocked mechanism to hook into until the API service is updated with these endpoints
     // These should ideally come from an API layer like `useAuth()` or `api.ts` directly.
     const handleStart2FASetup = async () => {
         setIsSettingUp2FA(true);
         try {
-            const token = localStorage.getItem('auth_token');
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'https://mini-hub.fly.dev'}/api/v1/security/2fa/totp/setup`, {
+            const res = await apiService.request({
                 method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` }
+                url: '/api/v1/security/2fa/totp/setup'
             });
-            const data = await res.json();
-            if (data.success) {
-                setTotpSetupData(data.data);
+            if (res.data.success) {
+                setTotpSetupData(res.data.data);
             }
         } catch (error) {
             console.error('Failed to start 2FA setup', error);
+            setIsSettingUp2FA(false);
         }
     };
 
     const handleVerify2FASetup = async () => {
         try {
-            const token = localStorage.getItem('auth_token');
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'https://mini-hub.fly.dev'}/api/v1/security/2fa/totp/verify`, {
+            const res = await apiService.request({
                 method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ code: verificationCode })
+                url: '/api/v1/security/2fa/totp/verify',
+                data: { code: verificationCode }
             });
-            const data = await res.json();
-            if (data.success) {
+            if (res.data.success) {
                 handleChange('two_factor_enabled', true);
-                setBackupCodes(data.data.backup_codes);
-                setIsSettingUp2FA(false); // Move to backup codes view
+                setHasTotp(true);
+                setBackupCodes(res.data.data.backup_codes);
+                setIsSettingUp2FA(false);
             }
-        } catch (error) {
-            console.error('Failed to verify 2FA setup', error);
+        } catch (error: any) {
+            const detail = error.response?.data?.detail || 'Failed to verify code. Please try again.';
+            console.error('Failed to verify 2FA setup', detail);
+            alert(detail);
         }
     };
 
-    const handleDisable2FA = async () => {
-        if (!confirm('Are you sure you want to disable Two-Factor Authentication? This will make your account less secure.')) return;
+    const handleDisable2FA = async (method: string = 'all') => {
+        const methodLabel = method === 'all' ? 'all 2FA methods' : method === 'totp' ? 'Authenticator App' : 'Email 2FA';
+        if (!confirm(`Are you sure you want to disable ${methodLabel}? This will make your account less secure.`)) return;
         try {
-            const token = localStorage.getItem('auth_token');
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'https://mini-hub.fly.dev'}/api/v1/security/2fa/disable`, {
+            const res = await apiService.request({
                 method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({}) // May require password in future
+                url: '/api/v1/security/2fa/disable',
+                data: { method }
             });
-            const data = await res.json();
-            if (data.success) {
-                handleChange('two_factor_enabled', false);
-                setTotpSetupData(null);
-                setBackupCodes([]);
+            if (res.data.success) {
+                if (method === 'all' || method === 'totp') {
+                    setTotpSetupData(null);
+                    setHasTotp(false);
+                }
+                if (method === 'all') {
+                    handleChange('two_factor_enabled', false);
+                    setBackupCodes([]);
+                    setIsEmail2FAEnabled(false);
+                }
+                if (method === 'email') {
+                    setIsEmail2FAEnabled(false);
+                }
+                fetch2FAStatus();
             }
         } catch (error) {
             console.error('Failed to disable 2FA', error);
+        }
+    };
+
+    // --- Email 2FA ---
+    const [isSettingUpEmail2FA, setIsSettingUpEmail2FA] = useState(false);
+    const [emailVerificationCode, setEmailVerificationCode] = useState('');
+    const [emailSetupMessage, setEmailSetupMessage] = useState('');
+
+    const handleStartEmail2FASetup = async () => {
+        setIsSettingUpEmail2FA(true);
+        setEmailSetupMessage('');
+        try {
+            const res = await apiService.request({
+                method: 'POST',
+                url: '/api/v1/security/2fa/email/setup'
+            });
+            if (res.data.success) {
+                setEmailSetupMessage(res.data.message || 'Verification code sent to your email.');
+            }
+        } catch (error) {
+            console.error('Failed to start Email 2FA setup', error);
+            setEmailSetupMessage('Failed to send code. Please try again.');
+        }
+    };
+
+    const handleVerifyEmail2FASetup = async () => {
+        try {
+            const res = await apiService.request({
+                method: 'POST',
+                url: '/api/v1/security/2fa/email/verify',
+                data: { code: emailVerificationCode }
+            });
+            if (res.data.success) {
+                handleChange('two_factor_enabled', true);
+                setIsEmail2FAEnabled(true);
+                setIsSettingUpEmail2FA(false);
+                setEmailVerificationCode('');
+                if (res.data.data?.backup_codes) {
+                    setBackupCodes(res.data.data.backup_codes);
+                }
+            }
+        } catch (error) {
+            console.error('Failed to verify Email 2FA setup', error);
         }
     };
 
@@ -135,19 +212,21 @@ const SecuritySettingsTab: React.FC<SecuritySettingsProps> = ({
                                     <p className="text-sm text-gray-900 dark:text-white font-medium transition-colors">Authenticator App (TOTP)</p>
                                     <p className="text-sm text-gray-600 dark:text-slate-400 transition-colors">Add an extra layer of security to your account</p>
                                 </div>
-                                {localSettings.two_factor_enabled ? (
+                                {isLoadingStatus ? (
+                                    <div className="animate-pulse h-8 w-24 bg-gray-200 dark:bg-slate-700 rounded transition-colors"></div>
+                                ) : hasTotp ? (
                                     <button
-                                        onClick={handleDisable2FA}
+                                        onClick={() => handleDisable2FA('totp')}
                                         className="px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
                                     >
-                                        Disable 2FA
+                                        Disable TOTP
                                     </button>
                                 ) : (
                                     <button
                                         onClick={handleStart2FASetup}
                                         className="px-4 py-2 text-sm font-medium text-white bg-blue-600 dark:bg-blue-600 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-500 transition-all shadow-sm hover:shadow-md"
                                     >
-                                        Enable 2FA
+                                        Enable TOTP
                                     </button>
                                 )}
                             </div>
@@ -220,6 +299,71 @@ const SecuritySettingsTab: React.FC<SecuritySettingsProps> = ({
                                             I have saved my backup codes
                                         </button>
                                     </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Email 2FA */}
+                    <div className="bg-gray-50 dark:bg-slate-900/50 rounded-lg p-6 border border-transparent dark:border-slate-700/50 transition-colors">
+                        <div className="flex items-center space-x-3 mb-4">
+                            <Mail className="w-5 h-5 text-blue-600 dark:text-blue-400 transition-colors" />
+                            <h4 className="text-lg font-medium text-gray-900 dark:text-white transition-colors">Email Verification</h4>
+                        </div>
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm text-gray-900 dark:text-white font-medium transition-colors">Email One-Time Password</p>
+                                    <p className="text-sm text-gray-600 dark:text-slate-400 transition-colors">Receive a 6-digit code via email when you log in</p>
+                                </div>
+                                {isLoadingStatus ? (
+                                    <div className="animate-pulse h-8 w-32 bg-gray-200 dark:bg-slate-700 rounded transition-colors"></div>
+                                ) : isEmail2FAEnabled ? (
+                                    <button
+                                        onClick={() => handleDisable2FA('email')}
+                                        className="px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+                                    >
+                                        Disable Email 2FA
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={handleStartEmail2FASetup}
+                                        className="px-4 py-2 text-sm font-medium text-white bg-blue-600 dark:bg-blue-600 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-500 transition-all shadow-sm hover:shadow-md"
+                                    >
+                                        Enable Email 2FA
+                                    </button>
+                                )}
+                            </div>
+
+                            {/* Email Setup Inline View */}
+                            {isSettingUpEmail2FA && (
+                                <div className="mt-4 p-4 border border-blue-100 dark:border-blue-500/20 bg-blue-50/50 dark:bg-blue-500/5 rounded-xl space-y-4 transition-colors">
+                                    <h5 className="font-semibold text-gray-900 dark:text-white transition-colors">Verify Your Email</h5>
+                                    <p className="text-sm text-gray-600 dark:text-slate-400 transition-colors">
+                                        {emailSetupMessage || 'A verification code has been sent to your email address.'}
+                                    </p>
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="text"
+                                            value={emailVerificationCode}
+                                            onChange={(e) => setEmailVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                                            className="flex-1 px-3 py-2 text-center text-lg tracking-[0.5em] bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500/50 transition-colors placeholder:text-gray-300 dark:placeholder:text-slate-700"
+                                            placeholder="000000"
+                                        />
+                                        <button
+                                            onClick={handleVerifyEmail2FASetup}
+                                            disabled={emailVerificationCode.length !== 6}
+                                            className="px-6 py-2 bg-blue-600 dark:bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-700 dark:hover:bg-blue-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
+                                        >
+                                            Verify
+                                        </button>
+                                    </div>
+                                    <button
+                                        onClick={handleStartEmail2FASetup}
+                                        className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors"
+                                    >
+                                        Resend code
+                                    </button>
                                 </div>
                             )}
                         </div>

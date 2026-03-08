@@ -61,9 +61,10 @@ interface CanvasToolbarProps {
     onAddTool: (tool: MCPTool | ToolInfo) => void;
     isCollapsed?: boolean;
     onToggleCollapse?: () => void;
+    isDark?: boolean;
 }
 
-const CanvasToolbar: React.FC<CanvasToolbarProps> = ({ tools, onAddTool, isCollapsed, onToggleCollapse }) => {
+const CanvasToolbar: React.FC<CanvasToolbarProps> = ({ tools, onAddTool, isCollapsed, onToggleCollapse, isDark }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['All']));
 
@@ -102,10 +103,10 @@ const CanvasToolbar: React.FC<CanvasToolbarProps> = ({ tools, onAddTool, isColla
 
     if (isCollapsed) {
         return (
-            <div className="w-12 bg-white/80 backdrop-blur-xl border-r border-gray-200 flex flex-col items-center py-4">
+            <div className={`w-12 backdrop-blur-xl border-r flex flex-col items-center py-4 ${isDark ? 'bg-gray-800/80 border-gray-700' : 'bg-white/80 border-gray-200'}`}>
                 <button
                     onClick={onToggleCollapse}
-                    className="p-2 rounded-xl hover:bg-gray-100 text-gray-500 transition-colors"
+                    className={`p-2 rounded-xl transition-colors ${isDark ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-500'}`}
                     title="Expand toolbar"
                 >
                     <ChevronRight className="w-5 h-5" />
@@ -115,31 +116,31 @@ const CanvasToolbar: React.FC<CanvasToolbarProps> = ({ tools, onAddTool, isColla
     }
 
     return (
-        <div className="w-72 bg-white/95 backdrop-blur-xl border-r border-gray-200 flex flex-col h-full shadow-xl shadow-gray-200/20">
+        <div className={`w-72 backdrop-blur-xl border-r flex flex-col h-full shadow-xl ${isDark ? 'bg-gray-800/95 border-gray-700 shadow-black/20' : 'bg-white/95 border-gray-200 shadow-gray-200/20'}`}>
             {/* Header */}
-            <div className="px-4 py-4 border-b border-gray-100">
+            <div className={`px-4 py-4 border-b ${isDark ? 'border-gray-700' : 'border-gray-100'}`}>
                 <div className="flex items-center justify-between mb-3">
                     <div>
-                        <h3 className="text-sm font-bold text-gray-900">Tool Library</h3>
-                        <p className="text-[10px] text-gray-400 font-medium">{tools.length} tools available</p>
+                        <h3 className={`text-sm font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Tool Library</h3>
+                        <p className={`text-[10px] font-medium ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>{tools.length} tools available</p>
                     </div>
                     {onToggleCollapse && (
                         <button
                             onClick={onToggleCollapse}
-                            className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 transition-colors"
+                            className={`p-1.5 rounded-lg transition-colors ${isDark ? 'hover:bg-gray-700 text-gray-500' : 'hover:bg-gray-100 text-gray-400'}`}
                         >
                             <X className="w-4 h-4" />
                         </button>
                     )}
                 </div>
                 <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+                    <Search className={`absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 ${isDark ? 'text-gray-500' : 'text-gray-400'}`} />
                     <input
                         type="text"
                         value={searchQuery}
                         onChange={e => setSearchQuery(e.target.value)}
                         placeholder="Search tools..."
-                        className="w-full pl-9 pr-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 focus:bg-white transition-all placeholder:text-gray-400"
+                        className={`w-full pl-9 pr-3 py-2 text-sm border rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all ${isDark ? 'bg-gray-700 border-gray-600 text-white placeholder:text-gray-500 focus:bg-gray-700' : 'bg-gray-50 border-gray-200 focus:bg-white placeholder:text-gray-400'}`}
                     />
                 </div>
             </div>
@@ -158,16 +159,16 @@ const CanvasToolbar: React.FC<CanvasToolbarProps> = ({ tools, onAddTool, isColla
                             <div key={category}>
                                 <button
                                     onClick={() => toggleCategory(category)}
-                                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl hover:bg-gray-50 transition-colors group"
+                                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-colors group ${isDark ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}`}
                                 >
                                     <div className="flex items-center space-x-2">
                                         <div className={`p-1 rounded-lg border ${colorClasses}`}>
                                             <Icon className="w-3.5 h-3.5" />
                                         </div>
-                                        <span className="text-xs font-bold text-gray-700">{category}</span>
+                                        <span className={`text-xs font-bold ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>{category}</span>
                                     </div>
                                     <div className="flex items-center space-x-1">
-                                        <span className="text-[10px] font-bold text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded-md">
+                                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${isDark ? 'text-gray-400 bg-gray-700' : 'text-gray-400 bg-gray-100'}`}>
                                             {catTools.length}
                                         </span>
                                         {isExpanded
@@ -183,16 +184,16 @@ const CanvasToolbar: React.FC<CanvasToolbarProps> = ({ tools, onAddTool, isColla
                                             <button
                                                 key={tool.name}
                                                 onClick={() => onAddTool(tool)}
-                                                className="w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl hover:bg-blue-50 hover:border-blue-200 border border-transparent transition-all group/tool text-left"
+                                                className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl border border-transparent transition-all group/tool text-left ${isDark ? 'hover:bg-blue-900/30 hover:border-blue-800' : 'hover:bg-blue-50 hover:border-blue-200'}`}
                                                 title={tool.description || tool.name}
                                             >
-                                                <GripVertical className="w-3 h-3 text-gray-300 group-hover/tool:text-blue-400 transition-colors flex-shrink-0" />
+                                                <GripVertical className={`w-3 h-3 transition-colors flex-shrink-0 ${isDark ? 'text-gray-600 group-hover/tool:text-blue-400' : 'text-gray-300 group-hover/tool:text-blue-400'}`} />
                                                 <div className="min-w-0 flex-1">
-                                                    <p className="text-xs font-semibold text-gray-700 group-hover/tool:text-blue-700 truncate transition-colors">
+                                                    <p className={`text-xs font-semibold truncate transition-colors ${isDark ? 'text-gray-300 group-hover/tool:text-blue-300' : 'text-gray-700 group-hover/tool:text-blue-700'}`}>
                                                         {tool.name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                                                     </p>
                                                     {tool.description && (
-                                                        <p className="text-[10px] text-gray-400 truncate">{tool.description}</p>
+                                                        <p className={`text-[10px] truncate ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>{tool.description}</p>
                                                     )}
                                                 </div>
                                             </button>
@@ -205,16 +206,16 @@ const CanvasToolbar: React.FC<CanvasToolbarProps> = ({ tools, onAddTool, isColla
 
                 {Object.keys(filteredCategories).length === 0 && (
                     <div className="text-center py-8 px-4">
-                        <Search className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-                        <p className="text-xs font-medium text-gray-400">No tools found</p>
-                        <p className="text-[10px] text-gray-400">Try a different search term</p>
+                        <Search className={`w-8 h-8 mx-auto mb-2 ${isDark ? 'text-gray-600' : 'text-gray-300'}`} />
+                        <p className={`text-xs font-medium ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>No tools found</p>
+                        <p className={`text-[10px] ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>Try a different search term</p>
                     </div>
                 )}
             </div>
 
             {/* Footer hint */}
-            <div className="px-4 py-3 border-t border-gray-100 bg-gray-50/50">
-                <p className="text-[10px] text-gray-400 text-center font-medium">
+            <div className={`px-4 py-3 border-t ${isDark ? 'border-gray-700 bg-gray-800/50' : 'border-gray-100 bg-gray-50/50'}`}>
+                <p className={`text-[10px] text-center font-medium ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
                     Click a tool to add it to the canvas
                 </p>
             </div>
