@@ -1,7 +1,16 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import apiService from '../services/api';
-import { User } from '../types';
+import organizationService from '../services/organizationService';
+import { User, Organization } from '../types';
+
+interface OrgSummary {
+  id: number;
+  name: string;
+  slug: string;
+  logo_url?: string;
+  role: string;
+}
 
 interface AuthContextType {
   user: User | null;
@@ -12,9 +21,11 @@ interface AuthContextType {
   login: (email: string, password: string, rememberMe?: boolean) => Promise<any>;
   verifyTOTP: (token: string, code: string) => Promise<any>;
   verifyBackupCode: (token: string, code: string) => Promise<any>;
+  sendEmailOTP: (token: string) => Promise<any>;
+  verifyEmailOTP: (token: string, code: string) => Promise<any>;
   loginWithGoogle: (credential: string) => Promise<any>;
   loginWithMicrosoft: (accessToken: string) => Promise<any>;
-  register: (email: string, password: string, name: string) => Promise<void>;
+  register: (email: string, password: string, name: string) => Promise<any>;
   logout: () => Promise<void>;
   updateUser: (data: Partial<User>) => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
@@ -22,6 +33,11 @@ interface AuthContextType {
   validateResetToken: (token: string) => Promise<void>;
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   refreshUser: () => Promise<void>;
+  // Organization context
+  organizations: OrgSummary[];
+  activeOrg: OrgSummary | null;
+  switchOrg: (orgId: number | null) => Promise<void>;
+  refreshOrganizations: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -37,6 +53,8 @@ export const useAuth = () => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [organizations, setOrganizations] = useState<OrgSummary[]>([]);
+  const [activeOrg, setActiveOrg] = useState<OrgSummary | null>(null);
 
   const refreshUser = async () => {
     try {
@@ -44,6 +62,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(response.data);
     } catch (error) {
       console.error('Failed to refresh user:', error);
+    }
+  };
+
+  const refreshOrganizations = async () => {
+    try {
+      const response = await organizationService.list();
+      setOrganizations(response.data || []);
+    } catch (error) {
+      console.error('Failed to refresh orgs:', error);
+    }
+  };
+
+  const _handleAuthResponse = (responseData: any) => {
+    localStorage.setItem('auth_token', responseData.token);
+    if (responseData.refresh_token) {
+      localStorage.setItem('refresh_token', responseData.refresh_token);
+    }
+    setUser(responseData.user);
+
+    // Set organizations from auth response
+    const orgs = responseData.organizations || [];
+    setOrganizations(orgs);
+
+    // Restore last active org
+    const lastOrgId = localStorage.getItem('active_org_id');
+    if (lastOrgId) {
+      const org = orgs.find((o: OrgSummary) => o.id === Number(lastOrgId));
+      if (org) setActiveOrg(org);
     }
   };
 
@@ -55,6 +101,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       apiService.getCurrentUser()
         .then((response) => {
           setUser(response.data);
+          // Also fetch orgs on initial load
+          return organizationService.list();
+        })
+        .then((orgResponse) => {
+          const orgs = orgResponse?.data || [];
+          setOrganizations(orgs);
+          const lastOrgId = localStorage.getItem('active_org_id');
+          if (lastOrgId) {
+            const org = orgs.find((o: OrgSummary) => o.id === Number(lastOrgId));
+            if (org) setActiveOrg(org);
+          }
         })
         .catch(() => {
           localStorage.removeItem('auth_token');
@@ -64,9 +121,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setLoading(false);
         });
     } else if (rememberMeToken) {
-      // Try to use remember me token to get user info
-      // This would require a new endpoint to validate remember me token
-      // For now, we'll just clear the token
       localStorage.removeItem('remember_me_token');
       setLoading(false);
     } else {
@@ -79,22 +133,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const response = await apiService.login(email, password, rememberMe);
 
       // Handle 2FA Challenge
-      if (response.data.requires_2fa) {
-        return { requires_2fa: true, ...response.data };
+      // apiService.login() returns axiosResponse.data, so `response` IS the JSON body
+      if (response.requires_2fa) {
+        return { requires_2fa: true, data: response.data };
       }
 
-      localStorage.setItem('auth_token', response.data.token);
-      if (response.data.refresh_token) {
-        localStorage.setItem('refresh_token', response.data.refresh_token);
-      }
+      _handleAuthResponse(response.data);
 
       if (response.data.remember_me_token) {
         localStorage.setItem('remember_me_token', response.data.remember_me_token);
       }
 
-      setUser(response.data.user);
       toast.success('Login successful!');
-      return { requires_2fa: false, user: response.data.user };
+      return {
+        requires_2fa: false,
+        user: response.data.user,
+        organizations: response.data.organizations || [],
+        is_new_user: response.data.is_new_user || false,
+      };
     } catch (error: any) {
       toast.error(error.response?.data?.message || error.response?.data?.detail || 'Login failed');
       throw error;
@@ -105,16 +161,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const response = await apiService.request({
         method: 'POST',
-        url: '/api/v1/auth/login/2fa/totp',
+        url: '/auth/login/2fa/totp',
         data: { two_factor_token, code }
       });
 
-      localStorage.setItem('auth_token', response.data.data.token);
-      if (response.data.data.refresh_token) {
-        localStorage.setItem('refresh_token', response.data.data.refresh_token);
-      }
-
-      setUser(response.data.data.user);
+      _handleAuthResponse(response.data.data);
       toast.success('Login successful!');
       return response.data.data.user;
     } catch (error: any) {
@@ -127,16 +178,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const response = await apiService.request({
         method: 'POST',
-        url: '/api/v1/auth/login/2fa/backup',
+        url: '/auth/login/2fa/backup',
         data: { two_factor_token, code }
       });
 
-      localStorage.setItem('auth_token', response.data.data.token);
-      if (response.data.data.refresh_token) {
-        localStorage.setItem('refresh_token', response.data.data.refresh_token);
-      }
-
-      setUser(response.data.data.user);
+      _handleAuthResponse(response.data.data);
       toast.success('Login successful!');
       return response.data.data.user;
     } catch (error: any) {
@@ -145,15 +191,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const sendEmailOTP = async (two_factor_token: string) => {
+    try {
+      const response = await apiService.request({
+        method: 'POST',
+        url: '/auth/login/2fa/email/send',
+        data: { two_factor_token }
+      });
+
+      toast.success(response.data.message || 'Verification code sent!');
+      return response.data;
+    } catch (error: any) {
+      toast.error(error.response?.data?.detail || 'Failed to send code');
+      throw error;
+    }
+  };
+
+  const verifyEmailOTP = async (two_factor_token: string, code: string) => {
+    try {
+      const response = await apiService.request({
+        method: 'POST',
+        url: '/auth/login/2fa/email/verify',
+        data: { two_factor_token, code }
+      });
+
+      _handleAuthResponse(response.data.data);
+      toast.success('Login successful!');
+      return response.data.data.user;
+    } catch (error: any) {
+      toast.error(error.response?.data?.detail || 'Invalid code');
+      throw error;
+    }
+  };
+
   const register = async (email: string, password: string, name: string) => {
     try {
       const response = await apiService.register(email, password, name);
-      localStorage.setItem('auth_token', response.data.token);
-      if (response.data.refresh_token) {
-        localStorage.setItem('refresh_token', response.data.refresh_token);
-      }
-      setUser(response.data.user);
+      _handleAuthResponse(response.data);
       toast.success('Registration successful!');
+      return { is_new_user: response.data.is_new_user ?? true };
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Registration failed');
       throw error;
@@ -163,13 +239,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const loginWithGoogle = async (credential: string) => {
     try {
       const response = await apiService.googleAuth(credential);
-      localStorage.setItem('auth_token', response.data.token);
-      if (response.data.refresh_token) {
-        localStorage.setItem('refresh_token', response.data.refresh_token);
-      }
-      setUser(response.data.user);
+      _handleAuthResponse(response.data);
       toast.success('Login successful!');
-      return response.data.user;
+      return {
+        user: response.data.user,
+        is_new_user: response.data.is_new_user || false,
+        organizations: response.data.organizations || [],
+      };
     } catch (error: any) {
       toast.error(error.response?.data?.detail || 'Google login failed');
       throw error;
@@ -179,13 +255,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const loginWithMicrosoft = async (accessToken: string) => {
     try {
       const response = await apiService.microsoftAuth(accessToken);
-      localStorage.setItem('auth_token', response.data.token);
-      if (response.data.refresh_token) {
-        localStorage.setItem('refresh_token', response.data.refresh_token);
-      }
-      setUser(response.data.user);
+      _handleAuthResponse(response.data);
       toast.success('Login successful!');
-      return response.data.user;
+      return {
+        user: response.data.user,
+        is_new_user: response.data.is_new_user || false,
+        organizations: response.data.organizations || [],
+      };
     } catch (error: any) {
       toast.error(error.response?.data?.detail || 'Microsoft login failed');
       throw error;
@@ -199,10 +275,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Ignore logout errors
     } finally {
       setUser(null);
+      setOrganizations([]);
+      setActiveOrg(null);
       localStorage.removeItem('auth_token');
       localStorage.removeItem('refresh_token');
       localStorage.removeItem('remember_me_token');
+      localStorage.removeItem('active_org_id');
       toast.success('Logged out successfully');
+    }
+  };
+
+  const switchOrg = async (orgId: number | null) => {
+    try {
+      const response = await organizationService.switchOrg(orgId);
+      localStorage.setItem('auth_token', response.data.token);
+      if (response.data.refresh_token) {
+        localStorage.setItem('refresh_token', response.data.refresh_token);
+      }
+      if (orgId !== null) {
+        localStorage.setItem('active_org_id', String(orgId));
+        const org = organizations.find(o => o.id === orgId) || null;
+        setActiveOrg(org);
+      } else {
+        localStorage.removeItem('active_org_id');
+        setActiveOrg(null);
+      }
+      toast.success(orgId ? 'Switched organization' : 'Switched to personal context');
+    } catch (error: any) {
+      toast.error(error.response?.data?.detail || 'Failed to switch organization');
+      throw error;
     }
   };
 
@@ -273,6 +374,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     login,
     verifyTOTP,
     verifyBackupCode,
+    sendEmailOTP,
+    verifyEmailOTP,
     loginWithGoogle,
     loginWithMicrosoft,
     register,
@@ -283,6 +386,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     validateResetToken,
     changePassword,
     refreshUser,
+    organizations,
+    activeOrg,
+    switchOrg,
+    refreshOrganizations,
   };
 
   return (

@@ -113,6 +113,82 @@
   html {
     font-family: 'Inter', system-ui, sans-serif;
   }
+
+  /* ── Global Dark Mode: Form Elements ── */
+  .dark input,
+  .dark textarea,
+  .dark select {
+    color: #f1f5f9;
+    background-color: transparent;
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+
+  .dark input::placeholder,
+  .dark textarea::placeholder {
+    color: #94a3b8;
+  }
+
+  .dark input:focus,
+  .dark textarea:focus,
+  .dark select:focus {
+    border-color: rgba(255, 255, 255, 0.3);
+    outline: none;
+  }
+
+  /* Fix autofill (Chrome/Edge) */
+  .dark input:-webkit-autofill,
+  .dark input:-webkit-autofill:hover,
+  .dark input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #f1f5f9;
+    -webkit-box-shadow: 0 0 0 1000px transparent inset;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
+  .dark label {
+    color: #e2e8f0;
+  }
+
+  .dark option {
+    background-color: #1e293b;
+    color: #f1f5f9;
+  }
+
+  /* ── Global Dark Mode: Override bg-white containers ── */
+  /* Modals, dialogs, dropdowns, popups, cards, panels */
+  .dark .bg-white {
+    background-color: #1e293b !important;
+    color: #f1f5f9;
+  }
+
+  .dark .bg-white .text-gray-900,
+  .dark .bg-white .text-gray-800,
+  .dark .bg-white .text-gray-700 {
+    color: #f1f5f9;
+  }
+
+  .dark .bg-white .text-gray-600,
+  .dark .bg-white .text-gray-500 {
+    color: #94a3b8;
+  }
+
+  .dark .bg-white .text-gray-400,
+  .dark .bg-white .text-gray-300 {
+    color: #64748b;
+  }
+
+  .dark .bg-white .border-gray-200,
+  .dark .bg-white .border-gray-100 {
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  /* Fix bg-gray-50 sections inside dark containers */
+  .dark .bg-gray-50 {
+    background-color: #0f172a !important;
+  }
+
+  .dark .bg-gray-100 {
+    background-color: #1a2332 !important;
+  }
 }
 
 @layer components {
@@ -132,16 +208,32 @@
     @apply bg-white rounded-lg shadow-sm border border-secondary-200 p-6;
   }
 
+  .dark .card {
+    @apply bg-secondary-800 border-secondary-700 shadow-md;
+  }
+
   .input-field {
     @apply w-full px-3 py-2 border border-secondary-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+  }
+
+  .dark .input-field {
+    @apply bg-secondary-800 border-secondary-600 text-secondary-100 placeholder-secondary-400;
   }
 
   .modal-overlay {
     @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50;
   }
 
+  .dark .modal-overlay {
+    @apply bg-opacity-70;
+  }
+
   .modal-content {
     @apply bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto;
+  }
+
+  .dark .modal-content {
+    @apply bg-secondary-800 border border-secondary-700 text-secondary-100;
   }
 
   .status-badge {
@@ -152,16 +244,32 @@
     @apply bg-green-100 text-green-800;
   }
 
+  .dark .status-success {
+    @apply bg-green-900/30 text-green-400;
+  }
+
   .status-error {
     @apply bg-red-100 text-red-800;
+  }
+
+  .dark .status-error {
+    @apply bg-red-900/30 text-red-400;
   }
 
   .status-warning {
     @apply bg-yellow-100 text-yellow-800;
   }
 
+  .dark .status-warning {
+    @apply bg-yellow-900/30 text-yellow-400;
+  }
+
   .status-info {
     @apply bg-blue-100 text-blue-800;
+  }
+
+  .dark .status-info {
+    @apply bg-blue-900/30 text-blue-400;
   }
 
   /* Line clamp utilities for text truncation */

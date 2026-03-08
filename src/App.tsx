@@ -55,6 +55,10 @@ const LandingPage = lazy(() => import('./pages/LandingPage'));
 const Terms = lazy(() => import('./pages/Terms'));
 const KraDashboard = lazy(() => import('./pages/apps/KraDashboard'));
 const ProductivityStats = lazy(() => import('./pages/ProductivityStats'));
+const Onboarding = lazy(() => import('./pages/Onboarding'));
+const CreateOrganization = lazy(() => import('./pages/CreateOrganization'));
+const OrganizationSettings = lazy(() => import('./pages/OrganizationSettings'));
+const AcceptInvite = lazy(() => import('./pages/AcceptInvite'));
 
 
 
@@ -176,8 +180,22 @@ const AppRoutes: React.FC = () => {
       {/* Microsoft OAuth Callback */}
       <Route path="/auth/microsoft/callback" element={<MicrosoftCallback />} />
 
+      {/* Organization Onboarding (Protected) */}
+      <Route path="/onboarding" element={
+        <ProtectedRoute><Onboarding /></ProtectedRoute>
+      } />
+      <Route path="/create-organization" element={
+        <ProtectedRoute><CreateOrganization /></ProtectedRoute>
+      } />
+      <Route path="/org/settings" element={
+        <ProtectedRoute><Layout><OrganizationSettings /></Layout></ProtectedRoute>
+      } />
+
       {/* Public Premium Content Unlock (no auth required) */}
       <Route path="/unlock/:linkId" element={<PremiumContentUnlock />} />
+
+      {/* Organization Invitation Accept (public — invitee may not be logged in) */}
+      <Route path="/invite/:token" element={<AcceptInvite />} />
 
       {/* Public Help & Support (no auth required) */}
       <Route path="/help" element={<HelpSupport />} />
