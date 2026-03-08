@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import apiService from '../services/api';
 import {
     TrendingUp,
     Flame,
@@ -113,72 +114,57 @@ export default function ProductivityStats() {
         try {
             setRefreshing(true);
 
-            // TODO: Replace with actual API calls when backend is connected
-            // For now, use mock data for demonstration
-            await new Promise(resolve => setTimeout(resolve, 500)); // Simulate loading
+            // Fetch summary (score, streak, achievements, breakdown, comparison)
+            const summaryRes = await apiService.request({ method: 'GET', url: '/productivity/summary' });
+            const summary = summaryRes.data;
 
-            // Mock data for demo
-            setDailyScore({
-                date: new Date().toISOString().split('T')[0],
-                score: 78,
-                breakdown: { task_completed: 20, email_processed: 15, meeting_attended: 12, focus_time: 18 },
-                activities_count: 45
-            });
-            setStreak({
-                current_streak: 5,
-                longest_streak: 12,
-                last_active_date: new Date().toISOString().split('T')[0],
-                streak_type: 'daily',
-                multiplier: 1.1
-            });
-            setAchievements([
-                { id: 'streak_3', title: 'On Fire! 🔥', description: '3-day productivity streak', earned: true, icon: '🔥' },
-                { id: 'tasks_10', title: 'Task Crusher', description: 'Completed 10 tasks', earned: true, icon: '✅' },
-                { id: 'inbox_zero_1', title: 'Inbox Zero Hero', description: 'Achieved Inbox Zero', earned: true, icon: '📭' },
-                { id: 'focus_5', title: 'Deep Worker', description: '5 hours of focus time', earned: true, icon: '🎯' },
-            ]);
-            setComparison({
-                this_week: { average_score: 78, total_score: 546, daily_scores: [] },
-                last_week: { average_score: 72, total_score: 504, daily_scores: [] },
-                change_percentage: 8.3,
-                trend: 'up'
-            });
-            setTrends(generateMockTrends());
-            setBreakdown({
-                period: selectedPeriod,
-                total_activities: 156,
-                by_type: { task_completed: 45, email_processed: 67, meeting_attended: 12, focus_time: 8, message_sent: 24 },
-                peak_hour: 10,
-                peak_day: 'Tuesday',
-                trend: 'up'
-            });
+            if (summary.today_score) {
+                setDailyScore(summary.today_score);
+            }
+            if (summary.streak) {
+                setStreak(summary.streak);
+            }
+            if (summary.recent_achievements) {
+                setAchievements(summary.recent_achievements);
+            }
+            if (summary.week_comparison) {
+                setComparison(summary.week_comparison);
+            }
+            if (summary.weekly_breakdown) {
+                setBreakdown(summary.weekly_breakdown);
+            }
+
+            // Fetch 30-day trends separately (not included in summary)
+            const trendsRes = await apiService.request({ method: 'GET', url: '/productivity/trends', params: { days: 30 } });
+            if (trendsRes.data?.scores) {
+                setTrends(trendsRes.data.scores);
+            }
         } catch (error) {
             console.error('Error fetching productivity data:', error);
         } finally {
             setLoading(false);
             setRefreshing(false);
         }
-    }, [selectedPeriod]);
+    }, []);
 
     useEffect(() => {
         fetchData();
     }, [fetchData]);
 
-    const generateMockTrends = (): DailyScore[] => {
-        const trends: DailyScore[] = [];
-        const today = new Date();
-        for (let i = 29; i >= 0; i--) {
-            const date = new Date(today);
-            date.setDate(date.getDate() - i);
-            trends.push({
-                date: date.toISOString().split('T')[0],
-                score: Math.floor(60 + Math.random() * 35),
-                breakdown: {},
-                activities_count: Math.floor(20 + Math.random() * 40)
-            });
-        }
-        return trends;
-    };
+    // Re-fetch breakdown when period changes
+    useEffect(() => {
+        const fetchBreakdown = async () => {
+            try {
+                const res = await apiService.request({ method: 'GET', url: `/productivity/breakdown/${selectedPeriod}` });
+                if (res.data) {
+                    setBreakdown(res.data);
+                }
+            } catch (error) {
+                console.error('Error fetching breakdown:', error);
+            }
+        };
+        fetchBreakdown();
+    }, [selectedPeriod]);
 
     const getScoreGradient = (score: number) => {
         if (score >= 80) return 'from-emerald-500 to-teal-400';
