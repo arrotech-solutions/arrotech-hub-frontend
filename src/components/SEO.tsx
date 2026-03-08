@@ -36,20 +36,33 @@ const SEO: React.FC<SEOProps> = ({
     ? title
     : `${title} | Arrotech Hub`;
 
-  // Default schema: SoftwareApplication (used when no page-specific schema is provided)
+  // Default schema: WebSite and Organization (Combined for SEO)
   const defaultSchema = {
     "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    "name": name,
-    "applicationCategory": "BusinessApplication",
-    "operatingSystem": "Web",
-    "description": description,
-    "url": BASE_URL,
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD"
-    }
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": `${BASE_URL}/#website`,
+        "url": `${BASE_URL}/`,
+        "name": name
+      },
+      {
+        "@type": "Organization",
+        "@id": "https://arrotechsolutions.com/#organization",
+        "name": "Arrotech Solutions",
+        "url": "https://arrotechsolutions.com",
+        "logo": `${BASE_URL}/favicon.png`,
+        "sameAs": [
+          "https://twitter.com/arrotech",
+          "https://linkedin.com/company/arrotech-solutions"
+        ],
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "telephone": "+254-700-000-000",
+          "contactType": "customer service"
+        }
+      }
+    ]
   };
 
   return (
