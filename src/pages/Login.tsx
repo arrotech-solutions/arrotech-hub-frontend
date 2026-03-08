@@ -31,7 +31,7 @@ interface LoginFormData {
 }
 
 const Login: React.FC = () => {
-  const { login, loginWithGoogle, loginWithMicrosoft } = useAuth();
+  const { login, loginWithGoogle, loginWithMicrosoft, verifyTOTP, verifyBackupCode, sendEmailOTP, verifyEmailOTP } = useAuth();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -50,9 +50,11 @@ const Login: React.FC = () => {
   // 2FA State
   const [requires2FA, setRequires2FA] = useState(false);
   const [mfaToken, setMfaToken] = useState('');
-  const [mfaType, setMfaType] = useState<'totp' | 'backup'>('totp');
+  const [mfaType, setMfaType] = useState<'totp' | 'backup' | 'email'>('totp');
   const [mfaCode, setMfaCode] = useState('');
-  const [mfaOptions, setMfaOptions] = useState({ has_totp: false, passkeys_count: 0 });
+  const [mfaOptions, setMfaOptions] = useState({ has_totp: false, has_email_2fa: false, default_2fa_method: 'totp', passkeys_count: 0 });
+  const [emailOtpSent, setEmailOtpSent] = useState(false);
+  const [emailOtpMessage, setEmailOtpMessage] = useState('');
 
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
@@ -62,13 +64,34 @@ const Login: React.FC = () => {
       if (result.requires_2fa) {
         setRequires2FA(true);
         setMfaToken(result.data['2fa_token']);
-        setMfaOptions({
+        const opts = {
           has_totp: result.data.has_totp,
+          has_email_2fa: result.data.has_email_2fa,
+          default_2fa_method: result.data.default_2fa_method || 'totp',
           passkeys_count: result.data.passkeys_count
-        });
+        };
+        setMfaOptions(opts);
+
+        // Set the default MFA type and auto-trigger email send if email is default
+        const defaultMethod = opts.default_2fa_method as 'totp' | 'email';
+        if (defaultMethod === 'email' && opts.has_email_2fa) {
+          setMfaType('email');
+          // Auto-send email OTP
+          try {
+            const sendResult = await sendEmailOTP(result.data['2fa_token']);
+            setEmailOtpSent(true);
+            setEmailOtpMessage(sendResult.message || 'Code sent to your email.');
+          } catch {
+            setEmailOtpMessage('Failed to send code. Try again.');
+          }
+        } else if (opts.has_totp) {
+          setMfaType('totp');
+        } else if (opts.has_email_2fa) {
+          setMfaType('email');
+        }
         return;
       }
-      navigate('/unified');
+      navigate(result.is_new_user ? '/onboarding' : '/unified');
     } catch (error: any) {
       // Handle specific access errors
       const errorMessage = error.response?.data?.detail || 'Login failed. Please try again.';
@@ -83,11 +106,10 @@ const Login: React.FC = () => {
     setIsLoading(true);
     setFormError(null);
     try {
-      const { verifyTOTP, verifyBackupCode } = useAuth(); // We need to export/use these correctly
-
-      // Local functions imported from context
       if (mfaType === 'totp') {
         await verifyTOTP(mfaToken, mfaCode);
+      } else if (mfaType === 'email') {
+        await verifyEmailOTP(mfaToken, mfaCode);
       } else {
         await verifyBackupCode(mfaToken, mfaCode);
       }
@@ -107,8 +129,8 @@ const Login: React.FC = () => {
     setIsOAuthLoading(true);
     setOAuthProvider('Google');
     try {
-      await loginWithGoogle(response.credential);
-      navigate('/unified');
+      const result = await loginWithGoogle(response.credential);
+      navigate(result?.is_new_user ? '/onboarding' : '/unified');
     } catch (error: any) {
       const errorMessage = error.response?.data?.detail || 'Google login failed. Please try again.';
       setFormError(errorMessage);
@@ -203,8 +225,8 @@ const Login: React.FC = () => {
             if (accessToken) {
               setIsOAuthLoading(true);
               setOAuthProvider('Microsoft');
-              await loginWithMicrosoft(accessToken);
-              navigate('/unified');
+              const result = await loginWithMicrosoft(accessToken);
+              navigate(result?.is_new_user ? '/onboarding' : '/unified');
             } else {
               setFormError('Microsoft login failed. No access token received.');
               setIsOAuthLoading(false);
@@ -282,13 +304,18 @@ const Login: React.FC = () => {
 
             {requires2FA ? (
               <form className="space-y-4" onSubmit={handleMfaSubmit}>
-                <div className="text-center mb-4">
+                  <div className="text-center mb-4">
                   <div className="inline-flex items-center justify-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-full mb-3 text-blue-600 dark:text-blue-400 transition-colors">
-                    {mfaType === 'totp' ? <Lock className="w-6 h-6" /> : <Shield className="w-6 h-6" />}
+                    {mfaType === 'totp' ? <Lock className="w-6 h-6" /> : mfaType === 'email' ? <Mail className="w-6 h-6" /> : <Shield className="w-6 h-6" />}
                   </div>
                   <h3 className="text-sm font-bold text-gray-900 dark:text-white transition-colors">Two-Factor Authentication</h3>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 transition-colors">
-                    {mfaType === 'totp' ? 'Enter the 6-digit code from your authenticator app.' : 'Enter one of your 8-character backup codes.'}
+                    {mfaType === 'totp'
+                      ? 'Enter the 6-digit code from your authenticator app.'
+                      : mfaType === 'email'
+                      ? (emailOtpMessage || 'We sent a 6-digit code to your email.')
+                      : 'Enter one of your 8-character backup codes.'
+                    }
                   </p>
                 </div>
 
@@ -297,28 +324,87 @@ const Login: React.FC = () => {
                     <input
                       type="text"
                       className="w-full text-center tracking-[0.5em] text-lg py-2 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all font-mono placeholder-slate-300 dark:placeholder-slate-600"
-                      placeholder={mfaType === 'totp' ? "000000" : "ABCDEFGH"}
+                      placeholder={mfaType === 'backup' ? "ABCDEFGH" : "000000"}
                       value={mfaCode}
                       onChange={(e) => setMfaCode(e.target.value.toUpperCase().trim())}
-                      maxLength={mfaType === 'totp' ? 6 : 8}
+                      maxLength={mfaType === 'backup' ? 8 : 6}
                       required
                       autoFocus
                     />
                   </div>
                 </div>
 
-                <div className="flex justify-between items-center text-xs px-1">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMfaType(mfaType === 'totp' ? 'backup' : 'totp');
-                      setMfaCode('');
-                      setFormError(null);
-                    }}
-                    className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors"
-                  >
-                    {mfaType === 'totp' ? 'Use a backup code instead' : 'Use authenticator app'}
-                  </button>
+                <div className="flex flex-col items-center gap-2 text-xs px-1">
+                  {/* Try another way */}
+                  <div className="flex gap-3">
+                    {mfaType !== 'totp' && mfaOptions.has_totp && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMfaType('totp');
+                          setMfaCode('');
+                          setFormError(null);
+                        }}
+                        className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors"
+                      >
+                        Use authenticator app
+                      </button>
+                    )}
+                    {mfaType !== 'email' && mfaOptions.has_email_2fa && (
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          setMfaType('email');
+                          setMfaCode('');
+                          setFormError(null);
+                          if (!emailOtpSent) {
+                            try {
+                              const sendResult = await sendEmailOTP(mfaToken);
+                              setEmailOtpSent(true);
+                              setEmailOtpMessage(sendResult.message || 'Code sent to your email.');
+                            } catch {
+                              setEmailOtpMessage('Failed to send code.');
+                            }
+                          }
+                        }}
+                        className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors"
+                      >
+                        Use email code
+                      </button>
+                    )}
+                    {mfaType !== 'backup' && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMfaType('backup');
+                          setMfaCode('');
+                          setFormError(null);
+                        }}
+                        className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors"
+                      >
+                        Use backup code
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Resend for email method */}
+                  {mfaType === 'email' && emailOtpSent && (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        try {
+                          const sendResult = await sendEmailOTP(mfaToken);
+                          setEmailOtpMessage(sendResult.message || 'New code sent!');
+                        } catch {
+                          setEmailOtpMessage('Failed to resend. Try again.');
+                        }
+                      }}
+                      className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors"
+                    >
+                      Resend code
+                    </button>
+                  )}
+
                   <button
                     type="button"
                     onClick={() => {
@@ -326,6 +412,8 @@ const Login: React.FC = () => {
                       setMfaToken('');
                       setMfaCode('');
                       setFormError(null);
+                      setEmailOtpSent(false);
+                      setEmailOtpMessage('');
                     }}
                     className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors"
                   >

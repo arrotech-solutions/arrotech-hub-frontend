@@ -515,6 +515,29 @@ class ApiService {
     return response.data;
   }
 
+  // QuickBooks OAuth endpoints
+  async getQuickBooksAuthUrl(): Promise<{ auth_url: string; state: string }> {
+    const response = await this.api.get('/api/quickbooks/auth-url');
+    return response.data;
+  }
+
+  async getQuickBooksCallback(code: string, state: string): Promise<{ success: boolean; error?: string }> {
+    const response = await this.api.get(`/api/quickbooks/callback?code=${code}&state=${state}`);
+    return response.data;
+  }
+
+  // Airtable OAuth endpoints
+  async getAirtableAuthUrl(): Promise<{ auth_url: string; state: string }> {
+    const response = await this.api.get('/api/airtable/auth-url');
+    return response.data;
+  }
+
+  async getAirtableCallback(code: string, state: string): Promise<{ success: boolean; error?: string }> {
+    const response = await this.api.get(`/api/airtable/callback?code=${code}&state=${state}`);
+    return response.data;
+  }
+
+
   // WhatsApp OAuth endpoints
   async getWhatsAppAuthUrl(): Promise<{ url: string }> {
     const response = await this.api.get('/api/whatsapp/auth-url');
