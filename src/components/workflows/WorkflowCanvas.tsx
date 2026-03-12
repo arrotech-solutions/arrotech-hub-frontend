@@ -65,8 +65,15 @@ const nodeTypes = {
 };
 
 // Edge default style
-const EDGE_STYLE = { stroke: '#6366f1', strokeWidth: 2 };
-const EDGE_MARKER = { type: MarkerType.ArrowClosed as const, color: '#6366f1' };
+const EDGE_STYLE = { stroke: '#8b5cf6', strokeWidth: 2.5, filter: 'drop-shadow(0 0 3px rgba(139, 92, 246, 0.4))' };
+const EDGE_MARKER = { type: MarkerType.ArrowClosed as const, color: '#8b5cf6' };
+
+const defaultEdgeOptions = {
+    type: 'smoothstep',
+    animated: true,
+    style: EDGE_STYLE,
+    markerEnd: EDGE_MARKER,
+};
 
 // Category detection (matches EnhancedWorkflowCreator logic)
 function getToolCategory(toolName: string): string {
@@ -640,8 +647,16 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
             </div>
 
             {/* Main content */}
-            <div className="flex-1 flex overflow-hidden">
-                {/* Left: Tool Toolbar */}
+            <div className={`flex-1 relative overflow-hidden ${isDark ? 'bg-[#0f111a]' : 'bg-slate-50'}`}>
+                {/* Background ambient gradients */}
+                <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+                    <div className={`absolute -top-20 -left-20 w-96 h-96 ${isDark ? 'bg-purple-900/20' : 'bg-purple-300/20'} rounded-full blur-3xl opacity-50`}></div>
+                    <div className={`absolute bottom-10 right-10 w-80 h-80 ${isDark ? 'bg-blue-900/20' : 'bg-blue-300/20'} rounded-full blur-3xl opacity-50`}></div>
+                </div>
+
+                {/* Left: Floating Tool Toolbar */}
+                <div className="absolute top-4 bottom-4 left-4 z-10 pointer-events-none">
+                    <div className="pointer-events-auto h-full shadow-2xl rounded-2xl overflow-hidden shadow-black/10 ring-1 ring-black/5 dark:ring-white/10 transition-all">
                 <CanvasToolbar
                     tools={availableTools}
                     onAddTool={handleAddTool}
@@ -649,9 +664,11 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
                     onToggleCollapse={() => setToolbarCollapsed(!toolbarCollapsed)}
                     isDark={isDark}
                 />
+                    </div>
+                </div>
 
-                {/* Center: Canvas */}
-                <div className="flex-1 relative">
+                {/* Center: Infinite Canvas */}
+                <div className="absolute inset-0">
                     {loadingTools && (
                         <div className={`absolute inset-0 backdrop-blur-sm z-20 flex items-center justify-center ${isDark ? 'bg-gray-900/80' : 'bg-white/80'}`}>
                             <div className="text-center">
@@ -671,6 +688,8 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
                         onNodeClick={onNodeClick}
                         onPaneClick={() => { setSelectedNode(null); setShowMetaPanel(false); }}
                         nodeTypes={nodeTypes}
+                        defaultEdgeOptions={defaultEdgeOptions}
+                        connectionLineStyle={EDGE_STYLE}
                         fitView
                         minZoom={0.3}
                         maxZoom={2}
@@ -678,37 +697,45 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
                         proOptions={{ hideAttribution: true }}
                         className="workflow-canvas"
                     >
-                        <Background variant={BackgroundVariant.Dots} gap={20} size={1} color={isDark ? '#374151' : '#e5e7eb'} />
+                        <Background variant={BackgroundVariant.Cross} gap={24} size={2} color={isDark ? '#334155' : '#cbd5e1'} className="opacity-50" />
                         <Controls
                             showZoom={true}
                             showFitView={true}
                             showInteractive={false}
-                            className={isDark ? '!bg-gray-800 !rounded-xl !border !border-gray-700 !shadow-lg [&>button]:!bg-gray-800 [&>button]:!border-gray-700 [&>button]:!fill-gray-300 [&>button:hover]:!bg-gray-700' : '!bg-white !rounded-xl !border !border-gray-200 !shadow-lg'}
+                            className={isDark ? '!bg-gray-800/80 !backdrop-blur-md !rounded-2xl !border !border-gray-700 !shadow-xl [&>button]:!bg-transparent [&>button]:!border-gray-700/50 [&>button]:!fill-gray-300 [&>button:hover]:!bg-gray-700/50' : '!bg-white/80 !backdrop-blur-md !rounded-2xl !border !border-gray-200 !shadow-xl'}
+                            style={{ display: 'flex', flexDirection: 'column', gap: '4px', padding: '4px' }}
                         />
                     </ReactFlow>
                 </div>
 
-                {/* Right: Config Panel or Meta Panel */}
+                </div>
+
+                {/* Right: Floating Config or Meta Panel */}
+                <div className="absolute top-4 bottom-4 right-4 z-10 pointer-events-none flex justify-end">
+                    
                 {selectedNode && selectedNodeData && (
-                    <NodeConfigPanel
-                        nodeId={selectedNode}
-                        toolName={selectedNodeData.data.toolName}
-                        tool={selectedNodeData.tool}
-                        parameters={selectedNodeData.data.parameters || {}}
-                        description={selectedNodeData.data.description}
-                        onUpdateParams={handleUpdateParams}
-                        onUpdateDescription={handleUpdateDescription}
-                        onUpdateRetry={handleUpdateRetry}
-                        onUpdateTimeout={handleUpdateTimeout}
-                        onDelete={handleDeleteNode}
-                        onClose={() => setSelectedNode(null)}
-                        isDark={isDark}
-                    />
+                    <div className="pointer-events-auto h-full shadow-2xl rounded-2xl overflow-hidden shadow-black/10 ring-1 ring-black/5 dark:ring-white/10 transition-all transform origin-right animate-slide-in-right">
+                        <NodeConfigPanel
+                            nodeId={selectedNode}
+                            toolName={selectedNodeData.data.toolName}
+                            tool={selectedNodeData.tool}
+                            parameters={selectedNodeData.data.parameters || {}}
+                            description={selectedNodeData.data.description}
+                            onUpdateParams={handleUpdateParams}
+                            onUpdateDescription={handleUpdateDescription}
+                            onUpdateRetry={handleUpdateRetry}
+                            onUpdateTimeout={handleUpdateTimeout}
+                            onDelete={handleDeleteNode}
+                            onClose={() => setSelectedNode(null)}
+                            isDark={isDark}
+                        />
+                    </div>
                 )}
 
                 {/* Workflow Details meta panel */}
                 {showMetaPanel && !selectedNode && (
-                    <div className={`w-80 border-l flex flex-col h-full shadow-xl ${isDark ? 'bg-gray-800 border-gray-700 shadow-black/20' : 'bg-white border-gray-200 shadow-gray-200/20'}`}>
+                    <div className="pointer-events-auto h-full shadow-2xl rounded-2xl overflow-hidden shadow-black/10 ring-1 ring-black/5 dark:ring-white/10 transition-all transform origin-right animate-slide-in-right">
+                    <div className={`w-[340px] flex flex-col h-full backdrop-blur-xl ${isDark ? 'bg-gray-800/95 border-gray-700 drop-shadow-2xl' : 'bg-white/95 drop-shadow-2xl'}`}>
                         <div className={`px-5 py-4 border-b ${isDark ? 'border-gray-700 bg-gradient-to-r from-gray-800 to-gray-800' : 'border-gray-100 bg-gradient-to-r from-gray-50 to-white'}`}>
                             <h3 className={`text-sm font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Workflow Details</h3>
                             <p className={`text-[10px] mt-0.5 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>Configure workflow metadata</p>
@@ -771,6 +798,42 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
                                 </div>
                             )}
 
+                            {triggerType === 'event' && (
+                                <div className="space-y-3">
+                                    <div>
+                                        <label className={`block text-xs font-bold uppercase tracking-wider mb-1.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Platform *</label>
+                                        <select
+                                            value={triggerConfig.platform || ''}
+                                            onChange={e => setTriggerConfig({ ...triggerConfig, platform: e.target.value, trigger: '' })}
+                                            className={`w-full px-3 py-2 text-sm border rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 ${isDark ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-200'}`}
+                                        >
+                                            <option value="">Select Platform</option>
+                                            <option value="zoho">Zoho Desk</option>
+                                            <option value="whatsapp">WhatsApp</option>
+                                            <option value="slack">Slack</option>
+                                        </select>
+                                    </div>
+                                    {triggerConfig.platform === 'zoho' && (
+                                        <div>
+                                            <label className={`block text-xs font-bold uppercase tracking-wider mb-1.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Zoho Event *</label>
+                                            <select
+                                                value={triggerConfig.trigger || ''}
+                                                onChange={e => setTriggerConfig({ ...triggerConfig, trigger: e.target.value })}
+                                                className={`w-full px-3 py-2 text-sm border rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 ${isDark ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-200'}`}
+                                            >
+                                                <option value="">Select Event</option>
+                                                <option value="Ticket Created">Ticket Created (Auto-resolve start)</option>
+                                                <option value="Ticket Status Updated">Ticket Status Updated (KB Draft trigger)</option>
+                                                <option value="New Contact">New Contact Created</option>
+                                            </select>
+                                            <p className={`text-[10px] mt-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                                                Zoho will automatically send an HTTP POST to Arrotech's Webhook URL whenever this event occurs.
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
                                     <label className={`block text-xs font-bold uppercase tracking-wider mb-1.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Category</label>
@@ -793,6 +856,7 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
                                     />
                                 </div>
                             </div>
+                        </div>
                         </div>
                     </div>
                 )}

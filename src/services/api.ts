@@ -537,6 +537,17 @@ class ApiService {
     return response.data;
   }
 
+  // Zoho OAuth endpoints
+  async getZohoAuthUrl(): Promise<{ auth_url: string; state: string }> {
+    const response = await this.api.get('/api/zoho/auth-url');
+    return response.data;
+  }
+
+  async getZohoCallback(code: string, state: string): Promise<{ success: boolean; error?: string }> {
+    const response = await this.api.get(`/api/zoho/callback?code=${code}&state=${state}`);
+    return response.data;
+  }
+
 
   // WhatsApp OAuth endpoints
   async getWhatsAppAuthUrl(): Promise<{ url: string }> {
@@ -2971,6 +2982,19 @@ class ApiService {
 
   async seedBlogPosts(): Promise<any> {
     const response = await this.api.post('/api/blog/seed');
+    return response.data;
+  }
+
+  // ── Zoho Integration ──────────────────────────────────────
+  async getZohoAuthUrl(): Promise<{ success: boolean; auth_url: string }> {
+    const response = await this.api.get('/api/zoho/auth-url');
+    return response.data;
+  }
+
+  async getZohoCallback(code: string, state: string): Promise<any> {
+    const response = await this.api.get('/api/zoho/callback', {
+      params: { code, state }
+    });
     return response.data;
   }
 
