@@ -66,7 +66,7 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
             return (
                 <div className="relative">
                     <select
-                        className={`w-full px-3 py-2 text-sm border rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 appearance-none transition-all ${isDark ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-200'}`}
+                        className={`w-full px-3 py-2.5 text-sm rounded-xl focus:ring-2 focus:ring-blue-500/50 appearance-none outline-none transition-all ${isDark ? 'bg-black/20 border border-white/10 text-white focus:bg-black/40' : 'bg-black/5 border border-black/5 focus:bg-white'}`}
                         value={localParams[name] || ''}
                         onChange={e => handleParamChange(name, e.target.value)}
                     >
@@ -101,7 +101,7 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
                     <input
                         type="text"
                         placeholder={`Enter ${name} or {{variable}}`}
-                        className={`w-full px-3 py-2 text-sm border rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all ${isDark ? 'bg-gray-700 border-gray-600 text-white placeholder:text-gray-500' : 'border-gray-200'}`}
+                        className={`w-full px-3 py-2.5 text-sm rounded-xl focus:ring-2 focus:ring-blue-500/50 outline-none transition-all ${isDark ? 'bg-black/20 border border-white/10 text-white placeholder:text-gray-500 focus:bg-black/40' : 'bg-black/5 border border-black/5 focus:bg-white placeholder:text-gray-500'}`}
                         value={localParams[name] ?? ''}
                         onChange={e => {
                             const val = e.target.value;
@@ -119,7 +119,7 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
                     <input
                         type="text"
                         placeholder={`Enter ${name}`}
-                        className={`w-full px-3 py-2 text-sm border rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all ${isDark ? 'bg-gray-700 border-gray-600 text-white placeholder:text-gray-500' : 'border-gray-200'}`}
+                        className={`w-full px-3 py-2.5 text-sm rounded-xl focus:ring-2 focus:ring-blue-500/50 outline-none transition-all ${isDark ? 'bg-black/20 border border-white/10 text-white placeholder:text-gray-500 focus:bg-black/40' : 'bg-black/5 border border-black/5 focus:bg-white placeholder:text-gray-500'}`}
                         value={localParams[name] || ''}
                         onChange={e => handleParamChange(name, e.target.value)}
                     />
@@ -128,16 +128,16 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
     };
 
     return (
-        <div className={`w-80 border-l flex flex-col h-full shadow-xl animate-slide-in-right ${isDark ? 'bg-gray-800 border-gray-700 shadow-black/20' : 'bg-white border-gray-200 shadow-gray-200/20'}`}>
+        <div className={`w-[340px] flex flex-col h-full ${isDark ? 'bg-gray-900/60 backdrop-blur-2xl' : 'bg-white/60 backdrop-blur-2xl'}`}>
             {/* Header */}
-            <div className={`px-5 py-4 border-b ${isDark ? 'border-gray-700 bg-gradient-to-r from-gray-800 to-gray-800' : 'border-gray-100 bg-gradient-to-r from-gray-50 to-white'}`}>
+            <div className={`px-5 py-5 border-b ${isDark ? 'border-white/5 bg-gray-900/40' : 'border-black/5 bg-white/40'}`}>
                 <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                         <Settings className="w-4 h-4 text-blue-600" />
                         <h3 className={`text-sm font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Configure Node</h3>
                     </div>
-                    <button onClick={onClose} className={`p-1.5 rounded-lg transition-colors ${isDark ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}>
-                        <X className={`w-4 h-4 ${isDark ? 'text-gray-500' : 'text-gray-400'}`} />
+                    <button onClick={onClose} className={`p-1.5 rounded-full transition-colors ${isDark ? 'hover:bg-white/10' : 'hover:bg-black/5'}`}>
+                        <X className={`w-4 h-4 ${isDark ? 'text-gray-400' : 'text-gray-500'}`} />
                     </button>
                 </div>
                 <p className={`text-xs mt-1 font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
@@ -156,7 +156,7 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
                         type="text"
                         value={localDescription}
                         onChange={e => { setLocalDescription(e.target.value); setIsDirty(true); }}
-                        className={`w-full px-3 py-2 text-sm border rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all ${isDark ? 'bg-gray-700 border-gray-600 text-white placeholder:text-gray-500' : 'border-gray-200'}`}
+                        className={`w-full px-3 py-2.5 text-sm rounded-xl focus:ring-2 focus:ring-blue-500/50 outline-none transition-all ${isDark ? 'bg-black/20 border border-white/10 text-white placeholder:text-gray-500 focus:bg-black/40' : 'bg-black/5 border border-black/5 focus:bg-white placeholder:text-gray-500'}`}
                         placeholder="What does this step do?"
                     />
                 </div>
@@ -206,7 +206,7 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
                     </button>
 
                     {showAdvanced && (
-                        <div className={`mt-3 space-y-3 p-3 rounded-xl border ${isDark ? 'bg-gray-900/50 border-gray-700' : 'bg-gray-50 border-gray-100'}`}>
+                        <div className={`mt-3 space-y-3 p-4 rounded-xl border ${isDark ? 'bg-black/20 border-white/10' : 'bg-black/5 border-transparent'}`}>
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
                                     <label className={`block text-[10px] font-bold uppercase mb-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
@@ -219,7 +219,7 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
                                         max="10"
                                         value={localRetry.max_retries}
                                         onChange={e => { setLocalRetry({ ...localRetry, max_retries: parseInt(e.target.value) || 0 }); setIsDirty(true); }}
-                                        className={`w-full px-2 py-1.5 text-xs border rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 ${isDark ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-200'}`}
+                                        className={`w-full px-2 py-2 text-sm rounded-lg focus:ring-2 focus:ring-blue-500/50 outline-none ${isDark ? 'bg-black/20 border border-white/10 text-white focus:bg-black/40' : 'bg-white border border-black/5'}`}
                                     />
                                 </div>
                                 <div>
@@ -231,7 +231,7 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
                                         min="0"
                                         value={localRetry.retry_delay}
                                         onChange={e => { setLocalRetry({ ...localRetry, retry_delay: parseInt(e.target.value) || 0 }); setIsDirty(true); }}
-                                        className={`w-full px-2 py-1.5 text-xs border rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 ${isDark ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-200'}`}
+                                        className={`w-full px-2 py-2 text-sm rounded-lg focus:ring-2 focus:ring-blue-500/50 outline-none ${isDark ? 'bg-black/20 border border-white/10 text-white focus:bg-black/40' : 'bg-white border border-black/5'}`}
                                     />
                                 </div>
                             </div>
@@ -245,7 +245,7 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
                                     min="1"
                                     value={localTimeout}
                                     onChange={e => { setLocalTimeout(parseInt(e.target.value) || 60); setIsDirty(true); }}
-                                    className={`w-full px-2 py-1.5 text-xs border rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 ${isDark ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-200'}`}
+                                    className={`w-full px-2 py-2 text-sm rounded-lg focus:ring-2 focus:ring-blue-500/50 outline-none ${isDark ? 'bg-black/20 border border-white/10 text-white focus:bg-black/40' : 'bg-white border border-black/5'}`}
                                 />
                             </div>
                         </div>
@@ -254,7 +254,7 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
             </div>
 
             {/* Footer */}
-            <div className={`px-5 py-4 border-t space-y-2 ${isDark ? 'border-gray-700 bg-gray-800/50' : 'border-gray-100 bg-gray-50/50'}`}>
+            <div className={`px-5 py-5 border-t space-y-2.5 ${isDark ? 'border-white/5 bg-gray-900/40' : 'border-black/5 bg-white/40'}`}>
                 <button
                     onClick={handleSave}
                     disabled={!isDirty}
@@ -268,7 +268,7 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
                 </button>
                 <button
                     onClick={() => onDelete(nodeId)}
-                    className={`w-full flex items-center justify-center space-x-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${isDark ? 'text-red-400 hover:bg-red-900/30 border border-red-800' : 'text-red-600 hover:bg-red-50 border border-red-200'}`}
+                    className={`w-full flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${isDark ? 'text-red-400 bg-red-900/10 hover:bg-red-900/30' : 'text-red-600 bg-red-50 hover:bg-red-100'}`}
                 >
                     <Trash2 className="w-3.5 h-3.5" />
                     <span>Remove Step</span>
