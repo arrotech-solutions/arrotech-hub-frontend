@@ -487,7 +487,7 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
             return (
                 <div className="relative">
                     <select
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm appearance-none bg-white"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm appearance-none bg-white"
                         value={stepParams[name] || ''}
                         onChange={(e) => setStepParams({ ...stepParams, [name]: e.target.value })}
                         required={isRequired}
@@ -512,7 +512,7 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                     <input
                         type="text"
                         placeholder={`Enter ${name}`}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
                         value={stepParams[name] || ''}
                         onChange={(e) => setStepParams({ ...stepParams, [name]: e.target.value })}
                         required={isRequired}
@@ -525,7 +525,7 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                     <input
                         type="text"
                         placeholder={`Enter ${name} or {{variable}}`}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
                         value={stepParams[name] || ''}
                         onChange={(e) => {
                             const val = e.target.value;
@@ -543,7 +543,7 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
             case 'boolean':
                 return (
                     <select
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
                         value={stepParams[name]?.toString() || 'false'}
                         onChange={(e) => setStepParams({ ...stepParams, [name]: e.target.value === 'true' })}
                     >
@@ -557,7 +557,7 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                     <input
                         type="text"
                         placeholder={`Enter ${name}`}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
                         value={stepParams[name] || ''}
                         onChange={(e) => setStepParams({ ...stepParams, [name]: e.target.value })}
                         required={isRequired}
@@ -577,7 +577,7 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
             />
 
             {/* Modal */}
-            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden">
+            <div className="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl dark:shadow-slate-900/50 border border-transparent dark:border-slate-700 w-full max-w-6xl max-h-[90vh] overflow-hidden">
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-purple-600 to-blue-600">
                     <div className="flex items-center space-x-3">
@@ -618,24 +618,24 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                 </div>
 
                 {/* Step Indicators */}
-                <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                <div className="px-6 py-4 bg-gray-50 dark:bg-slate-800/50 border-b border-gray-200 dark:border-slate-700">
                     <div className="flex items-center justify-center space-x-4">
                         {steps.map((step, index) => (
                             <div key={step} className="flex items-center">
-                                <div className={`flex items-center space-x-2 ${index <= currentStep ? 'text-purple-600' : 'text-gray-400'
+                                <div className={`flex items-center space-x-2 ${index <= currentStep ? 'text-purple-600 dark:text-purple-400' : 'text-gray-400 dark:text-slate-500'
                                     }`}>
                                     <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${index < currentStep
                                         ? 'bg-purple-600 text-white'
                                         : index === currentStep
-                                            ? 'bg-purple-100 text-purple-600 border-2 border-purple-600'
-                                            : 'bg-gray-100 text-gray-400'
+                                            ? 'bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 border-2 border-purple-600 dark:border-purple-500'
+                                            : 'bg-gray-100 dark:bg-slate-800 text-gray-400 dark:text-slate-500'
                                         }`}>
                                         {index < currentStep ? <CheckCircle className="w-4 h-4" /> : index + 1}
                                     </div>
                                     <span className="text-sm font-medium hidden sm:block">{step}</span>
                                 </div>
                                 {index < steps.length - 1 && (
-                                    <div className={`w-12 h-0.5 mx-2 ${index < currentStep ? 'bg-purple-600' : 'bg-gray-200'
+                                    <div className={`w-12 h-0.5 mx-2 ${index < currentStep ? 'bg-purple-600' : 'bg-gray-200 dark:bg-slate-700'
                                         }`} />
                                 )}
                             </div>
@@ -659,20 +659,20 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                     {currentStep === 0 && (
                         <div className="space-y-6">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
                                     Workflow Name *
                                 </label>
                                 <input
                                     type="text"
                                     value={workflowName}
                                     onChange={(e) => setWorkflowName(e.target.value)}
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                    className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                                     placeholder="My Awesome Workflow"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
                                     Description
                                 </label>
                                 <textarea
@@ -685,7 +685,7 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-3">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-3">
                                     Trigger Type
                                 </label>
                                 <div className="grid grid-cols-2 gap-3">
@@ -699,17 +699,17 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                                             key={trigger.value}
                                             onClick={() => setTriggerType(trigger.value as TriggerType)}
                                             className={`flex items-center space-x-3 p-4 border rounded-lg transition-all ${triggerType === trigger.value
-                                                ? 'border-purple-500 bg-purple-50'
-                                                : 'border-gray-200 hover:border-gray-300'
+                                                ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30 dark:border-purple-400'
+                                                : 'border-gray-200 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600'
                                                 }`}
                                         >
-                                            <div className={`p-2 rounded-lg ${triggerType === trigger.value ? 'bg-purple-100' : 'bg-gray-100'
+                                            <div className={`p-2 rounded-lg ${triggerType === trigger.value ? 'bg-purple-100 dark:bg-purple-500/20' : 'bg-gray-100 dark:bg-slate-800'
                                                 }`}>
                                                 {getTriggerIcon(trigger.value as TriggerType)}
                                             </div>
                                             <div className="text-left">
-                                                <p className="font-medium text-gray-900">{trigger.label}</p>
-                                                <p className="text-xs text-gray-500">{trigger.desc}</p>
+                                                <p className="font-medium text-gray-900 dark:text-white">{trigger.label}</p>
+                                                <p className="text-xs text-gray-500 dark:text-slate-400">{trigger.desc}</p>
                                             </div>
                                         </button>
                                     ))}
@@ -718,60 +718,82 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
 
                             {/* Trigger Configuration */}
                             {triggerType !== 'manual' && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h4 className="text-sm font-medium text-gray-900 border-b border-gray-200 pb-2 mb-2">
+                                <div className="bg-gray-50 dark:bg-slate-800/50 p-4 rounded-lg border border-gray-200 dark:border-slate-700 space-y-4">
+                                    <h4 className="text-sm font-medium text-gray-900 dark:text-white border-b border-gray-200 dark:border-slate-700 pb-2 mb-2">
                                         {triggerType.charAt(0).toUpperCase() + triggerType.slice(1)} Configuration
                                     </h4>
 
                                     {triggerType === 'scheduled' && (
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
                                                 Cron Expression *
                                             </label>
                                             <input
                                                 type="text"
                                                 value={triggerConfig.cron_expression || ''}
                                                 onChange={(e) => setTriggerConfig({ ...triggerConfig, cron_expression: e.target.value })}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm font-mono"
+                                                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm font-mono"
                                                 placeholder="0 9 * * 1-5 (At 09:00 on every day-of-week from Monday through Friday)"
                                             />
-                                            <p className="text-xs text-gray-500 mt-1">
-                                                Use standard cron syntax. <a href="https://crontab.guru/" target="_blank" rel="noreferrer" className="text-purple-600 hover:underline">Need help?</a>
+                                            <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
+                                                Use standard cron syntax. <a href="https://crontab.guru/" target="_blank" rel="noreferrer" className="text-purple-600 dark:text-purple-400 hover:underline">Need help?</a>
                                             </p>
                                         </div>
                                     )}
 
                                     {triggerType === 'event' && (
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Event Type *
-                                            </label>
-                                            <input
-                                                type="text"
-                                                value={triggerConfig.event_type || ''}
-                                                onChange={(e) => setTriggerConfig({ ...triggerConfig, event_type: e.target.value })}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
-                                                placeholder="e.g., user.created, payment.received"
-                                            />
-                                            <p className="text-xs text-gray-500 mt-1">
-                                                The event name that will trigger this workflow.
-                                            </p>
+                                        <div className="space-y-3">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                                                    Platform *
+                                                </label>
+                                                <select
+                                                    value={triggerConfig.platform || ''}
+                                                    onChange={(e) => setTriggerConfig({ ...triggerConfig, platform: e.target.value, event_type: '' })}
+                                                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                                                >
+                                                    <option value="">Select Platform</option>
+                                                    <option value="zoho">Zoho Desk</option>
+                                                    <option value="whatsapp">WhatsApp</option>
+                                                    <option value="slack">Slack</option>
+                                                </select>
+                                            </div>
+                                            {triggerConfig.platform === 'zoho' && (
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                                                        Zoho Event *
+                                                    </label>
+                                                    <select
+                                                        value={triggerConfig.event_type || ''}
+                                                        onChange={(e) => setTriggerConfig({ ...triggerConfig, event_type: e.target.value })}
+                                                        className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                                                    >
+                                                        <option value="">Select Event</option>
+                                                        <option value="Ticket Created">Ticket Created (Auto-resolve start)</option>
+                                                        <option value="Ticket Status Updated">Ticket Status Updated (KB Draft trigger)</option>
+                                                        <option value="New Contact">New Contact Created</option>
+                                                    </select>
+                                                    <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
+                                                        Zoho will automatically send an HTTP POST to Arrotech's Webhook URL whenever this event occurs.
+                                                    </p>
+                                                </div>
+                                            )}
                                         </div>
                                     )}
 
                                     {triggerType === 'webhook' && (
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
                                                 Webhook Secret (Optional)
                                             </label>
                                             <input
                                                 type="text"
                                                 value={triggerConfig.webhook_secret || ''}
                                                 onChange={(e) => setTriggerConfig({ ...triggerConfig, webhook_secret: e.target.value })}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                                                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
                                                 placeholder="Enter a secret token to verify requests"
                                             />
-                                            <p className="text-xs text-gray-500 mt-1">
+                                            <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
                                                 If provided, the webhook must include this secret in the headers for verification.
                                             </p>
                                         </div>
@@ -781,26 +803,26 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
                                         Category
                                     </label>
                                     <input
                                         type="text"
                                         value={category}
                                         onChange={(e) => setCategory(e.target.value)}
-                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                        className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                                         placeholder="e.g., Marketing, Sales"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
                                         Tags (comma-separated)
                                     </label>
                                     <input
                                         type="text"
                                         value={tags}
                                         onChange={(e) => setTags(e.target.value)}
-                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                        className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                                         placeholder="automation, slack, reporting"
                                     />
                                 </div>
@@ -815,13 +837,13 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                             <div className="col-span-2 space-y-4">
                                 {/* Search */}
                                 <div className="relative">
-                                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-slate-500" />
                                     <input
                                         type="text"
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
                                         placeholder="Search tools..."
-                                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                                        className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
                                     />
                                 </div>
 
@@ -833,7 +855,7 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                                             onClick={() => setSelectedCategory(cat)}
                                             className={`flex items-center space-x-1 px-3 py-1.5 rounded-full text-sm font-medium transition-all ${selectedCategory === cat
                                                 ? 'bg-purple-600 text-white'
-                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                : 'bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-700'
                                                 }`}
                                         >
                                             {cat !== 'All' && getCategoryIcon(cat)}
@@ -850,10 +872,10 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                                     {loadingTools ? (
                                         <div className="text-center py-12">
                                             <Loader2 className="w-8 h-8 animate-spin text-purple-600 mx-auto mb-2" />
-                                            <p className="text-sm text-gray-500">Loading tools...</p>
+                                            <p className="text-sm text-gray-500 dark:text-slate-400">Loading tools...</p>
                                         </div>
                                     ) : filteredTools.length === 0 ? (
-                                        <div className="text-center py-12 text-gray-500">
+                                        <div className="text-center py-12 text-gray-500 dark:text-slate-400">
                                             <p className="text-sm">No tools found matching "{searchQuery}"</p>
                                             <p className="text-xs mt-1">Try a different search term</p>
                                         </div>
@@ -861,7 +883,7 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                                         filteredTools.map(tool => (
                                             <div
                                                 key={tool.name}
-                                                className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-all group"
+                                                className="flex items-center justify-between p-3 border border-gray-200 dark:border-slate-700 rounded-lg hover:border-purple-300 dark:hover:border-purple-500/50 hover:bg-purple-50 dark:hover:bg-purple-500/10 transition-all group"
                                             >
                                                 <div className="flex items-center space-x-3 flex-1">
                                                     <div className={`p-2 rounded-lg bg-${getCategoryColor(getToolCategory(tool.name))}-100`}>
@@ -869,14 +891,14 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                                                     </div>
                                                     <div className="flex-1">
                                                         <div className="flex items-center space-x-2">
-                                                            <span className="font-medium text-gray-900 text-sm">
+                                                            <span className="font-medium text-gray-900 dark:text-white text-sm">
                                                                 {tool.name.replace(/_/g, ' ')}
                                                             </span>
                                                             <span className={`px-2 py-0.5 rounded-full text-xs font-medium bg-${getCategoryColor(getToolCategory(tool.name))}-100 text-${getCategoryColor(getToolCategory(tool.name))}-700`}>
                                                                 {getToolCategory(tool.name)}
                                                             </span>
                                                         </div>
-                                                        <p className="text-xs text-gray-500 mt-1 line-clamp-1">
+                                                        <p className="text-xs text-gray-500 dark:text-slate-400 mt-1 line-clamp-1">
                                                             {tool.description || 'No description available'}
                                                         </p>
                                                     </div>
@@ -896,11 +918,11 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
 
                             {/* Right: Selected Steps */}
                             <div className="space-y-3">
-                                <h3 className="text-sm font-semibold text-gray-900">
+                                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
                                     Workflow Steps ({workflowSteps.length})
                                 </h3>
                                 {workflowSteps.length === 0 ? (
-                                    <div className="text-center py-12 text-gray-400">
+                                    <div className="text-center py-12 text-gray-400 dark:text-slate-500">
                                         <Zap className="w-8 h-8 mx-auto mb-2 opacity-50" />
                                         <p className="text-xs">No steps added yet</p>
                                         <p className="text-xs mt-1">Add tools from the left</p>
@@ -910,19 +932,19 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                                         {workflowSteps.map((step, index) => (
                                             <div
                                                 key={step.id}
-                                                className="flex items-center justify-between p-2 bg-white border border-gray-200 rounded-lg"
+                                                className="flex items-center justify-between p-2 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg"
                                             >
                                                 <div className="flex items-center space-x-2 flex-1">
                                                     <div className="w-6 h-6 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-xs font-medium">
                                                         {index + 1}
                                                     </div>
-                                                    <span className="text-xs font-medium text-gray-900 truncate">
+                                                    <span className="text-xs font-medium text-gray-900 dark:text-white truncate">
                                                         {step.tool_name.replace(/_/g, ' ')}
                                                     </span>
                                                 </div>
                                                 <button
                                                     onClick={() => handleRemoveStep(step.id)}
-                                                    className="p-1 text-gray-400 hover:text-red-600 transition-colors"
+                                                    className="p-1 text-gray-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 transition-colors"
                                                 >
                                                     <Trash2 className="w-3 h-3" />
                                                 </button>
@@ -937,15 +959,15 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                     {/* Step 2: Configure Steps */}
                     {currentStep === 2 && (
                         <div className="space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-900">
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                                 Configure Workflow Steps
                             </h3>
-                            <p className="text-sm text-gray-600">
+                            <p className="text-sm text-gray-600 dark:text-slate-400">
                                 Configure parameters for each step in your workflow
                             </p>
 
                             {workflowSteps.length === 0 ? (
-                                <div className="text-center py-12 text-gray-400">
+                                <div className="text-center py-12 text-gray-400 dark:text-slate-500">
                                     <Settings className="w-12 h-12 mx-auto mb-3 opacity-50" />
                                     <p className="text-sm">No steps to configure</p>
                                 </div>
@@ -959,7 +981,7 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                                         return (
                                             <div
                                                 key={step.id}
-                                                className={`border rounded-lg transition-all ${isEditing ? 'border-purple-300 bg-purple-50' : 'border-gray-200 bg-white'
+                                                className={`border rounded-lg transition-all ${isEditing ? 'border-purple-300 dark:border-purple-500/50 bg-purple-50 dark:bg-purple-900/10' : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800'
                                                     }`}
                                             >
                                                 <div
@@ -978,17 +1000,17 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                                                             {index + 1}
                                                         </div>
                                                         <div>
-                                                            <h4 className="font-medium text-gray-900">
+                                                            <h4 className="font-medium text-gray-900 dark:text-white">
                                                                 {step.tool_name.replace(/_/g, ' ')}
                                                             </h4>
-                                                            <p className="text-xs text-gray-500">
+                                                            <p className="text-xs text-gray-500 dark:text-slate-400">
                                                                 {hasParams ? (
                                                                     <span className="flex items-center space-x-1 text-green-600">
                                                                         <CheckCircle className="w-3 h-3" />
                                                                         <span>Configured</span>
                                                                     </span>
                                                                 ) : (
-                                                                    <span className="flex items-center space-x-1 text-gray-400">
+                                                                    <span className="flex items-center space-x-1 text-gray-400 dark:text-slate-500">
                                                                         <Settings className="w-3 h-3" />
                                                                         <span>Not configured</span>
                                                                     </span>
@@ -997,23 +1019,23 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                                                         </div>
                                                     </div>
                                                     {isEditing ? (
-                                                        <ChevronUp className="w-4 h-4 text-gray-500" />
+                                                        <ChevronUp className="w-4 h-4 text-gray-500 dark:text-slate-400" />
                                                     ) : (
-                                                        <ChevronDown className="w-4 h-4 text-gray-500" />
+                                                        <ChevronDown className="w-4 h-4 text-gray-500 dark:text-slate-400" />
                                                     )}
                                                 </div>
 
                                                 {isEditing && tool && tool.inputSchema?.properties && (
-                                                    <div className="px-4 pb-4 pt-2 border-t border-gray-100 space-y-3">
+                                                    <div className="px-4 pb-4 pt-2 border-t border-gray-100 dark:border-slate-700 space-y-3">
                                                         {Object.entries(tool.inputSchema.properties).map(([name, schema]: [string, any]) => (
                                                             <div key={name}>
-                                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
                                                                     {name.replace(/_/g, ' ')}
                                                                     {schema.required && <span className="text-red-500 ml-1">*</span>}
                                                                 </label>
                                                                 {renderInputField(name, schema, tool)}
                                                                 {schema.description && (
-                                                                    <p className="text-xs text-gray-500 mt-1">{schema.description}</p>
+                                                                    <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">{schema.description}</p>
                                                                 )}
                                                             </div>
                                                         ))}
@@ -1034,7 +1056,7 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                                                                     setEditingStep(null);
                                                                     setStepParams({});
                                                                 }}
-                                                                className="px-3 py-1.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm"
+                                                                className="px-3 py-1.5 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-300 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors text-sm"
                                                             >
                                                                 Cancel
                                                             </button>
@@ -1052,53 +1074,53 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                     {/* Step 3: Review */}
                     {currentStep === 3 && (
                         <div className="space-y-6">
-                            <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-6 border border-purple-200">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-4">Workflow Summary</h3>
+                            <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/10 dark:to-blue-900/10 rounded-lg p-6 border border-purple-200 dark:border-purple-500/30">
+                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Workflow Summary</h3>
                                 <div className="grid grid-cols-2 gap-4 text-sm">
                                     <div>
-                                        <span className="text-gray-600">Name:</span>
-                                        <span className="ml-2 font-medium text-gray-900">{workflowName}</span>
+                                        <span className="text-gray-600 dark:text-slate-400">Name:</span>
+                                        <span className="ml-2 font-medium text-gray-900 dark:text-white">{workflowName}</span>
                                     </div>
                                     <div>
-                                        <span className="text-gray-600">Trigger:</span>
-                                        <span className="ml-2 font-medium text-gray-900 capitalize">{triggerType}</span>
+                                        <span className="text-gray-600 dark:text-slate-400">Trigger:</span>
+                                        <span className="ml-2 font-medium text-gray-900 dark:text-white capitalize">{triggerType}</span>
                                     </div>
                                     <div>
-                                        <span className="text-gray-600">Steps:</span>
-                                        <span className="ml-2 font-medium text-gray-900">{workflowSteps.length}</span>
+                                        <span className="text-gray-600 dark:text-slate-400">Steps:</span>
+                                        <span className="ml-2 font-medium text-gray-900 dark:text-white">{workflowSteps.length}</span>
                                     </div>
                                     {category && (
                                         <div>
-                                            <span className="text-gray-600">Category:</span>
-                                            <span className="ml-2 font-medium text-gray-900">{category}</span>
+                                            <span className="text-gray-600 dark:text-slate-400">Category:</span>
+                                            <span className="ml-2 font-medium text-gray-900 dark:text-white">{category}</span>
                                         </div>
                                     )}
                                 </div>
                                 {description && (
                                     <div className="mt-4">
-                                        <span className="text-gray-600 text-sm">Description:</span>
-                                        <p className="mt-1 text-gray-900">{description}</p>
+                                        <span className="text-gray-600 dark:text-slate-400 text-sm">Description:</span>
+                                        <p className="mt-1 text-gray-900 dark:text-white">{description}</p>
                                     </div>
                                 )}
                             </div>
 
                             <div>
-                                <h4 className="text-sm font-semibold text-gray-900 mb-3">Workflow Steps</h4>
+                                <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Workflow Steps</h4>
                                 <div className="space-y-2">
                                     {workflowSteps.map((step, index) => (
-                                        <div key={step.id} className="flex items-center space-x-3 p-3 bg-white border border-gray-200 rounded-lg">
-                                            <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-sm font-medium flex-shrink-0">
+                                        <div key={step.id} className="flex items-center space-x-3 p-3 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg">
+                                            <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center text-sm font-medium flex-shrink-0">
                                                 {index + 1}
                                             </div>
                                             <div className="flex-1">
-                                                <span className="font-medium text-gray-900 text-sm">
+                                                <span className="font-medium text-gray-900 dark:text-white text-sm">
                                                     {step.tool_name.replace(/_/g, ' ')}
                                                 </span>
-                                                <p className="text-xs text-gray-500 mt-0.5">
+                                                <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
                                                     {Object.keys(step.tool_parameters).length} parameter(s) configured
                                                 </p>
                                             </div>
-                                            <ChevronRight className="w-4 h-4 text-gray-400" />
+                                            <ChevronRight className="w-4 h-4 text-gray-400 dark:text-slate-500" />
                                         </div>
                                     ))}
                                 </div>
@@ -1108,7 +1130,7 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                 </div>
 
                 {/* Footer */}
-                <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 bg-gray-50">
+                <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50">
                     <button
                         onClick={() => {
                             if (currentStep === 0) {
@@ -1117,7 +1139,7 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                                 setCurrentStep(currentStep - 1);
                             }
                         }}
-                        className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:text-gray-900 transition-colors"
+                        className="flex items-center space-x-2 px-4 py-2 text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white transition-colors"
                     >
                         <ArrowLeft className="w-4 h-4" />
                         <span>{currentStep === 0 ? 'Cancel' : 'Back'}</span>
