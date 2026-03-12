@@ -203,6 +203,8 @@ const Integrations: React.FC = () => {
         toast.success('HubSpot CRM connected successfully!');
       } else if (success === 'quickbooks_connected') {
         toast.success('QuickBooks connected successfully!');
+      } else if (success === 'zoho_connected') {
+        toast.success('Zoho Workspace connected successfully!');
       } else if (success === 'airtable_connected') {
         toast.success('Airtable connected successfully!');
       } else {
@@ -683,6 +685,30 @@ const Integrations: React.FC = () => {
           });
         } else {
           toast.error('Failed to initiate Airtable connection');
+        }
+        return;
+      }
+    }
+
+    // Redirect to Zoho OAuth if it's Zoho AND NOT already connected
+    if (platform.id === 'zoho' && !existing) {
+      try {
+        toast.loading('Redirecting to Zoho...', { id: 'oauth-redirect' });
+        const { auth_url } = await apiService.getZohoAuthUrl();
+        window.location.href = auth_url;
+        return;
+      } catch (error: any) {
+        toast.dismiss('oauth-redirect');
+        if (error.response?.status === 402 || error.response?.data?.error === 'upgrade_required') {
+          const details = error.response?.data?.detail || error.response?.data || {};
+          setUpgradeModal({
+            isOpen: true,
+            feature: details.feature || 'Zoho integration',
+            requiredTier: details.required_tier || 'Biashara Lite',
+            currentTier: details.current_tier || 'Free'
+          });
+        } else {
+          toast.error('Failed to initiate Zoho connection');
         }
         return;
       }
