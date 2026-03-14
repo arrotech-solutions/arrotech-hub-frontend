@@ -39,7 +39,8 @@ import {
   LinkedInLogo,
   InstagramLogo,
   SalesforceLogo,
-  AirtableLogo
+  AirtableLogo,
+  XeroLogo
 } from '../components/BrandIcons';
 import KraPinModal from '../components/KraPinModal';
 
@@ -102,6 +103,7 @@ const Integrations: React.FC = () => {
       case 'instagram': return <InstagramLogo {...props} />;
       case 'salesforce': return <SalesforceLogo {...props} />;
       case 'airtable': return <AirtableLogo {...props} />;
+      case 'xero': return <XeroLogo {...props} />;
       default: return <Database {...props} className="text-gray-400 p-2" />;
     }
   };
@@ -114,6 +116,7 @@ const Integrations: React.FC = () => {
     if (id.includes('shopify') || id.includes('jumia')) return 'E-commerce';
     if (id.includes('shopify') || id.includes('jumia')) return 'E-commerce';
     if (id.includes('mpesa') || id.includes('airtel') || id.includes('stripe')) return 'Payment';
+    if (id.includes('quickbooks') || id.includes('xero')) return 'Accounting';
     if (id.includes('clickup') || id.includes('asana') || id.includes('trello') || id.includes('notion') || id.includes('jira') || id.includes('airtable')) return 'Productivity';
     return 'Other';
   };
@@ -132,7 +135,7 @@ const Integrations: React.FC = () => {
         'Apollo Agriculture', 'Sunculture', 'DigiFarm', 'ShambaSmart', 'Rescue',
         'BambooHR', 'Bitrix24', 'SeamlessHR', 'WorkPay', 'G4S', 'Fargo Courier',
         'Busybee', 'Sendy', 'Lori Systems', 'Amitruck', 'Vyapar', 'Sasapay',
-        'Lipabiz', 'Zoho Books', 'Xero', 'KRA iTax', 'Sky Garden',
+        'Lipabiz', 'Zoho Books', 'KRA iTax', 'Sky Garden',
         'Wasoko', 'Twiga Foods', 'Copia', 'Masoko', 'Jiji', 'Kilimall', 'Jumia',
         'Little Pay', 'Ipay', 'Pesapal', 'Cellulant', 'Kopo Kopo', 'Paystack',
         'Flutterwave', 'Equity Jenga', 'Logistics Hub', 'Business Intelligence',
@@ -207,6 +210,8 @@ const Integrations: React.FC = () => {
         toast.success('Zoho Workspace connected successfully!');
       } else if (success === 'airtable_connected') {
         toast.success('Airtable connected successfully!');
+      } else if (success === 'xero_connected') {
+        toast.success('Xero connected successfully!');
       } else {
         toast.success('Connection successful!');
       }
@@ -661,6 +666,30 @@ const Integrations: React.FC = () => {
           });
         } else {
           toast.error('Failed to initiate QuickBooks connection');
+        }
+        return;
+      }
+    }
+
+    // Redirect to Xero OAuth if it's Xero AND NOT already connected
+    if (platform.id === 'xero' && !existing) {
+      try {
+        toast.loading('Redirecting to Xero...', { id: 'oauth-redirect' });
+        const { auth_url } = await apiService.getXeroAuthUrl();
+        window.location.href = auth_url;
+        return;
+      } catch (error: any) {
+        toast.dismiss('oauth-redirect');
+        if (error.response?.status === 402 || error.response?.data?.error === 'upgrade_required') {
+          const details = error.response?.data?.detail || error.response?.data || {};
+          setUpgradeModal({
+            isOpen: true,
+            feature: details.feature || 'Xero integration',
+            requiredTier: details.required_tier || 'Biashara Lite',
+            currentTier: details.current_tier || 'Free'
+          });
+        } else {
+          toast.error('Failed to initiate Xero connection');
         }
         return;
       }
