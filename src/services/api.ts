@@ -526,6 +526,12 @@ class ApiService {
     return response.data;
   }
 
+  // Xero OAuth endpoints
+  async getXeroAuthUrl(): Promise<{ auth_url: string; state: string }> {
+    const response = await this.api.get('/api/xero/auth-url');
+    return response.data;
+  }
+
   // Airtable OAuth endpoints
   async getAirtableAuthUrl(): Promise<{ auth_url: string; state: string }> {
     const response = await this.api.get('/api/airtable/auth-url');
