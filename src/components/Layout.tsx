@@ -27,7 +27,8 @@ import {
   Phone,
   Video,
   Landmark,
-  BarChart3
+  BarChart3,
+  Code
 } from 'lucide-react';
 import logo from '../assets/Logo/icononly_transparent_nobuffer.png';
 import React from 'react';
@@ -190,6 +191,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       icon: CreditCard,
       description: 'Billing and subscriptions',
       badge: null
+    },
+    {
+      name: 'Developer Portal',
+      href: '/developer',
+      icon: Code,
+      description: 'Manage API applications',
+      badge: 'New'
     },
     {
       name: 'Activity',
@@ -599,6 +607,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     >
                       <Settings className="w-4 h-4 mr-3 text-gray-500 dark:text-slate-400" />
                       Settings
+                    </Link>
+
+                    <Link
+                      to="/developer"
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700/50 hover:text-gray-900 dark:hover:text-white transition-colors"
+                      onClick={() => setUserDropdownOpen(false)}
+                    >
+                      <Code className="w-4 h-4 mr-3 text-gray-500 dark:text-slate-400" />
+                      My Apps
                     </Link>
 
                     <Link

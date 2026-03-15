@@ -1,6 +1,6 @@
-# Mini-Hub Frontend
+# Arrotech Hub Frontend
 
-A modern React TypeScript frontend for the Mini-Hub MCP Server, providing a comprehensive interface for managing AI model integrations with marketing tools.
+A modern React TypeScript frontend for the Arrotech Hub Server, providing a comprehensive interface for managing AI model integrations with marketing tools and business platforms.
 
 ## Features
 
@@ -11,16 +11,16 @@ A modern React TypeScript frontend for the Mini-Hub MCP Server, providing a comp
 - User profile management
 
 ### 🔗 Connection Management
-- Create and manage marketing tool integrations
-- Support for HubSpot, GA4, and Slack connections
+- Create and manage extensive tool integrations
+- Support for HubSpot, GA4, Slack, Zoho, Xero, QuickBooks, Airtable, social media, and much more.
 - Connection testing and status monitoring
 - Configuration management for each platform
 
-### ⚡ MCP Tools
+### ⚡ Automation & Tools
 - Execute AI model tools and integrations
 - Dynamic parameter input based on tool schemas
 - Real-time tool execution and result display
-- Support for HubSpot, GA4, and Slack tools
+- Workflows and Agents
 
 ### 💳 Payment Integration
 - M-Pesa payment processing
@@ -38,18 +38,20 @@ A modern React TypeScript frontend for the Mini-Hub MCP Server, providing a comp
 ## Tech Stack
 
 - **React 18** with TypeScript
+- **Vite** as the build tool for fast and optimized bundling
 - **React Router** for navigation
 - **Axios** for API communication
 - **Tailwind CSS** for styling
 - **Lucide React** for icons
 - **React Hot Toast** for notifications
 - **React Hook Form** for form management
+- **React Flow** for Visual Workflow mapping
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 16+ and npm
+- Node.js 18+ and npm
 - Backend server running on `http://localhost:8000`
 
 ### Installation
@@ -59,20 +61,21 @@ A modern React TypeScript frontend for the Mini-Hub MCP Server, providing a comp
 npm install
 ```
 
-2. Start the development server:
+2. Start the Vite development server:
 ```bash
 npm start
 ```
 
-3. Open [http://localhost:3000](http://localhost:3000) in your browser.
+3. Open the localhost URL provided by Vite in your browser (typically `http://localhost:5173`).
 
 ### Environment Variables
 
 Create a `.env` file in the root directory:
 
 ```env
-REACT_APP_API_URL=http://localhost:8000
+VITE_API_URL=http://localhost:8000
 ```
+*(Notice that Vite requires the `VITE_` prefix for client-exposed environment variables)*
 
 ## API Integration
 
@@ -92,7 +95,7 @@ The frontend is fully synchronized with the backend API endpoints:
 - `POST /connections/{id}/test` - Test connection
 - `GET /connections/platforms` - Get available platforms
 
-### MCP Tools
+### Automation Tools
 - `GET /mcp/tools` - List available tools
 - `POST /mcp/execute` - Execute tool with parameters
 
@@ -112,23 +115,26 @@ The frontend is fully synchronized with the backend API endpoints:
 ## Project Structure
 
 ```
-src/
-├── components/          # Reusable UI components
-│   └── Layout.tsx      # Main layout with navigation
-├── hooks/              # Custom React hooks
-│   └── useAuth.tsx     # Authentication hook
-├── pages/              # Page components
-│   ├── Dashboard.tsx   # Main dashboard
-│   ├── Login.tsx       # Login page
-│   ├── Register.tsx    # Registration page
-│   ├── Connections.tsx # Connection management
-│   ├── Payments.tsx    # Payment processing
-│   └── MCPTools.tsx    # MCP tools execution
-├── services/           # API services
-│   └── api.ts         # API client and endpoints
-├── types/              # TypeScript type definitions
-│   └── index.ts       # All type interfaces
-└── App.tsx            # Main app component
+arrotech-hub-frontend/
+├── src/
+│   ├── components/          # Reusable UI components
+│   │   └── Layout.tsx      # Main layout with navigation
+│   ├── hooks/              # Custom React hooks
+│   │   └── useAuth.tsx     # Authentication hook
+│   ├── pages/              # Page components
+│   │   ├── Dashboard.tsx   # Main dashboard
+│   │   ├── Login.tsx       # Login page
+│   │   ├── Register.tsx    # Registration page
+│   │   ├── Connections.tsx # Connection management
+│   │   ├── Payments.tsx    # Payment processing
+│   │   └── Workflows.tsx   # Visual Workflows and Automation
+│   ├── services/           # API services
+│   │   └── api.ts         # API client and endpoints
+│   ├── types/              # TypeScript type definitions
+│   │   └── index.ts       # All type interfaces
+│   └── App.tsx            # Main app component
+├── vite.config.ts         # Vite configuration
+└── package.json
 ```
 
 ## Key Features
@@ -157,10 +163,10 @@ src/
 
 ### Available Scripts
 
-- `npm start` - Start development server
-- `npm build` - Build for production
-- `npm test` - Run tests
-- `npm eject` - Eject from Create React App
+- `npm start` - Start Vite development server
+- `npm run build` - Build for production using Vite
+- `npm run preview` - Preview the production build locally
+- `npm run analyze` - Analyze the production bundle size
 
 ### Code Style
 
@@ -171,11 +177,11 @@ src/
 
 ## Backend Synchronization
 
-This frontend is fully synchronized with the Mini-Hub backend:
+This frontend is fully synchronized with the Arrotech Hub backend:
 
 ### Data Models
 - User model with subscription tiers
-- Connection model with platform support
+- Connection model with extensive platform support
 - Payment model with M-Pesa and Stripe
 - Usage tracking and billing
 
@@ -193,15 +199,12 @@ This frontend is fully synchronized with the Mini-Hub backend:
 
 ### Production Build
 
-1. Build the application:
+1. Build the application for production:
 ```bash
 npm run build
 ```
 
-2. Serve the build folder with a static server:
-```bash
-npx serve -s build
-```
+This will run Vite build and output the assets to a `dist/` or `build/` directory, optimized for deployment.
 
 ### Docker Deployment
 
@@ -217,4 +220,4 @@ The frontend can be deployed alongside the backend using Docker Compose. See the
 
 ## License
 
-This project is part of the Mini-Hub MCP Server and follows the same license terms. 
+This project is part of the Arrotech Hub Server and follows the same license terms. 
