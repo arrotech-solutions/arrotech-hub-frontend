@@ -47,7 +47,11 @@ import {
   Workflow,
   WorkflowCreateRequest,
   WorkflowExecuteRequest,
-  WorkflowTemplate
+  WorkflowTemplate,
+  DeveloperApp,
+  DeveloperAppCreate,
+  DeveloperAppUpdate,
+  DeveloperAppCredentials
 } from '../types';
 
 class ApiService {
@@ -796,7 +800,49 @@ class ApiService {
 
   // Zoom OAuth endpoints
   async getZoomAuthUrl(): Promise<{ auth_url: string; state: string }> {
-    const response = await this.api.get('/api/zoom/auth-url');
+    const response = await this.api.get('/api/zoom/url');
+    return response.data;
+  }
+
+  // Developer App endpoints
+  async getDeveloperApps(): Promise<ApiResponse<DeveloperApp[]>> {
+    const response = await this.api.get('/developers/apps');
+    return response.data;
+  }
+
+  async createDeveloperApp(data: DeveloperAppCreate): Promise<ApiResponse<{ app: DeveloperApp; credentials: DeveloperAppCredentials }>> {
+    const response = await this.api.post('/developers/apps', data);
+    return response.data;
+  }
+
+  async getDeveloperApp(appId: number): Promise<ApiResponse<DeveloperApp>> {
+    const response = await this.api.get(`/developers/apps/${appId}`);
+    return response.data;
+  }
+
+  async updateDeveloperApp(appId: number, data: DeveloperAppUpdate): Promise<ApiResponse<DeveloperApp>> {
+    const response = await this.api.patch(`/developers/apps/${appId}`, data);
+    return response.data;
+  }
+
+  async deleteDeveloperApp(appId: number): Promise<ApiResponse<any>> {
+    const response = await this.api.delete(`/developers/apps/${appId}`);
+    return response.data;
+  }
+
+  async rotateDeveloperAppSecret(appId: number): Promise<ApiResponse<{ client_secret: string }>> {
+    const response = await this.api.post(`/developers/apps/${appId}/rotate-secret`);
+    return response.data;
+  }
+
+  // OAuth Authorization Code flows
+  async oauthAuthorize(params: { client_id: string; response_type: string; redirect_uri: string; scope: string; state?: string }): Promise<any> {
+    const response = await this.api.get('/auth/authorize', { params });
+    return response.data;
+  }
+
+  async oauthApprove(data: { client_id: string; response_type: string; redirect_uri: string; scope: string; state?: string }): Promise<ApiResponse<{ code: string; redirect_uri: string; state?: string }>> {
+    const response = await this.api.post('/auth/authorize/approve', data);
     return response.data;
   }
 
