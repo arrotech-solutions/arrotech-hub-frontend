@@ -798,6 +798,40 @@ export interface PortalConfig {
   support_url?: string;
 }
 
+
+export interface DeveloperApp {
+  id: number;
+  user_id: number;
+  name: string;
+  description?: string;
+  client_id: string;
+  scopes: string[];
+  callback_urls: string[];
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DeveloperAppCreate {
+  name: string;
+  description?: string;
+  scopes?: string[];
+  callback_urls?: string[];
+}
+
+export interface DeveloperAppUpdate {
+  name?: string;
+  description?: string;
+  scopes?: string[];
+  callback_urls?: string[];
+  is_active?: boolean;
+}
+
+export interface DeveloperAppCredentials {
+  client_id: string;
+  client_secret: string;
+}
+
 export interface PortalEndpoint {
   path: string;
   method: string;
