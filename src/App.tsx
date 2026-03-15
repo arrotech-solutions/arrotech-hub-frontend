@@ -39,6 +39,7 @@ const Settings = lazy(() => import('./pages/Settings'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const Workflows = lazy(() => import('./pages/Workflows'));
 const Pricing = lazy(() => import('./pages/Pricing'));
+const DeveloperPortal = lazy(() => import('./pages/DeveloperPortal'));
 
 const UnifiedDashboard = lazy(() => import('./pages/UnifiedDashboard'));
 const UnifiedInbox = lazy(() => import('./pages/UnifiedInbox'));
@@ -415,6 +416,17 @@ const AppRoutes: React.FC = () => {
           <ProtectedRoute>
             <Layout>
               <Profile />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/developer"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <DeveloperPortal />
             </Layout>
           </ProtectedRoute>
         }
