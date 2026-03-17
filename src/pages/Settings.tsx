@@ -14,6 +14,7 @@ import DashboardSettingsTab from '../components/settings/DashboardSettings';
 import IntegrationSettingsTab from '../components/settings/IntegrationSettings';
 import NotificationSettingsTab from '../components/settings/NotificationSettings';
 import SecuritySettingsTab from '../components/settings/SecuritySettings';
+import MpesaSettingsTab from '../components/settings/MpesaSettingsTab';
 import DataPrivacySettings from '../components/settings/DataPrivacySettings';
 import ProfileSettings from '../components/settings/ProfileSettings';
 import apiService from '../services/api';
@@ -311,6 +312,11 @@ const Settings: React.FC = () => {
                     onUpdate={handleIntegrationSettingsUpdate}
                     expanded={true}
                   />
+                </div>
+              )}
+              {activeTab === 'mpesa' && (
+                <div className="animate-in fade-in slide-in-from-right-4 duration-500">
+                  <MpesaSettingsTab />
                 </div>
               )}
               {activeTab === 'security' && settings && (
