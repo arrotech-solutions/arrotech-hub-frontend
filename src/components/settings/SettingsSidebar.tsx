@@ -6,7 +6,8 @@ import {
     Webhook,
     Shield,
     FileText,
-    User
+    User,
+    Smartphone
 } from 'lucide-react';
 
 interface SettingsSidebarProps {
@@ -44,6 +45,12 @@ const tabs = [
         name: 'Integrations',
         icon: Webhook,
         description: 'Connected services'
+    },
+    {
+        id: 'mpesa',
+        name: 'M-Pesa Webhooks',
+        icon: Smartphone,
+        description: 'Configure tenant DARAJA'
     },
     {
         id: 'security',
