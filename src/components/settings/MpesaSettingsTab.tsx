@@ -67,8 +67,10 @@ export default function MpesaSettingsTab() {
       };
 
       if (config.daraja_consumer_key && !config.daraja_consumer_key.includes('••')) payload.daraja_consumer_key = config.daraja_consumer_key;
-      if (config.daraja_consumer_secret) payload.daraja_consumer_secret = config.daraja_consumer_secret;
-      if (config.daraja_passkey) payload.daraja_passkey = config.daraja_passkey;
+      // Only send secrets if they have been typed into (not containing the masking dots)
+      if (config.daraja_consumer_secret && !config.daraja_consumer_secret.includes('••')) payload.daraja_consumer_secret = config.daraja_consumer_secret;
+      if (config.daraja_passkey && !config.daraja_passkey.includes('••')) payload.daraja_passkey = config.daraja_passkey;
+      
       if (config.daraja_shortcode) payload.daraja_shortcode = config.daraja_shortcode;
       if (config.daraja_environment) payload.daraja_environment = config.daraja_environment;
       if (config.callback_url_override) payload.callback_url_override = config.callback_url_override;
