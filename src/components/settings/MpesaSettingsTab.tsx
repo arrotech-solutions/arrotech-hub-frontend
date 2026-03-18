@@ -28,6 +28,7 @@ export default function MpesaSettingsTab() {
     daraja_consumer_secret: '',
     daraja_passkey: '',
     daraja_shortcode: '',
+    daraja_environment: 'sandbox',
     webhook_secret: '',
     alert_enabled: true,
     auto_match_enabled: true,
@@ -65,10 +66,11 @@ export default function MpesaSettingsTab() {
         auto_match_enabled: config.auto_match_enabled
       };
 
-      if (config.daraja_consumer_key) payload.daraja_consumer_key = config.daraja_consumer_key;
+      if (config.daraja_consumer_key && !config.daraja_consumer_key.includes('••')) payload.daraja_consumer_key = config.daraja_consumer_key;
       if (config.daraja_consumer_secret) payload.daraja_consumer_secret = config.daraja_consumer_secret;
       if (config.daraja_passkey) payload.daraja_passkey = config.daraja_passkey;
       if (config.daraja_shortcode) payload.daraja_shortcode = config.daraja_shortcode;
+      if (config.daraja_environment) payload.daraja_environment = config.daraja_environment;
       if (config.callback_url_override) payload.callback_url_override = config.callback_url_override;
 
       const res = await apiService.updateMpesaAgentConfig(payload) as any;
@@ -205,6 +207,23 @@ export default function MpesaSettingsTab() {
                   placeholder="e.g. 174379"
                 />
               </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                Daraja Environment
+              </label>
+              <select
+                value={config.daraja_environment || 'sandbox'}
+                onChange={e => setConfig({...config, daraja_environment: e.target.value})}
+                className="block w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-xl focus:ring-orange-500 focus:border-orange-500 bg-white dark:bg-slate-900 text-gray-900 dark:text-white"
+              >
+                <option value="sandbox">🧪 Sandbox (Testing)</option>
+                <option value="live">🟢 Live (Production)</option>
+              </select>
+              <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">
+                Use Sandbox for testing with fake transactions. Switch to Live when going to production.
+              </p>
             </div>
 
             <div className="md:col-span-2">

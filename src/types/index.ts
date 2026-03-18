@@ -1831,6 +1831,13 @@ export interface MpesaAgentConfig {
   auto_match_enabled: boolean;
   match_threshold: number;
   notification_preferences?: Record<string, any>;
+  daraja_consumer_key?: string;
+  daraja_consumer_secret?: string;
+  daraja_passkey?: string;
+  daraja_shortcode?: string;
+  daraja_environment?: string;  // "sandbox" or "live"
+  webhook_secret?: string;
+  callback_url_override?: string;
 }
 
 export interface MpesaPayment {
