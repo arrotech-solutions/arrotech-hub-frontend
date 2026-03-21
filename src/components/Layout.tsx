@@ -114,42 +114,42 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       description: 'Automated processes',
       badge: 'New'
     },
+    // {
+    //   name: 'Agents',
+    //   href: '/agents',
+    //   icon: Bot,
+    //   description: 'AI agents management',
+    //   badge: null
+    // },
     {
-      name: 'Agents',
-      href: '/agents',
-      icon: Bot,
-      description: 'AI agents management',
+      name: 'Usage',
+      href: '/usage',
+      icon: Activity,
+      description: 'Platform usage and metrics',
       badge: null
     },
-    {
-      name: 'Analytics',
-      href: '/productivity',
-      icon: BarChart3,
-      description: 'Productivity stats & insights',
-      badge: 'New'
-    },
-    {
-      name: 'Channels',
-      icon: Share2,
-      description: 'Social & messaging platforms',
-      badge: 'New',
-      children: [
-        {
-          name: 'WhatsApp',
-          href: '/whatsapp',
-          icon: Phone,
-          description: 'WhatsApp Business automation',
-          badge: 'New'
-        },
-        {
-          name: 'TikTok',
-          href: '/tiktok',
-          icon: Video,
-          description: 'Viral content scheduler',
-          badge: 'New'
-        }
-      ]
-    },
+    // {
+    //   name: 'Channels',
+    //   icon: Share2,
+    //   description: 'Social & messaging platforms',
+    //   badge: 'New',
+    //   children: [
+    //     {
+    //       name: 'WhatsApp',
+    //       href: '/whatsapp',
+    //       icon: Phone,
+    //       description: 'WhatsApp Business automation',
+    //       badge: 'New'
+    //     },
+    //     {
+    //       name: 'TikTok',
+    //       href: '/tiktok',
+    //       icon: Video,
+    //       description: 'Viral content scheduler',
+    //       badge: 'New'
+    //     }
+    //   ]
+    // },
     {
       name: 'Marketplace',
       href: '/marketplace',
@@ -157,13 +157,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       description: 'Share and discover workflows',
       badge: 'New'
     },
-    {
-      name: 'KRA GavaConnect',
-      href: '/apps/kra',
-      icon: Landmark,
-      description: 'Tax services portal',
-      badge: 'Beta'
-    },
+    // {
+    //   name: 'KRA GavaConnect',
+    //   href: '/apps/kra',
+    //   icon: Landmark,
+    //   description: 'Tax services portal',
+    //   badge: 'Beta'
+    // },
     {
       name: 'Favorites',
       href: '/favorites',
@@ -192,20 +192,20 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       description: 'Billing and subscriptions',
       badge: null
     },
-    {
-      name: 'Developer Portal',
-      href: '/developer',
-      icon: Code,
-      description: 'Manage API applications',
-      badge: 'New'
-    },
-    {
-      name: 'Activity',
-      href: '/activity',
-      icon: Activity,
-      description: 'System monitoring',
-      badge: null
-    },
+    // {
+    //   name: 'Developer Portal',
+    //   href: '/developer',
+    //   icon: Code,
+    //   description: 'Manage API applications',
+    //   badge: 'New'
+    // },
+    // {
+    //   name: 'Activity',
+    //   href: '/activity',
+    //   icon: Activity,
+    //   description: 'System monitoring',
+    //   badge: null
+    // },
     {
       name: 'Settings',
       href: '/settings',
