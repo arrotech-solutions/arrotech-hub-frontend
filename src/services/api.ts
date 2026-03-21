@@ -3042,20 +3042,6 @@ class ApiService {
     const response = await this.api.post('/api/blog/seed');
     return response.data;
   }
-
-  // ── Zoho Integration ──────────────────────────────────────
-  async getZohoAuthUrl(): Promise<{ success: boolean; auth_url: string }> {
-    const response = await this.api.get('/api/zoho/auth-url');
-    return response.data;
-  }
-
-  async getZohoCallback(code: string, state: string): Promise<any> {
-    const response = await this.api.get('/api/zoho/callback', {
-      params: { code, state }
-    });
-    return response.data;
-  }
-
 }
 
 export const apiService = new ApiService();
