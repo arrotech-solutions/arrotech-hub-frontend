@@ -63,6 +63,7 @@ const Workflows: React.FC = () => {
   const [showExecutionModal, setShowExecutionModal] = useState(false);
   const [selectedWorkflow, setSelectedWorkflow] = useState<WorkflowType | null>(null);
   const [selectedExecution, setSelectedExecution] = useState<WorkflowExecution | null>(null);
+  const [selectedStepId, setSelectedStepId] = useState<number | null>(null);
   const [executingWorkflow, setExecutingWorkflow] = useState<WorkflowType | null>(null);
   const [editingWorkflow, setEditingWorkflow] = useState<WorkflowType | null>(null);
 
@@ -158,6 +159,11 @@ const Workflows: React.FC = () => {
       const response = await apiService.getWorkflowStepExecutions(executionId);
       if (response.success) {
         setStepExecutions(response.data);
+        if (response.data.length > 0) {
+          setSelectedStepId(response.data[0].id);
+        } else {
+          setSelectedStepId(null);
+        }
       }
     } catch (error) {
       console.error('Error loading step executions:', error);
@@ -1147,145 +1153,252 @@ const Workflows: React.FC = () => {
         )}
 
         {/* Execution Details Modal */}
+        {/* Execution Details Modal (Aesthetic Split-Pane Inspector) */}
         {showExecutionModal && selectedExecution && (
-          <div className="fixed inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-colors duration-300">
-            <div className="bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col border border-gray-100 dark:border-slate-800 transition-colors duration-300">
-              <div className="flex items-center justify-between px-6 sm:px-8 py-5 sm:py-6 bg-gradient-to-r from-purple-600 to-blue-600 dark:from-purple-700 dark:to-blue-700">
-                <div className="flex items-center space-x-3 sm:space-x-4">
-                  <div className="p-2 sm:p-3 bg-white/20 rounded-xl sm:rounded-2xl backdrop-blur-md">
-                    <PlayCircle className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+          <div className="fixed inset-0 bg-slate-900/60 dark:bg-black/70 backdrop-blur-md flex items-center justify-center z-[60] p-4 sm:p-6 transition-all duration-300">
+            <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-3xl shadow-2xl w-full max-w-7xl h-[85vh] overflow-hidden flex flex-col border border-white/20 dark:border-slate-800/80 ring-1 ring-black/5">
+              
+              {/* Top Header Bar */}
+              <div className="flex-none flex items-center justify-between px-6 py-5 bg-white/50 dark:bg-slate-900/50 border-b border-gray-100 dark:border-slate-800 backdrop-blur-md relative z-10">
+                <div className="flex items-center space-x-4">
+                  <div className={`p-3 rounded-2xl flex items-center justify-center ${
+                    selectedExecution.status === 'completed' ? 'bg-green-100 dark:bg-green-500/20 text-green-600' :
+                    selectedExecution.status === 'failed' ? 'bg-red-100 dark:bg-red-500/20 text-red-600' :
+                    selectedExecution.status === 'running' ? 'bg-blue-100 dark:bg-blue-500/20 text-blue-600 animate-pulse' :
+                    'bg-gray-100 dark:bg-slate-800 text-gray-500'
+                  }`}>
+                    {getStatusIcon(selectedExecution.status)}
                   </div>
                   <div>
-                    <h2 className="text-lg sm:text-2xl font-black text-white leading-tight">Execution Report</h2>
-                    <p className="text-white/70 text-[10px] sm:text-xs font-bold uppercase tracking-widest">ID #{selectedExecution.id}</p>
+                    <h2 className="text-xl font-bold tracking-tight text-gray-900 dark:text-white flex items-center space-x-3">
+                      <span>Execution Inspector</span>
+                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider ${
+                        selectedExecution.status === 'completed' ? 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400' :
+                        selectedExecution.status === 'failed' ? 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400' :
+                        selectedExecution.status === 'running' ? 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400' :
+                        'bg-gray-100 text-gray-700 dark:bg-slate-800 dark:text-gray-400'
+                      }`}>
+                        {selectedExecution.status}
+                      </span>
+                    </h2>
+                    <p className="text-sm text-gray-500 dark:text-slate-400 font-medium mt-0.5">
+                      Execution #{selectedExecution.id} • Triggered by <span className="text-gray-700 dark:text-slate-300 capitalize">{selectedExecution.trigger_type}</span>
+                    </p>
                   </div>
                 </div>
                 <button
                   onClick={() => setShowExecutionModal(false)}
-                  className="p-1.5 sm:p-2 bg-white/10 hover:bg-white/20 rounded-lg sm:rounded-xl transition-all"
+                  className="p-2.5 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-all text-gray-400 hover:text-gray-600 dark:hover:text-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
                 >
-                  <X className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                  <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div>
-                  <h3 className="text-lg font-medium mb-4 flex items-center space-x-2 text-gray-900 dark:text-white">
-                    <Settings className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                    <span>Execution Overview</span>
-                  </h3>
-                  <div className="space-y-4">
-                    <div className="bg-gray-50 dark:bg-slate-800/50 rounded-lg p-4 border border-gray-100 dark:border-slate-700/50">
-                      <span className="text-sm font-medium text-gray-500 dark:text-slate-400">Status</span>
-                      <div className="mt-1">
-                        <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(selectedExecution.status)}`}>
-                          {getStatusIcon(selectedExecution.status)}
-                          <span className="ml-2 capitalize">{selectedExecution.status}</span>
-                        </span>
+              {/* Main Split Body */}
+              <div className="flex-1 flex overflow-hidden">
+                
+                {/* Left Pane: Timeline Drawer */}
+                <div className="w-1/3 min-w-[300px] max-w-[400px] border-r border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-900/30 overflow-y-auto px-6 py-8">
+                  <h3 className="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-6 px-2">Execution Timeline</h3>
+                  
+                  <div className="relative">
+                    {/* Vertical Connector Line */}
+                    <div className="absolute left-[27px] top-8 bottom-8 w-0.5 bg-gray-200 dark:bg-slate-800 rounded-full" />
+                    
+                    {/* Overall Overview Node */}
+                    <button 
+                      onClick={() => setSelectedStepId(null)}
+                      className={`relative z-10 w-full text-left mb-6 group transition-all duration-200 ${!selectedStepId ? 'scale-[1.02]' : 'opacity-70 hover:opacity-100 hover:scale-[1.01]'}`}
+                    >
+                      <div className={`p-4 rounded-2xl border backdrop-blur-sm transition-all shadow-sm ${
+                        !selectedStepId 
+                          ? 'bg-white dark:bg-slate-800 border-purple-200 dark:border-purple-500/30 ring-4 ring-purple-500/10' 
+                          : 'bg-white/80 dark:bg-slate-800/80 border-gray-100 dark:border-slate-700/50 hover:border-gray-300 dark:hover:border-slate-600'
+                      }`}>
+                        <div className="flex items-center space-x-4">
+                          <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 border-4 border-gray-50 dark:border-slate-900 ${
+                            selectedExecution.status === 'completed' ? 'bg-green-500 text-white' :
+                            selectedExecution.status === 'failed' ? 'bg-red-500 text-white' :
+                            selectedExecution.status === 'running' ? 'bg-blue-500 text-white ring-4 ring-blue-500/20' :
+                            'bg-gray-400 text-white'
+                          }`}>
+                            <Activity className="w-3 h-3" />
+                          </div>
+                          <div className="min-w-0">
+                            <h4 className={`text-sm font-bold truncate ${!selectedStepId ? 'text-purple-700 dark:text-purple-400' : 'text-gray-900 dark:text-white'}`}>Execution Overview</h4>
+                            <p className="text-xs text-gray-500 dark:text-slate-400 truncate mt-0.5">
+                              {selectedExecution.started_at ? new Date(selectedExecution.started_at).toLocaleTimeString() : 'Pending'}
+                            </p>
+                          </div>
+                        </div>
                       </div>
+                    </button>
+
+                    {/* Step Nodes */}
+                    <div className="space-y-4">
+                      {stepExecutions.map((stepExecution, index) => {
+                        const isSelected = selectedStepId === stepExecution.id;
+                        return (
+                          <button 
+                            key={stepExecution.id}
+                            onClick={() => setSelectedStepId(stepExecution.id)}
+                            className={`relative z-10 w-full text-left group transition-all duration-200 ${isSelected ? 'scale-[1.02]' : 'opacity-70 hover:opacity-100 hover:scale-[1.01]'}`}
+                          >
+                            <div className={`p-4 rounded-2xl border backdrop-blur-sm transition-all shadow-sm ${
+                              isSelected 
+                                ? 'bg-white dark:bg-slate-800 border-blue-200 dark:border-blue-500/50 ring-4 ring-blue-500/10' 
+                                : 'bg-white/80 dark:bg-slate-800/80 border-gray-100 dark:border-slate-700/50 hover:border-gray-300 dark:hover:border-slate-600'
+                            }`}>
+                              <div className="flex items-start justify-between">
+                                <div className="flex items-start space-x-4">
+                                  <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 border-4 border-gray-50 dark:border-slate-900 mt-0.5 ${
+                                    stepExecution.status === 'completed' ? 'bg-green-500 text-white' :
+                                    stepExecution.status === 'failed' ? 'bg-red-500 text-white' :
+                                    stepExecution.status === 'running' ? 'bg-blue-500 text-white ring-4 ring-blue-500/20' :
+                                    'bg-gray-200 dark:bg-slate-700 text-gray-500'
+                                  }`}>
+                                    {stepExecution.status === 'completed' ? <CheckCircle className="w-3 h-3" /> :
+                                     stepExecution.status === 'failed' ? <AlertCircle className="w-3 h-3" /> :
+                                     stepExecution.status === 'running' ? <PlayCircle className="w-3 h-3" /> :
+                                     <span className="text-[10px] font-bold">{index + 1}</span>}
+                                  </div>
+                                  <div className="min-w-0 pr-2">
+                                    <h4 className={`text-sm font-bold truncate ${isSelected ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>
+                                      Step {stepExecution.step_id}
+                                    </h4>
+                                    <p className="text-xs text-gray-500 dark:text-slate-400 mt-1 line-clamp-1">
+                                      {stepExecution.status === 'failed' && stepExecution.error_message ? stepExecution.error_message : 'View details...'}
+                                    </p>
+                                    <div className="flex items-center space-x-2 mt-2">
+                                      {stepExecution.started_at && (
+                                        <span className="text-[10px] font-medium text-gray-400 dark:text-slate-500 bg-gray-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">
+                                          {new Date(stepExecution.started_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'})}
+                                        </span>
+                                      )}
+                                      {stepExecution.retry_count > 0 && (
+                                        <span className="text-[10px] font-medium text-orange-600 bg-orange-50 dark:bg-orange-500/10 px-2 py-0.5 rounded-md">
+                                          Retry {stepExecution.retry_count}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                                <ChevronRight className={`w-4 h-4 mt-1 transition-colors ${isSelected ? 'text-blue-500' : 'text-gray-300 dark:text-slate-600'}`} />
+                              </div>
+                            </div>
+                          </button>
+                        );
+                      })}
+                      {stepExecutions.length === 0 && (
+                        <div className="text-center py-10 px-4 bg-white/50 dark:bg-slate-800/30 rounded-2xl border border-dashed border-gray-200 dark:border-slate-700">
+                          <Activity className="w-8 h-8 text-gray-300 dark:text-slate-600 mx-auto mb-2" />
+                          <p className="text-xs text-gray-500 dark:text-slate-400 font-medium">No steps executed yet</p>
+                        </div>
+                      )}
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-gray-50 dark:bg-slate-800/50 rounded-lg p-4 border border-gray-100 dark:border-slate-700/50">
-                        <span className="text-sm font-medium text-gray-500 dark:text-slate-400">Started</span>
-                        <p className="text-sm text-gray-900 dark:text-white mt-1">
-                          {selectedExecution.started_at
-                            ? new Date(selectedExecution.started_at).toLocaleString()
-                            : 'Not started'
-                          }
-                        </p>
-                      </div>
-                      <div className="bg-gray-50 dark:bg-slate-800/50 rounded-lg p-4 border border-gray-100 dark:border-slate-700/50">
-                        <span className="text-sm font-medium text-gray-500 dark:text-slate-400">Completed</span>
-                        <p className="text-sm text-gray-900 dark:text-white mt-1">
-                          {selectedExecution.completed_at
-                            ? new Date(selectedExecution.completed_at).toLocaleString()
-                            : 'Not completed'
-                          }
-                        </p>
-                      </div>
-                    </div>
-                    <div className="bg-gray-50 dark:bg-slate-800/50 rounded-lg p-4 border border-gray-100 dark:border-slate-700/50">
-                      <span className="text-sm font-medium text-gray-500 dark:text-slate-400">Trigger Type</span>
-                      <p className="text-sm text-gray-900 dark:text-white mt-1">{selectedExecution.trigger_type}</p>
-                    </div>
-                    {selectedExecution.error_message && (
-                      <div className="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg p-4">
-                        <span className="text-sm font-medium text-red-700 dark:text-red-400">Error Message</span>
-                        <p className="text-sm text-red-600 dark:text-red-300 mt-1">{selectedExecution.error_message}</p>
-                      </div>
-                    )}
                   </div>
                 </div>
 
-                <div>
-                  <h3 className="text-lg font-medium mb-4 flex items-center space-x-2 text-gray-900 dark:text-white">
-                    <BarChart3 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                    <span>Step Executions</span>
-                  </h3>
-                  <div className="space-y-3">
-                    {stepExecutions.length > 0 ? (
-                      stepExecutions.map((stepExecution: WorkflowStepExecution, index: number) => (
-                        <div key={stepExecution.id} className={`bg-white dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700/50 rounded-lg p-4 ${getStatusBgColor(stepExecution.status)}`}>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-3">
-                              <div className="w-8 h-8 bg-blue-100 dark:bg-blue-500/20 rounded-full flex items-center justify-center">
-                                <span className="text-sm font-medium text-blue-600 dark:text-blue-400">{index + 1}</span>
+                {/* Right Pane: Details Inspector */}
+                <div className="flex-1 overflow-y-auto bg-white dark:bg-[#0a0f1c] relative">
+                  {(() => {
+                    const viewData = selectedStepId 
+                      ? stepExecutions.find(s => s.id === selectedStepId)
+                      : selectedExecution;
+
+                    if (!viewData) return null;
+
+                    return (
+                      <div className="p-8 max-w-4xl mx-auto space-y-8 pb-20">
+                        {/* Header Section for Inspector */}
+                        <div>
+                          <h3 className="text-2xl font-black text-gray-900 dark:text-white mb-2">
+                            {selectedStepId && 'step_id' in viewData ? `Step ${viewData.step_id} Details` : 'Execution Metadata'}
+                          </h3>
+                          <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-slate-400">
+                            {viewData.started_at && (
+                              <div className="flex items-center space-x-1">
+                                <Clock className="w-4 h-4" />
+                                <span>Started: {new Date(viewData.started_at).toLocaleString()}</span>
                               </div>
-                              <div>
-                                <p className="text-sm font-medium text-gray-900 dark:text-white">Step #{stepExecution.step_id}</p>
-                                <div className="flex items-center space-x-2 mt-1">
-                                  <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(stepExecution.status)}`}>
-                                    {getStatusIcon(stepExecution.status)}
-                                    <span className="ml-1 capitalize">{stepExecution.status}</span>
-                                  </span>
-                                  {stepExecution.retry_count > 0 && (
-                                    <span className="text-xs text-orange-600">
-                                      Retries: {stepExecution.retry_count}
-                                    </span>
-                                  )}
-                                </div>
+                            )}
+                            {viewData.completed_at && viewData.started_at && (
+                              <div className="flex items-center space-x-1">
+                                <Activity className="w-4 h-4" />
+                                <span>Duration: {Math.max(0, new Date(viewData.completed_at).getTime() - new Date(viewData.started_at).getTime())}ms</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Error Banner */}
+                        {viewData.error_message && (
+                          <div className="bg-red-50 dark:bg-red-950/30 border-l-4 border-red-500 p-5 rounded-r-xl shadow-sm">
+                            <div className="flex items-start">
+                              <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
+                              <div className="ml-3">
+                                <h3 className="text-sm font-bold text-red-800 dark:text-red-300">Execution Error</h3>
+                                <p className="text-sm text-red-700 dark:text-red-400/90 mt-1 whitespace-pre-wrap font-mono relative bg-white/50 dark:bg-black/20 p-3 rounded-lg border border-red-100 dark:border-red-900/50 block w-full overflow-x-auto">
+                                  {viewData.error_message}
+                                </p>
                               </div>
                             </div>
-                            <ChevronRight className="w-4 h-4 text-gray-400 dark:text-slate-500" />
                           </div>
-                          {stepExecution.error_message && (
-                            <div className="mt-3 text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 p-2 rounded">
-                              {stepExecution.error_message}
+                        )}
+
+                        {/* Input Data Block */}
+                        <div>
+                          <div className="flex items-center justify-between mb-3">
+                            <h4 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider flex items-center space-x-2">
+                              <div className="w-2 h-2 rounded-full bg-blue-500" />
+                              <span>Input Parameters</span>
+                            </h4>
+                          </div>
+                          {viewData.input_data && Object.keys(viewData.input_data).length > 0 ? (
+                            <div className="bg-[#0d1117] rounded-xl shadow-inner border border-gray-800 overflow-hidden relative group">
+                              <div className="absolute top-0 left-0 w-full h-8 bg-white/5 border-b border-gray-800 flex items-center px-4">
+                                <span className="text-[10px] text-gray-400 font-mono font-bold uppercase">JSON • request</span>
+                              </div>
+                              <pre className="p-5 pt-12 text-[#c9d1d9] font-mono text-[13px] leading-relaxed overflow-x-auto">
+                                <code>{JSON.stringify(viewData.input_data, null, 2)}</code>
+                              </pre>
+                            </div>
+                          ) : (
+                            <div className="p-6 bg-gray-50 dark:bg-slate-800/30 border border-dashed border-gray-200 dark:border-slate-700 rounded-xl text-center">
+                              <p className="text-sm text-gray-500 dark:text-slate-400 font-medium">No input data payload recorded.</p>
                             </div>
                           )}
                         </div>
-                      ))
-                    ) : (
-                      <div className="text-center py-8">
-                        <BarChart3 className="w-12 h-12 text-gray-400 dark:text-slate-500 mx-auto mb-4" />
-                        <p className="text-sm text-gray-500 dark:text-slate-400">No step executions found</p>
+
+                        {/* Output Data Block */}
+                        <div>
+                          <div className="flex items-center justify-between mb-3">
+                            <h4 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider flex items-center space-x-2">
+                              <div className="w-2 h-2 rounded-full bg-green-500" />
+                              <span>Output Result</span>
+                            </h4>
+                          </div>
+                          {viewData.output_data && Object.keys(viewData.output_data).length > 0 ? (
+                            <div className="bg-[#0d1117] rounded-xl shadow-inner border border-gray-800 overflow-hidden relative group">
+                              <div className="absolute top-0 left-0 w-full h-8 bg-white/5 border-b border-gray-800 flex items-center px-4">
+                                <span className="text-[10px] text-gray-400 font-mono font-bold uppercase">JSON • response</span>
+                              </div>
+                              <pre className="p-5 pt-12 text-[#c9d1d9] font-mono text-[13px] leading-relaxed overflow-x-auto">
+                                <code>{JSON.stringify(viewData.output_data, null, 2)}</code>
+                              </pre>
+                            </div>
+                          ) : (
+                            <div className="p-6 bg-gray-50 dark:bg-slate-800/30 border border-dashed border-gray-200 dark:border-slate-700 rounded-xl text-center">
+                              <p className="text-sm text-gray-500 dark:text-slate-400 font-medium">No valid output response yet.</p>
+                            </div>
+                          )}
+                        </div>
+                        
                       </div>
-                    )}
-                  </div>
+                    );
+                  })()}
                 </div>
               </div>
-
-              {selectedExecution.input_data && Object.keys(selectedExecution.input_data).length > 0 && (
-                <div className="mt-8">
-                  <h3 className="text-lg font-medium mb-4 text-gray-900 dark:text-white">Input Data</h3>
-                  <div className="bg-gray-50 dark:bg-slate-800/50 rounded-lg p-4 border border-gray-100 dark:border-slate-700/50">
-                    <pre className="text-sm text-gray-800 dark:text-slate-300 overflow-x-auto">
-                      {JSON.stringify(selectedExecution.input_data, null, 2)}
-                    </pre>
-                  </div>
-                </div>
-              )}
-
-              {selectedExecution.output_data && Object.keys(selectedExecution.output_data).length > 0 && (
-                <div className="mt-8">
-                  <h3 className="text-lg font-medium mb-4 text-gray-900 dark:text-white">Output Data</h3>
-                  <div className="bg-gray-50 dark:bg-slate-800/50 rounded-lg p-4 border border-gray-100 dark:border-slate-700/50">
-                    <pre className="text-sm text-gray-800 dark:text-slate-300 overflow-x-auto">
-                      {JSON.stringify(selectedExecution.output_data, null, 2)}
-                    </pre>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         )}
