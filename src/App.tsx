@@ -16,7 +16,7 @@ import {
   GitBranch, Bot, MessageCircle, Video, ShoppingBag, Link, Activity as ActivityIcon, User
 } from 'lucide-react';
 
-const Activity = lazy(() => import('./pages/Activity'));
+const Usage = lazy(() => import('./pages/Usage'));
 const Agents = lazy(() => import('./pages/Agents'));
 const Chat = lazy(() => import('./pages/Chat'));
 const Connections = lazy(() => import('./pages/Connections'));
@@ -55,7 +55,6 @@ const MicrosoftCallback = lazy(() => import('./pages/MicrosoftCallback'));
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const Terms = lazy(() => import('./pages/Terms'));
 const KraDashboard = lazy(() => import('./pages/apps/KraDashboard'));
-const ProductivityStats = lazy(() => import('./pages/ProductivityStats'));
 const Onboarding = lazy(() => import('./pages/Onboarding'));
 const CreateOrganization = lazy(() => import('./pages/CreateOrganization'));
 const OrganizationSettings = lazy(() => import('./pages/OrganizationSettings'));
@@ -278,7 +277,7 @@ const AppRoutes: React.FC = () => {
         }
       />
 
-      <Route
+      {/* <Route
         path="/agents"
         element={
           <ProtectedRoute>
@@ -287,20 +286,20 @@ const AppRoutes: React.FC = () => {
             </Layout>
           </ProtectedRoute>
         }
-      />
+      /> */}
 
       <Route
-        path="/productivity"
+        path="/usage"
         element={
           <ProtectedRoute>
             <Layout>
-              <ProductivityStats />
+              <Usage />
             </Layout>
           </ProtectedRoute>
         }
       />
 
-      <Route
+      {/* <Route
         path="/whatsapp"
         element={
           <ProtectedRoute>
@@ -309,9 +308,9 @@ const AppRoutes: React.FC = () => {
             </Layout>
           </ProtectedRoute>
         }
-      />
+      /> */}
 
-      <Route
+      {/* <Route
         path="/tiktok"
         element={
           <ProtectedRoute>
@@ -320,7 +319,7 @@ const AppRoutes: React.FC = () => {
             </Layout>
           </ProtectedRoute>
         }
-      />
+      /> */}
 
       <Route
         path="/marketplace"
@@ -333,7 +332,7 @@ const AppRoutes: React.FC = () => {
         }
       />
 
-      <Route
+      {/* <Route
         path="/apps/kra"
         element={
           <ProtectedRoute>
@@ -342,7 +341,7 @@ const AppRoutes: React.FC = () => {
             </Layout>
           </ProtectedRoute>
         }
-      />
+      /> */}
 
       <Route
         path="/templates"
@@ -383,10 +382,7 @@ const AppRoutes: React.FC = () => {
       />
 
 
-
-
-
-      <Route
+      {/* <Route
         path="/activity"
         element={
           <ProtectedRoute>
@@ -395,7 +391,7 @@ const AppRoutes: React.FC = () => {
             </Layout>
           </ProtectedRoute>
         }
-      />
+      /> */}
 
 
 
