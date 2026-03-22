@@ -1,34 +1,41 @@
 import {
   Activity,
   Award,
-
+  BarChart3,
   Bot,
+  CalendarDays,
+  CheckSquare,
   ChevronDown,
   ChevronRight,
+  Code,
   CreditCard,
   Crown,
   Database,
   Heart,
   HelpCircle,
   Home,
+  Inbox,
+  Landmark,
+  LayoutDashboard,
+  LifeBuoy,
   LogOut,
   Menu,
   MessageCircle,
+  Phone,
+  Plug,
   Search,
   Settings,
+  Share2,
   ShoppingBag,
   Sparkles,
+  Star,
+  Store,
   User,
+  UserCircle,
+  Video,
   Workflow,
   X,
-  Zap,
-  LayoutDashboard,
-  Share2,
-  Phone,
-  Video,
-  Landmark,
-  BarChart3,
-  Code
+  Zap
 } from 'lucide-react';
 import logo from '../assets/Logo/icononly_transparent_nobuffer.png';
 import React from 'react';
@@ -80,30 +87,30 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         {
           name: 'Inbox',
           href: '/unified/inbox',
-          icon: MessageCircle,
+          icon: Inbox,
           description: 'Unified Inbox',
           badge: null
         },
         {
           name: 'Task View',
           href: '/unified/tasks',
-          icon: Workflow,
+          icon: CheckSquare,
           description: 'Unified Tasks',
           badge: null
         },
         {
           name: 'Calendar',
           href: '/unified/calendar',
-          icon: Activity,
+          icon: CalendarDays,
           description: 'Unified Calendar',
           badge: null
         }
       ]
     },
     {
-      name: 'Chat',
+      name: 'Ask AI',
       href: '/chat',
-      icon: MessageCircle,
+      icon: Sparkles,
       description: 'AI-powered conversations',
       badge: null
     },
@@ -124,7 +131,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     {
       name: 'Usage',
       href: '/usage',
-      icon: Activity,
+      icon: BarChart3,
       description: 'Platform usage and metrics',
       badge: null
     },
@@ -153,7 +160,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     {
       name: 'Marketplace',
       href: '/marketplace',
-      icon: ShoppingBag,
+      icon: Store,
       description: 'Share and discover workflows',
       badge: 'New'
     },
@@ -167,21 +174,21 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     {
       name: 'Favorites',
       href: '/favorites',
-      icon: Heart,
+      icon: Star,
       description: 'Saved workflows',
       badge: null
     },
     {
       name: 'Creator Profile',
       href: '/creator-profile',
-      icon: Award,
+      icon: UserCircle,
       description: 'Manage your creator profile',
       badge: null
     },
     {
-      name: 'Connections',
+      name: 'Integrations',
       href: '/connections',
-      icon: Database,
+      icon: Plug,
       description: 'External integrations',
       badge: null
     },
@@ -216,7 +223,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     {
       name: 'Help & Support',
       href: '/help',
-      icon: HelpCircle,
+      icon: LifeBuoy,
       description: 'Get help and contact us',
       badge: null
     },
