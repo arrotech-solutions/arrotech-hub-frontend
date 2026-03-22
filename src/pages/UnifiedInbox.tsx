@@ -408,6 +408,8 @@ const UnifiedInbox: React.FC = () => {
 
     // Phase 3: Analyze messages with AI after fetching
     useEffect(() => {
+        // AI analysis is temporarily disabled to save tokens.
+        /*
         const analyzeWithAI = async () => {
             if (messages.length === 0 || analyzingMessages) return;
 
@@ -440,6 +442,7 @@ const UnifiedInbox: React.FC = () => {
         // Delay analysis slightly to not block initial render
         const timer = setTimeout(analyzeWithAI, 500);
         return () => clearTimeout(timer);
+        */
     }, [messages, analyzingMessages, enrichments]); // Only re-run when message count changes
 
     // Phase 3: Keyboard Navigation
