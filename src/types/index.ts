@@ -38,6 +38,32 @@ export interface Message {
 }
 
 // Tool Call Types for Workflow Extraction
+export type StreamEventType = 'thinking' | 'tool_start' | 'tool_result' | 'reasoning_delta' | 'content_delta' | 'content' | 'done' | 'error' | 'message_saved' | 'search_sources';
+
+export interface SearchSource {
+  title: string;
+  url: string;
+  snippet: string;
+  domain: string;
+  favicon?: string | null;
+}
+
+export interface StreamEvent {
+  type: StreamEventType;
+  content?: string;        // For thinking, content_delta, content
+  delta?: string;          // For content_delta
+  tool?: string;           // For tool_start, tool_result
+  args?: Record<string, any>; // For tool_start
+  success?: boolean;       // For tool_result
+  summary?: string;        // For tool_result
+  message_id?: number;     // For message_saved
+  tokens_used?: number;    // For done
+  tools_called?: Array<ToolCall>; // For done
+  error?: string;          // For error
+  sources?: SearchSource[]; // For search_sources
+  timestamp?: string;
+}
+
 export interface ToolCall {
   id?: string;
   name: string;
@@ -128,6 +154,8 @@ export interface CreateWorkflowFromStepsRequest {
 export interface MessageCreate {
   content: string;
   provider?: string;
+  use_reasoning?: boolean;
+  use_search?: boolean;
 }
 
 export interface ConversationCreate {
