@@ -496,18 +496,18 @@ const UnifiedCalendar: React.FC = () => {
                         </button>
 
                         {/* Desktop Bar */}
-                        <div className={`hidden md:block absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity ${focusMode ? 'opacity-10' : 'dark:opacity-10'}`} />
+                        <div className={`hidden md:block absolute inset-0 bg-gradient-to-r from-indigo-400 to-purple-500 rounded-2xl blur-md opacity-30 group-hover:opacity-50 transition-all duration-500 ${focusMode ? 'opacity-10' : 'dark:opacity-20'}`} />
                         <button
                             onClick={() => setShowSmartScheduler(true)}
-                            className={`calendar-smart-scheduler-tut hidden md:flex relative items-center w-full h-11 px-4 rounded-2xl transition-all border text-left ${focusMode ? 'bg-slate-800/50 border-slate-700 text-white placeholder-slate-500' : 'bg-white/80 dark:bg-slate-800/80 border-indigo-100 dark:border-slate-700 text-slate-700 dark:text-slate-200 placeholder-indigo-300 dark:placeholder-slate-500 shadow-sm hover:shadow-md hover:border-indigo-200 dark:hover:border-indigo-500/50'}`}
+                            className={`calendar-smart-scheduler-tut hidden md:flex relative items-center w-full h-12 px-5 rounded-2xl transition-all duration-300 border text-left group-hover:-translate-y-0.5 ${focusMode ? 'bg-slate-900/80 border-slate-700 text-white placeholder-slate-500 shadow-xl shadow-black/20' : 'bg-white/90 dark:bg-slate-900/90 border-indigo-100/80 dark:border-slate-700/80 text-slate-700 dark:text-slate-200 placeholder-indigo-300 dark:placeholder-slate-500 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:shadow-[0_8px_30px_rgb(79,70,229,0.1)] hover:border-indigo-300 dark:hover:border-indigo-500 backdrop-blur-md'}`}
                         >
-                            <Sparkles className={`w-4 h-4 mr-3 shrink-0 ${focusMode ? 'text-indigo-400' : 'text-indigo-500'}`} />
-                            <span className={`text-sm font-medium truncate ${focusMode ? 'text-slate-400' : 'text-indigo-400 dark:text-indigo-300'}`}>
-                                <span className="hidden lg:inline">Ask AI to schedule... "Lunch with Sarah tomorrow at 12"</span>
+                            <Sparkles className={`w-5 h-5 mr-3 shrink-0 transition-transform group-hover:scale-110 ${focusMode ? 'text-indigo-400' : 'text-indigo-500'}`} />
+                            <span className={`text-[15px] font-medium truncate tracking-tight ${focusMode ? 'text-slate-400' : 'text-indigo-900/60 dark:text-indigo-200/60'}`}>
+                                <span className="hidden lg:inline">Ask AI to schedule... "Team sync next Friday at 2pm"</span>
                                 <span className="lg:hidden">Ask AI to schedule...</span>
                             </span>
                             <div className="ml-auto flex items-center gap-2">
-                                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${focusMode ? 'bg-slate-700 text-slate-400' : 'bg-indigo-50 dark:bg-indigo-500/20 text-indigo-400 dark:text-indigo-300'}`}>⌘K</span>
+                                <span className={`text-[11px] font-bold px-2 py-1 rounded-md border ${focusMode ? 'bg-slate-800 border-slate-700 text-slate-400' : 'bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-500 dark:text-slate-400 shadow-sm'}`}>⌘K</span>
                             </div>
                         </button>
                     </div>
@@ -622,23 +622,23 @@ const UnifiedCalendar: React.FC = () => {
                                 </div>
                                 <div className="grid grid-cols-7 flex-1 auto-rows-fr">
                                     {getMonthDays(viewDate).map((date, i) => {
-                                        if (!date) return <div key={i} className={`border-b border-r ${focusMode ? 'border-slate-800/50 bg-slate-800/20' : 'border-indigo-50/30 dark:border-slate-800/30 bg-indigo-50/10 dark:bg-slate-900/20'} ${i % 7 === 6 ? 'border-r-0' : ''}`} />;
+                                        if (!date) return <div key={i} className={`border-b border-r border-dashed ${focusMode ? 'border-slate-800/80 bg-slate-900/40' : 'border-gray-200/80 dark:border-slate-800/80 bg-gray-50/30 dark:bg-slate-900/30'} ${i % 7 === 6 ? 'border-r-0' : ''}`} />;
 
                                         const dayEvents = events.filter(e => e.date.toDateString() === date.toDateString());
                                         const isCurrentMonth = date.getMonth() === viewDate.getMonth();
 
                                         return (
                                             <div key={i} onClick={() => date && setViewDate(date)} className={`
-                                                relative border-b border-r p-2 transition-all duration-200 group
-                                                ${focusMode ? 'border-slate-800/50 hover:bg-slate-800/30' : 'border-indigo-50/50 dark:border-slate-800/50 hover:bg-white/80 dark:hover:bg-slate-800/50'}
+                                                relative border-b border-r border-dashed p-2 transition-all duration-300 group
+                                                ${focusMode ? 'border-slate-800/80 hover:bg-slate-800/40' : 'border-gray-200/80 dark:border-slate-800/80 hover:bg-white dark:hover:bg-slate-800/80'}
                                                 ${i % 7 === 6 ? 'border-r-0' : ''}
-                                                ${!isCurrentMonth ? 'opacity-40 grayscale' : ''}
+                                                ${!isCurrentMonth ? 'opacity-30 grayscale' : ''}
                                             `}>
                                                 <div className={`
-                                                    w-7 h-7 mb-2 flex items-center justify-center rounded-full text-sm font-semibold transition-all
+                                                    w-7 h-7 mb-2 flex items-center justify-center rounded-full text-[13px] font-bold transition-all duration-300
                                                     ${isToday(date)
-                                                        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/40 scale-110'
-                                                        : (focusMode ? 'text-slate-400 group-hover:text-white' : 'text-slate-700 dark:text-slate-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 group-hover:bg-indigo-50 dark:group-hover:bg-slate-800')}
+                                                        ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/40 scale-110'
+                                                        : (focusMode ? 'text-slate-500 group-hover:text-slate-200' : 'text-slate-500 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 group-hover:bg-indigo-50 dark:group-hover:bg-slate-800')}
                                                 `}>
                                                     {date.getDate()}
                                                 </div>
@@ -716,12 +716,12 @@ const UnifiedCalendar: React.FC = () => {
                                                             <div key={e.id}
                                                                 onClick={(ev) => { ev.stopPropagation(); setSelectedEvent(e); }}
                                                                 className={`
-                                                                    absolute p-2 rounded-xl border z-10 
-                                                                    cursor-pointer transition-all hover:scale-[1.03] hover:z-20
+                                                                    absolute p-2.5 rounded-[14px] border z-10 backdrop-blur-md
+                                                                    cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:z-20
                                                                     flex flex-col justify-center overflow-hidden
                                                                     ${focusMode
-                                                                        ? 'bg-indigo-600/20 border-indigo-500/30 text-indigo-100 hover:bg-indigo-600/30 shadow-lg shadow-black/20'
-                                                                        : 'bg-white/90 dark:bg-slate-900 border-indigo-100 dark:border-slate-700 text-indigo-900 dark:text-indigo-100 hover:bg-indigo-50 dark:hover:bg-slate-800 hover:border-indigo-200 dark:hover:border-indigo-400 shadow-md shadow-indigo-100 dark:shadow-none'}
+                                                                        ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-200 hover:bg-indigo-500/20 shadow-lg shadow-black/30'
+                                                                        : 'bg-indigo-50/80 dark:bg-indigo-900/30 border-indigo-200/50 dark:border-indigo-700/50 text-indigo-900 dark:text-indigo-100 hover:bg-indigo-100/90 dark:hover:bg-indigo-800/50 shadow-sm hover:border-indigo-300'}
                                                                 `}
                                                                 style={{
                                                                     top: `${top}px`,
@@ -730,9 +730,9 @@ const UnifiedCalendar: React.FC = () => {
                                                                     width: style.width
                                                                 }}
                                                             >
-                                                                <div className="font-bold text-xs truncate leading-tight mb-0.5">{e.title}</div>
-                                                                <div className={`text-[10px] truncate flex items-center gap-1 ${focusMode ? 'text-indigo-300' : 'text-indigo-500 dark:text-indigo-400'}`}>
-                                                                    <Clock className="w-2.5 h-2.5" />
+                                                                <div className="font-semibold text-[13px] truncate leading-tight tracking-tight mb-0.5">{e.title}</div>
+                                                                <div className={`text-[11px] font-medium truncate flex items-center gap-1 opacity-80 ${focusMode ? 'text-indigo-300' : 'text-indigo-700 dark:text-indigo-300'}`}>
+                                                                    <Clock className="w-3 h-3" />
                                                                     {e.time}
                                                                 </div>
                                                             </div>
@@ -782,9 +782,9 @@ const UnifiedCalendar: React.FC = () => {
                                                         <div key={e.id}
                                                             onClick={(ev) => { ev.stopPropagation(); setSelectedEvent(e); }}
                                                             className={`
-                                                                 absolute p-4 rounded-2xl border z-10 shadow-lg cursor-pointer
-                                                                 transition-all hover:scale-[1.01] hover:-translate-y-1
-                                                                 ${focusMode ? 'bg-indigo-600/20 border-indigo-500/40 text-white shadow-indigo-900/20' : 'bg-white dark:bg-slate-900 border-indigo-100 dark:border-slate-800 text-indigo-900 dark:text-white shadow-indigo-100/50 dark:shadow-none'}
+                                                                 absolute p-4 rounded-[20px] border z-10 backdrop-blur-md cursor-pointer
+                                                                 transition-all duration-300 hover:scale-[1.01] hover:-translate-y-1 hover:shadow-2xl hover:z-20
+                                                                 ${focusMode ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-100 shadow-indigo-900/20 hover:bg-indigo-500/20' : 'bg-indigo-50/90 dark:bg-indigo-900/40 border-indigo-200/50 dark:border-indigo-700/50 text-indigo-900 dark:text-indigo-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none hover:bg-indigo-100/90 dark:hover:bg-indigo-800/60 hover:border-indigo-300'}
                                                              `}
                                                             style={{
                                                                 top: `${top}px`,
@@ -795,20 +795,20 @@ const UnifiedCalendar: React.FC = () => {
                                                         >
                                                             <div className="flex justify-between items-start">
                                                                 <div>
-                                                                    <h3 className="font-bold text-base mb-1">{e.title}</h3>
-                                                                    <div className={`flex items-center gap-2 text-xs font-medium ${focusMode ? 'text-indigo-300' : 'text-indigo-500 dark:text-indigo-400'}`}>
+                                                                    <h3 className="font-bold text-[17px] tracking-tight mb-1">{e.title}</h3>
+                                                                    <div className={`flex items-center gap-2 text-[13px] font-medium opacity-80 ${focusMode ? 'text-indigo-300' : 'text-indigo-700 dark:text-indigo-300'}`}>
                                                                         <Clock className="w-3.5 h-3.5" />
                                                                         {e.time} - {e.endTime}
                                                                     </div>
                                                                 </div>
                                                                 {e.isOnline && (
-                                                                    <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${focusMode ? 'bg-indigo-500/30 text-indigo-200' : 'bg-indigo-50 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400'}`}>
+                                                                    <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${focusMode ? 'bg-indigo-500/30 text-indigo-200' : 'bg-white/60 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-200/50 dark:border-transparent'}`}>
                                                                         Online
                                                                     </span>
                                                                 )}
                                                             </div>
                                                             {e.location && (
-                                                                <div className={`flex items-center gap-1.5 mt-3 text-xs ${focusMode ? 'text-slate-400' : 'text-slate-500 dark:text-slate-400'}`}>
+                                                                <div className={`flex items-center gap-1.5 mt-3 text-xs opacity-70 ${focusMode ? 'text-indigo-200' : 'text-indigo-800 dark:text-indigo-200'}`}>
                                                                     <MapPin className="w-3.5 h-3.5" /> {e.location}
                                                                 </div>
                                                             )}
@@ -861,17 +861,17 @@ const UnifiedCalendar: React.FC = () => {
                         <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
                             {taskLoading ? (
                                 <div className="flex flex-col items-center justify-center h-40 opacity-50">
-                                    <Loader2 className={`w-6 h-6 animate-spin ${focusMode ? 'text-white' : 'text-indigo-600'}`} />
+                                    <Loader2 className={`w-6 h-6 animate-spin ${focusMode ? 'text-indigo-400' : 'text-indigo-600'}`} />
                                 </div>
                             ) : (
                                 tasks
                                     .filter(t => taskFilter === 'All' || t.platform.toLowerCase() === taskFilter.toLowerCase())
                                     .map(task => (
                                         <div key={task.id} className={`
-                                        group relative p-4 rounded-2xl border transition-all duration-200 cursor-grab active:cursor-grabbing
+                                        group relative p-4 rounded-[16px] border transition-all duration-300 cursor-grab active:cursor-grabbing hover:-translate-y-0.5
                                         ${focusMode
-                                                ? 'bg-slate-800/40 border-slate-700/50 hover:bg-slate-800 hover:border-emerald-500/30 text-slate-300'
-                                                : 'bg-white/80 dark:bg-slate-800/40 border-indigo-50 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 hover:border-emerald-200 dark:hover:border-emerald-500/30 hover:shadow-lg dark:hover:shadow-none hover:shadow-emerald-100/40'}
+                                                ? 'bg-slate-800/60 border-slate-700/50 hover:bg-slate-800 hover:border-emerald-500/50 text-slate-300 shadow-md shadow-black/10'
+                                                : 'bg-white dark:bg-slate-800/80 border-gray-100 dark:border-slate-700/80 hover:border-emerald-300 dark:hover:border-emerald-500/50 hover:shadow-[0_8px_30px_rgb(16,185,129,0.12)] dark:hover:shadow-none'}
                                     `}>
                                             <div className="flex justify-between items-start mb-2">
                                                 <div className="flex items-center gap-1.5">
