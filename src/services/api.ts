@@ -34,6 +34,8 @@ import {
   ServerInfo,
   ServerStatus,
   ShortLinkResponse,
+  StreamEvent,
+  StreamEventType,
   StripeCustomerRequest,
   StripePaymentRequest,
   Subscription,
@@ -1755,6 +1757,70 @@ class ApiService {
     const response = await this.api.post(`/chat/conversations/${conversationId}/messages`, data);
     // Backend returns MessageRead object directly, not wrapped in ApiResponse
     return response.data;
+  }
+
+  async sendMessageStream(
+    conversationId: number, 
+    data: MessageCreate,
+    onEvent: (event: StreamEvent) => void,
+    signal?: AbortSignal
+  ): Promise<void> {
+    const token = localStorage.getItem('auth_token');
+    if (!token) throw new Error('No authentication token found');
+
+    const response = await fetch(`${this.api.defaults.baseURL}/chat/conversations/${conversationId}/messages/stream`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(data),
+      signal
+    });
+
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status}`);
+    }
+
+    if (!response.body) {
+      throw new Error('ReadableStream not supported by this browser');
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder('utf-8');
+    let buffer = '';
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        
+        if (done) break;
+        
+        buffer += decoder.decode(value, { stream: true });
+        
+        // Process complete lines
+        let newlineIndex;
+        while ((newlineIndex = buffer.indexOf('\n')) !== -1) {
+          const line = buffer.slice(0, newlineIndex).trim();
+          buffer = buffer.slice(newlineIndex + 1);
+          
+          if (line.startsWith('data: ')) {
+            const dataStr = line.substring(6);
+            if (dataStr === '[DONE]') {
+              return;
+            }
+            try {
+              const eventData = JSON.parse(dataStr) as StreamEvent;
+              onEvent(eventData);
+            } catch (e) {
+              console.error('Error parsing SSE event:', e, dataStr);
+            }
+          }
+        }
+      }
+    } finally {
+      reader.releaseLock();
+    }
   }
 
   async updateConversation(conversationId: number, title: string): Promise<ApiResponse<Conversation>> {
