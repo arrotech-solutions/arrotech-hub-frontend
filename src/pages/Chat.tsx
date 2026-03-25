@@ -14,7 +14,9 @@ import { Activity } from 'lucide-react';
 import ChatSidebar from '../components/chat/ChatSidebar';
 import MessageList from '../components/chat/MessageList';
 import ChatInput from '../components/chat/ChatInput';
+import ArtifactPanel from '../components/chat/ArtifactPanel';
 import { useSubscription } from '../hooks/useSubscription';
+import { useStreamingChat } from '../hooks/useStreamingChat';
 
 // TypeScript declarations for speech recognition
 declare global {
@@ -46,11 +48,28 @@ const Chat: React.FC = () => {
   const [messageVersions, setMessageVersions] = useState<{ [key: number]: Message[] }>({});
   const [currentVersion, setCurrentVersion] = useState<{ [key: number]: number }>({});
 
+  const {
+    isStreaming,
+    content: streamingContent,
+    reasoningContent,
+    activeArtifact,
+    thinkingSteps,
+    activeTools,
+    searchSources,
+    error: streamError,
+    sendStreamingMessage,
+    cancelStream
+  } = useStreamingChat();
+
   // Workflow & Agent State
   const [showWorkflowBuilder, setShowWorkflowBuilder] = useState(false);
   const [showAgentCreator, setShowAgentCreator] = useState(false);
   const [extractedToolCalls, setExtractedToolCalls] = useState<ExtractedToolCall[]>([]);
   const [createdWorkflowId, setCreatedWorkflowId] = useState<number | null>(null);
+
+  // Feature Toggles state
+  const [useReasoning, setUseReasoning] = useState(false);
+  const [useSearch, setUseSearch] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -249,18 +268,41 @@ const Chat: React.FC = () => {
         }
       }
 
-      const response = await apiService.sendMessage(conversationToUse!.id, {
+      // Optimistically add the user message
+      const tempUserMessage: Message = {
+        id: Date.now(), // temporary ID
+        conversation_id: conversationToUse!.id,
+        role: 'user',
         content: messageContent,
-        provider: selectedProvider
-      });
-
-      setMessages(prev => [...prev, response]);
+        created_at: new Date().toISOString(),
+        status: 'completed'
+      };
+      
+      setMessages(prev => [...prev, tempUserMessage]);
       loadConversations();
       refreshUsage();
+
+      await sendStreamingMessage(
+        conversationToUse!.id,
+        messageContent,
+        selectedProvider,
+        useReasoning,
+        useSearch,
+        // On success, reload messages to get the real DB IDs
+        () => {
+          loadMessages(conversationToUse!.id);
+          setIsLoading(false);
+        }
+      );
+      
+      // If there's an immediate error from the stream initialization
+      if (streamError) {
+        throw new Error(streamError);
+      }
+
     } catch (error) {
       toast.error('Failed to send message');
       setInputMessage(messageContent);
-    } finally {
       setIsLoading(false);
     }
   };
@@ -436,6 +478,12 @@ const Chat: React.FC = () => {
           messages={messages}
           isDarkMode={isDarkMode}
           isLoading={isLoading}
+          isStreaming={isStreaming}
+          streamingContent={streamingContent}
+          reasoningContent={reasoningContent}
+          thinkingSteps={thinkingSteps}
+          activeTools={activeTools}
+          searchSources={searchSources}
           currentConversation={currentConversation}
           messageVersions={messageVersions}
           currentVersion={currentVersion}
@@ -469,8 +517,21 @@ const Chat: React.FC = () => {
           isProviderAvailable={isProviderAvailable}
           usage={usage}
           limits={limits}
+          useReasoning={useReasoning}
+          setUseReasoning={setUseReasoning}
+          useSearch={useSearch}
+          setUseSearch={setUseSearch}
         />
       </main>
+
+      {/* Artifact Panel */}
+      {activeArtifact && (
+        <ArtifactPanel
+          artifact={activeArtifact}
+          isDarkMode={isDarkMode}
+          onClose={() => { /* the user can close, we'd need to add a way to hide it via state if needed, for now just null the state or implement a local close state */ }}
+        />
+      )}
 
       {/* Modals */}
       {showWorkflowBuilder && currentConversation && (
