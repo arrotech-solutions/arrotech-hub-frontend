@@ -9,13 +9,24 @@ import {
     Globe,
     MessageSquare
 } from 'lucide-react';
-import { Conversation, Message } from '../../types';
+import { Conversation, Message, SearchSource } from '../../types';
 import MessageItem from './MessageItem';
+import StreamingMessageBubble from './StreamingMessageBubble';
+import ThinkingIndicator from './ThinkingIndicator';
+import SearchSourceCards from './SearchSourceCards';
+import { ThinkingStep } from '../../hooks/useStreamingChat';
+import { ToolCall } from '../../types';
 
 interface MessageListProps {
     messages: Message[];
     isDarkMode: boolean;
     isLoading: boolean;
+    isStreaming?: boolean;
+    streamingContent?: string;
+    reasoningContent?: string;
+    thinkingSteps?: ThinkingStep[];
+    activeTools?: ToolCall[];
+    searchSources?: SearchSource[];
     currentConversation: Conversation | null;
     messageVersions: { [key: number]: Message[] };
     currentVersion: { [key: number]: number };
@@ -36,6 +47,12 @@ const MessageList: React.FC<MessageListProps> = ({
     messages,
     isDarkMode,
     isLoading,
+    isStreaming = false,
+    streamingContent = '',
+    reasoningContent = '',
+    thinkingSteps = [],
+    activeTools = [],
+    searchSources = [],
     currentConversation,
     messageVersions,
     currentVersion,
@@ -161,7 +178,8 @@ const MessageList: React.FC<MessageListProps> = ({
                             />
                         ))}
 
-                        {isLoading && (
+                        {/* Standard Loading Indicator (fallback if not streaming) */}
+                        {isLoading && !isStreaming && (
                             <div className="flex flex-col items-start mb-8 animate-in fade-in slide-in-from-bottom-2">
                                 <div className="flex items-center space-x-3">
                                     <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg animate-pulse">
@@ -182,6 +200,29 @@ const MessageList: React.FC<MessageListProps> = ({
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                        )}
+
+                        {/* SSE Streaming UI Elements */}
+                        {isStreaming && (
+                            <div className="w-full max-w-[85%] mb-8 animate-in fade-in slide-in-from-bottom-2">
+                                {thinkingSteps && thinkingSteps.length > 0 && (
+                                    <div className="ml-11 mb-2">
+                                        <ThinkingIndicator steps={thinkingSteps} isDarkMode={isDarkMode} />
+                                    </div>
+                                )}
+                                {searchSources && searchSources.length > 0 && (
+                                    <div className="ml-11 mb-2">
+                                        <SearchSourceCards sources={searchSources} isDarkMode={isDarkMode} />
+                                    </div>
+                                )}
+                                {streamingContent && (
+                                    <StreamingMessageBubble 
+                                        content={streamingContent} 
+                                        reasoningContent={reasoningContent}
+                                        isDarkMode={isDarkMode} 
+                                    />
+                                )}
                             </div>
                         )}
                     </>
