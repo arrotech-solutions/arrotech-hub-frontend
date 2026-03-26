@@ -14,81 +14,38 @@ import {
 } from 'lucide-react';
 import { Message } from '../../types';
 
+import ToolInsightCard from './ToolInsightCard';
+
 interface ToolResultWidgetProps {
     message: Message;
     isDarkMode: boolean;
-    showDetailedResults?: boolean;
+    responseMode?: 'simple' | 'detailed';
 }
 
 const ToolResultWidget: React.FC<ToolResultWidgetProps> = ({
     message,
     isDarkMode,
-    showDetailedResults = true,
+    responseMode = 'simple',
 }) => {
     if (!message.tools_called) return null;
-
-    const renderToolIcon = (name: string) => {
-        const n = name.toLowerCase();
-        if (n.includes('slack')) return <MessageCircle size={14} />;
-        if (n.includes('hubspot') || n.includes('sale') || n.includes('customer')) return <User size={14} />;
-        if (n.includes('analytics') || n.includes('report') || n.includes('ga4')) return <BarChart3 size={14} />;
-        if (n.includes('file')) return <FileText size={14} />;
-        if (n.includes('web')) return <Globe size={14} />;
-        if (n.includes('image')) return <ImageIcon size={14} />;
-        if (n.includes('security')) return <Zap size={14} />;
-        return <Activity size={14} />;
-    };
-
-    const getToolColor = (name: string) => {
-        const n = name.toLowerCase();
-        if (n.includes('slack')) return 'text-purple-500 bg-purple-500/10 border-purple-500/20';
-        if (n.includes('hubspot') || n.includes('sale')) return 'text-orange-500 bg-orange-500/10 border-orange-500/20';
-        if (n.includes('analytics')) return 'text-blue-500 bg-blue-500/10 border-blue-500/20';
-        if (n.includes('file')) return 'text-indigo-500 bg-indigo-500/10 border-indigo-500/20';
-        if (n.includes('web')) return 'text-cyan-500 bg-cyan-500/10 border-cyan-500/20';
-        if (n.includes('error')) return 'text-red-500 bg-red-500/10 border-red-500/20';
-        return 'text-gray-500 bg-gray-500/10 border-gray-500/20';
-    };
 
     return (
         <div className="space-y-4 my-4">
             {message.tools_called.map((tool, idx) => {
                 const isSuccess = tool.success !== false && !tool.result?.error;
-                const colorClass = isSuccess ? getToolColor(tool.name) : getToolColor('error');
+                const toolContext = (tool as any).context;
 
                 return (
-                    <div
+                    <ToolInsightCard
                         key={idx}
-                        className={`rounded-2xl border transition-all duration-300
-              ${isDarkMode ? 'bg-gray-800/40 border-gray-700/50' : 'bg-white border-gray-100 shadow-sm'}
-              ${!isSuccess ? 'border-red-500/20' : ''}`}
+                        tool={tool}
+                        context={toolContext}
+                        isDarkMode={isDarkMode}
+                        mode={responseMode}
                     >
-                        {/* Header */}
-                        <div className="flex items-center justify-between p-4 border-b border-transparent group cursor-pointer">
-                            <div className="flex items-center space-x-3">
-                                <div className={`p-2 rounded-xl border ${colorClass}`}>
-                                    {isSuccess ? renderToolIcon(tool.name) : <XCircle size={14} />}
-                                </div>
-                                <div>
-                                    <h4 className={`text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                                        {tool.name.replace(/_/g, ' ')}
-                                    </h4>
-                                    <div className="flex items-center space-x-2 mt-0.5">
-                                        <span className={`text-[10px] font-medium ${isSuccess ? 'text-green-500' : 'text-red-400'}`}>
-                                            {isSuccess ? 'Execution Successful' : 'Execution Failed'}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>
-                                Tool Call
-                            </div>
-                        </div>
-
                         {/* Content Body */}
-                        {showDetailedResults && tool.result && (
-                            <div className="p-4 pt-2">
+                        {tool.result && (
+                            <div className="pt-2">
                                 {/* Specific Tool Renderers */}
                                 {isSuccess ? (
                                     <div className="space-y-3">
@@ -277,20 +234,9 @@ const ToolResultWidget: React.FC<ToolResultWidgetProps> = ({
                                     </div>
                                 )}
 
-                                {/* Raw Footer (Debug) */}
-                                <details className="mt-3 group">
-                                    <summary className={`text-[10px] font-bold uppercase tracking-widest cursor-pointer hover:underline transition-all
-                    ${isDarkMode ? 'text-gray-600 hover:text-gray-400' : 'text-gray-400 hover:text-gray-600'}`}>
-                                        View Raw Response
-                                    </summary>
-                                    <pre className={`mt-2 p-3 text-[10px] rounded-xl overflow-x-auto max-h-40
-                    ${isDarkMode ? 'bg-gray-900 text-indigo-400' : 'bg-gray-50 text-indigo-600 border border-gray-100'}`}>
-                                        {JSON.stringify(tool.result, null, 2)}
-                                    </pre>
-                                </details>
                             </div>
                         )}
-                    </div>
+                    </ToolInsightCard>
                 );
             })}
         </div>
