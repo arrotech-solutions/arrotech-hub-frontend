@@ -10,6 +10,7 @@ import {
     BrainCircuit,
     Globe
 } from 'lucide-react';
+import ConnectedAppsDropdown from './ConnectedAppsDropdown';
 
 interface ChatInputProps {
     inputMessage: string;
@@ -96,25 +97,21 @@ const ChatInput: React.FC<ChatInputProps> = ({
                       
                       {/* Features Dropdown Menu */}
                       {showFeaturesMenu && (
-                          <div id="features-menu" className={`absolute left-0 bottom-full mb-2 w-56 rounded-xl border shadow-xl overflow-hidden z-50 animate-in fade-in slide-in-from-bottom-2 origin-bottom-left
+                          <div id="features-menu" className={`absolute left-0 bottom-full mb-2 w-56 rounded-xl border shadow-xl overflow-visible z-50 animate-in fade-in slide-in-from-bottom-2 origin-bottom-left
                               ${isDarkMode ? 'bg-gray-800 border-gray-700 shadow-black/50' : 'bg-white border-gray-100 shadow-gray-200/50'}`}
                           >
                               <div className="p-2 space-y-1">
                                   <button
-                                      onClick={() => { setUseReasoning(!useReasoning); setShowFeaturesMenu(false); }}
-                                      className={`w-full flex items-center justify-between p-2.5 rounded-lg text-sm transition-colors
+                                      className={`w-full flex items-center p-2.5 rounded-lg text-sm transition-colors
                                           ${isDarkMode ? 'hover:bg-gray-700/50 text-gray-200' : 'hover:bg-gray-50 text-gray-700'}
                                       `}
+                                      title="Add photos/files"
                                   >
                                       <div className="flex items-center space-x-3">
-                                          <BrainCircuit size={16} className={useReasoning ? 'text-indigo-500' : 'text-gray-400'} />
-                                          <span className="font-medium">Deep Thinking</span>
-                                      </div>
-                                      <div className={`w-8 h-4 rounded-full relative transition-colors ${useReasoning ? 'bg-indigo-500' : (isDarkMode ? 'bg-gray-600' : 'bg-gray-200')}`}>
-                                          <div className={`absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-white transition-transform ${useReasoning ? 'translate-x-4' : ''}`} />
+                                          <Paperclip size={16} className="text-blue-500" />
+                                          <span className="font-medium">Add photos/files</span>
                                       </div>
                                   </button>
-                                  
                                   <button
                                       onClick={() => { setUseSearch(!useSearch); setShowFeaturesMenu(false); }}
                                       className={`w-full flex items-center justify-between p-2.5 rounded-lg text-sm transition-colors
@@ -129,17 +126,25 @@ const ChatInput: React.FC<ChatInputProps> = ({
                                           <div className={`absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-white transition-transform ${useSearch ? 'translate-x-4' : ''}`} />
                                       </div>
                                   </button>
+                                  
+                                  <button
+                                      onClick={() => { setUseReasoning(!useReasoning); setShowFeaturesMenu(false); }}
+                                      className={`w-full flex items-center justify-between p-2.5 rounded-lg text-sm transition-colors
+                                          ${isDarkMode ? 'hover:bg-gray-700/50 text-gray-200' : 'hover:bg-gray-50 text-gray-700'}
+                                      `}
+                                  >
+                                      <div className="flex items-center space-x-3">
+                                          <BrainCircuit size={16} className={useReasoning ? 'text-indigo-500' : 'text-gray-400'} />
+                                          <span className="font-medium">Deep Thinking</span>
+                                      </div>
+                                      <div className={`w-8 h-4 rounded-full relative transition-colors ${useReasoning ? 'bg-indigo-500' : (isDarkMode ? 'bg-gray-600' : 'bg-gray-200')}`}>
+                                          <div className={`absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-white transition-transform ${useReasoning ? 'translate-x-4' : ''}`} />
+                                      </div>
+                                  </button>
+                                  <ConnectedAppsDropdown isDarkMode={isDarkMode} />
                               </div>
                           </div>
                       )}
-
-                      <button
-                          className={`p-2 rounded-xl transition-colors
-                            ${isDarkMode ? 'hover:bg-gray-700 text-gray-500' : 'hover:bg-gray-50 text-gray-400'}`}
-                          title="Attach File"
-                      >
-                          <Paperclip size={18} />
-                      </button>
                     </div>
 
                     <textarea

@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
-import { StreamEvent, ToolCall, SearchSource } from '../types';
+import { StreamEvent, ToolCall, SearchSource, ToolContextEvent } from '../types';
 import { apiService } from '../services/api';
 
 export interface ThinkingStep {
@@ -15,6 +15,7 @@ export interface StreamingState {
   activeArtifact: any | null;
   thinkingSteps: ThinkingStep[];
   activeTools: ToolCall[];
+  toolContexts: Record<string, ToolContextEvent>;
   searchSources: SearchSource[];
   error: string | null;
 }
@@ -27,6 +28,7 @@ export function useStreamingChat() {
     activeArtifact: null,
     thinkingSteps: [],
     activeTools: [],
+    toolContexts: {},
     searchSources: [],
     error: null,
   });
@@ -41,6 +43,7 @@ export function useStreamingChat() {
       activeArtifact: null,
       thinkingSteps: [],
       activeTools: [],
+      toolContexts: {},
       searchSources: [],
       error: null,
     });
@@ -99,6 +102,35 @@ export function useStreamingChat() {
                 newState.thinkingSteps = newSteps;
                 break;
 
+              case 'tool_context': {
+                // Store tool context for the upcoming tool call
+                const toolName = event.tool || '';
+                newState.toolContexts = {
+                  ...prev.toolContexts,
+                  [toolName]: {
+                    tool: toolName,
+                    platform: event.platform || 'Built-in',
+                    platform_icon: event.platform_icon || '⚡',
+                    platform_color: event.platform_color || 'gray',
+                    category: event.category || 'general',
+                    connection_status: event.connection_status || 'built-in',
+                    reason: event.reason || `Using ${toolName}`
+                  }
+                };
+                // Add a thinking step for why this tool was chosen
+                const contextSteps = [...prev.thinkingSteps];
+                if (contextSteps.length > 0) {
+                  contextSteps[contextSteps.length - 1].isComplete = true;
+                }
+                contextSteps.push({
+                  text: event.reason || `Selected ${toolName}`,
+                  isComplete: true,
+                  timestamp: new Date().toISOString()
+                });
+                newState.thinkingSteps = contextSteps;
+                break;
+              }
+
               case 'tool_start':
                 newState.activeTools = [
                   ...prev.activeTools,
@@ -127,7 +159,13 @@ export function useStreamingChat() {
                     return {
                       ...tool,
                       success: event.success,
-                      result: { summary: event.summary }
+                      result: {
+                        summary: event.summary,
+                        platform: event.platform,
+                        platform_icon: event.platform_icon,
+                        platform_color: event.platform_color,
+                        category: event.category
+                      }
                     };
                   }
                   return tool;
