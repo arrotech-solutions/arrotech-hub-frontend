@@ -10,7 +10,10 @@ import {
 } from 'lucide-react';
 import { Message } from '../../types';
 import ToolResultWidget from './ToolResultWidget';
+import ResponseModeToggle from './ResponseModeToggle';
 import ReasoningBubble, { extractThought } from './ReasoningBubble';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface MessageItemProps {
     message: Message;
@@ -27,6 +30,8 @@ interface MessageItemProps {
     startEditingMessage: (message: Message) => void;
     resendEditedMessage: () => void;
     formatTime: (timestamp: string) => string;
+    responseMode?: 'simple' | 'detailed';
+    onResponseModeChange?: (mode: 'simple' | 'detailed') => void;
 }
 
 const MessageItem: React.FC<MessageItemProps> = ({
@@ -44,6 +49,8 @@ const MessageItem: React.FC<MessageItemProps> = ({
     startEditingMessage,
     resendEditedMessage,
     formatTime,
+    responseMode = 'simple',
+    onResponseModeChange,
 }) => {
     const isUser = message.role === 'user';
     const isEditing = editingMessageId === message.id;
@@ -108,19 +115,65 @@ const MessageItem: React.FC<MessageItemProps> = ({
                                 </div>
                             </div>
                         ) : (
-                            <div className="text-sm sm:text-[15px] leading-relaxed whitespace-pre-wrap">
+                            <div className="text-sm sm:text-[15px] leading-relaxed">
                                 {!isUser && message.content && (
                                     <ReasoningBubble content={message.content} isDarkMode={isDarkMode} />
                                 )}
 
-                                {cleanContent}
+                                {!isUser ? (
+                                    <div className={`prose prose-sm max-w-none ${isDarkMode ? 'prose-invert' : 'prose-gray'} mt-1`}>
+                                        <ReactMarkdown
+                                            remarkPlugins={[remarkGfm]}
+                                            components={{
+                                                code({node, inline, className, children, ...props}: any) {
+                                                  const match = /language-(\w+)/.exec(className || '')
+                                                  return !inline && match ? (
+                                                    <div className="relative rounded-lg overflow-hidden my-4 border border-gray-700/50 not-prose">
+                                                      <div className="flex items-center px-4 py-2 bg-gray-900 border-b border-gray-800">
+                                                        <span className="text-xs text-gray-400 font-mono lowercase">{match[1]}</span>
+                                                      </div>
+                                                      <div className="overflow-x-auto bg-gray-950 p-4">
+                                                        <code className={className} {...props}>
+                                                          {children}
+                                                        </code>
+                                                      </div>
+                                                    </div>
+                                                  ) : (
+                                                    <code className={`${className} px-1.5 py-0.5 rounded-md ${isDarkMode ? 'bg-gray-700/50 text-indigo-300' : 'bg-indigo-50 text-indigo-600'}`} {...props}>
+                                                      {children}
+                                                    </code>
+                                                  )
+                                                }
+                                            }}
+                                        >
+                                            {cleanContent || ''}
+                                        </ReactMarkdown>
+                                    </div>
+                                ) : (
+                                    <div className="whitespace-pre-wrap">{cleanContent}</div>
+                                )}
 
                                 {/* Tool Results in Assistant Messages */}
                                 {!isUser && message.tools_called && (
-                                    <ToolResultWidget
-                                        message={message}
-                                        isDarkMode={isDarkMode}
-                                    />
+                                    <div className="mt-3 not-prose">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <span className={`text-[10px] font-bold uppercase tracking-widest ${isDarkMode ? 'text-gray-600' : 'text-gray-400'}`}>
+                                                Tools Used ({message.tools_called.length})
+                                            </span>
+                                            {onResponseModeChange && (
+                                                <ResponseModeToggle
+                                                    mode={responseMode}
+                                                    onChange={onResponseModeChange}
+                                                    isDarkMode={isDarkMode}
+                                                />
+                                            )}
+                                        </div>
+                                        <ToolResultWidget
+                                            message={message}
+                                            isDarkMode={isDarkMode}
+                                            responseMode={responseMode}
+                                        />
+                                    </div>
                                 )}
                             </div>
                         )}
