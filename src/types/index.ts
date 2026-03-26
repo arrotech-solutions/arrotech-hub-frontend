@@ -38,7 +38,7 @@ export interface Message {
 }
 
 // Tool Call Types for Workflow Extraction
-export type StreamEventType = 'thinking' | 'tool_start' | 'tool_result' | 'reasoning_delta' | 'content_delta' | 'content' | 'done' | 'error' | 'message_saved' | 'search_sources';
+export type StreamEventType = 'thinking' | 'tool_start' | 'tool_result' | 'tool_context' | 'reasoning_delta' | 'content_delta' | 'content' | 'done' | 'error' | 'message_saved' | 'search_sources';
 
 export interface SearchSource {
   title: string;
@@ -48,11 +48,21 @@ export interface SearchSource {
   favicon?: string | null;
 }
 
+export interface ToolContextEvent {
+  tool: string;
+  platform: string;
+  platform_icon: string;
+  platform_color: string;
+  category: string;
+  connection_status: string;
+  reason: string;
+}
+
 export interface StreamEvent {
   type: StreamEventType;
   content?: string;        // For thinking, content_delta, content
   delta?: string;          // For content_delta
-  tool?: string;           // For tool_start, tool_result
+  tool?: string;           // For tool_start, tool_result, tool_context
   args?: Record<string, any>; // For tool_start
   success?: boolean;       // For tool_result
   summary?: string;        // For tool_result
@@ -62,6 +72,13 @@ export interface StreamEvent {
   error?: string;          // For error
   sources?: SearchSource[]; // For search_sources
   timestamp?: string;
+  // Tool context fields (from tool_context and enriched tool_result events)
+  platform?: string;
+  platform_icon?: string;
+  platform_color?: string;
+  category?: string;
+  connection_status?: string;
+  reason?: string;
 }
 
 export interface ToolCall {
