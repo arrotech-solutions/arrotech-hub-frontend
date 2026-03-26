@@ -9,11 +9,14 @@ import {
     Globe,
     MessageSquare
 } from 'lucide-react';
-import { Conversation, Message, SearchSource } from '../../types';
+import { Conversation, Message, SearchSource, ToolContextEvent } from '../../types';
 import MessageItem from './MessageItem';
 import StreamingMessageBubble from './StreamingMessageBubble';
 import ThinkingIndicator from './ThinkingIndicator';
 import SearchSourceCards from './SearchSourceCards';
+import ToolInsightCard from './ToolInsightCard';
+import ResponseModeToggle from './ResponseModeToggle';
+
 import { ThinkingStep } from '../../hooks/useStreamingChat';
 import { ToolCall } from '../../types';
 
@@ -26,7 +29,10 @@ interface MessageListProps {
     reasoningContent?: string;
     thinkingSteps?: ThinkingStep[];
     activeTools?: ToolCall[];
+    toolContexts?: Record<string, ToolContextEvent>;
     searchSources?: SearchSource[];
+    responseMode?: 'simple' | 'detailed';
+    onResponseModeChange?: (mode: 'simple' | 'detailed') => void;
     currentConversation: Conversation | null;
     messageVersions: { [key: number]: Message[] };
     currentVersion: { [key: number]: number };
@@ -52,7 +58,10 @@ const MessageList: React.FC<MessageListProps> = ({
     reasoningContent = '',
     thinkingSteps = [],
     activeTools = [],
+    toolContexts = {},
     searchSources = [],
+    responseMode = 'simple',
+    onResponseModeChange,
     currentConversation,
     messageVersions,
     currentVersion,
@@ -164,6 +173,8 @@ const MessageList: React.FC<MessageListProps> = ({
                                 message={msg}
                                 isDarkMode={isDarkMode}
                                 isLast={idx === messages.length - 1}
+                                responseMode={responseMode || 'simple'}
+                                onResponseModeChange={onResponseModeChange}
                                 messageVersions={messageVersions[msg.id]}
                                 currentVersionIndex={currentVersion[msg.id] || 0}
                                 switchVersion={switchVersion}
@@ -214,6 +225,32 @@ const MessageList: React.FC<MessageListProps> = ({
                                 {searchSources && searchSources.length > 0 && (
                                     <div className="ml-11 mb-2">
                                         <SearchSourceCards sources={searchSources} isDarkMode={isDarkMode} />
+                                    </div>
+                                )}
+                                {/* Tool Insight Cards - replaces bare tool_start/tool_result rendering */}
+                                {activeTools && activeTools.length > 0 && (
+                                    <div className="ml-11 mb-3 space-y-2">
+                                        <div className="flex items-center justify-between mb-1">
+                                            <span className={`text-[10px] font-bold uppercase tracking-widest ${isDarkMode ? 'text-gray-600' : 'text-gray-400'}`}>
+                                                Tools Used ({activeTools.length})
+                                            </span>
+                                            {onResponseModeChange && (
+                                                <ResponseModeToggle
+                                                    mode={responseMode || 'simple'}
+                                                    onChange={onResponseModeChange}
+                                                    isDarkMode={isDarkMode}
+                                                />
+                                            )}
+                                        </div>
+                                        {activeTools.map((tool, idx) => (
+                                            <ToolInsightCard
+                                                key={`${tool.name}_${idx}`}
+                                                tool={tool}
+                                                context={toolContexts?.[tool.name]}
+                                                isDarkMode={isDarkMode}
+                                                mode={responseMode}
+                                            />
+                                        ))}
                                     </div>
                                 )}
                                 {streamingContent && (
