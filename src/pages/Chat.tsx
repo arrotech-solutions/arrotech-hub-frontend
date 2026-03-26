@@ -55,6 +55,7 @@ const Chat: React.FC = () => {
     activeArtifact,
     thinkingSteps,
     activeTools,
+    toolContexts,
     searchSources,
     error: streamError,
     sendStreamingMessage,
@@ -70,6 +71,9 @@ const Chat: React.FC = () => {
   // Feature Toggles state
   const [useReasoning, setUseReasoning] = useState(false);
   const [useSearch, setUseSearch] = useState(false);
+  const [responseMode, setResponseMode] = useState<'simple' | 'detailed'>(
+    () => (localStorage.getItem('chat_response_mode') as 'simple' | 'detailed') || 'simple'
+  );
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -288,13 +292,16 @@ const Chat: React.FC = () => {
         selectedProvider,
         useReasoning,
         useSearch,
-        // On success, reload messages to get the real DB IDs
+        // On success callback (optional)
         () => {
-          loadMessages(conversationToUse!.id);
-          setIsLoading(false);
+          console.log('Stream fully saved');
         }
       );
       
+      // Always reload messages and stop loading after the stream completes (even if error)
+      loadMessages(conversationToUse!.id);
+      setIsLoading(false);
+
       // If there's an immediate error from the stream initialization
       if (streamError) {
         throw new Error(streamError);
@@ -483,7 +490,13 @@ const Chat: React.FC = () => {
           reasoningContent={reasoningContent}
           thinkingSteps={thinkingSteps}
           activeTools={activeTools}
+          toolContexts={toolContexts}
           searchSources={searchSources}
+          responseMode={responseMode}
+          onResponseModeChange={(mode) => {
+            setResponseMode(mode);
+            localStorage.setItem('chat_response_mode', mode);
+          }}
           currentConversation={currentConversation}
           messageVersions={messageVersions}
           currentVersion={currentVersion}
