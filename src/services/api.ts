@@ -34,8 +34,6 @@ import {
   ServerInfo,
   ServerStatus,
   ShortLinkResponse,
-  StreamEvent,
-  StreamEventType,
   StripeCustomerRequest,
   StripePaymentRequest,
   Subscription,
@@ -49,11 +47,7 @@ import {
   Workflow,
   WorkflowCreateRequest,
   WorkflowExecuteRequest,
-  WorkflowTemplate,
-  DeveloperApp,
-  DeveloperAppCreate,
-  DeveloperAppUpdate,
-  DeveloperAppCredentials
+  WorkflowTemplate
 } from '../types';
 
 class ApiService {
@@ -561,10 +555,14 @@ class ApiService {
   }
 
 
-  // WhatsApp OAuth endpoints
   async getWhatsAppAuthUrl(): Promise<{ url: string }> {
     const response = await this.api.get('/api/whatsapp/auth-url');
     // The backend returns { url: "..." }
+    return response.data;
+  }
+
+  async connectWhatsAppEmbedded(code: string): Promise<ApiResponse<any>> {
+    const response = await this.api.post('/api/whatsapp/oauth/callback', { code });
     return response.data;
   }
 
@@ -802,49 +800,7 @@ class ApiService {
 
   // Zoom OAuth endpoints
   async getZoomAuthUrl(): Promise<{ auth_url: string; state: string }> {
-    const response = await this.api.get('/api/zoom/url');
-    return response.data;
-  }
-
-  // Developer App endpoints
-  async getDeveloperApps(): Promise<ApiResponse<DeveloperApp[]>> {
-    const response = await this.api.get('/developers/apps');
-    return response.data;
-  }
-
-  async createDeveloperApp(data: DeveloperAppCreate): Promise<ApiResponse<{ app: DeveloperApp; credentials: DeveloperAppCredentials }>> {
-    const response = await this.api.post('/developers/apps', data);
-    return response.data;
-  }
-
-  async getDeveloperApp(appId: number): Promise<ApiResponse<DeveloperApp>> {
-    const response = await this.api.get(`/developers/apps/${appId}`);
-    return response.data;
-  }
-
-  async updateDeveloperApp(appId: number, data: DeveloperAppUpdate): Promise<ApiResponse<DeveloperApp>> {
-    const response = await this.api.patch(`/developers/apps/${appId}`, data);
-    return response.data;
-  }
-
-  async deleteDeveloperApp(appId: number): Promise<ApiResponse<any>> {
-    const response = await this.api.delete(`/developers/apps/${appId}`);
-    return response.data;
-  }
-
-  async rotateDeveloperAppSecret(appId: number): Promise<ApiResponse<{ client_secret: string }>> {
-    const response = await this.api.post(`/developers/apps/${appId}/rotate-secret`);
-    return response.data;
-  }
-
-  // OAuth Authorization Code flows
-  async oauthAuthorize(params: { client_id: string; response_type: string; redirect_uri: string; scope: string; state?: string }): Promise<any> {
-    const response = await this.api.get('/auth/authorize', { params });
-    return response.data;
-  }
-
-  async oauthApprove(data: { client_id: string; response_type: string; redirect_uri: string; scope: string; state?: string }): Promise<ApiResponse<{ code: string; redirect_uri: string; state?: string }>> {
-    const response = await this.api.post('/auth/authorize/approve', data);
+    const response = await this.api.get('/api/zoom/auth-url');
     return response.data;
   }
 
@@ -1759,70 +1715,6 @@ class ApiService {
     return response.data;
   }
 
-  async sendMessageStream(
-    conversationId: number, 
-    data: MessageCreate,
-    onEvent: (event: StreamEvent) => void,
-    signal?: AbortSignal
-  ): Promise<void> {
-    const token = localStorage.getItem('auth_token');
-    if (!token) throw new Error('No authentication token found');
-
-    const response = await fetch(`${this.api.defaults.baseURL}/chat/conversations/${conversationId}/messages/stream`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(data),
-      signal
-    });
-
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status}`);
-    }
-
-    if (!response.body) {
-      throw new Error('ReadableStream not supported by this browser');
-    }
-
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder('utf-8');
-    let buffer = '';
-
-    try {
-      while (true) {
-        const { done, value } = await reader.read();
-        
-        if (done) break;
-        
-        buffer += decoder.decode(value, { stream: true });
-        
-        // Process complete lines
-        let newlineIndex;
-        while ((newlineIndex = buffer.indexOf('\n')) !== -1) {
-          const line = buffer.slice(0, newlineIndex).trim();
-          buffer = buffer.slice(newlineIndex + 1);
-          
-          if (line.startsWith('data: ')) {
-            const dataStr = line.substring(6);
-            if (dataStr === '[DONE]') {
-              return;
-            }
-            try {
-              const eventData = JSON.parse(dataStr) as StreamEvent;
-              onEvent(eventData);
-            } catch (e) {
-              console.error('Error parsing SSE event:', e, dataStr);
-            }
-          }
-        }
-      }
-    } finally {
-      reader.releaseLock();
-    }
-  }
-
   async updateConversation(conversationId: number, title: string): Promise<ApiResponse<Conversation>> {
     const response = await this.api.put(`/chat/conversations/${conversationId}`, { title });
     return response.data;
@@ -1857,7 +1749,6 @@ class ApiService {
     const response = await this.api.delete('/settings');
     return response.data;
   }
-  
 
   // Notification settings
   async getNotificationSettings(): Promise<ApiResponse<NotificationSettings>> {
@@ -2684,17 +2575,17 @@ class ApiService {
 
   // M-Pesa Agent endpoints
   async getMpesaAgentConfig(): Promise<ApiResponse<MpesaAgentConfig>> {
-    const response = await this.api.get('/api/agents/daraja/config');
+    const response = await this.api.get('/api/agents/mpesa/config');
     return response.data;
   }
 
   async updateMpesaAgentConfig(config: Partial<MpesaAgentConfig>): Promise<ApiResponse<MpesaAgentConfig>> {
-    const response = await this.api.post('/api/agents/daraja/config', config);
+    const response = await this.api.post('/api/agents/mpesa/config', config);
     return response.data;
   }
 
   async getMpesaPaymentSummary(days: number = 1): Promise<ApiResponse<MpesaPaymentSummary>> {
-    const response = await this.api.get('/api/agents/daraja/summary', { params: { days } });
+    const response = await this.api.get('/api/agents/mpesa/summary', { params: { days } });
     return response.data;
   }
 
@@ -2703,17 +2594,12 @@ class ApiService {
     offset?: number;
     status?: 'pending' | 'matched' | 'unmatched';
   } = {}): Promise<ApiResponse<MpesaPaymentListResponse>> {
-    const response = await this.api.get('/api/agents/daraja/payments', { params });
+    const response = await this.api.get('/api/agents/mpesa/payments', { params });
     return response.data;
   }
 
   async getUnmatchedMpesaPayments(limit: number = 10): Promise<ApiResponse<{ payments: MpesaPayment[] }>> {
-    const response = await this.api.get('/api/agents/daraja/payments/unmatched', { params: { limit } });
-    return response.data;
-  }
-
-  async registerMpesaUrls(): Promise<ApiResponse<any>> {
-    const response = await this.api.post('/api/agents/daraja/register-urls');
+    const response = await this.api.get('/api/agents/mpesa/payments/unmatched', { params: { limit } });
     return response.data;
   }
 
@@ -3108,6 +2994,20 @@ class ApiService {
     const response = await this.api.post('/api/blog/seed');
     return response.data;
   }
+
+  // ── Zoho Integration ──────────────────────────────────────
+  async getZohoAuthUrl(): Promise<{ success: boolean; auth_url: string }> {
+    const response = await this.api.get('/api/zoho/auth-url');
+    return response.data;
+  }
+
+  async getZohoCallback(code: string, state: string): Promise<any> {
+    const response = await this.api.get('/api/zoho/callback', {
+      params: { code, state }
+    });
+    return response.data;
+  }
+
 }
 
 export const apiService = new ApiService();
