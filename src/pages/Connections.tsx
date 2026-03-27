@@ -323,7 +323,7 @@ const Integrations: React.FC = () => {
     // Redirect to WhatsApp Auth if it's WhatsApp AND NOT already connected
     if (platform.id === 'whatsapp' && !existing) {
       try {
-        toast.loading('Redirecting to Facebook...', { id: 'oauth-redirect' });
+        toast.loading('Redirecting to WhatsApp...', { id: 'oauth-redirect' });
         const { url } = await apiService.getWhatsAppAuthUrl();
         window.location.href = url;
         return;
@@ -338,7 +338,7 @@ const Integrations: React.FC = () => {
             currentTier: details.current_tier || 'Free'
           });
         } else {
-          toast.error('Failed to initiate connection');
+          toast.error(error.message || 'Failed to initiate connection');
         }
         return;
       }
