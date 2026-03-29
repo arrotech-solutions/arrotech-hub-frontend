@@ -135,28 +135,28 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       description: 'Platform usage and metrics',
       badge: null
     },
-    // {
-    //   name: 'Channels',
-    //   icon: Share2,
-    //   description: 'Social & messaging platforms',
-    //   badge: 'New',
-    //   children: [
-    //     {
-    //       name: 'WhatsApp',
-    //       href: '/whatsapp',
-    //       icon: Phone,
-    //       description: 'WhatsApp Business automation',
-    //       badge: 'New'
-    //     },
-    //     {
-    //       name: 'TikTok',
-    //       href: '/tiktok',
-    //       icon: Video,
-    //       description: 'Viral content scheduler',
-    //       badge: 'New'
-    //     }
-    //   ]
-    // },
+    {
+      name: 'Channels',
+      icon: Share2,
+      description: 'Social & messaging platforms',
+      badge: 'New',
+      children: [
+        {
+          name: 'WhatsApp',
+          href: '/whatsapp',
+          icon: Phone,
+          description: 'WhatsApp Business automation',
+          badge: 'New'
+        },
+        {
+          name: 'TikTok',
+          href: '/tiktok',
+          icon: Video,
+          description: 'Viral content scheduler',
+          badge: 'New'
+        }
+      ]
+    },
     {
       name: 'Marketplace',
       href: '/marketplace',
