@@ -299,7 +299,7 @@ const AppRoutes: React.FC = () => {
         }
       />
 
-      {/* <Route
+      <Route
         path="/whatsapp"
         element={
           <ProtectedRoute>
@@ -308,9 +308,9 @@ const AppRoutes: React.FC = () => {
             </Layout>
           </ProtectedRoute>
         }
-      /> */}
+      />
 
-      {/* <Route
+      <Route
         path="/tiktok"
         element={
           <ProtectedRoute>
@@ -319,7 +319,7 @@ const AppRoutes: React.FC = () => {
             </Layout>
           </ProtectedRoute>
         }
-      /> */}
+      />
 
       <Route
         path="/marketplace"

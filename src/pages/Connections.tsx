@@ -212,6 +212,8 @@ const Integrations: React.FC = () => {
         toast.success('Airtable connected successfully!');
       } else if (success === 'xero_connected') {
         toast.success('Xero connected successfully!');
+      } else if (success === 'linkedin_connected') {
+        toast.success('LinkedIn connected successfully!');
       } else {
         toast.success('Connection successful!');
       }
@@ -358,6 +360,30 @@ const Integrations: React.FC = () => {
           setUpgradeModal({
             isOpen: true,
             feature: details.feature || 'Facebook integration',
+            requiredTier: details.required_tier || 'Business Pro',
+            currentTier: details.current_tier || 'Free'
+          });
+        } else {
+          toast.error('Failed to initiate connection');
+        }
+        return;
+      }
+    }
+
+    // Redirect to LinkedIn Auth if it's LinkedIn AND NOT already connected
+    if (platform.id === 'linkedin' && !existing) {
+      try {
+        toast.loading('Redirecting to LinkedIn...', { id: 'oauth-redirect' });
+        const { url } = await apiService.getLinkedInAuthUrl();
+        window.location.href = url;
+        return;
+      } catch (error: any) {
+        toast.dismiss('oauth-redirect');
+        if (error.response?.status === 402) {
+          const details = error.response.data;
+          setUpgradeModal({
+            isOpen: true,
+            feature: details.feature || 'LinkedIn integration',
             requiredTier: details.required_tier || 'Business Pro',
             currentTier: details.current_tier || 'Free'
           });
