@@ -67,5 +67,12 @@
   <noscript>You need to enable JavaScript to run this app.</noscript>
   <div id="root"></div>
   <script type="module" src="/src/index.tsx"></script>
+  <!-- Facebook SDK for Embedded Signup -->
+  <script>
+    window.fbAsyncInit = function() {
+      // FB.init will be called by the application code when ready
+    };
+  </script>
+  <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>
 </body>
 </html>
