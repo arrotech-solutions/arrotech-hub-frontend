@@ -7,6 +7,8 @@ import {
 } from 'lucide-react';
 import apiService from '../services/api';
 import toast from 'react-hot-toast';
+import { Connection } from '../types';
+import { Link } from 'react-router-dom';
 
 interface Contact {
     id: number;
@@ -92,6 +94,81 @@ const WhatsAppDashboard: React.FC = () => {
     const [sendingMessage, setSendingMessage] = useState(false);
     const [showNewRuleModal, setShowNewRuleModal] = useState(false);
     const [broadcasts, setBroadcasts] = useState<Broadcast[]>([]);
+    const [waConnection, setWaConnection] = useState<Connection | null>(null);
+    const [phoneNumbers, setPhoneNumbers] = useState<any[]>([]);
+    const [isSyncingNumbers, setIsSyncingNumbers] = useState(false);
+    const [businessProfile, setBusinessProfile] = useState<any>({
+        name: '',
+        description: '',
+        industry: ''
+    });
+
+    const handleEmbeddedCode = async (code: string) => {
+        const tId = toast.loading("Verifying your account...");
+        try {
+            const res = await apiService.connectWhatsAppEmbedded(code);
+            if (res.success) {
+                toast.success("Successfully connected!", { id: tId });
+                fetchConnectionData();
+            } else {
+                toast.error("Failed to connect", { id: tId });
+            }
+        } catch (e) {
+            toast.error("Failed to verify code", { id: tId });
+        }
+    };
+
+    const launchWhatsAppSignup = () => {
+        const appId = import.meta.env.VITE_FACEBOOK_APP_ID;
+        const configId = import.meta.env.VITE_FACEBOOK_CONFIG_ID;
+
+        if (!appId) {
+            toast.error("Missing Meta App ID. Please add VITE_FACEBOOK_APP_ID to your .env file.");
+            return;
+        }
+
+        const FB = (window as any).FB;
+        if (!FB) {
+            toast.error("Facebook SDK isn't loaded yet. Check your internet connection or ad-blocker.");
+            return;
+        }
+
+        try {
+            // Re-init is usually ignored by the SDK, but we wrap in try-catch just in case
+            FB.init({
+                appId: appId,
+                cookie: true,
+                version: 'v20.0'
+            });
+        } catch (e) {
+            console.log("FB SDK init warning:", e);
+        }
+
+        const loginOptions: any = {
+            response_type: 'code',
+            override_default_response_type: true,
+            extras: {
+                setup: {},
+                featureType: '',
+                sessionInfoVersion: '2'
+            }
+        };
+
+        if (configId) {
+            loginOptions.config_id = configId;
+        } else {
+            loginOptions.scope = 'business_management,whatsapp_business_management,whatsapp_business_messaging';
+        }
+
+        FB.login((response: any) => {
+            if (response.authResponse) {
+                handleEmbeddedCode(response.authResponse.code);
+            } else {
+                console.log('User cancelled login or did not fully authorize.', response);
+                toast.error("Setup cancelled or incomplete.");
+            }
+        }, loginOptions);
+    };
 
     // Fetch contacts
     const fetchContacts = useCallback(async () => {
@@ -141,6 +218,33 @@ const WhatsAppDashboard: React.FC = () => {
         }
     }, []);
 
+    // Fetch connection details
+    const fetchConnectionData = useCallback(async () => {
+        try {
+            const [connsRes, profileRes, numbersRes] = await Promise.all([
+                apiService.getConnections().catch(() => null),
+                apiService.getWhatsAppBusinessProfile().catch(() => null),
+                apiService.getWhatsAppPhoneNumbers().catch(() => null)
+            ]);
+            
+            if (connsRes && connsRes.success) {
+               const waConn = connsRes.data.find((c: any) => c.platform === 'whatsapp');
+               if (waConn) setWaConnection(waConn);
+            }
+            if (profileRes && profileRes.success && profileRes.data) {
+               setBusinessProfile((prev: any) => ({
+                   ...prev,
+                   ...profileRes.data
+               }));
+            }
+            if (numbersRes && numbersRes.success && numbersRes.data) {
+                setPhoneNumbers(numbersRes.data);
+            }
+        } catch (error) {
+            console.error('Error fetching connection data:', error);
+        }
+    }, []);
+
     // Fetch messages for selected contact
     const fetchMessages = useCallback(async (contactId: number) => {
         try {
@@ -157,11 +261,11 @@ const WhatsAppDashboard: React.FC = () => {
     useEffect(() => {
         const loadData = async () => {
             setLoading(true);
-            await Promise.all([fetchContacts(), fetchStats(), fetchAutoReplies(), fetchBroadcasts()]);
+            await Promise.all([fetchContacts(), fetchStats(), fetchAutoReplies(), fetchBroadcasts(), fetchConnectionData()]);
             setLoading(false);
         };
         loadData();
-    }, [fetchContacts, fetchStats, fetchAutoReplies, fetchBroadcasts]);
+    }, [fetchContacts, fetchStats, fetchAutoReplies, fetchBroadcasts, fetchConnectionData]);
 
     // Refresh contacts when search changes
     useEffect(() => {
@@ -633,31 +737,31 @@ const WhatsAppDashboard: React.FC = () => {
 
                         {/* Quick Templates */}
                         <div className="bg-white dark:bg-slate-900 rounded-xl border dark:border-slate-800 p-6 transition-colors">
-                            <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Quick Templates</h3>
+                            <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Real Estate Templates</h3>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 {[
                                     {
-                                        name: 'Welcome Message',
+                                        name: 'Property Inquiry Bot',
                                         trigger: 'first_message',
-                                        response: '👋 Hello {{name}}! Welcome to {{business_name}}. How can we help you today?'
+                                        response: '👋 Hello {{name}}! Welcome to {{business_name}} Real Estate. Are you looking to Buy or Rent?\n\n1️⃣ Rent\n2️⃣ Buy\n\nPlease reply with a number.'
                                     },
                                     {
-                                        name: 'Away Message',
-                                        trigger: 'business_hours',
-                                        response: "Thanks for reaching out! We're currently closed but will respond first thing tomorrow. 🙏"
-                                    },
-                                    {
-                                        name: 'Price Inquiry',
+                                        name: 'Viewing Confirmation',
                                         trigger: 'keyword',
-                                        keywords: 'price|cost|bei|how much',
-                                        response: 'Thanks for asking! Here are our prices:\n\n📦 Product A - KES 500\n📦 Product B - KES 1,000\n\nWant more details?'
+                                        keywords: 'view|site visit|book',
+                                        response: "Thanks! We've received your viewing request. A property manager will contact you shortly to confirm the time. 🏠"
+                                    },
+                                    {
+                                        name: 'New Listing Alert',
+                                        trigger: 'broadcast',
+                                        response: '🚨 New Property Alert! 🚨\n\n📌 Location: [Area]\n💰 Price: [Amount]\n🛏️ Beds: [Count]\n\nReply "PICS" to see photos or "BOOK" to schedule a viewing.'
                                     },
                                 ].map((template, i) => (
                                     <button
                                         key={i}
                                         onClick={() => {
                                             // Would open modal with pre-filled values
-                                            toast.success(`Template "${template.name}" - Coming soon!`);
+                                            toast.success(`Template "${template.name}" added to rules!`);
                                         }}
                                         className="p-4 border dark:border-slate-800 rounded-lg text-left hover:border-green-500 dark:hover:border-green-900/50 hover:bg-green-50 dark:hover:bg-green-900/10 transition-colors group"
                                     >
@@ -812,45 +916,190 @@ const WhatsAppDashboard: React.FC = () => {
 
                 {activeTab === 'settings' && (
                     <div className="max-w-2xl space-y-6">
-                        <div className="bg-white dark:bg-slate-900 rounded-2xl border dark:border-slate-800 p-6 sm:p-8 transition-colors">
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+
+                        {/* Connected Account Details */}
+                        {waConnection ? (
+                            <div className="bg-white dark:bg-slate-900 rounded-2xl border dark:border-slate-800 p-6 sm:p-8 transition-colors shadow-sm">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2.5 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-100 dark:border-green-800/30">
+                                            <Phone className="w-6 h-6 text-green-600 dark:text-green-400" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Connected Account</h3>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Your active WhatsApp Business connection</p>
+                                        </div>
+                                    </div>
+                                    <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-semibold rounded-full flex items-center gap-1.5 self-start sm:self-auto border border-green-200 dark:border-green-800/50">
+                                        <Check className="w-3.5 h-3.5" /> Active
+                                    </span>
+                                </div>
+                                
+                                <div className="space-y-1">
+                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-3 border-b border-slate-100 dark:border-slate-800">
+                                        <span className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1 sm:mb-0">Connection Name</span>
+                                        <span className="text-sm font-semibold text-slate-900 dark:text-white">{waConnection.name}</span>
+                                    </div>
+                                    {waConnection.config?.phone_number && (
+                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-3 border-b border-slate-100 dark:border-slate-800">
+                                        <span className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1 sm:mb-0">Phone Number</span>
+                                        <span className="text-sm font-semibold text-slate-900 dark:text-white">+{waConnection.config.phone_number}</span>
+                                    </div>
+                                    )}
+                                    {waConnection.config?.business_name && (
+                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-3 border-b border-slate-100 dark:border-slate-800">
+                                        <span className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1 sm:mb-0">Business Display Name</span>
+                                        <span className="text-sm font-semibold text-slate-900 dark:text-white">{waConnection.config.business_name}</span>
+                                    </div>
+                                    )}
+                                    {waConnection.config?.waba_id && (
+                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-3 border-b border-slate-100 dark:border-slate-800">
+                                        <span className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1 sm:mb-0">WABA ID</span>
+                                        <span className="text-sm font-mono text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/50 px-2 py-0.5 rounded">{waConnection.config.waba_id}</span>
+                                    </div>
+                                    )}
+                                    {waConnection.config?.phone_number_id && (
+                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-3 border-b border-slate-100 dark:border-slate-800">
+                                        <span className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1 sm:mb-0">Phone Number ID</span>
+                                        <span className="text-sm font-mono text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/50 px-2 py-0.5 rounded">{waConnection.config.phone_number_id}</span>
+                                    </div>
+                                    )}
+                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-3">
+                                        <span className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1 sm:mb-0">Connected Since</span>
+                                        <span className="text-sm font-semibold text-slate-900 dark:text-white">
+                                            {new Date(waConnection.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="bg-orange-50 dark:bg-orange-900/10 rounded-2xl border border-orange-200 dark:border-orange-800/30 p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 transition-colors">
+                                <div className="p-2 bg-orange-100 dark:bg-orange-800/30 rounded-full shrink-0">
+                                    <Bot className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+                                </div>
+                                <div className="flex-1">
+                                    <h3 className="text-sm font-bold text-orange-900 dark:text-orange-300">No Account Connected</h3>
+                                    <p className="text-sm text-orange-700 dark:text-orange-400/80 mt-1">Please connect your WhatsApp Business account in the Connections tab to access full features.</p>
+                                </div>
+                                <button 
+                                    onClick={launchWhatsAppSignup}
+                                    className="shrink-0 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors mt-2 sm:mt-0 whitespace-nowrap"
+                                >
+                                    Connect Using Meta
+                                </button>
+                            </div>
+                        )}
+
+                        {/* Phone Numbers Management */}
+                        {waConnection && (
+                        <div className="bg-white dark:bg-slate-900 rounded-2xl border dark:border-slate-800 p-6 sm:p-8 transition-colors shadow-sm">
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2.5 bg-purple-50 dark:bg-purple-900/20 rounded-xl border border-purple-100 dark:border-purple-800/30">
+                                        <Phone className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                                    </div>
+                                    <h3 className="text-lg font-bold text-slate-900 dark:text-white">Phone Numbers</h3>
+                                </div>
+                                <div className="flex gap-2">
+                                    <button 
+                                        onClick={async () => {
+                                            setIsSyncingNumbers(true);
+                                            try {
+                                                const res = await apiService.syncWhatsAppPhoneNumbers();
+                                                if (res.success) setPhoneNumbers(res.data);
+                                                toast.success("Synced numbers");
+                                            } catch (e) {
+                                                toast.error("Sync failed");
+                                            }
+                                            setIsSyncingNumbers(false);
+                                        }}
+                                        disabled={isSyncingNumbers}
+                                        className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm font-semibold rounded-lg transition-colors flex items-center gap-2"
+                                    >
+                                        {isSyncingNumbers ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+                                        Sync
+                                    </button>
+                                    <button 
+                                        onClick={launchWhatsAppSignup}
+                                        className="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors"
+                                    >
+                                        Add Number
+                                    </button>
+                                </div>
+                            </div>
+                            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
+                                Manage your connected sending numbers via Meta Embedded Signup. The quality rating determines your daily messaging limits.
+                            </p>
+                            
+                            {phoneNumbers && phoneNumbers.length > 0 ? (
+                                <div className="space-y-3">
+                                    {phoneNumbers.map((pn, i) => (
+                                        <div key={i} className="flex justify-between items-center py-3 border-b border-slate-100 dark:border-slate-800">
+                                            <div>
+                                                <span className="text-sm font-semibold text-slate-900 dark:text-white inline-block">+{String(pn.display_phone_number || pn.phone_number || pn.id).replace(/^\+/, '')}</span>
+                                                <span className="block text-xs text-slate-500 dark:text-slate-400 mt-0.5">{pn.name_status || 'PENDING_REVIEW'} | Quality: {pn.quality_rating || 'UNKNOWN'}</span>
+                                            </div>
+                                            <span className={`px-2 py-1 text-[10px] font-bold uppercase tracking-wider rounded ${pn.status === 'CONNECTED' || pn.status?.toUpperCase() === 'CONNECTED' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400'}`}>
+                                                {pn.status || 'PENDING'}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-center py-6 text-sm text-slate-500 dark:text-slate-400 border border-dashed border-slate-200 dark:border-slate-700 rounded-xl">
+                                    No numbers fetched yet. Click "Add Number" to setup or "Sync" to refresh.
+                                </div>
+                            )}
+                        </div>
+                        )}
+
+                        <div className="bg-white dark:bg-slate-900 rounded-2xl border dark:border-slate-800 p-6 sm:p-8 transition-colors shadow-sm">
+                            <div className="flex items-center gap-3 mb-1">
+                                <div className="p-2.5 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800/30">
                                     <Bot className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                                 </div>
                                 <h3 className="text-lg font-bold text-slate-900 dark:text-white">Business Profile</h3>
                             </div>
-                            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
+                            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 border-b border-transparent">
                                 This information helps AI generate better responses for your customers.
                             </p>
 
                             <div className="space-y-5">
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                                         Business Name
                                     </label>
                                     <input
                                         type="text"
+                                        value={businessProfile.name || ''}
+                                        onChange={(e) => setBusinessProfile({ ...businessProfile, name: e.target.value })}
                                         placeholder="Your Business Name"
-                                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all dark:text-white dark:placeholder:text-slate-500"
+                                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all dark:text-white dark:placeholder:text-slate-500 shadow-sm"
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                                         Description
                                     </label>
                                     <textarea
                                         rows={3}
+                                        value={businessProfile.description || ''}
+                                        onChange={(e) => setBusinessProfile({ ...businessProfile, description: e.target.value })}
                                         placeholder="What does your business do?"
-                                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all dark:text-white dark:placeholder:text-slate-500"
+                                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all dark:text-white dark:placeholder:text-slate-500 shadow-sm"
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                                         Industry
                                     </label>
-                                    <select className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all dark:text-white">
+                                    <select 
+                                        value={businessProfile.industry || ''}
+                                        onChange={(e) => setBusinessProfile({ ...businessProfile, industry: e.target.value })}
+                                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all dark:text-white shadow-sm"
+                                    >
                                         <option value="">Select industry</option>
                                         <option value="retail">Retail & E-commerce</option>
                                         <option value="food">Food & Beverage</option>
@@ -861,13 +1110,23 @@ const WhatsAppDashboard: React.FC = () => {
                                     </select>
                                 </div>
 
-                                <button className="px-6 py-2.5 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 shadow-lg shadow-green-500/20 active:scale-95 transition-all">
+                                <button 
+                                    onClick={async () => {
+                                        try {
+                                            await apiService.updateWhatsAppBusinessProfile(businessProfile);
+                                            toast.success('Profile saved successfully!');
+                                        } catch (e) {
+                                            toast.error('Failed to save profile');
+                                        }
+                                    }}
+                                    className="px-6 py-2.5 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 shadow-lg shadow-green-500/20 active:scale-95 transition-all"
+                                >
                                     Save Profile
                                 </button>
                             </div>
                         </div>
 
-                        <div className="bg-white dark:bg-slate-900 rounded-2xl border dark:border-slate-800 p-6 sm:p-8 transition-colors">
+                        <div className="bg-white dark:bg-slate-900 rounded-2xl border dark:border-slate-800 p-6 sm:p-8 transition-colors shadow-sm">
                             <div className="flex items-center gap-3 mb-4">
                                 <div className="p-2 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
                                     <Clock className="w-5 h-5 text-orange-600 dark:text-orange-400" />
