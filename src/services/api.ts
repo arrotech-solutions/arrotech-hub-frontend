@@ -543,17 +543,6 @@ class ApiService {
     return response.data;
   }
 
-  // Zoho OAuth endpoints
-  async getZohoAuthUrl(): Promise<{ auth_url: string; state: string }> {
-    const response = await this.api.get('/api/zoho/auth-url');
-    return response.data;
-  }
-
-  async getZohoCallback(code: string, state: string): Promise<{ success: boolean; error?: string }> {
-    const response = await this.api.get(`/api/zoho/callback?code=${code}&state=${state}`);
-    return response.data;
-  }
-
 
   async getWhatsAppAuthUrl(): Promise<{ url: string }> {
     const response = await this.api.get('/api/whatsapp/auth-url');
@@ -562,7 +551,7 @@ class ApiService {
   }
 
   async connectWhatsAppEmbedded(code: string): Promise<ApiResponse<any>> {
-    const response = await this.api.post('/api/whatsapp/oauth/callback', { code });
+    const response = await this.api.post('/api/whatsapp/embedded-callback', { code });
     return response.data;
   }
 
@@ -579,6 +568,17 @@ class ApiService {
 
   async createWhatsAppContact(data: { phone_number: string; name?: string; tags?: string[]; notes?: string }): Promise<ApiResponse<any>> {
     const response = await this.api.post('/api/whatsapp/contacts', data);
+    return response.data;
+  }
+
+  // Phone numbers management
+  async getWhatsAppPhoneNumbers(): Promise<ApiResponse<any>> {
+    const response = await this.api.get('/api/whatsapp/phone-numbers');
+    return response.data;
+  }
+
+  async syncWhatsAppPhoneNumbers(): Promise<ApiResponse<any>> {
+    const response = await this.api.post('/api/whatsapp/phone-numbers/sync');
     return response.data;
   }
 
@@ -654,6 +654,12 @@ class ApiService {
   // Facebook OAuth endpoints
   async getFacebookAuthUrl(): Promise<{ url: string }> {
     const response = await this.api.get('/api/facebook/auth-url');
+    return response.data;
+  }
+
+  // LinkedIn OAuth endpoints
+  async getLinkedInAuthUrl(): Promise<{ url: string }> {
+    const response = await this.api.get('/api/linkedin/auth-url');
     return response.data;
   }
 
