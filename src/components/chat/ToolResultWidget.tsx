@@ -15,6 +15,7 @@ import {
 import { Message } from '../../types';
 
 import ToolInsightCard from './ToolInsightCard';
+import SearchSourceCards from './SearchSourceCards';
 
 interface ToolResultWidgetProps {
     message: Message;
@@ -71,44 +72,7 @@ const ToolResultWidget: React.FC<ToolResultWidgetProps> = ({
 
                                         {/* Web Search Sources UI */}
                                         {tool.name === 'web_search' && tool.result.sources && Array.isArray(tool.result.sources) && (
-                                            <div className="space-y-2">
-                                                <div className="flex items-center space-x-2 mb-2">
-                                                    <Globe size={12} className="text-cyan-500" />
-                                                    <span className={`text-[10px] font-semibold uppercase tracking-wider ${isDarkMode ? 'text-cyan-400' : 'text-cyan-600'}`}>
-                                                        {tool.result.sources.length} sources found
-                                                    </span>
-                                                </div>
-                                                <div className="flex space-x-2 overflow-x-auto pb-2">
-                                                    {tool.result.sources.map((src: any, i: number) => (
-                                                        <a
-                                                            key={i}
-                                                            href={src.url}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className={`flex-shrink-0 w-52 rounded-xl border p-3 transition-all duration-200 hover:scale-[1.02] hover:shadow-md group ${
-                                                                isDarkMode
-                                                                    ? 'bg-gray-900/60 border-gray-700/50 hover:border-cyan-500/40'
-                                                                    : 'bg-gray-50 border-gray-200 hover:border-cyan-300'
-                                                            }`}
-                                                        >
-                                                            <div className="flex items-center space-x-2 mb-1.5">
-                                                                {src.favicon ? (
-                                                                    <img src={src.favicon} alt="" className="w-3.5 h-3.5 rounded-sm" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                                                                ) : (
-                                                                    <Globe size={10} className="text-gray-400" />
-                                                                )}
-                                                                <span className={`text-[9px] font-medium truncate ${isDarkMode ? 'text-cyan-400/70' : 'text-cyan-600/70'}`}>
-                                                                    {src.domain}
-                                                                </span>
-                                                                <ExternalLink size={9} className="ml-auto flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity text-cyan-500" />
-                                                            </div>
-                                                            <p className={`text-[11px] font-semibold leading-tight line-clamp-2 ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
-                                                                {src.title}
-                                                            </p>
-                                                        </a>
-                                                    ))}
-                                                </div>
-                                            </div>
+                                            <SearchSourceCards sources={tool.result.sources} isDarkMode={isDarkMode} />
                                         )}
 
                                         {/* Image Result UI */}

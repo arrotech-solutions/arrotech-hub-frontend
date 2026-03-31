@@ -91,7 +91,7 @@ const ToolInsightCard: React.FC<ToolInsightCardProps> = ({
 
   return (
     <div
-      className={`rounded-2xl border transition-all duration-300 overflow-hidden group ${
+      className={`rounded-2xl border transition-all duration-300 group ${
         isDarkMode
           ? `bg-gray-800/50 ${isSuccess ? colors.border : 'border-red-500/30'}`
           : `bg-white ${isSuccess ? 'border-gray-100' : 'border-red-200'} shadow-sm`
