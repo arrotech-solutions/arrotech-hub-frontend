@@ -1721,6 +1721,69 @@ class ApiService {
     return response.data;
   }
 
+  async sendMessageStream(
+    conversationId: number,
+    data: MessageCreate,
+    onEvent: (event: any) => void,
+    signal?: AbortSignal
+  ): Promise<void> {
+    const response = await fetch(`${this.api.defaults.baseURL}/chat/conversations/${conversationId}/messages/stream`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+      },
+      body: JSON.stringify(data),
+      signal,
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const reader = response.body?.getReader();
+    if (!reader) {
+      throw new Error('No response body');
+    }
+
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const eventData = JSON.parse(line.slice(6));
+              onEvent(eventData);
+            } catch (e) {
+              console.error('Error parsing SSE data:', e);
+            }
+          }
+        }
+      }
+
+      // Process any remaining buffer
+      if (buffer.startsWith('data: ')) {
+        try {
+          const eventData = JSON.parse(buffer.slice(6));
+          onEvent(eventData);
+        } catch (e) {
+          // ignore trailing parse errors
+        }
+      }
+    } finally {
+      reader.releaseLock();
+    }
+  }
+
   async updateConversation(conversationId: number, title: string): Promise<ApiResponse<Conversation>> {
     const response = await this.api.put(`/chat/conversations/${conversationId}`, { title });
     return response.data;
