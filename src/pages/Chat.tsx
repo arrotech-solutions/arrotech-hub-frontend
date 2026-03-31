@@ -302,17 +302,16 @@ const Chat: React.FC = () => {
       loadMessages(conversationToUse!.id);
       setIsLoading(false);
 
-      // If there's an immediate error from the stream initialization
-      if (streamError) {
-        throw new Error(streamError);
-      }
-
     } catch (error) {
+      // Only toast for connection-level failures (e.g. network errors, fetch failures)
+      // Stream-level errors (e.g. provider issues) are already displayed inline by the streaming UI
+      console.error('Send message error:', error);
       toast.error('Failed to send message');
       setInputMessage(messageContent);
       setIsLoading(false);
     }
   };
+
 
   const resendEditedMessage = async () => {
     if (!editingMessage || !editingMessageText.trim()) return;
