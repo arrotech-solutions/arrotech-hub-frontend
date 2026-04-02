@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import {
     X, Settings, Trash2, ChevronDown, Save,
-    RotateCcw, Clock, AlertCircle
+    RotateCcw, Clock, AlertCircle, Loader2, Search
 } from 'lucide-react';
 import { MCPTool, ToolInfo } from '../../types';
+import { apiService } from '../../services/api';
 
 interface NodeConfigPanelProps {
     nodeId: string;
@@ -33,6 +34,10 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
     const [localTimeout, setLocalTimeout] = useState(timeout || 60);
     const [showAdvanced, setShowAdvanced] = useState(false);
     const [isDirty, setIsDirty] = useState(false);
+    
+    // Dynamic Options State
+    const [dynamicOptions, setDynamicOptions] = useState<Record<string, { label: string, value: any }[]>>({});
+    const [loadingDynamic, setLoadingDynamic] = useState<Record<string, boolean>>({});
 
     useEffect(() => {
         setLocalParams(parameters || {});
@@ -55,12 +60,93 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
         setIsDirty(false);
     };
 
+    const fetchDynamicOptions = async (fieldKey: string, toolOperation: string) => {
+        if (dynamicOptions[fieldKey] || loadingDynamic[fieldKey]) return;
+
+        try {
+            setLoadingDynamic(prev => ({ ...prev, [fieldKey]: true }));
+            const [toolNameFetch, operation] = toolOperation.split('.');
+            
+            const response = await apiService.executeTool(toolNameFetch, { operation }) as any;
+            
+            // Robust parsing same as in EnhancedWorkflowCreator
+            let options = null;
+            if (response.result?.options && Array.isArray(response.result.options)) {
+                options = response.result.options;
+            } else if (response.data?.options && Array.isArray(response.data.options)) {
+                options = response.data.options;
+            } else if (response.options && Array.isArray(response.options)) {
+                options = response.options;
+            } else if (Array.isArray(response.result)) {
+                options = response.result;
+            } else if (Array.isArray(response.data)) {
+                options = response.data;
+            } else if (Array.isArray(response)) {
+                options = response;
+            }
+
+            if (options) {
+                setDynamicOptions(prev => ({ ...prev, [fieldKey]: options }));
+            }
+        } catch (err) {
+            console.error(`Error fetching dynamic options for ${fieldKey}:`, err);
+        } finally {
+            setLoadingDynamic(prev => ({ ...prev, [fieldKey]: false }));
+        }
+    };
+
     // Get input schema from tool
     const inputSchema = tool ? (tool as any).inputSchema : null;
     const properties = inputSchema?.properties || {};
     const requiredFields: string[] = inputSchema?.required || [];
 
     const renderField = (name: string, schema: any) => {
+        // Handle dynamic options
+        const dynamicSource = 
+            schema['x-dynamic-options'] || 
+            schema.x_dynamic_options || 
+            schema.xDynamicOptions;
+
+        if (dynamicSource) {
+            const fieldKey = `${toolName}.${name}`;
+            
+            // Trigger fetch
+            if (!dynamicOptions[fieldKey] && !loadingDynamic[fieldKey]) {
+                fetchDynamicOptions(fieldKey, dynamicSource);
+            }
+
+            const currentOptions = dynamicOptions[fieldKey] || [];
+            const isLoading = loadingDynamic[fieldKey];
+
+            return (
+                <div className="relative">
+                    <select
+                        className={`w-full px-3 py-2.5 text-sm rounded-xl focus:ring-2 focus:ring-blue-500/50 appearance-none outline-none transition-all ${isDark ? 'bg-black/20 border border-white/10 text-white focus:bg-black/40' : 'bg-black/5 border border-black/5 focus:bg-white'}`}
+                        value={localParams[name] || ''}
+                        onChange={e => handleParamChange(name, e.target.value)}
+                        disabled={isLoading}
+                    >
+                        {isLoading ? (
+                            <option>Loading options...</option>
+                        ) : (
+                            <>
+                                <option value="">Select {name.replace(/_/g, ' ')}...</option>
+                                {currentOptions.map((opt: any) => (
+                                    <option key={opt.value} value={opt.value}>
+                                        {opt.label}
+                                    </option>
+                                ))}
+                            </>
+                        )}
+                    </select>
+                    {isLoading ? (
+                        <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-blue-500 animate-spin" />
+                    ) : (
+                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+                    )}
+                </div>
+            );
+        }
 
         if (schema.enum && Array.isArray(schema.enum)) {
             return (
