@@ -83,6 +83,8 @@ function getToolCategory(toolName: string): string {
         'E-commerce': { keywords: ['ecommerce', 'jumia', 'kilimall', 'jiji'] },
         'Accounting': { keywords: ['accounting', 'kra', 'itax', 'quickbooks', 'xero'] },
         'Logistics': { keywords: ['logistics', 'amitruck', 'lori', 'sendy'] },
+        'Knowledge Base': { keywords: ['rag_', 'pinecone_', 'qdrant_', 'weaviate_', 'llamaparse_', 'unstructured_', 'firecrawl_'] },
+        'AI Models': { keywords: ['ai_embeddings', 'ai_'] },
         'Slack': { prefix: 'slack_' },
         'HubSpot': { prefix: 'hubspot_' },
         'Analytics': { prefix: 'ga4_' },
