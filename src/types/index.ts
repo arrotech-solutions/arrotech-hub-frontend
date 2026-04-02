@@ -1802,6 +1802,9 @@ export interface GalleryTemplate {
     default?: any;
     enum?: string[];
     format?: string;
+    ui_hint?: string;
+    connection_for?: string;
+    placeholder?: string;
   }>;
 }
 
