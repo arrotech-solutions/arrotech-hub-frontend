@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
     ArrowRight,
     BookOpen,
@@ -14,14 +14,23 @@ import {
     Zap,
     X,
     ChevronDown,
-    ChevronRight
+    ChevronRight,
+    Link2,
+    CheckCircle2,
+    AlertCircle,
+    FolderOpen
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import apiService from '../services/api';
-import { GalleryTemplate, TemplateCategory } from '../types';
+import { GalleryTemplate, TemplateCategory, Connection } from '../types';
 
 interface WorkflowTemplatesProps {
     onWorkflowCreated?: () => void;
+}
+
+interface DriveFolder {
+    id: string;
+    name: string;
 }
 
 const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onWorkflowCreated }) => {
@@ -36,11 +45,69 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onWorkflowCreated
     const [usingTemplate, setUsingTemplate] = useState(false);
     const [showFilters, setShowFilters] = useState(false);
 
+    // Connection & folder state
+    const [userConnections, setUserConnections] = useState<Connection[]>([]);
+    const [driveFolders, setDriveFolders] = useState<DriveFolder[]>([]);
+    const [loadingFolders, setLoadingFolders] = useState(false);
+    const [connectionsLoaded, setConnectionsLoaded] = useState(false);
+
     useEffect(() => {
         loadTemplates();
         loadCategories();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedCategory, selectedDifficulty, searchQuery]);
+
+    // Load user connections once
+    useEffect(() => {
+        loadConnections();
+    }, []);
+
+    const loadConnections = async () => {
+        try {
+            const res = await apiService.getConnections();
+            if (res.success && res.data) {
+                setUserConnections(res.data);
+            }
+        } catch (error) {
+            console.error('Failed to load connections:', error);
+        } finally {
+            setConnectionsLoaded(true);
+        }
+    };
+
+    const isConnected = useCallback((platform: string): boolean => {
+        // Normalize: rag_pipeline is always considered connected (platform-managed)
+        if (platform === 'rag_pipeline') return true;
+        return userConnections.some(
+            (c) => c.platform?.toLowerCase() === platform.toLowerCase() && c.status === 'active'
+        );
+    }, [userConnections]);
+
+    // Load drive folders when a template with folder_picker is selected
+    useEffect(() => {
+        if (!selectedTemplate) return;
+        const hasFolderPicker = Object.values(selectedTemplate.variables).some(
+            (v) => v.ui_hint === 'folder_picker'
+        );
+        if (hasFolderPicker && isConnected('google_workspace') && driveFolders.length === 0) {
+            loadDriveFolders();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedTemplate]);
+
+    const loadDriveFolders = async () => {
+        try {
+            setLoadingFolders(true);
+            const res = await apiService.getDriveFolders();
+            if (res.success && Array.isArray(res.data)) {
+                setDriveFolders(res.data);
+            }
+        } catch (error) {
+            console.error('Failed to load drive folders:', error);
+        } finally {
+            setLoadingFolders(false);
+        }
+    };
 
     const loadTemplates = async () => {
         try {
@@ -112,6 +179,25 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onWorkflowCreated
         const category = categories.find(c => c.name.toLowerCase() === categoryName.toLowerCase());
         return category?.color || '#8B5CF6';
     };
+
+    const getConnectionLabel = (conn: string) => {
+        const labels: Record<string, string> = {
+            google_workspace: 'Google Workspace',
+            slack: 'Slack',
+            notion: 'Notion',
+            hubspot: 'HubSpot',
+            rag_pipeline: 'RAG Pipeline',
+            airtable: 'Airtable',
+            clickup: 'ClickUp',
+            whatsapp: 'WhatsApp',
+        };
+        return labels[conn] || conn.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+    };
+
+    // Check if all required connections are met
+    const allConnectionsMet = selectedTemplate
+        ? selectedTemplate.required_connections.every((c) => isConnected(c))
+        : true;
 
     return (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -374,42 +460,130 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onWorkflowCreated
 
                                 {/* Sidebar Info */}
                                 <div className="space-y-8">
-                                    {/* Required Connections */}
+                                    {/* Required Connections — with live status */}
                                     {selectedTemplate.required_connections.length > 0 && (
                                         <section className="bg-blue-50/50 dark:bg-blue-500/10 p-5 rounded-2xl border border-blue-100 dark:border-blue-500/20">
                                             <h3 className="text-xs font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-4">Required Services</h3>
-                                            <div className="flex flex-wrap gap-2">
-                                                {selectedTemplate.required_connections.map((conn) => (
-                                                    <div
-                                                        key={conn}
-                                                        className="px-3 py-2 bg-white dark:bg-slate-900 border border-blue-200 dark:border-blue-500/30 text-blue-700 dark:text-blue-400 rounded-xl text-xs font-bold uppercase shadow-sm flex items-center space-x-2"
-                                                    >
-                                                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></div>
-                                                        <span>{conn}</span>
-                                                    </div>
-                                                ))}
+                                            <div className="space-y-2.5">
+                                                {selectedTemplate.required_connections.map((conn) => {
+                                                    const connected = isConnected(conn);
+                                                    return (
+                                                        <div
+                                                            key={conn}
+                                                            className={`px-3 py-2.5 rounded-xl text-xs font-bold uppercase shadow-sm flex items-center justify-between gap-2 border transition-all ${
+                                                                connected
+                                                                    ? 'bg-white dark:bg-slate-900 border-green-200 dark:border-green-500/30 text-green-700 dark:text-green-400'
+                                                                    : 'bg-white dark:bg-slate-900 border-amber-200 dark:border-amber-500/30 text-amber-700 dark:text-amber-400'
+                                                            }`}
+                                                        >
+                                                            <div className="flex items-center space-x-2 min-w-0">
+                                                                {connected ? (
+                                                                    <CheckCircle2 className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />
+                                                                ) : (
+                                                                    <AlertCircle className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
+                                                                )}
+                                                                <span className="truncate">{getConnectionLabel(conn)}</span>
+                                                            </div>
+                                                            {connected ? (
+                                                                <span className="text-[9px] bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400 px-2 py-0.5 rounded-full font-black flex-shrink-0">
+                                                                    CONNECTED
+                                                                </span>
+                                                            ) : (
+                                                                <a
+                                                                    href="/connections"
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    onClick={(e) => e.stopPropagation()}
+                                                                    className="text-[9px] bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 px-2 py-0.5 rounded-full font-black flex-shrink-0 hover:bg-amber-200 dark:hover:bg-amber-500/30 transition-colors flex items-center space-x-1"
+                                                                >
+                                                                    <Link2 className="w-2.5 h-2.5" />
+                                                                    <span>CONNECT</span>
+                                                                </a>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })}
                                             </div>
+                                            {!allConnectionsMet && (
+                                                <p className="mt-3 text-[10px] text-amber-600 dark:text-amber-400 font-semibold leading-tight">
+                                                    ⚠️ Connect missing services before deploying this workflow.
+                                                </p>
+                                            )}
                                         </section>
                                     )}
 
-                                    {/* Variables */}
+                                    {/* Variables / Inputs Needed — with prefilled defaults, folder picker, connection hints */}
                                     {Object.keys(selectedTemplate.variables).length > 0 && (
                                         <section className="bg-purple-50/30 dark:bg-purple-500/10 p-5 rounded-2xl border border-purple-100 dark:border-purple-500/20">
                                             <h3 className="text-xs font-black text-purple-600 dark:text-purple-400 uppercase tracking-widest mb-4">Inputs Needed</h3>
                                             <div className="space-y-3">
-                                                {Object.entries(selectedTemplate.variables).map(([key, config]) => (
-                                                    <div key={key} className="p-4 bg-white dark:bg-slate-900 border border-purple-100 dark:border-purple-500/20 rounded-xl shadow-sm">
-                                                        <div className="flex items-center justify-between mb-2">
-                                                            <code className="text-xs font-black text-gray-900 dark:text-white bg-gray-100 dark:bg-slate-800 px-2 py-0.5 rounded uppercase">{key}</code>
-                                                            {config.required && (
-                                                                <span className="text-[10px] bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 px-2 py-0.5 rounded-full font-black uppercase">Required</span>
-                                                            )}
+                                                {Object.entries(selectedTemplate.variables).map(([key, config]) => {
+                                                    const connectionMissing = config.connection_for && !isConnected(config.connection_for);
+                                                    const isFolderPicker = config.ui_hint === 'folder_picker';
+
+                                                    return (
+                                                        <div key={key} className="p-4 bg-white dark:bg-slate-900 border border-purple-100 dark:border-purple-500/20 rounded-xl shadow-sm">
+                                                            <div className="flex items-center justify-between mb-2 gap-2">
+                                                                <code className="text-xs font-black text-gray-900 dark:text-white bg-gray-100 dark:bg-slate-800 px-2 py-0.5 rounded uppercase truncate">{key}</code>
+                                                                <div className="flex items-center space-x-1.5 flex-shrink-0">
+                                                                    {config.required && (
+                                                                        <span className="text-[10px] bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 px-2 py-0.5 rounded-full font-black uppercase">Required</span>
+                                                                    )}
+                                                                    {connectionMissing && (
+                                                                        <a
+                                                                            href="/connections"
+                                                                            target="_blank"
+                                                                            rel="noopener noreferrer"
+                                                                            onClick={(e) => e.stopPropagation()}
+                                                                            className="text-[10px] bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 px-2 py-0.5 rounded-full font-black flex items-center space-x-1 hover:bg-amber-200 dark:hover:bg-amber-500/30 transition-colors"
+                                                                        >
+                                                                            <Link2 className="w-2.5 h-2.5" />
+                                                                            <span>Connect</span>
+                                                                        </a>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                            <p className="text-[11px] text-gray-500 dark:text-slate-400 font-bold leading-tight">
+                                                                {config.description}
+                                                            </p>
+
+                                                            {/* Show prefilled default or folder picker preview */}
+                                                            {isFolderPicker && isConnected('google_workspace') ? (
+                                                                <div className="mt-2.5 flex items-center space-x-2 text-[11px]">
+                                                                    <FolderOpen className="w-3.5 h-3.5 text-blue-500" />
+                                                                    <span className="text-blue-600 dark:text-blue-400 font-semibold">
+                                                                        {loadingFolders
+                                                                            ? 'Loading folders...'
+                                                                            : `${driveFolders.length} folder${driveFolders.length !== 1 ? 's' : ''} available`
+                                                                        }
+                                                                    </span>
+                                                                    <span className="text-gray-400 dark:text-slate-500">— dropdown in execution</span>
+                                                                </div>
+                                                            ) : config.default != null ? (
+                                                                <div className="mt-2.5 px-2.5 py-1.5 bg-gray-50 dark:bg-slate-800 rounded-lg border border-gray-100 dark:border-slate-700">
+                                                                    <span className="text-[10px] text-gray-400 dark:text-slate-500 font-bold uppercase mr-1.5">Default:</span>
+                                                                    <span className="text-[11px] text-gray-700 dark:text-slate-300 font-semibold">{String(config.default)}</span>
+                                                                </div>
+                                                            ) : config.placeholder ? (
+                                                                <div className="mt-2.5 px-2.5 py-1.5 bg-gray-50 dark:bg-slate-800 rounded-lg border border-gray-100 dark:border-slate-700">
+                                                                    <span className="text-[10px] text-gray-400 dark:text-slate-500 font-bold uppercase mr-1.5">Example:</span>
+                                                                    <span className="text-[11px] text-gray-500 dark:text-slate-400 font-medium italic">{config.placeholder}</span>
+                                                                </div>
+                                                            ) : config.enum ? (
+                                                                <div className="mt-2.5 flex flex-wrap gap-1">
+                                                                    {config.enum.map((opt) => (
+                                                                        <span
+                                                                            key={opt}
+                                                                            className="text-[10px] px-2 py-0.5 bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 rounded-md font-bold border border-purple-100 dark:border-purple-500/20"
+                                                                        >
+                                                                            {opt}
+                                                                        </span>
+                                                                    ))}
+                                                                </div>
+                                                            ) : null}
                                                         </div>
-                                                        <p className="text-[11px] text-gray-500 dark:text-slate-400 font-bold leading-tight">
-                                                            {config.description}
-                                                        </p>
-                                                    </div>
-                                                ))}
+                                                    );
+                                                })}
                                             </div>
                                         </section>
                                     )}
