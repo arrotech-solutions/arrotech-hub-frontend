@@ -30,7 +30,9 @@ import {
     Droplets,
     Leaf,
     ShoppingBag,
-    Truck
+    Truck,
+    Database,
+    BrainCircuit
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -164,6 +166,16 @@ const TOOL_CATEGORIES = {
         color: 'red',
         prefix: 'enterprise_'
     },
+    'Knowledge Base': {
+        icon: Database,
+        color: 'violet',
+        keywords: ['rag_', 'pinecone_', 'qdrant_', 'weaviate_', 'llamaparse_', 'unstructured_', 'firecrawl_']
+    },
+    'AI Models': {
+        icon: BrainCircuit,
+        color: 'fuchsia',
+        keywords: ['ai_embeddings', 'ai_']
+    },
     'General': {
         icon: Settings,
         color: 'gray',
@@ -206,6 +218,8 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
     // UI state
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [dynamicOptions, setDynamicOptions] = useState<Record<string, { label: string, value: any }[]>>({});
+    const [loadingDynamic, setLoadingDynamic] = useState<Record<string, boolean>>({});
     const isEditing = !!initialData;
 
     useEffect(() => {
@@ -478,9 +492,94 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
 
 
 
+    const fetchDynamicOptions = async (fieldKey: string, toolOperation: string) => {
+        if (dynamicOptions[fieldKey] || loadingDynamic[fieldKey]) return;
+
+        try {
+            setLoadingDynamic(prev => ({ ...prev, [fieldKey]: true }));
+            const [toolName, operation] = toolOperation.split('.');
+            
+            const response = await apiService.executeTool(toolName, { operation }) as any;
+            
+            // Mega-robust option parsing
+            let options = null;
+            
+            // Check for options in various common response locations
+            if (response.result?.options && Array.isArray(response.result.options)) {
+                options = response.result.options;
+            } else if (response.data?.options && Array.isArray(response.data.options)) {
+                options = response.data.options;
+            } else if (response.options && Array.isArray(response.options)) {
+                options = response.options;
+            } else if (Array.isArray(response.result)) {
+                options = response.result;
+            } else if (Array.isArray(response.data)) {
+                options = response.data;
+            } else if (Array.isArray(response)) {
+                options = response;
+            }
+
+            if (options) {
+                setDynamicOptions(prev => ({ ...prev, [fieldKey]: options }));
+            } else {
+                console.warn(`No options found for ${fieldKey} in response:`, response);
+            }
+        } catch (err) {
+            console.error(`Error fetching dynamic options for ${fieldKey}:`, err);
+        } finally {
+            setLoadingDynamic(prev => ({ ...prev, [fieldKey]: false }));
+        }
+    };
+
     const renderInputField = (name: string, schema: any, tool: MCPTool | ToolInfo) => {
         const fieldType = schema.type || 'string';
         const isRequired = schema.required || false;
+        
+        // Search for dynamic options metadata in multiple possible key formats
+        // This is extremely robust to handle any backend-to-frontend casing transformations
+        const dynamicSource = 
+            schema['x-dynamic-options'] || 
+            schema.x_dynamic_options || 
+            schema.xDynamicOptions ||
+            schema['x-dynamic-ui'];
+
+        // Handle dynamic options
+        if (dynamicSource) {
+            const toolId = (tool as any).id || tool.name;
+            const fieldKey = `${toolId}.${name}`;
+            
+            // Trigger fetch if not loaded
+            if (!dynamicOptions[fieldKey] && !loadingDynamic[fieldKey]) {
+                console.log(`[WorkflowBuilder] Triggering dynamic fetch for ${fieldKey} using ${dynamicSource}`);
+                fetchDynamicOptions(fieldKey, dynamicSource);
+            }
+
+            return (
+                <div className="relative">
+                    <select
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm appearance-none bg-white"
+                        value={stepParams[name] || ''}
+                        onChange={(e) => setStepParams({ ...stepParams, [name]: e.target.value })}
+                        disabled={loadingDynamic[fieldKey]}
+                        required={isRequired}
+                    >
+                        <option value="">{loadingDynamic[fieldKey] ? 'Loading options...' : `Select ${name}...`}</option>
+                        {dynamicOptions[fieldKey]?.map((option: any) => (
+                            <option key={option.value} value={option.value}>
+                                {option.label}
+                            </option>
+                        ))}
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                        {loadingDynamic[fieldKey] ? (
+                            <Loader2 className="w-4 h-4 text-gray-400 animate-spin" />
+                        ) : (
+                            <ChevronDown className="w-4 h-4 text-gray-400" />
+                        )}
+                    </div>
+                </div>
+            );
+        }
 
         // Render select dropdown if enum is provided
         if (schema.enum && Array.isArray(schema.enum)) {

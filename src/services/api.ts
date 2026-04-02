@@ -2558,6 +2558,11 @@ class ApiService {
     return response.data;
   }
 
+  async getDriveFolders(): Promise<ApiResponse<any>> {
+    const response = await this.api.get('/templates/helpers/drive-folders');
+    return response.data;
+  }
+
   // ================== Payment/Purchase API ==================
 
   async purchaseWorkflow(workflowId: number, paymentMethod: string, phoneNumber?: string): Promise<ApiResponse<any>> {
