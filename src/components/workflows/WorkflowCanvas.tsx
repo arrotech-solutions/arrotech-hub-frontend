@@ -833,6 +833,23 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
                                             </p>
                                         </div>
                                     )}
+                                    {triggerConfig.platform === 'slack' && (
+                                        <div>
+                                            <label className={`block text-xs font-bold uppercase tracking-wider mb-1.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Slack Event *</label>
+                                            <select
+                                                value={triggerConfig.trigger || ''}
+                                                onChange={e => setTriggerConfig({ ...triggerConfig, trigger: e.target.value })}
+                                                className={`w-full px-3 py-2 text-sm border rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 ${isDark ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-200'}`}
+                                            >
+                                                <option value="">Select Event</option>
+                                                <option value="slack_message_received">Message Received (All channel & DM chatter)</option>
+                                                <option value="slack_app_mention">App Mention (When @bot is tagged)</option>
+                                            </select>
+                                            <p className={`text-[10px] mt-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                                                Whenever this Slack event occurs, the workflow will be automatically triggered.
+                                            </p>
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
