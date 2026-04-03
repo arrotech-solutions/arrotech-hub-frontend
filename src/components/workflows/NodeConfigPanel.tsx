@@ -102,10 +102,17 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
 
     const renderField = (name: string, schema: any) => {
         // Handle dynamic options
-        const dynamicSource = 
+        let dynamicSource = 
             schema['x-dynamic-options'] || 
             schema.x_dynamic_options || 
             schema.xDynamicOptions;
+
+        // Custom handling for Google Drive folder selection
+        if (toolName === 'rag_ingest_source' && name === 'url_or_id') {
+            if (localParams['source_type'] === 'google_drive') {
+                dynamicSource = 'google_workspace_drive.list_folders';
+            }
+        }
 
         if (dynamicSource) {
             const fieldKey = `${toolName}.${name}`;
