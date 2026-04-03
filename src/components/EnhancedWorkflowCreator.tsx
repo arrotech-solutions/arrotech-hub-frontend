@@ -537,11 +537,18 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
         
         // Search for dynamic options metadata in multiple possible key formats
         // This is extremely robust to handle any backend-to-frontend casing transformations
-        const dynamicSource = 
+        let dynamicSource = 
             schema['x-dynamic-options'] || 
             schema.x_dynamic_options || 
             schema.xDynamicOptions ||
             schema['x-dynamic-ui'];
+
+        // Custom handling for Google Drive folder selection
+        if (tool?.name === 'rag_ingest_source' && name === 'url_or_id') {
+            if (stepParams['source_type'] === 'google_drive') {
+                dynamicSource = 'google_workspace_drive.list_folders';
+            }
+        }
 
         // Handle dynamic options
         if (dynamicSource) {
@@ -874,6 +881,25 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                                                     </select>
                                                     <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
                                                         Zoho will automatically send an HTTP POST to Arrotech's Webhook URL whenever this event occurs.
+                                                    </p>
+                                                </div>
+                                            )}
+                                            {triggerConfig.platform === 'slack' && (
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                                                        Slack Event *
+                                                    </label>
+                                                    <select
+                                                        value={triggerConfig.event_type || ''}
+                                                        onChange={(e) => setTriggerConfig({ ...triggerConfig, event_type: e.target.value })}
+                                                        className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                                                    >
+                                                        <option value="">Select Event</option>
+                                                        <option value="slack_message_received">Message Received (All channel & DM chatter)</option>
+                                                        <option value="slack_app_mention">App Mention (When @bot is tagged)</option>
+                                                    </select>
+                                                    <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
+                                                        Whenever this Slack event occurs, the workflow will be automatically triggered.
                                                     </p>
                                                 </div>
                                             )}
