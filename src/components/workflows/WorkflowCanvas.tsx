@@ -813,6 +813,9 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
                                             <option value="zoho">Zoho Desk</option>
                                             <option value="whatsapp">WhatsApp</option>
                                             <option value="slack">Slack</option>
+                                            <option value="instagram">Instagram</option>
+                                            <option value="telegram">Telegram</option>
+                                            <option value="google_drive">Google Drive</option>
                                         </select>
                                     </div>
                                     {triggerConfig.platform === 'zoho' && (
@@ -847,6 +850,54 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
                                             </select>
                                             <p className={`text-[10px] mt-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                                                 Whenever this Slack event occurs, the workflow will be automatically triggered.
+                                            </p>
+                                        </div>
+                                    )}
+                                    {triggerConfig.platform === 'instagram' && (
+                                        <div>
+                                            <label className={`block text-xs font-bold uppercase tracking-wider mb-1.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Instagram Event *</label>
+                                            <select
+                                                value={triggerConfig.trigger || ''}
+                                                onChange={e => setTriggerConfig({ ...triggerConfig, trigger: e.target.value })}
+                                                className={`w-full px-3 py-2 text-sm border rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 ${isDark ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-200'}`}
+                                            >
+                                                <option value="">Select Event</option>
+                                                <option value="instagram_dm_received">DM Received (Incoming direct messages)</option>
+                                            </select>
+                                            <p className={`text-[10px] mt-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                                                Whenever this Instagram event occurs, the workflow will be automatically triggered.
+                                            </p>
+                                        </div>
+                                    )}
+                                    {triggerConfig.platform === 'telegram' && (
+                                        <div>
+                                            <label className={`block text-xs font-bold uppercase tracking-wider mb-1.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Telegram Event *</label>
+                                            <select
+                                                value={triggerConfig.trigger || ''}
+                                                onChange={e => setTriggerConfig({ ...triggerConfig, trigger: e.target.value })}
+                                                className={`w-full px-3 py-2 text-sm border rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 ${isDark ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-200'}`}
+                                            >
+                                                <option value="">Select Event</option>
+                                                <option value="telegram_message_received">Message Received (Incoming telegram messages)</option>
+                                            </select>
+                                            <p className={`text-[10px] mt-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                                                Whenever this Telegram event occurs, the workflow will be automatically triggered.
+                                            </p>
+                                        </div>
+                                    )}
+                                    {triggerConfig.platform === 'google_drive' && (
+                                        <div>
+                                            <label className={`block text-xs font-bold uppercase tracking-wider mb-1.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Google Drive Event *</label>
+                                            <select
+                                                value={triggerConfig.trigger || ''}
+                                                onChange={e => setTriggerConfig({ ...triggerConfig, trigger: e.target.value })}
+                                                className={`w-full px-3 py-2 text-sm border rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 ${isDark ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-200'}`}
+                                            >
+                                                <option value="">Select Event</option>
+                                                <option value="google_drive_folder_changed">Drive Folder Changed (Auto-sync trigger)</option>
+                                            </select>
+                                            <p className={`text-[10px] mt-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                                                Whenever a file is added, updated, or removed in the specified folder, this workflow will trigger.
                                             </p>
                                         </div>
                                     )}

@@ -733,6 +733,12 @@ class ApiService {
     return response.data;
   }
 
+  // Telegram OAuth endpoints
+  async getTelegramAuthUrl(): Promise<{ auth_url: string; state: string }> {
+    const response = await this.api.get('/api/telegram/auth-url');
+    return response.data;
+  }
+
   // Paystack endpoints
   async verifyPaystackPayment(reference: string): Promise<ApiResponse<any>> {
     const response = await this.api.post('/payments/paystack/verify', { reference });
