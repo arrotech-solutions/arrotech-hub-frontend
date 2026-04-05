@@ -214,6 +214,8 @@ const Integrations: React.FC = () => {
         toast.success('Xero connected successfully!');
       } else if (success === 'linkedin_connected') {
         toast.success('LinkedIn connected successfully!');
+      } else if (success === 'telegram_connected') {
+        toast.success('Telegram connected successfully!');
       } else {
         toast.success('Connection successful!');
       }
@@ -645,6 +647,20 @@ const Integrations: React.FC = () => {
         } else {
           toast.error('Failed to initiate TikTok connection');
         }
+        return;
+      }
+    }
+
+    // Redirect to Telegram Auth
+    if (platform.id === 'telegram' && !existing) {
+      try {
+        toast.loading('Redirecting to Telegram...', { id: 'oauth-redirect' });
+        const { auth_url } = await apiService.getTelegramAuthUrl();
+        window.location.href = auth_url;
+        return;
+      } catch (error: any) {
+        toast.dismiss('oauth-redirect');
+        toast.error('Failed to initiate Telegram connection');
         return;
       }
     }
