@@ -139,7 +139,7 @@ const TOOL_CATEGORIES = {
     'Communication': {
         icon: Users,
         color: 'green',
-        prefix: 'whatsapp_'
+        keywords: ['whatsapp_', 'telegram_', 'instagram_']
     },
     'File Management': {
         icon: FileText,
@@ -648,14 +648,18 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
 
             case 'boolean':
                 return (
-                    <select
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
-                        value={stepParams[name]?.toString() || 'false'}
-                        onChange={(e) => setStepParams({ ...stepParams, [name]: e.target.value === 'true' })}
-                    >
-                        <option value="true">True</option>
-                        <option value="false">False</option>
-                    </select>
+                    <div className="flex items-center space-x-3 pt-1">
+                        <button
+                            type="button"
+                            onClick={() => setStepParams({ ...stepParams, [name]: !stepParams[name] })}
+                            className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${stepParams[name] ? 'bg-purple-600' : 'bg-gray-200 dark:bg-slate-700'}`}
+                        >
+                            <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${stepParams[name] ? 'translate-x-5' : 'translate-x-0'}`} />
+                        </button>
+                        <span className="text-sm text-gray-600 dark:text-slate-400">
+                            {stepParams[name] ? 'Enabled' : 'Disabled'}
+                        </span>
+                    </div>
                 );
 
             default:
@@ -862,6 +866,9 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                                                     <option value="zoho">Zoho Desk</option>
                                                     <option value="whatsapp">WhatsApp</option>
                                                     <option value="slack">Slack</option>
+                                                    <option value="instagram">Instagram</option>
+                                                    <option value="telegram">Telegram</option>
+                                                    <option value="google_drive">Google Drive</option>
                                                 </select>
                                             </div>
                                             {triggerConfig.platform === 'zoho' && (
@@ -900,6 +907,60 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                                                     </select>
                                                     <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
                                                         Whenever this Slack event occurs, the workflow will be automatically triggered.
+                                                    </p>
+                                                </div>
+                                            )}
+                                            {triggerConfig.platform === 'instagram' && (
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                                                        Instagram Event *
+                                                    </label>
+                                                    <select
+                                                        value={triggerConfig.event_type || ''}
+                                                        onChange={(e) => setTriggerConfig({ ...triggerConfig, event_type: e.target.value })}
+                                                        className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                                                    >
+                                                        <option value="">Select Event</option>
+                                                        <option value="instagram_dm_received">DM Received (Incoming direct messages)</option>
+                                                    </select>
+                                                    <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
+                                                        Whenever this Instagram event occurs, the workflow will be automatically triggered.
+                                                    </p>
+                                                </div>
+                                            )}
+                                            {triggerConfig.platform === 'telegram' && (
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                                                        Telegram Event *
+                                                    </label>
+                                                    <select
+                                                        value={triggerConfig.event_type || ''}
+                                                        onChange={(e) => setTriggerConfig({ ...triggerConfig, event_type: e.target.value })}
+                                                        className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                                                    >
+                                                        <option value="">Select Event</option>
+                                                        <option value="telegram_message_received">Message Received (Incoming telegram messages)</option>
+                                                    </select>
+                                                    <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
+                                                        Whenever this Telegram event occurs, the workflow will be automatically triggered.
+                                                    </p>
+                                                </div>
+                                            )}
+                                            {triggerConfig.platform === 'google_drive' && (
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                                                        Google Drive Event *
+                                                    </label>
+                                                    <select
+                                                        value={triggerConfig.event_type || ''}
+                                                        onChange={(e) => setTriggerConfig({ ...triggerConfig, event_type: e.target.value })}
+                                                        className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                                                    >
+                                                        <option value="">Select Event</option>
+                                                        <option value="google_drive_folder_changed">Drive Folder Changed (Auto-sync trigger)</option>
+                                                    </select>
+                                                    <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
+                                                        Whenever a file is added, updated, or removed in the specified folder, this workflow will trigger.
                                                     </p>
                                                 </div>
                                             )}
