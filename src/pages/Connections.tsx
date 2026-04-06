@@ -43,6 +43,7 @@ import {
   XeroLogo
 } from '../components/BrandIcons';
 import KraPinModal from '../components/KraPinModal';
+import TelegramLogoImg from '../assets/apps/telegram.png';
 
 const Integrations: React.FC = () => {
   const navigate = useNavigate();
@@ -104,6 +105,7 @@ const Integrations: React.FC = () => {
       case 'salesforce': return <SalesforceLogo {...props} />;
       case 'airtable': return <AirtableLogo {...props} />;
       case 'xero': return <XeroLogo {...props} />;
+      case 'telegram': return <img src={TelegramLogoImg} alt="Telegram" {...props} />;
       default: return <Database {...props} className="text-gray-400 p-2" />;
     }
   };
@@ -139,7 +141,9 @@ const Integrations: React.FC = () => {
         'Wasoko', 'Twiga Foods', 'Copia', 'Masoko', 'Jiji', 'Kilimall', 'Jumia',
         'Little Pay', 'Ipay', 'Pesapal', 'Cellulant', 'Kopo Kopo', 'Paystack',
         'Flutterwave', 'Equity Jenga', 'Logistics Hub', 'Business Intelligence',
-        'Lead Intelligence', 'HR Hub', 'M-Pesa Business', 'T-Kash', 'Airtel Money', 'System'
+        'Lead Intelligence', 'HR Hub', 'M-Pesa Business', 'T-Kash', 'Airtel Money', 'System',
+        'LlamaParse', 'Firecrawl', 'Pinecone', 'RAG Knowledge Base', 'Vector Databases',
+        'Document Parsers', 'AI Models & Embeddings'
       ];
 
       const filteredPlatforms = (platsRes.data || []).filter((p: ConnectionPlatform) =>
