@@ -15,6 +15,7 @@ import ChatSidebar from '../components/chat/ChatSidebar';
 import MessageList from '../components/chat/MessageList';
 import ChatInput from '../components/chat/ChatInput';
 import ArtifactPanel from '../components/chat/ArtifactPanel';
+import CapabilityExplorer from '../components/chat/CapabilityExplorer';
 import { useSubscription } from '../hooks/useSubscription';
 import { useStreamingChat } from '../hooks/useStreamingChat';
 
@@ -67,6 +68,7 @@ const Chat: React.FC = () => {
   const [showAgentCreator, setShowAgentCreator] = useState(false);
   const [extractedToolCalls, setExtractedToolCalls] = useState<ExtractedToolCall[]>([]);
   const [createdWorkflowId, setCreatedWorkflowId] = useState<number | null>(null);
+  const [showCapabilityExplorer, setShowCapabilityExplorer] = useState(false);
 
   // Feature Toggles state
   const [useReasoning, setUseReasoning] = useState(false);
@@ -510,6 +512,7 @@ const Chat: React.FC = () => {
           startEditingMessage={(m) => { setEditingMessage(m.id); setEditingMessageText(m.content); }}
           messagesEndRef={messagesEndRef}
           setInputMessage={setInputMessage}
+          onOpenCapabilityExplorer={() => setShowCapabilityExplorer(true)}
         />
 
         {/* Chat Input Area */}
@@ -565,6 +568,18 @@ const Chat: React.FC = () => {
           onAgentCreated={() => { setShowAgentCreator(false); toast.success('Agent created!'); }}
         />
       )}
+
+      {/* Capability Explorer Panel */}
+      <CapabilityExplorer
+        isDarkMode={isDarkMode}
+        isOpen={showCapabilityExplorer}
+        onClose={() => setShowCapabilityExplorer(false)}
+        onSuggestionClick={(prompt) => {
+          setInputMessage(prompt);
+          setShowCapabilityExplorer(false);
+          if (inputRef.current) inputRef.current.focus();
+        }}
+      />
 
       <style dangerouslySetInnerHTML={{
         __html: `
