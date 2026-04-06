@@ -1809,6 +1809,16 @@ class ApiService {
     return response.data;
   }
 
+  async getToolCapabilities(): Promise<ApiResponse<any>> {
+    const response = await this.api.get('/chat/tools/capabilities');
+    return response.data;
+  }
+
+  async getToolDiscovery(): Promise<ApiResponse<any>> {
+    const response = await this.api.get('/chat/tools/discover');
+    return response.data;
+  }
+
   // Settings endpoints
   async getUserSettings(): Promise<ApiResponse<UserSettings>> {
     const response = await this.api.get('/settings');
