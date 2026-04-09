@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Clock, Globe, ChevronDown, ChevronRight, Lock, Key, Copy, Check, Smartphone, Mail } from 'lucide-react';
+import { Shield, Clock, Globe, ChevronDown, ChevronRight, Lock, Key, Copy, Check, Smartphone, Mail, Eye, EyeOff, Pencil, Loader2 } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { SecuritySettings } from '../../types';
 import apiService from '../../services/api';
 
@@ -35,11 +36,41 @@ const SecuritySettingsTab: React.FC<SecuritySettingsProps> = ({
     const [isEmail2FAEnabled, setIsEmail2FAEnabled] = useState(false);
     const [isLoadingStatus, setIsLoadingStatus] = useState(true);
 
+    // Change Password states
+    const [showChangePassword, setShowChangePassword] = useState(false);
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [showCurrentPw, setShowCurrentPw] = useState(false);
+    const [showNewPw, setShowNewPw] = useState(false);
+    const [showConfirmPw, setShowConfirmPw] = useState(false);
+    const [isChangingPassword, setIsChangingPassword] = useState(false);
+
+    // Change Email states
+    const [showChangeEmail, setShowChangeEmail] = useState(false);
+    const [newEmail, setNewEmail] = useState('');
+    const [emailPassword, setEmailPassword] = useState('');
+    const [showEmailPw, setShowEmailPw] = useState(false);
+    const [isChangingEmail, setIsChangingEmail] = useState(false);
+    const [currentEmail, setCurrentEmail] = useState('');
+
     useEffect(() => {
         if (expanded) {
             fetch2FAStatus();
+            fetchCurrentEmail();
         }
     }, [expanded]);
+
+    const fetchCurrentEmail = async () => {
+        try {
+            const res = await apiService.getCurrentUser();
+            if (res.success) {
+                setCurrentEmail(res.data?.email || '');
+            }
+        } catch {
+            // silently fail
+        }
+    };
 
     const fetch2FAStatus = async () => {
         try {
@@ -57,6 +88,89 @@ const SecuritySettingsTab: React.FC<SecuritySettingsProps> = ({
             console.error('Failed to fetch 2FA status', error);
         } finally {
             setIsLoadingStatus(false);
+        }
+    };
+
+    // --- Change Password ---
+    const handleChangePassword = async () => {
+        if (!currentPassword || !newPassword || !confirmPassword) {
+            toast.error('Please fill in all password fields.');
+            return;
+        }
+        if (newPassword.length < 8) {
+            toast.error('New password must be at least 8 characters.');
+            return;
+        }
+        if (newPassword !== confirmPassword) {
+            toast.error('New passwords do not match.');
+            return;
+        }
+
+        setIsChangingPassword(true);
+        try {
+            const res = await apiService.request({
+                method: 'POST',
+                url: '/api/v1/security/change-password',
+                data: {
+                    current_password: currentPassword,
+                    new_password: newPassword
+                }
+            });
+            if (res.data.success) {
+                toast.success('Password changed successfully!');
+                setShowChangePassword(false);
+                setCurrentPassword('');
+                setNewPassword('');
+                setConfirmPassword('');
+            }
+        } catch (error: any) {
+            const detail = error.response?.data?.detail || 'Failed to change password.';
+            toast.error(detail);
+        } finally {
+            setIsChangingPassword(false);
+        }
+    };
+
+    // --- Change Email ---
+    const handleChangeEmail = async () => {
+        if (!newEmail || !emailPassword) {
+            toast.error('Please fill in all fields.');
+            return;
+        }
+        if (!newEmail.includes('@')) {
+            toast.error('Please enter a valid email address.');
+            return;
+        }
+
+        setIsChangingEmail(true);
+        try {
+            const res = await apiService.request({
+                method: 'POST',
+                url: '/api/v1/security/change-email',
+                data: {
+                    new_email: newEmail,
+                    password: emailPassword
+                }
+            });
+            if (res.data.success) {
+                toast.success('Email changed successfully!');
+                // Update auth token since email changed
+                if (res.data.data?.token) {
+                    localStorage.setItem('auth_token', res.data.data.token);
+                    if (res.data.data?.refresh_token) {
+                        localStorage.setItem('refresh_token', res.data.data.refresh_token);
+                    }
+                }
+                setCurrentEmail(res.data.data?.email || newEmail);
+                setShowChangeEmail(false);
+                setNewEmail('');
+                setEmailPassword('');
+            }
+        } catch (error: any) {
+            const detail = error.response?.data?.detail || 'Failed to change email.';
+            toast.error(detail);
+        } finally {
+            setIsChangingEmail(false);
         }
     };
 
@@ -200,6 +314,201 @@ const SecuritySettingsTab: React.FC<SecuritySettingsProps> = ({
 
             {expanded && (
                 <div className="space-y-6 animate-in fade-in duration-300">
+
+                    {/* Change Email */}
+                    <div className="bg-gray-50 dark:bg-slate-900/50 rounded-lg p-6 border border-transparent dark:border-slate-700/50 transition-colors">
+                        <div className="flex items-center space-x-3 mb-4">
+                            <Mail className="w-5 h-5 text-blue-600 dark:text-blue-400 transition-colors" />
+                            <h4 className="text-lg font-medium text-gray-900 dark:text-white transition-colors">Email Address</h4>
+                        </div>
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm text-gray-900 dark:text-white font-medium transition-colors">Current Email</p>
+                                    <p className="text-sm text-gray-600 dark:text-slate-400 transition-colors font-mono">{currentEmail || '...'}</p>
+                                </div>
+                                {!showChangeEmail ? (
+                                    <button
+                                        onClick={() => setShowChangeEmail(true)}
+                                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-500 transition-all shadow-sm hover:shadow-md"
+                                    >
+                                        <Pencil className="w-4 h-4" />
+                                        Change Email
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={() => { setShowChangeEmail(false); setNewEmail(''); setEmailPassword(''); }}
+                                        className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-slate-400 bg-gray-100 dark:bg-slate-800 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                )}
+                            </div>
+
+                            {showChangeEmail && (
+                                <div className="mt-4 p-5 border border-blue-100 dark:border-blue-500/20 bg-blue-50/50 dark:bg-blue-500/5 rounded-xl space-y-4 transition-colors">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5 transition-colors">New Email Address</label>
+                                        <input
+                                            type="email"
+                                            value={newEmail}
+                                            onChange={(e) => setNewEmail(e.target.value)}
+                                            className="w-full px-3 py-2.5 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500/50 focus:border-transparent transition-colors"
+                                            placeholder="newemail@example.com"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5 transition-colors">Confirm Password</label>
+                                        <div className="relative">
+                                            <input
+                                                type={showEmailPw ? 'text' : 'password'}
+                                                value={emailPassword}
+                                                onChange={(e) => setEmailPassword(e.target.value)}
+                                                className="w-full px-3 py-2.5 pr-10 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500/50 focus:border-transparent transition-colors"
+                                                placeholder="Enter your current password"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowEmailPw(!showEmailPw)}
+                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 transition-colors"
+                                            >
+                                                {showEmailPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={handleChangeEmail}
+                                        disabled={isChangingEmail || !newEmail || !emailPassword}
+                                        className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 dark:hover:bg-blue-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
+                                    >
+                                        {isChangingEmail ? (
+                                            <>
+                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                                Updating...
+                                            </>
+                                        ) : (
+                                            'Update Email'
+                                        )}
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Change Password */}
+                    <div className="bg-gray-50 dark:bg-slate-900/50 rounded-lg p-6 border border-transparent dark:border-slate-700/50 transition-colors">
+                        <div className="flex items-center space-x-3 mb-4">
+                            <Key className="w-5 h-5 text-amber-600 dark:text-amber-400 transition-colors" />
+                            <h4 className="text-lg font-medium text-gray-900 dark:text-white transition-colors">Password</h4>
+                        </div>
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm text-gray-900 dark:text-white font-medium transition-colors">Account Password</p>
+                                    <p className="text-sm text-gray-600 dark:text-slate-400 transition-colors">Update your password to keep your account secure</p>
+                                </div>
+                                {!showChangePassword ? (
+                                    <button
+                                        onClick={() => setShowChangePassword(true)}
+                                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-amber-600 rounded-lg hover:bg-amber-700 dark:hover:bg-amber-500 transition-all shadow-sm hover:shadow-md"
+                                    >
+                                        <Lock className="w-4 h-4" />
+                                        Change Password
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={() => { setShowChangePassword(false); setCurrentPassword(''); setNewPassword(''); setConfirmPassword(''); }}
+                                        className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-slate-400 bg-gray-100 dark:bg-slate-800 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                )}
+                            </div>
+
+                            {showChangePassword && (
+                                <div className="mt-4 p-5 border border-amber-100 dark:border-amber-500/20 bg-amber-50/50 dark:bg-amber-500/5 rounded-xl space-y-4 transition-colors">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5 transition-colors">Current Password</label>
+                                        <div className="relative">
+                                            <input
+                                                type={showCurrentPw ? 'text' : 'password'}
+                                                value={currentPassword}
+                                                onChange={(e) => setCurrentPassword(e.target.value)}
+                                                className="w-full px-3 py-2.5 pr-10 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-amber-500 dark:focus:ring-amber-500/50 focus:border-transparent transition-colors"
+                                                placeholder="Enter current password"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowCurrentPw(!showCurrentPw)}
+                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 transition-colors"
+                                            >
+                                                {showCurrentPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5 transition-colors">New Password</label>
+                                        <div className="relative">
+                                            <input
+                                                type={showNewPw ? 'text' : 'password'}
+                                                value={newPassword}
+                                                onChange={(e) => setNewPassword(e.target.value)}
+                                                className="w-full px-3 py-2.5 pr-10 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-amber-500 dark:focus:ring-amber-500/50 focus:border-transparent transition-colors"
+                                                placeholder="Min. 8 characters"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowNewPw(!showNewPw)}
+                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 transition-colors"
+                                            >
+                                                {showNewPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                            </button>
+                                        </div>
+                                        {newPassword && newPassword.length < 8 && (
+                                            <p className="text-xs text-red-500 dark:text-red-400 mt-1 transition-colors">Password must be at least 8 characters</p>
+                                        )}
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5 transition-colors">Confirm New Password</label>
+                                        <div className="relative">
+                                            <input
+                                                type={showConfirmPw ? 'text' : 'password'}
+                                                value={confirmPassword}
+                                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                                className="w-full px-3 py-2.5 pr-10 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-amber-500 dark:focus:ring-amber-500/50 focus:border-transparent transition-colors"
+                                                placeholder="Re-enter new password"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowConfirmPw(!showConfirmPw)}
+                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 transition-colors"
+                                            >
+                                                {showConfirmPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                            </button>
+                                        </div>
+                                        {confirmPassword && newPassword !== confirmPassword && (
+                                            <p className="text-xs text-red-500 dark:text-red-400 mt-1 transition-colors">Passwords do not match</p>
+                                        )}
+                                    </div>
+                                    <button
+                                        onClick={handleChangePassword}
+                                        disabled={isChangingPassword || !currentPassword || !newPassword || !confirmPassword || newPassword !== confirmPassword || newPassword.length < 8}
+                                        className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-amber-600 text-white font-medium rounded-lg hover:bg-amber-700 dark:hover:bg-amber-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
+                                    >
+                                        {isChangingPassword ? (
+                                            <>
+                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                                Updating...
+                                            </>
+                                        ) : (
+                                            'Update Password'
+                                        )}
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
                     {/* Two Factor Authentication */}
                     <div className="bg-gray-50 dark:bg-slate-900/50 rounded-lg p-6 border border-transparent dark:border-slate-700/50 transition-colors">
                         <div className="flex items-center space-x-3 mb-4">
@@ -409,7 +718,7 @@ const SecuritySettingsTab: React.FC<SecuritySettingsProps> = ({
                                     onChange={(e) => handleChange('ip_whitelist', e.target.value.split('\n').filter(ip => ip.trim()))}
                                     className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-red-500 dark:focus:ring-red-500/50 focus:border-transparent font-mono text-sm transition-colors placeholder:text-gray-400 dark:placeholder:text-slate-600"
                                     rows={4}
-                                    placeholder="192.168.1.1&#10;10.0.0.1"
+                                    placeholder={"192.168.1.1\n10.0.0.1"}
                                 />
                                 <p className="text-sm text-gray-600 dark:text-slate-400 transition-colors">Restrict access to specific IP addresses (leave empty to allow all)</p>
                             </div>
