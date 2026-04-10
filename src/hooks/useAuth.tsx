@@ -33,6 +33,9 @@ interface AuthContextType {
   validateResetToken: (token: string) => Promise<void>;
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   refreshUser: () => Promise<void>;
+  // Email verification
+  verifyEmail: (code: string) => Promise<any>;
+  resendVerification: () => Promise<any>;
   // Organization context
   organizations: OrgSummary[];
   activeOrg: OrgSummary | null;
@@ -228,10 +231,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const response = await apiService.register(email, password, name);
       _handleAuthResponse(response.data);
-      toast.success('Registration successful!');
-      return { is_new_user: response.data.is_new_user ?? true };
+      toast.success('Registration successful! Please verify your email.');
+      return {
+        is_new_user: response.data.is_new_user ?? true,
+        email_verified: response.data.user?.email_verified ?? false,
+      };
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Registration failed');
+      throw error;
+    }
+  };
+
+  const verifyEmail = async (code: string) => {
+    try {
+      const response = await apiService.request({
+        method: 'POST',
+        url: '/auth/verify-email',
+        data: { code },
+      });
+      // Refresh user to get updated email_verified status
+      await refreshUser();
+      toast.success('Email verified successfully!');
+      return response.data;
+    } catch (error: any) {
+      toast.error(error.response?.data?.detail || 'Verification failed');
+      throw error;
+    }
+  };
+
+  const resendVerification = async () => {
+    try {
+      const response = await apiService.request({
+        method: 'POST',
+        url: '/auth/resend-verification',
+      });
+      toast.success(response.data.message || 'Verification code sent!');
+      return response.data;
+    } catch (error: any) {
+      toast.error(error.response?.data?.detail || 'Failed to resend code');
       throw error;
     }
   };
@@ -386,6 +423,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     validateResetToken,
     changePassword,
     refreshUser,
+    verifyEmail,
+    resendVerification,
     organizations,
     activeOrg,
     switchOrg,
