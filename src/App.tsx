@@ -59,6 +59,7 @@ const Onboarding = lazy(() => import('./pages/Onboarding'));
 const CreateOrganization = lazy(() => import('./pages/CreateOrganization'));
 const OrganizationSettings = lazy(() => import('./pages/OrganizationSettings'));
 const AcceptInvite = lazy(() => import('./pages/AcceptInvite'));
+const VerifyEmail = lazy(() => import('./pages/VerifyEmail'));
 
 
 
@@ -105,6 +106,26 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   /* if (!accessApproved && window.location.pathname !== '/reset-password') {
     return <Navigate to="/" replace />;
   } */
+
+  return <>{children}</>;
+};
+
+// Email Verification Guard — redirects unverified users to /verify-email
+const RequireVerifiedEmail: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      </div>
+    );
+  }
+
+  // If user is logged in but email is not verified, redirect to verification
+  if (user && user.email_verified === false) {
+    return <Navigate to="/verify-email" replace />;
+  }
 
   return <>{children}</>;
 };
@@ -182,17 +203,22 @@ const AppRoutes: React.FC = () => {
 
       {/* Organization Onboarding (Protected) */}
       <Route path="/onboarding" element={
-        <ProtectedRoute><Onboarding /></ProtectedRoute>
+        <ProtectedRoute><RequireVerifiedEmail><Onboarding /></RequireVerifiedEmail></ProtectedRoute>
       } />
       <Route path="/create-organization" element={
-        <ProtectedRoute><CreateOrganization /></ProtectedRoute>
+        <ProtectedRoute><RequireVerifiedEmail><CreateOrganization /></RequireVerifiedEmail></ProtectedRoute>
       } />
       <Route path="/org/settings" element={
-        <ProtectedRoute><Layout><OrganizationSettings /></Layout></ProtectedRoute>
+        <ProtectedRoute><RequireVerifiedEmail><Layout><OrganizationSettings /></Layout></RequireVerifiedEmail></ProtectedRoute>
       } />
 
       {/* Public Premium Content Unlock (no auth required) */}
       <Route path="/unlock/:linkId" element={<PremiumContentUnlock />} />
+
+      {/* Email Verification (protected but NOT wrapped in RequireVerifiedEmail) */}
+      <Route path="/verify-email" element={
+        <ProtectedRoute><VerifyEmail /></ProtectedRoute>
+      } />
 
       {/* Organization Invitation Accept (public — invitee may not be logged in) */}
       <Route path="/invite/:token" element={<AcceptInvite />} />
@@ -210,9 +236,11 @@ const AppRoutes: React.FC = () => {
         path="/unified"
         element={
           <ProtectedRoute>
-            <Layout>
-              <UnifiedDashboard />
-            </Layout>
+            <RequireVerifiedEmail>
+              <Layout>
+                <UnifiedDashboard />
+              </Layout>
+            </RequireVerifiedEmail>
           </ProtectedRoute>
         }
       />
@@ -220,9 +248,11 @@ const AppRoutes: React.FC = () => {
         path="/unified/inbox"
         element={
           <ProtectedRoute>
-            <Layout>
-              <UnifiedInbox />
-            </Layout>
+            <RequireVerifiedEmail>
+              <Layout>
+                <UnifiedInbox />
+              </Layout>
+            </RequireVerifiedEmail>
           </ProtectedRoute>
         }
       />
@@ -230,9 +260,11 @@ const AppRoutes: React.FC = () => {
         path="/unified/tasks"
         element={
           <ProtectedRoute>
-            <Layout>
-              <UnifiedTaskView />
-            </Layout>
+            <RequireVerifiedEmail>
+              <Layout>
+                <UnifiedTaskView />
+              </Layout>
+            </RequireVerifiedEmail>
           </ProtectedRoute>
         }
       />
@@ -240,9 +272,11 @@ const AppRoutes: React.FC = () => {
         path="/unified/calendar"
         element={
           <ProtectedRoute>
-            <Layout>
-              <UnifiedCalendar />
-            </Layout>
+            <RequireVerifiedEmail>
+              <Layout>
+                <UnifiedCalendar />
+              </Layout>
+            </RequireVerifiedEmail>
           </ProtectedRoute>
         }
       />
@@ -253,9 +287,11 @@ const AppRoutes: React.FC = () => {
         path="/connections"
         element={
           <ProtectedRoute>
-            <Layout>
-              <Connections />
-            </Layout>
+            <RequireVerifiedEmail>
+              <Layout>
+                <Connections />
+              </Layout>
+            </RequireVerifiedEmail>
           </ProtectedRoute>
         }
       />
@@ -270,9 +306,11 @@ const AppRoutes: React.FC = () => {
         path="/workflows"
         element={
           <ProtectedRoute>
-            <Layout>
-              <Workflows />
-            </Layout>
+            <RequireVerifiedEmail>
+              <Layout>
+                <Workflows />
+              </Layout>
+            </RequireVerifiedEmail>
           </ProtectedRoute>
         }
       />
@@ -292,9 +330,11 @@ const AppRoutes: React.FC = () => {
         path="/usage"
         element={
           <ProtectedRoute>
-            <Layout>
-              <Usage />
-            </Layout>
+            <RequireVerifiedEmail>
+              <Layout>
+                <Usage />
+              </Layout>
+            </RequireVerifiedEmail>
           </ProtectedRoute>
         }
       />
@@ -303,9 +343,11 @@ const AppRoutes: React.FC = () => {
         path="/whatsapp"
         element={
           <ProtectedRoute>
-            <Layout>
-              <WhatsAppDashboard />
-            </Layout>
+            <RequireVerifiedEmail>
+              <Layout>
+                <WhatsAppDashboard />
+              </Layout>
+            </RequireVerifiedEmail>
           </ProtectedRoute>
         }
       />
@@ -314,9 +356,11 @@ const AppRoutes: React.FC = () => {
         path="/tiktok"
         element={
           <ProtectedRoute>
-            <Layout>
-              <TikTokDashboard />
-            </Layout>
+            <RequireVerifiedEmail>
+              <Layout>
+                <TikTokDashboard />
+              </Layout>
+            </RequireVerifiedEmail>
           </ProtectedRoute>
         }
       />
@@ -325,9 +369,11 @@ const AppRoutes: React.FC = () => {
         path="/marketplace"
         element={
           <ProtectedRoute>
-            <Layout>
-              <Marketplace />
-            </Layout>
+            <RequireVerifiedEmail>
+              <Layout>
+                <Marketplace />
+              </Layout>
+            </RequireVerifiedEmail>
           </ProtectedRoute>
         }
       />
@@ -352,9 +398,11 @@ const AppRoutes: React.FC = () => {
         path="/favorites"
         element={
           <ProtectedRoute>
-            <Layout>
-              <Favorites />
-            </Layout>
+            <RequireVerifiedEmail>
+              <Layout>
+                <Favorites />
+              </Layout>
+            </RequireVerifiedEmail>
           </ProtectedRoute>
         }
       />
@@ -363,9 +411,11 @@ const AppRoutes: React.FC = () => {
         path="/creator-profile"
         element={
           <ProtectedRoute>
-            <Layout>
-              <CreatorProfile />
-            </Layout>
+            <RequireVerifiedEmail>
+              <Layout>
+                <CreatorProfile />
+              </Layout>
+            </RequireVerifiedEmail>
           </ProtectedRoute>
         }
       />
@@ -374,9 +424,11 @@ const AppRoutes: React.FC = () => {
         path="/payments"
         element={
           <ProtectedRoute>
-            <Layout>
-              <Payments />
-            </Layout>
+            <RequireVerifiedEmail>
+              <Layout>
+                <Payments />
+              </Layout>
+            </RequireVerifiedEmail>
           </ProtectedRoute>
         }
       />
@@ -399,9 +451,11 @@ const AppRoutes: React.FC = () => {
         path="/settings"
         element={
           <ProtectedRoute>
-            <Layout>
-              <Settings />
-            </Layout>
+            <RequireVerifiedEmail>
+              <Layout>
+                <Settings />
+              </Layout>
+            </RequireVerifiedEmail>
           </ProtectedRoute>
         }
       />
@@ -410,9 +464,11 @@ const AppRoutes: React.FC = () => {
         path="/profile"
         element={
           <ProtectedRoute>
-            <Layout>
-              <Profile />
-            </Layout>
+            <RequireVerifiedEmail>
+              <Layout>
+                <Profile />
+              </Layout>
+            </RequireVerifiedEmail>
           </ProtectedRoute>
         }
       />
@@ -421,9 +477,11 @@ const AppRoutes: React.FC = () => {
         path="/developer"
         element={
           <ProtectedRoute>
-            <Layout>
-              <DeveloperPortal />
-            </Layout>
+            <RequireVerifiedEmail>
+              <Layout>
+                <DeveloperPortal />
+              </Layout>
+            </RequireVerifiedEmail>
           </ProtectedRoute>
         }
       />
@@ -432,7 +490,9 @@ const AppRoutes: React.FC = () => {
         path="/chat"
         element={
           <ProtectedRoute>
-            <Chat />
+            <RequireVerifiedEmail>
+              <Chat />
+            </RequireVerifiedEmail>
           </ProtectedRoute>
         }
       />
