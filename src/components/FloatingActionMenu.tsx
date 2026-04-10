@@ -11,6 +11,7 @@ import {
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useTutorial } from '../hooks/useTutorial';
+import AIAssistant from './AIAssistant';
 
 interface MenuItem {
   id: string;
@@ -285,159 +286,9 @@ const FloatingActionMenu: React.FC = () => {
 
       {/* AI Assistant Panel (shown when selected) */}
       {showAssistant && (
-        <AIAssistantPanel onClose={() => setShowAssistant(false)} />
+        <AIAssistant embedded onClose={() => setShowAssistant(false)} />
       )}
     </>
-  );
-};
-
-// Inline AI Assistant Panel Component
-const AIAssistantPanel: React.FC<{ onClose: () => void }> = ({ onClose }) => {
-  const [messages, setMessages] = useState<Array<{ role: string; content: string }>>([]);
-  const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const location = useLocation();
-
-  const getPageContext = () => {
-    const path = location.pathname;
-    if (path.includes('/unified') || path.includes('/dashboard')) return 'workspace';
-    if (path.includes('/workflows')) return 'workflows';
-    if (path.includes('/agents')) return 'agents';
-    if (path.includes('/chat')) return 'chat';
-    if (path.includes('/connections')) return 'connections';
-    if (path.includes('/marketplace')) return 'marketplace';
-    if (path.includes('/favorites')) return 'favorites';
-    if (path.includes('/creator-profile')) return 'creator_profile';
-
-    if (path.includes('/settings')) return 'settings';
-    return 'general';
-  };
-
-  const quickPrompts = [
-    { label: 'How do I create a workflow?', icon: '🔧' },
-    { label: 'Show me keyboard shortcuts', icon: '⌨️' },
-    { label: 'What can I do here?', icon: '🤔' },
-    { label: 'Help me get started', icon: '🚀' },
-  ];
-
-  const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
-
-    const userMessage = { role: 'user', content: input };
-    setMessages(prev => [...prev, userMessage]);
-    setInput('');
-    setIsLoading(true);
-
-    // Simulate AI response (replace with actual API call)
-    setTimeout(() => {
-      const context = getPageContext();
-      const response = {
-        role: 'assistant',
-        content: `I understand you're asking about "${input}" while on the ${context} page. I'm here to help! This is a demo response - in production, I'd connect to your AI backend to provide real assistance.`,
-      };
-      setMessages(prev => [...prev, response]);
-      setIsLoading(false);
-    }, 1000);
-  };
-
-  return (
-    <div className="fixed bottom-24 right-6 z-50 w-96 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col max-h-[500px]">
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-purple-600 to-blue-600 rounded-t-2xl">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-            <Bot className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-white">AI Assistant</h3>
-            <p className="text-xs text-white/70">Ask me anything</p>
-          </div>
-        </div>
-        <button
-          onClick={onClose}
-          className="p-2 hover:bg-white/20 rounded-lg transition-colors"
-        >
-          <X className="w-5 h-5 text-white" />
-        </button>
-      </div>
-
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-[200px]">
-        {messages.length === 0 ? (
-          <div className="text-center py-6">
-            <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-purple-100 to-blue-100 dark:from-purple-900/30 dark:to-blue-900/30 rounded-full flex items-center justify-center">
-              <Bot className="w-8 h-8 text-purple-600 dark:text-purple-400" />
-            </div>
-            <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
-              How can I help you today?
-            </p>
-            <div className="space-y-2">
-              {quickPrompts.map((prompt, index) => (
-                <button
-                  key={index}
-                  onClick={() => {
-                    setInput(prompt.label);
-                    handleSend();
-                  }}
-                  className="w-full text-left px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex items-center space-x-2"
-                >
-                  <span>{prompt.icon}</span>
-                  <span className="text-gray-700 dark:text-gray-300">{prompt.label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        ) : (
-          messages.map((msg, index) => (
-            <div
-              key={index}
-              className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-            >
-              <div
-                className={`max-w-[80%] rounded-2xl px-4 py-2 ${msg.role === 'user'
-                  ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
-                  }`}
-              >
-                <p className="text-sm">{msg.content}</p>
-              </div>
-            </div>
-          ))
-        )}
-        {isLoading && (
-          <div className="flex justify-start">
-            <div className="bg-gray-100 dark:bg-gray-700 rounded-2xl px-4 py-2">
-              <div className="flex space-x-1">
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Input */}
-      <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-        <div className="flex space-x-2">
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-            placeholder="Ask anything..."
-            className="flex-1 px-4 py-2 bg-gray-100 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none text-gray-800 dark:text-gray-200"
-          />
-          <button
-            onClick={handleSend}
-            disabled={!input.trim() || isLoading}
-            className="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl hover:opacity-90 disabled:opacity-50 transition-opacity"
-          >
-            Send
-          </button>
-        </div>
-      </div>
-    </div>
   );
 };
 
