@@ -56,7 +56,8 @@ const Register: React.FC = () => {
     setFormError(null);
     try {
       const result = await registerUser(data.email, data.password, data.name);
-      navigate(result?.is_new_user ? '/onboarding' : '/unified');
+      // New users go to email verification first
+      navigate('/verify-email');
     } catch (error: any) {
       const errorMessage = error.response?.data?.detail || 'Registration failed.';
       setFormError(errorMessage);

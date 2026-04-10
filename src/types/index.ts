@@ -10,6 +10,7 @@ export interface User {
   phone_number?: string;
   role?: 'user' | 'employee' | 'admin';
   permissions?: Record<string, boolean>;
+  email_verified?: boolean;
   created_at: string;
   updated_at: string;
 }
