@@ -3098,6 +3098,65 @@ class ApiService {
     return response.data;
   }
 
+  // ── AI Assistant (RAG-powered) ─────────────────────────────
+  async assistantChat(
+    message: string,
+    conversationHistory: Array<{ role: string; content: string }> = [],
+    pageContext: string = '',
+    sessionId: string = ''
+  ): Promise<{
+    response: string;
+    sources: Array<{ title: string; score: number }>;
+    suggested_followups: string[];
+    tokens_used: number;
+    is_authenticated: boolean;
+    rate_limit_remaining?: number;
+  }> {
+    const response = await this.api.post('/assistant/chat', {
+      message,
+      conversation_history: conversationHistory,
+      page_context: pageContext,
+      session_id: sessionId,
+    });
+    return response.data;
+  }
+
+  async getAssistantCapabilities(): Promise<{
+    success: boolean;
+    data: {
+      categories: Array<{
+        id: string;
+        name: string;
+        icon: string;
+        tools: Array<{
+          id: string;
+          name: string;
+          description: string;
+          connected: boolean;
+        }>;
+      }>;
+      total_integrations: number;
+      connected_count: number;
+      is_authenticated: boolean;
+    };
+  }> {
+    const response = await this.api.get('/assistant/capabilities');
+    return response.data;
+  }
+
+  async submitAssistantFeedback(
+    messageContent: string,
+    helpful: boolean,
+    userQuery: string = ''
+  ): Promise<{ success: boolean; message: string }> {
+    const response = await this.api.post('/assistant/feedback', {
+      message_content: messageContent,
+      helpful,
+      user_query: userQuery,
+    });
+    return response.data;
+  }
+
 }
 
 export const apiService = new ApiService();
