@@ -51,10 +51,11 @@ import instagramLogo from '../assets/apps/instagram.jpeg';
 import tiktokLogo from '../assets/apps/tiktok.png';
 import outlookLogo from '../assets/apps/outlook.png';
 
+import HeroAIChatMockup from '../components/HeroAIChatMockup';
+
 const LandingPage: React.FC = () => {
     const { user } = useAuth();
     const [activeTab, setActiveTab] = useState('engineering');
-    const [heroTextIndex, setHeroTextIndex] = useState(0);
 
     // Live Activity Simulation State
     const [activities, setActivities] = useState([
@@ -62,16 +63,6 @@ const LandingPage: React.FC = () => {
         { id: 2, type: 'jira', user: 'System', action: 'Ticket EXP-1024 updated', time: '2m ago', icon: GitBranch, color: 'text-orange-500', bg: 'bg-orange-100' },
         { id: 3, type: 'gmail', user: 'Client A', action: 'New proposal request', time: '15m ago', icon: Mail, color: 'text-red-500', bg: 'bg-red-100' },
     ]);
-
-    const heroWords = ["Marketing", "Sales", "Support", "Engineering", "HR"];
-
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setHeroTextIndex((prev) => (prev + 1) % heroWords.length);
-        }, 2000);
-        return () => clearInterval(interval);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [heroWords.length]);
 
     // Simulate incoming activity
     useEffect(() => {
@@ -114,26 +105,7 @@ const LandingPage: React.FC = () => {
         return { ref, isVisible };
     };
 
-    // Animated Counter
-    const useCounter = (end: number, isVisible: boolean, duration = 2000) => {
-        const [count, setCount] = useState(0);
-        useEffect(() => {
-            if (!isVisible) return;
-            let start = 0;
-            const step = end / (duration / 16);
-            const timer = setInterval(() => {
-                start += step;
-                if (start >= end) {
-                    setCount(end);
-                    clearInterval(timer);
-                } else {
-                    setCount(Math.floor(start));
-                }
-            }, 16);
-            return () => clearInterval(timer);
-        }, [isVisible, end, duration]);
-        return count;
-    };
+
 
     // Create reveal refs for each section
     const heroReveal = useScrollReveal();
@@ -145,11 +117,7 @@ const LandingPage: React.FC = () => {
     const securityReveal = useScrollReveal();
     const ctaReveal = useScrollReveal();
 
-    // Social proof counters
-    const statsVisible = heroReveal.isVisible;
-    const teamCount = useCounter(10000, statsVisible);
-    const integrationCount = useCounter(50, statsVisible);
-    const uptimeCount = useCounter(99, statsVisible);
+
 
 
     const integrations = [
@@ -180,113 +148,108 @@ const LandingPage: React.FC = () => {
             />
 
             {/* Hero Section */}
-            <section className="relative z-10 pt-2 pb-12 sm:pb-16 px-4 sm:px-6 lg:px-8 flex flex-col items-center overflow-hidden">
+            <section className="relative z-10 pt-16 pb-12 sm:pb-20 px-4 sm:px-6 lg:px-8 flex flex-col items-center overflow-hidden">
 
-                {/* Animated floating orbs — subtle to avoid navbar clash */}
-                <div className="absolute top-[15%] left-[15%] w-72 h-72 bg-purple-400/10 dark:bg-purple-900/20 rounded-full blur-[120px] animate-float pointer-events-none"></div>
-                <div className="absolute top-[25%] right-[10%] w-64 h-64 bg-blue-400/8 dark:bg-blue-900/20 rounded-full blur-[100px] animate-float pointer-events-none" style={{ animationDelay: '2s' }}></div>
-                <div className="absolute bottom-[20%] left-[40%] w-56 h-56 bg-cyan-400/6 dark:bg-cyan-900/20 rounded-full blur-[90px] animate-float pointer-events-none" style={{ animationDelay: '4s' }}></div>
-                {/* Subtle grid pattern */}
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,_rgba(0,0,0,0.02)_1px,_transparent_0)] dark:bg-[radial-gradient(circle_at_1px_1px,_rgba(255,255,255,0.05)_1px,_transparent_0)] bg-[size:32px_32px] pointer-events-none transition-colors"></div>
+                {/* Subtle, calm background glow */}
+                <div className="absolute inset-0 top-[-20%] left-[-10%] w-[60%] h-[60%] bg-purple-500/5 dark:bg-purple-900/10 rounded-full blur-[140px] pointer-events-none"></div>
+                <div className="absolute inset-0 top-[10%] right-[-10%] w-[50%] h-[50%] bg-blue-500/5 dark:bg-blue-900/10 rounded-full blur-[120px] pointer-events-none"></div>
 
-                <div ref={heroReveal.ref} className={`max-w-6xl mx-auto text-center relative z-20 transition-all duration-700 ${heroReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                <div ref={heroReveal.ref} className={`w-full max-w-7xl mx-auto relative z-20 transition-all duration-700 ${heroReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
 
-                    {/* Main Headline */}
-                    <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 sm:mb-8 tracking-tighter leading-[1.1] text-slate-900 dark:text-white transition-colors">
-                        <span className="block">Automate your</span>
-                        <div className="h-[1.1em] overflow-hidden relative mt-1">
-                            <span
-                                className="block bg-gradient-to-r from-slate-800 via-slate-600 to-slate-900 dark:from-slate-200 dark:via-white dark:to-slate-300 bg-clip-text text-transparent transition-transform duration-500 ease-in-out"
-                                style={{ transform: `translateY(-${heroTextIndex * 1.1}em)` }}
-                            >
-                                {heroWords.map((word) => (
-                                    <span key={word} className="block h-[1.1em]"> {word}</span>
-                                ))}
-                            </span>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 xl:gap-20 items-center">
+                        {/* Left Content Area */}
+                        <div className="max-w-2xl">
+                            {/* Announcement Badge */}
+                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-indigo-50 dark:from-indigo-900/30 to-purple-50 dark:to-purple-900/30 border border-indigo-100 dark:border-indigo-800/50 text-indigo-700 dark:text-indigo-300 text-[11px] sm:text-xs font-bold uppercase tracking-widest mb-6 lg:mb-8 shadow-sm">
+                                <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
+                                <span>Reimagining the Workspace</span>
+                            </div>
+
+                            {/* Main Headline */}
+                            <h1 className="text-4xl sm:text-5xl lg:text-5xl xl:text-[3.5rem] font-extrabold mb-8 tracking-tight leading-[1.1] text-slate-900 dark:text-white">
+                                The workspace that <br className="hidden sm:block" />
+                                <span className="bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 bg-clip-text text-transparent">executes the work.</span>
+                            </h1>
+
+                            {/* Subheadline (Structured like ClickUp) */}
+                            <ul className="text-base sm:text-lg text-slate-600 dark:text-slate-300 mb-10 leading-relaxed max-w-xl space-y-4">
+                                <li className="flex items-start gap-3">
+                                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs font-bold mt-0.5 shadow-sm border border-indigo-200 dark:border-indigo-800/60">1</span>
+                                    <span>
+                                        <strong className="text-slate-900 dark:text-white block sm:inline">Unify context.</strong> Chat, Tasks, Data, and 50+ Apps in one place.
+                                    </span>
+                                </li>
+                                <li className="flex items-start gap-3">
+                                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 flex items-center justify-center text-xs font-bold mt-0.5 shadow-sm border border-purple-200 dark:border-purple-800/60">2</span>
+                                    <span>
+                                        <strong className="text-slate-900 dark:text-white block sm:inline">Deploy intelligence.</strong> AI Agents that think, reason, and act autonomously.
+                                    </span>
+                                </li>
+                                <li className="flex items-start gap-3">
+                                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xs font-bold mt-0.5 shadow-sm border border-emerald-200 dark:border-emerald-800/60">3</span>
+                                    <span>
+                                        <strong className="text-slate-900 dark:text-white block sm:inline">Run on autopilot.</strong> Create infinite Workflows with zero coding.
+                                    </span>
+                                </li>
+                            </ul>
+
+                            {/* CTAs */}
+                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-start gap-3 w-full sm:w-auto">
+                                {user ? (
+                                    <Link
+                                        to="/unified"
+                                        className="group inline-flex items-center justify-center gap-2 bg-slate-900 text-white dark:bg-white dark:text-slate-900 px-6 py-3 rounded-lg font-bold text-sm transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5 hover:ring-2 ring-slate-900/20 dark:ring-white/20"
+                                    >
+                                        Open Dashboard
+                                        <LayoutDashboard className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                    </Link>
+                                ) : (
+                                    <Link
+                                        to="/register"
+                                        className="group inline-flex items-center justify-center gap-2 bg-slate-900 text-white dark:bg-white dark:text-slate-900 px-6 py-3 rounded-lg font-bold text-sm transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5 hover:ring-2 ring-slate-900/20 dark:ring-white/20"
+                                    >
+                                        Start Building for Free
+                                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                    </Link>
+                                )}
+                                <Link
+                                    to="/pricing"
+                                    className="group inline-flex items-center justify-center gap-2 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 px-6 py-3 rounded-lg font-bold text-sm transition-all duration-300 shadow-sm hover:shadow"
+                                >
+                                    View Pricing
+                                </Link>
+                            </div>
+
+                            {/* Social Proof Stats */}
+                            <div className="mt-12 lg:mt-14 flex flex-wrap items-center justify-start gap-4 sm:gap-6 border-t border-slate-200 dark:border-slate-800 pt-8 transition-colors">
+                                <div className="flex flex-col items-start hidden sm:flex">
+                                    <div className="text-base font-bold text-slate-900 dark:text-white tracking-tight">Trusted by</div>
+                                    <div className="text-[10px] uppercase tracking-wider text-slate-500 font-bold mt-1">Early-Stage Tech Teams</div>
+                                </div>
+                                <div className="w-px h-8 bg-slate-200 dark:bg-slate-800 hidden sm:block"></div>
+                                <div className="flex flex-col items-start">
+                                    <div className="text-base font-bold text-slate-900 dark:text-white tracking-tight">50+ Connectors</div>
+                                    <div className="text-[10px] uppercase tracking-wider text-slate-500 font-bold mt-1">Ready on Day One</div>
+                                </div>
+                                <div className="w-px h-8 bg-slate-200 dark:bg-slate-800 hidden sm:block"></div>
+                                <div className="flex flex-col items-start">
+                                    <div className="text-base font-bold text-slate-900 dark:text-white tracking-tight">Zero Coding</div>
+                                    <div className="text-[10px] uppercase tracking-wider text-slate-500 font-bold mt-1">Instant Agent Setup</div>
+                                </div>
+                            </div>
                         </div>
-                    </h1>
 
-                    {/* Subheadline */}
-                    <p className="text-lg sm:text-xl text-slate-500/90 dark:text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed font-medium transition-colors">
-                        Stop switching apps. The intelligent workspace that unifies your <br className="hidden sm:block" />tools, tasks, and teams in one place.
-                    </p>
-
-
-                    {/* CTAs */}
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto">
-                        {user ? (
-                            <Link
-                                to="/unified"
-                                className="group w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 px-8 py-3.5 rounded-full font-semibold text-sm sm:text-base transition-all duration-300 shadow-[0_4px_14px_0_rgb(0,0,0,0.1)] dark:shadow-none hover:shadow-[0_6px_20px_rgba(0,0,0,0.15)] hover:-translate-y-0.5"
-                            >
-                                Open Dashboard
-                                <LayoutDashboard className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                            </Link>
-                        ) : (
-                            <Link
-                                to="/register"
-                                className="group w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 px-8 py-3.5 rounded-full font-semibold text-sm sm:text-base transition-all duration-300 shadow-[0_4px_14px_0_rgb(0,0,0,0.1)] dark:shadow-none hover:shadow-[0_6px_20px_rgba(0,0,0,0.15)] hover:-translate-y-0.5"
-                            >
-                                Get Started Free
-                                <ArrowRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
-                            </Link>
-                        )}
-                        <button
-                            onClick={() => {
-                                document.getElementById('demo-video')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            }}
-                            className="group w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700 border border-slate-200/60 dark:border-slate-700 text-slate-600 dark:text-slate-300 px-8 py-3.5 rounded-full font-semibold text-sm sm:text-base transition-all duration-300 hover:shadow-[0_4px_14px_0_rgb(0,0,0,0.05)] hover:-translate-y-0.5"
-                        >
-                            <Play className="w-4 h-4 text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors fill-current" />
-                            See how it works
-                        </button>
-                    </div>
-
-                    {/* Social Proof Stats */}
-                    <div className="mt-12 sm:mt-16 flex flex-wrap items-center justify-center gap-6 sm:gap-10 opacity-80 mix-blend-multiply dark:mix-blend-normal transition-all">
-                        <div className="flex flex-col items-center">
-                            <div className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">{teamCount.toLocaleString()}+</div>
-                            <div className="text-xs text-slate-500/80 dark:text-slate-400 font-medium tracking-wide">TEAMS WORLDWIDE</div>
-                        </div>
-                        <div className="w-px h-8 bg-slate-200 hidden sm:block"></div>
-                        <div className="flex flex-col items-center">
-                            <div className="text-2xl font-bold text-slate-800 tracking-tight">{integrationCount}+</div>
-                            <div className="text-xs text-slate-500/80 font-medium tracking-wide">INTEGRATIONS</div>
-                        </div>
-                        <div className="w-px h-8 bg-slate-200 hidden sm:block"></div>
-                        <div className="flex flex-col items-center">
-                            <div className="text-2xl font-bold text-slate-800 tracking-tight">{uptimeCount}.9%</div>
-                            <div className="text-xs text-slate-500/80 font-medium tracking-wide">UPTIME SLA</div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Video Demo Section */}
-            <section id="demo-video" className="pb-16 md:pb-24 px-4 sm:px-6 lg:px-8 bg-transparent relative z-20 w-full overflow-hidden -mt-4 sm:-mt-8 md:-mt-12 transition-colors">
-                {/* Decorative Background Elements */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-5xl h-[300px] bg-gradient-to-b from-purple-500/10 dark:from-purple-900/20 to-transparent blur-3xl pointer-events-none"></div>
-
-                <div className="max-w-6xl mx-auto relative">
-                    {/* Video Container */}
-                    <div className="relative group rounded-[2rem] sm:rounded-[3rem] p-2 sm:p-4 bg-white/50 dark:bg-slate-900/50 backdrop-blur-3xl border border-white dark:border-slate-800 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] dark:shadow-none hover:shadow-[0_30px_80px_-20px_rgba(100,50,255,0.2)] dark:hover:shadow-[0_30px_80px_-20px_rgba(100,50,255,0.1)] transition-all duration-700">
-                        {/* Inner Video Wrapper */}
-                        <div className="relative rounded-2xl sm:rounded-[2rem] overflow-hidden bg-slate-900 aspect-video shadow-2xl ring-1 ring-slate-900/10 group-hover:ring-purple-500/30 transition-all duration-700 w-full transform group-hover:-translate-y-1">
-                            {/* Subtle Inner Glow */}
-                            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-10"></div>
-
-                            <iframe
-                                className="absolute top-0 left-0 w-full h-full relative z-0 animate-fade-in"
-                                src="https://www.youtube.com/embed/DjMBlY2NAN8?autoplay=1&mute=1&loop=1&playlist=DjMBlY2NAN8&controls=0"
-                                title="Product Demo"
-                                frameBorder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                allowFullScreen
-                            ></iframe>
+                        {/* Right Area: AI Mockup */}
+                        <div className="w-full h-full flex justify-center lg:justify-end items-center mt-8 lg:mt-0 relative">
+                            {/* Extra subtle background glow for the right side */}
+                            <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/5 to-purple-500/10 dark:from-indigo-900/20 dark:to-purple-900/20 blur-2xl rounded-full pointer-events-none"></div>
+                            <HeroAIChatMockup />
                         </div>
                     </div>
                 </div>
             </section>
+
+
 
             {/* Scrolling Marquee */}
             <section className="py-8 overflow-hidden transition-colors">
