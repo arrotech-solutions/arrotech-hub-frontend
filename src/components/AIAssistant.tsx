@@ -443,10 +443,10 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ onClose, embedded = false }) 
   const chatPanel = (
     <div
       className={`${embedded
-        ? 'fixed bottom-24 right-6 z-50 w-[400px] max-h-[560px]'
+        ? 'fixed bottom-[80px] right-4 left-4 sm:left-auto sm:right-6 z-50 sm:w-[400px] h-[70vh] sm:h-[560px] max-h-[calc(100vh-100px)]'
         : isExpanded
-          ? 'fixed z-50 bottom-4 right-4 left-4 top-4 md:left-auto md:w-[600px] md:h-[80vh]'
-          : 'fixed z-50 bottom-24 right-6 w-[400px] h-[560px]'
+          ? 'fixed z-50 bottom-4 right-4 left-4 top-4 md:left-auto md:right-6 md:bottom-6 md:w-[600px] md:h-[85vh]'
+          : 'fixed z-50 bottom-[80px] right-4 left-4 sm:left-auto sm:right-6 sm:w-[400px] h-[70vh] sm:h-[560px] max-h-[calc(100vh-100px)]'
         } bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col transition-all duration-300`}
       style={{ animation: 'slideUp 0.3s ease-out' }}
     >
@@ -524,7 +524,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ onClose, embedded = false }) 
                 <Loader2 className="w-5 h-5 animate-spin text-indigo-500" />
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {capabilities.map(category => (
                   <div
                     key={category.id}
@@ -615,7 +615,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ onClose, embedded = false }) 
             className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
             style={{ animation: 'slideUp 0.2s ease-out' }}
           >
-            <div className={`max-w-[85%] ${message.role === 'user' ? '' : 'space-y-2'}`}>
+            <div className={`max-w-[90%] sm:max-w-[85%] ${message.role === 'user' ? '' : 'space-y-2'}`}>
               <div
                 className={`rounded-2xl px-4 py-3 ${message.role === 'user'
                   ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white'
@@ -648,7 +648,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ onClose, embedded = false }) 
                       {/* Feedback buttons */}
                       <button
                         onClick={() => handleFeedback(message.id, true)}
-                        className={`p-1 rounded transition-colors ${
+                        className={`p-1.5 sm:p-1 rounded transition-colors ${
                           message.feedbackGiven === 'up'
                             ? 'text-green-500 bg-green-50 dark:bg-green-900/30'
                             : 'text-gray-400 hover:text-green-500 hover:bg-gray-100 dark:hover:bg-gray-600'
@@ -660,7 +660,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ onClose, embedded = false }) 
                       </button>
                       <button
                         onClick={() => handleFeedback(message.id, false)}
-                        className={`p-1 rounded transition-colors ${
+                        className={`p-1.5 sm:p-1 rounded transition-colors ${
                           message.feedbackGiven === 'down'
                             ? 'text-red-500 bg-red-50 dark:bg-red-900/30'
                             : 'text-gray-400 hover:text-red-500 hover:bg-gray-100 dark:hover:bg-gray-600'
@@ -673,7 +673,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ onClose, embedded = false }) 
                       {/* Copy button */}
                       <button
                         onClick={() => copyToClipboard(message.content, message.id)}
-                        className="p-1 hover:bg-gray-100 dark:hover:bg-gray-600 rounded transition-colors"
+                        className="p-1.5 sm:p-1 hover:bg-gray-100 dark:hover:bg-gray-600 rounded transition-colors"
                         title="Copy"
                       >
                         {copiedId === message.id ? (
@@ -731,7 +731,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ onClose, embedded = false }) 
           }}
           className="absolute bottom-24 right-4 p-2 bg-white dark:bg-gray-700 shadow-lg rounded-full hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors border border-gray-200 dark:border-gray-600"
         >
-          <ChevronDown className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+          <ChevronDown className="w-5 h-5 sm:w-4 sm:h-4 text-gray-600 dark:text-gray-300" />
         </button>
       )}
 
@@ -786,7 +786,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ onClose, embedded = false }) 
     <>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`fixed bottom-6 right-6 z-50 p-4 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 ${isOpen
+        className={`fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[60] p-4 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 ${isOpen
           ? 'bg-gray-600 hover:bg-gray-700'
           : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700'
         }`}

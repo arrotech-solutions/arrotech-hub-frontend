@@ -50,7 +50,7 @@ const UnifiedDashboard: React.FC = () => {
                     promises.push(apiService.executeMCPTool('google_workspace_gmail', { operation: 'read_emails', max_results: 5 }).then(res => ({ type: 'gmail', res })));
                 }
                 if (activePlatforms.includes('slack')) {
-                    promises.push(apiService.executeMCPTool('slack_search', { action: 'get_channel_history', channel: 'general', limit: 5 }).then(res => ({ type: 'slack', res })));
+                    promises.push(apiService.executeMCPTool('slack_search', { action: 'get_recent_messages', limit: 5 }).then(res => ({ type: 'slack', res })));
                 }
                 if (activePlatforms.includes('outlook')) {
                     promises.push(apiService.executeMCPTool('outlook_email_management', { action: 'read_emails', limit: 5 }).then(res => ({ type: 'outlook', res })));
@@ -133,10 +133,10 @@ const UnifiedDashboard: React.FC = () => {
                                 platform: 'gmail'
                             })));
                         } else if (type === 'slack') {
-                            const msgs = data.data?.messages || data.messages || [];
+                            const msgs = data.messages || data.data?.messages || [];
                             newMessages.push(...msgs.map((m: any) => ({
-                                id: m.timestamp, title: m.user || 'Unknown', subtitle: m.text || 'Message',
-                                time: new Date(parseFloat(m.timestamp) * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                                id: m.timestamp || m.id, title: m.user || 'Unknown', subtitle: m.channel ? `${m.channel}: ${m.text}` : m.text,
+                                time: m.timestamp ? new Date(parseFloat(m.timestamp) * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Now',
                                 platform: 'slack'
                             })));
                         } else if (type === 'outlook') {

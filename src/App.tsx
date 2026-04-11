@@ -5,6 +5,7 @@ import Layout from './components/Layout';
 import PublicLayout from './components/PublicLayout'; // New shared layout
 import TutorialButton from './components/TutorialButton';
 import TutorialOverlay from './components/TutorialOverlay';
+import FloatingActionMenu from './components/FloatingActionMenu';
 import { AuthProvider, useAuth } from './hooks/useAuth';
 import { TutorialProvider } from './hooks/useTutorial';
 
@@ -555,6 +556,7 @@ const App: React.FC = () => {
             <DefaultGlobalCommands />
             <TutorialButton />
             <TutorialOverlay />
+            <FloatingActionMenu />
           </TutorialProvider>
         </CommandProvider>
       </AuthProvider>
