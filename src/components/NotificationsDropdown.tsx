@@ -38,12 +38,19 @@ const NotificationsDropdown: React.FC = () => {
   }, [isOpen]);
 
   const fetchUnreadCount = async () => {
+    // Avoid hitting the API at all if we know the token is gone
+    if (!localStorage.getItem('auth_token')) return;
+    
     try {
       const response = await apiService.getUnreadNotificationCount();
       if (response.success) {
         setUnreadCount(response.data?.unread_count || 0);
       }
-    } catch (error) {
+    } catch (error: any) {
+      // If it's a 401, the interceptor will handle logout. No need to spam console errors.
+      if (error?.response?.status === 401) {
+        return;
+      }
       console.error('Failed to fetch unread count:', error);
     }
   };
@@ -161,7 +168,7 @@ const NotificationsDropdown: React.FC = () => {
           />
 
           {/* Dropdown */}
-          <div className="absolute right-0 mt-2 w-96 bg-white rounded-xl shadow-xl border border-gray-200 z-50 overflow-hidden">
+          <div className="fixed sm:absolute top-16 sm:top-auto right-4 sm:right-0 left-4 sm:left-auto sm:mt-2 w-auto sm:w-96 bg-white rounded-xl shadow-xl border border-gray-200 z-50 overflow-hidden">
             {/* Header */}
             <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
               <h3 className="font-semibold text-gray-900">Notifications</h3>

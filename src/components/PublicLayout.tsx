@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, ChevronDown, LayoutDashboard, ArrowRight, Sun, Moon } from 'lucide-react';
+import { Menu, X, ChevronDown, LayoutDashboard, ArrowRight, Sun, Moon, BookOpen, LifeBuoy, Plug } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import logo from '../assets/Logo/fulllogo_transparent.png';
 
@@ -91,54 +91,87 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
 
             {/* Header */}
             <header
-                className={`fixed w-full top-0 z-50 transition-all duration-500 ${scrolled
-                    ? 'bg-white/70 dark:bg-slate-950/70 backdrop-blur-2xl border-b border-gray-200/40 dark:border-slate-800/60 shadow-lg shadow-black/[0.03] py-0'
-                    : 'bg-transparent py-0'
-                    }`}
+                className={`fixed w-full top-0 z-50 transition-all duration-500 pt-4 flex justify-center`}
             >
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="relative flex justify-between items-center">
+                <div className={`transition-all duration-500 w-full ${scrolled ? 'max-w-5xl px-3 sm:px-4' : 'max-w-7xl px-4 sm:px-6 lg:px-8'}`}>
+                    <div className={`relative flex justify-between items-center transition-all duration-500 rounded-full px-4 py-2 ${scrolled
+                            ? 'bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-gray-200/50 dark:border-slate-700/50 shadow-[0_8px_30px_rgb(0,0,0,0.08)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)]'
+                            : 'bg-transparent border border-transparent'
+                        }`}>
                         {/* Logo */}
                         <Link to="/" className="relative flex items-center gap-2 group py-1">
-                            <img src={logo} alt="Arrotech Hub" className="h-[4.5rem] w-auto object-contain transition-all duration-300 group-hover:scale-105 group-hover:opacity-90 dark:brightness-0 dark:invert" />
+                            <img src={logo} alt="Arrotech Hub" className="h-9 sm:h-11 w-auto object-contain transition-all duration-300 group-hover:scale-[1.03] group-hover:opacity-90 dark:brightness-0 dark:invert" />
                         </Link>
 
                         {/* Desktop Navigation */}
-                        <div className="hidden md:flex items-center gap-1 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl px-2 py-1.5 rounded-full border border-slate-200/50 dark:border-slate-800/50 shadow-[0_2px_8px_rgb(0,0,0,0.04)] dark:shadow-none mx-auto absolute left-1/2 transform -translate-x-1/2">
-                            <button onClick={() => scrollToSection('features')} className="px-4 py-2 text-[13px] font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50/80 dark:hover:bg-slate-800/80 rounded-full transition-all duration-200">Features</button>
-                            <button onClick={() => scrollToSection('demo-video')} className="px-4 py-2 text-[13px] font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50/80 dark:hover:bg-slate-800/80 rounded-full transition-all duration-200">How it Works</button>
-                            <Link to="/pricing" className="px-4 py-2 text-[13px] font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50/80 dark:hover:bg-slate-800/80 rounded-full transition-all duration-200">Pricing</Link>
+                        <div className="hidden md:flex items-center gap-1 bg-slate-50/50 dark:bg-slate-800/30 backdrop-blur-xl px-1.5 py-1.5 rounded-full border border-slate-200/50 dark:border-slate-700/50 shadow-inner mx-auto absolute left-1/2 transform -translate-x-1/2">
+                            <button onClick={() => scrollToSection('features')} className="relative px-5 py-2 text-[13px] font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-full transition-all duration-300 group/nav overflow-hidden">
+                                <span className="relative z-10">Features</span>
+                                <div className="absolute inset-0 bg-white dark:bg-slate-700 rounded-full scale-0 group-hover/nav:scale-100 opacity-0 group-hover/nav:opacity-100 transition-all duration-300 origin-center shadow-sm"></div>
+                            </button>
+                            <button onClick={() => scrollToSection('demo-video')} className="relative px-5 py-2 text-[13px] font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-full transition-all duration-300 group/nav overflow-hidden">
+                                <span className="relative z-10">How it Works</span>
+                                <div className="absolute inset-0 bg-white dark:bg-slate-700 rounded-full scale-0 group-hover/nav:scale-100 opacity-0 group-hover/nav:opacity-100 transition-all duration-300 origin-center shadow-sm"></div>
+                            </button>
+                            <Link to="/pricing" className="relative px-5 py-2 text-[13px] font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-full transition-all duration-300 group/nav overflow-hidden">
+                                <span className="relative z-10">Pricing</span>
+                                <div className="absolute inset-0 bg-white dark:bg-slate-700 rounded-full scale-0 group-hover/nav:scale-100 opacity-0 group-hover/nav:opacity-100 transition-all duration-300 origin-center shadow-sm"></div>
+                            </Link>
 
-                            {/* Resources Dropdown */}
-                            <div className="relative group">
+                            {/* Resources Dropdown Mega Menu */}
+                            <div className="relative group/menu">
                                 <button
-                                    className="flex items-center gap-1 px-4 py-2 text-[13px] font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50/80 dark:hover:bg-slate-800/80 rounded-full transition-all duration-200"
+                                    className="relative flex items-center gap-1.5 px-5 py-2 text-[13px] font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-full transition-all duration-300 group/nav overflow-hidden"
                                     onMouseEnter={() => setResourcesOpen(true)}
                                 >
-                                    Resources
-                                    <ChevronDown className="w-3 h-3 opacity-50 group-hover:opacity-100 transition-opacity" />
+                                    <span className="relative z-10 flex items-center gap-1">
+                                        Resources
+                                        <ChevronDown className="w-3.5 h-3.5 opacity-50 group-hover/menu:rotate-180 group-hover/menu:opacity-100 transition-all duration-300" />
+                                    </span>
+                                    <div className="absolute inset-0 bg-white dark:bg-slate-700 rounded-full scale-0 group-hover/nav:scale-100 opacity-0 group-hover/nav:opacity-100 transition-all duration-300 origin-center shadow-sm"></div>
                                 </button>
 
-                                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-52 bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border border-gray-100/60 dark:border-slate-800/60 rounded-2xl shadow-xl shadow-black/[0.08] dark:shadow-black/[0.3] py-2 invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200 transform translate-y-2 group-hover:translate-y-0">
-                                    <Link to="/blog" className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 dark:text-slate-300 hover:bg-purple-50 dark:hover:bg-purple-500/10 hover:text-purple-700 dark:hover:text-purple-300 font-medium transition-colors rounded-xl mx-1">
-                                        Blog
-                                    </Link>
-                                    <Link to="/help" className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 dark:text-slate-300 hover:bg-purple-50 dark:hover:bg-purple-500/10 hover:text-purple-700 dark:hover:text-purple-300 font-medium transition-colors rounded-xl mx-1">
-                                        Help Center
-                                    </Link>
-                                    <Link to="/integrations/gmail" className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 dark:text-slate-300 hover:bg-purple-50 dark:hover:bg-purple-500/10 hover:text-purple-700 dark:hover:text-purple-300 font-medium transition-colors rounded-xl mx-1">
-                                        Integrations
-                                    </Link>
+                                <div className="absolute top-full left-1/2 -translate-x-1/2 pt-4 w-72 invisible opacity-0 group-hover/menu:visible group-hover/menu:opacity-100 transition-all duration-300 transform translate-y-2 group-hover/menu:translate-y-0 z-50">
+                                    <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border border-gray-100/60 dark:border-slate-700/60 rounded-3xl shadow-2xl shadow-black/[0.1] dark:shadow-black/[0.4] p-3 flex flex-col gap-1 relative overflow-hidden">
+                                        <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 dark:bg-purple-900/30 blur-2xl rounded-full pointer-events-none"></div>
+                                        
+                                        <Link to="/blog" className="flex items-start gap-4 p-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-2xl group/item transition-colors">
+                                            <div className="p-2.5 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl group-hover/item:scale-110 group-hover/item:bg-blue-100 dark:group-hover/item:bg-blue-500/20 transition-all duration-300 align-top">
+                                                <BookOpen className="w-5 h-5" />
+                                            </div>
+                                            <div>
+                                                <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-0.5 group-hover/item:text-blue-600 dark:group-hover/item:text-blue-400 transition-colors">Blog</h4>
+                                                <p className="text-xs text-slate-500 dark:text-slate-400 leading-tight">Latest news, articles and product updates.</p>
+                                            </div>
+                                        </Link>
+                                        <Link to="/help" className="flex items-start gap-4 p-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-2xl group/item transition-colors">
+                                            <div className="p-2.5 bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-xl group-hover/item:scale-110 group-hover/item:bg-amber-100 dark:group-hover/item:bg-amber-500/20 transition-all duration-300 align-top">
+                                                <LifeBuoy className="w-5 h-5" />
+                                            </div>
+                                            <div>
+                                                <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-0.5 group-hover/item:text-amber-600 dark:group-hover/item:text-amber-400 transition-colors">Help Center</h4>
+                                                <p className="text-xs text-slate-500 dark:text-slate-400 leading-tight">Guides and tutorials to get you started.</p>
+                                            </div>
+                                        </Link>
+                                        <Link to="/integrations/gmail" className="flex items-start gap-4 p-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-2xl group/item transition-colors">
+                                            <div className="p-2.5 bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 rounded-xl group-hover/item:scale-110 group-hover/item:bg-purple-100 dark:group-hover/item:bg-purple-500/20 transition-all duration-300 align-top">
+                                                <Plug className="w-5 h-5" />
+                                            </div>
+                                            <div>
+                                                <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-0.5 group-hover/item:text-purple-600 dark:group-hover/item:text-purple-400 transition-colors">Integrations</h4>
+                                                <p className="text-xs text-slate-500 dark:text-slate-400 leading-tight">Connect with Gmail, Slack, Jira and more.</p>
+                                            </div>
+                                        </Link>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         {/* Auth Buttons & Theme Toggle */}
                         <div className="hidden md:flex items-center gap-3">
-                            {/* Theme Toggle Button */}
                             <button
                                 onClick={() => setIsDark(!isDark)}
-                                className="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors mr-2 flex items-center justify-center"
+                                className="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors flex items-center justify-center hover:rotate-12 transform"
                                 aria-label="Toggle Dark Mode"
                             >
                                 {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
@@ -147,20 +180,22 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
                             {user ? (
                                 <Link
                                     to="/unified"
-                                    className="group inline-flex items-center justify-center gap-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-5 py-2.5 rounded-full text-[13px] font-medium transition-all duration-300 shadow-[0_2px_8px_rgb(0,0,0,0.08)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] hover:-translate-y-0.5"
+                                    className="group relative inline-flex items-center justify-center gap-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-2.5 rounded-full text-[13px] font-bold transition-all duration-300 shadow-[0_4px_14px_0_rgb(0,0,0,0.1)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.15)] hover:-translate-y-0.5 overflow-hidden"
                                 >
-                                    <LayoutDashboard className="w-3.5 h-3.5" />
-                                    Dashboard
+                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 dark:via-black/10 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
+                                    <LayoutDashboard className="w-4 h-4 relative z-10" />
+                                    <span className="relative z-10">Dashboard</span>
                                 </Link>
                             ) : (
                                 <>
-                                    <Link to="/login" className="text-[13px] font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">Log in</Link>
+                                    <Link to="/login" className="text-[13px] font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors px-2">Log in</Link>
                                     <Link
                                         to="/register"
-                                        className="group inline-flex items-center justify-center gap-1.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-5 py-2.5 rounded-full text-[13px] font-medium transition-all duration-300 shadow-[0_2px_8px_rgb(0,0,0,0.08)] dark:shadow-none hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] hover:-translate-y-0.5"
+                                        className="group relative inline-flex items-center justify-center gap-1.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-2.5 rounded-full text-[13px] font-bold transition-all duration-300 shadow-[0_4px_14px_0_rgb(0,0,0,0.1)] dark:shadow-none hover:shadow-[0_6px_20px_rgba(0,0,0,0.15)] hover:-translate-y-0.5 overflow-hidden"
                                     >
-                                        Get Started
-                                        <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 dark:via-black/10 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
+                                        <span className="relative z-10">Get Started</span>
+                                        <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform relative z-10" />
                                     </Link>
                                 </>
                             )}
@@ -175,46 +210,63 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
                                 {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
                             </button>
                             <button
-                                className="p-2.5 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
+                                className="p-2 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all"
                                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                             >
-                                {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                                {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
                             </button>
                         </div>
                     </div>
                 </div>
 
-                {/* Mobile Menu */}
-                {mobileMenuOpen && (
-                    <div className="md:hidden absolute top-full left-0 w-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border-b border-gray-100 dark:border-slate-800 py-6 px-5 shadow-2xl shadow-black/[0.08] dark:shadow-black/[0.3] max-h-[calc(100vh-4rem)] overflow-y-auto">
-                        <div className="flex flex-col gap-1">
-                            <button onClick={() => scrollToSection('features')} className="text-left py-3 px-4 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 font-semibold text-base transition-colors">Features</button>
-                            <button onClick={() => scrollToSection('demo-video')} className="text-left py-3 px-4 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 font-semibold text-base transition-colors">How it Works</button>
-                            <Link to="/pricing" className="text-left py-3 px-4 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 font-semibold text-base transition-colors">Pricing</Link>
+                {/* Mobile Menu Overlay */}
+                <div className={`md:hidden fixed inset-0 z-40 bg-white/95 dark:bg-slate-950/95 backdrop-blur-3xl transition-all duration-500 ease-in-out ${mobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none delay-200'}`}>
+                    <div className="flex flex-col justify-center h-full max-w-sm mx-auto px-6 py-20 gap-8">
+                        <div className={`flex flex-col gap-6 transition-all duration-700 ease-out ${mobileMenuOpen ? 'translate-y-0 opacity-100 delay-100' : 'translate-y-8 opacity-0'}`}>
+                            <button onClick={() => { scrollToSection('features'); setMobileMenuOpen(false); }} className="text-left text-2xl font-bold text-slate-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center justify-between group">
+                                Features
+                                <ArrowRight className="w-5 h-5 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-blue-500" />
+                            </button>
+                            <button onClick={() => { scrollToSection('demo-video'); setMobileMenuOpen(false); }} className="text-left text-2xl font-bold text-slate-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center justify-between group">
+                                How it Works
+                                <ArrowRight className="w-5 h-5 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-blue-500" />
+                            </button>
+                            <Link onClick={() => setMobileMenuOpen(false)} to="/pricing" className="text-left text-2xl font-bold text-slate-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center justify-between group">
+                                Pricing
+                                <ArrowRight className="w-5 h-5 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-blue-500" />
+                            </Link>
 
-                            <div className="border-t border-gray-100 dark:border-slate-800 py-3 my-2">
-                                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 block px-4">Resources</span>
-                                <Link to="/blog" className="block py-2.5 px-4 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 font-medium text-sm">Blog</Link>
-                                <Link to="/help" className="block py-2.5 px-4 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 font-medium text-sm">Help Center</Link>
-                                <Link to="/integrations/gmail" className="block py-2.5 px-4 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 font-medium text-sm">Integrations</Link>
-                            </div>
+                            <div className="h-px w-full bg-slate-200 dark:bg-slate-800 my-2"></div>
 
-                            <div className="pt-3 border-t border-gray-100 dark:border-slate-800">
-                                {user ? (
-                                    <Link to="/unified" className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-3.5 rounded-2xl font-bold text-center shadow-lg flex items-center justify-center gap-2 text-sm">
-                                        <LayoutDashboard className="w-4 h-4" />
-                                        Go to Dashboard
-                                    </Link>
-                                ) : (
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <Link to="/login" className="w-full flex items-center justify-center py-3 rounded-2xl border border-slate-200 dark:border-slate-700 font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 text-sm transition-colors">Log in</Link>
-                                        <Link to="/register" className="w-full flex items-center justify-center py-3 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold shadow-[0_4px_14px_0_rgb(0,0,0,0.1)] dark:shadow-none text-sm transition-all">Get Started</Link>
-                                    </div>
-                                )}
+                            <div className="flex flex-col gap-4">
+                                <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Resources</span>
+                                <Link onClick={() => setMobileMenuOpen(false)} to="/blog" className="text-lg font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors flex items-center gap-3">
+                                    <BookOpen className="w-4 h-4 text-slate-400" /> Blog
+                                </Link>
+                                <Link onClick={() => setMobileMenuOpen(false)} to="/help" className="text-lg font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors flex items-center gap-3">
+                                    <LifeBuoy className="w-4 h-4 text-slate-400" /> Help Center
+                                </Link>
+                                <Link onClick={() => setMobileMenuOpen(false)} to="/integrations/gmail" className="text-lg font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors flex items-center gap-3">
+                                    <Plug className="w-4 h-4 text-slate-400" /> Integrations
+                                </Link>
                             </div>
                         </div>
+
+                        <div className={`mt-auto transition-all duration-700 ease-out ${mobileMenuOpen ? 'translate-y-0 opacity-100 delay-300' : 'translate-y-8 opacity-0'}`}>
+                            {user ? (
+                                <Link onClick={() => setMobileMenuOpen(false)} to="/unified" className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-4 rounded-2xl font-bold text-center shadow-lg flex items-center justify-center gap-2 text-base">
+                                    <LayoutDashboard className="w-5 h-5" />
+                                    Go to Dashboard
+                                </Link>
+                            ) : (
+                                <div className="flex flex-col gap-3">
+                                    <Link onClick={() => setMobileMenuOpen(false)} to="/register" className="w-full flex items-center justify-center py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold shadow-lg shadow-blue-500/20 text-base transition-all active:scale-[0.98]">Get Started Free</Link>
+                                    <Link onClick={() => setMobileMenuOpen(false)} to="/login" className="w-full flex items-center justify-center py-4 rounded-2xl border-2 border-slate-200 dark:border-slate-800 font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 text-base transition-colors">Log in to account</Link>
+                                </div>
+                            )}
+                        </div>
                     </div>
-                )}
+                </div>
             </header>
 
             {/* Main Content */}
