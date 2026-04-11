@@ -89,8 +89,8 @@ const FloatingActionMenu: React.FC = () => {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Don't show when: not logged in, tutorial is active, or user disabled via settings
-  if (!user || tutorialActive || !showFloatingMenu) return null;
+  // Don't show when: tutorial is active or user disabled via settings
+  if (tutorialActive || !showFloatingMenu) return null;
 
   const pageLabels: Record<string, string> = {
     dashboard: 'Dashboard',
@@ -132,8 +132,8 @@ const FloatingActionMenu: React.FC = () => {
       },
       badge: 'AI',
     }] : []),
-    // Tutorial items - only show if enabled
-    ...(showTutorials ? [
+    // Tutorial items - only show if logged in AND enabled in settings
+    ...(user && showTutorials ? [
       {
         id: 'page-tutorial',
         icon: <BookOpen className="w-5 h-5" />,
@@ -163,7 +163,7 @@ const FloatingActionMenu: React.FC = () => {
   return (
     <>
       {/* Floating Action Button */}
-      <div className="fixed bottom-6 right-6 z-50" ref={menuRef}>
+      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[60]" ref={menuRef}>
         {/* Backdrop when open */}
         {isOpen && (
           <div
@@ -175,7 +175,7 @@ const FloatingActionMenu: React.FC = () => {
         {/* Menu Items - Fan/Wheel Animation */}
         <div className={`absolute bottom-16 right-0 transition-all duration-300 ${isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
           }`}>
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden w-80">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden w-[calc(100vw-32px)] sm:w-80 shrink-0 right-0 origin-bottom-right">
             {/* Header */}
             <div className="px-4 py-3 bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-500">
               <div className="flex items-center justify-between">
