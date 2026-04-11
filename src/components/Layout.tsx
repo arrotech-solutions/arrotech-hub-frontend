@@ -41,7 +41,7 @@ import logo from '../assets/Logo/icononly_transparent_nobuffer.png';
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import FloatingActionMenu from './FloatingActionMenu';
+
 import NotificationsDropdown from './NotificationsDropdown';
 import CookieConsent from './CookieConsent';
 import UsageWarningBanner from './UsageWarningBanner';
@@ -662,8 +662,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </main>
       </div>
 
-      {/* Floating Action Menu - Help, AI Assistant, Tutorial */}
-      <FloatingActionMenu />
+
       <CookieConsent />
     </div>
   );

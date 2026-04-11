@@ -85,7 +85,12 @@ const parseGmailBody = (payload: any): string => {
 
     const decode = (data: string) => {
         try {
-            return atob(data.replace(/-/g, '+').replace(/_/g, '/'));
+            const decoded = atob(data.replace(/-/g, '+').replace(/_/g, '/'));
+            const bytes = new Uint8Array(decoded.length);
+            for (let i = 0; i < decoded.length; i++) {
+                bytes[i] = decoded.charCodeAt(i);
+            }
+            return new TextDecoder('utf-8').decode(bytes);
         } catch (e) {
             console.error('Base64 decode error', e);
             return '';
@@ -257,7 +262,7 @@ const UnifiedInbox: React.FC = () => {
         try {
             const [gmailRes, slackRes, teamsRes, outlookRes] = await Promise.allSettled([
                 apiService.executeMCPTool('google_workspace_gmail', { operation: 'read_emails', max_results: 20 }),
-                apiService.executeMCPTool('slack_search', { action: 'get_channel_history', channel: 'general', limit: 20 }),
+                apiService.executeMCPTool('slack_search', { action: 'get_recent_messages', limit: 20 }),
                 apiService.executeMCPTool('teams_message_search', { action: 'get_recent_chats', limit: 20 }),
                 apiService.executeMCPTool('outlook_email_management', { action: 'read_emails', limit: 20 })
             ]);
@@ -296,21 +301,19 @@ const UnifiedInbox: React.FC = () => {
 
             const slackRaw = unwrap(slackRes);
 
-            // Unpacking logic matching UnifiedDashboard
             const slackData = slackRaw?.data || slackRaw?.result || slackRaw;
-            const slackMessages = slackData?.messages || slackData?.data?.messages || []; // Dashboard logic
+            const slackMessages = slackData?.messages || slackData?.data?.messages || [];
 
             if (slackMessages && Array.isArray(slackMessages)) {
                 allMessages.push(...slackMessages.map((m: any) => {
                     const ts = m.timestamp || m.ts;
-                    console.log('Slack Message:', m, 'TS:', ts); // Debug
                     return {
                         id: ts || Math.random().toString(),
                         source: 'slack' as const,
                         sender: m.user || 'Slack User',
                         channelId: m.channel || m.channel_id || m.channel_name,
                         threadTs: m.thread_ts || ts,
-                        subject: m.channel ? `#${m.channel}` : 'Direct Message',
+                        subject: m.channel || 'Slack Message',
                         preview: m.text || '',
                         fullContent: m.text || 'No content.',
                         time: ts ? new Date(parseFloat(ts) * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Now',
@@ -1393,17 +1396,32 @@ const UnifiedInbox: React.FC = () => {
                             <button onClick={() => setSelectedMessage(null)} className="hidden md:block p-2 text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors"><X className="w-5 h-5" /></button>
                         </div>
 
-                        <div className="flex-1 overflow-y-auto p-6 md:p-10 custom-scrollbar dark:bg-slate-900 transition-colors">
+                        <div className="flex-1 overflow-y-auto p-4 md:px-8 md:py-6 custom-scrollbar dark:bg-slate-900 transition-colors">
                             <div className="max-w-3xl mx-auto">
-                                <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-8 gap-4">
-                                    <h1 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white leading-tight transition-colors">{selectedMessage.subject}</h1>
-                                    <span className={`self-start px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider border transition-colors ${getSourceStyle(selectedMessage.source)}`}>{selectedMessage.source}</span>
+                                <div className="flex items-center gap-3 mb-6 mt-2">
+                                    <h1 className="text-[22px] font-normal text-slate-900 dark:text-white leading-tight">{selectedMessage.subject}</h1>
+                                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${getSourceStyle(selectedMessage.source)}`}>{selectedMessage.source}</span>
                                 </div>
-                                <div className="flex items-center gap-4 mb-8 pb-8 border-b border-slate-100 dark:border-slate-800 transition-colors">
-                                    <img src={selectedMessage.avatar} alt="" className="w-12 h-12 rounded-xl shadow-sm object-cover ring-2 ring-white dark:ring-slate-800" />
-                                    <div>
-                                        <div className="font-bold text-slate-900 dark:text-white text-lg transition-colors">{selectedMessage.sender}</div>
-                                        <div className="text-sm text-slate-400 dark:text-slate-500 font-medium transition-colors">To: Me • {selectedMessage.time}</div>
+                                
+                                <div className="flex items-start justify-between mb-8">
+                                    <div className="flex items-center gap-3">
+                                        <img src={selectedMessage.avatar} alt="" className="w-10 h-10 rounded-full shadow-sm object-cover bg-slate-100 dark:bg-slate-800" />
+                                        <div className="flex flex-col">
+                                            <div className="flex items-baseline gap-2 leading-tight mb-1">
+                                                <span className="font-bold text-slate-900 dark:text-gray-100 text-[14px]">{selectedMessage.sender}</span>
+                                                <span className="text-[12px] text-slate-500 dark:text-gray-400 hidden sm:inline">&lt;{selectedMessage.senderEmail || selectedMessage.sender.toLowerCase().replace(' ', '') + '@example.com'}&gt;</span>
+                                            </div>
+                                            <div className="text-[12px] text-slate-500 dark:text-gray-400 mt-0.5 flex items-center gap-1">
+                                                to me 
+                                                <svg className="w-3 h-3 fill-current opacity-70" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"></path></svg>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-[12px] font-medium shrink-0">
+                                        <span className="mr-2">{selectedMessage.time || '10:42 AM'}</span>
+                                        <button className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors hidden sm:block"><Star className="w-4 h-4" /></button>
+                                        <button className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors hidden sm:block" onClick={() => replyInputRef.current?.focus()}><Reply className="w-4 h-4" /></button>
                                     </div>
                                 </div>
 
@@ -1413,12 +1431,17 @@ const UnifiedInbox: React.FC = () => {
                                         <span className="ml-3 text-slate-500 font-medium">Loading full message...</span>
                                     </div>
                                 ) : (
-                                    <div className="prose prose-slate dark:prose-invert prose-lg max-w-none text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-wrap transition-colors">
+                                    <div className="text-[14px] text-slate-800 dark:text-slate-300 leading-[1.5] font-sans max-w-none break-words email-content-wrapper">
                                         {/* Dangerous HTML rendering if source is trusted (Gmail), otherwise text */}
                                         {['gmail', 'outlook', 'teams'].includes(selectedMessage.source) ? (
-                                            <div dangerouslySetInnerHTML={{ __html: selectedMessage.fullContent || selectedMessage.preview }} className="dark:text-slate-300" />
+                                            <div 
+                                                dangerouslySetInnerHTML={{ __html: selectedMessage.fullContent || selectedMessage.preview }} 
+                                                className="dark:text-slate-300 [&_p]:mb-2 [&_p]:mt-0 [&_br]:leading-[0] [&>*:last-child]:mb-0" 
+                                            />
                                         ) : (
-                                            selectedMessage.fullContent || selectedMessage.preview
+                                            <div className="whitespace-pre-wrap">
+                                                {selectedMessage.fullContent || selectedMessage.preview}
+                                            </div>
                                         )}
                                     </div>
                                 )}
