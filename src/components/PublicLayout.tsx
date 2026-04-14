@@ -4,6 +4,8 @@ import { Menu, X, ChevronDown, LayoutDashboard, ArrowRight, Sun, Moon, BookOpen,
 import { useAuth } from '../hooks/useAuth';
 import logo from '../assets/Logo/fulllogo_transparent.png';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://prod.api.arrotechsolutions.com';
+
 interface PublicLayoutProps {
     children: React.ReactNode;
 }
@@ -12,6 +14,9 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const [, setResourcesOpen] = useState(false);
+    const [nlEmail, setNlEmail] = useState('');
+    const [nlStatus, setNlStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+    const [nlMsg, setNlMsg] = useState('');
 
     // Theme state
     const [isDark, setIsDark] = useState(() => {
@@ -291,17 +296,59 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
                             </p>
                             <div className="w-full max-w-sm">
                                 <h5 className="font-semibold text-slate-900 dark:text-white text-sm mb-3 tracking-tight transition-colors">Stay in the loop</h5>
-                                <div className="flex gap-2">
+                                <form
+                                    onSubmit={async (e) => {
+                                        e.preventDefault();
+                                        if (!nlEmail.trim() || nlStatus === 'loading') return;
+                                        setNlStatus('loading');
+                                        try {
+                                            const res = await fetch(`${API_BASE_URL}/api/public/subscribe`, {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({ email: nlEmail, source_site: 'hub.arrotechsolutions.com', honeypot: '' }),
+                                            });
+                                            const data = await res.json();
+                                            if (res.ok && data.success) {
+                                                setNlStatus('success');
+                                                setNlMsg(data.message || 'Subscribed!');
+                                                setNlEmail('');
+                                            } else {
+                                                setNlStatus('error');
+                                                setNlMsg('Something went wrong.');
+                                            }
+                                        } catch {
+                                            setNlStatus('error');
+                                            setNlMsg('Network error.');
+                                        }
+                                    }}
+                                    className="flex gap-2"
+                                >
                                     <input
                                         type="email"
                                         placeholder="you@company.com"
+                                        value={nlEmail}
+                                        onChange={(e) => { setNlEmail(e.target.value); if (nlStatus !== 'idle') setNlStatus('idle'); }}
                                         className="flex-1 bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/10 rounded-full px-5 py-2.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 dark:focus:ring-white/30 dark:focus:border-white/30 transition-all font-medium"
+                                        required
+                                        disabled={nlStatus === 'loading'}
                                     />
-                                    <button className="bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-gray-100 text-white dark:text-slate-900 px-5 py-2.5 rounded-full font-semibold text-sm transition-all hover:scale-[1.02] flex-shrink-0">
-                                        Subscribe
+                                    <button
+                                        type="submit"
+                                        disabled={nlStatus === 'loading'}
+                                        className="bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-gray-100 text-white dark:text-slate-900 px-5 py-2.5 rounded-full font-semibold text-sm transition-all hover:scale-[1.02] flex-shrink-0 disabled:opacity-50"
+                                    >
+                                        {nlStatus === 'loading' ? '...' : 'Subscribe'}
                                     </button>
-                                </div>
-                                <p className="text-[11px] text-slate-500 mt-2.5">No spam. Unsubscribe anytime.</p>
+                                </form>
+                                {nlStatus === 'success' && (
+                                    <p className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-2.5 font-medium">✅ {nlMsg}</p>
+                                )}
+                                {nlStatus === 'error' && (
+                                    <p className="text-[11px] text-red-600 dark:text-red-400 mt-2.5 font-medium">❌ {nlMsg}</p>
+                                )}
+                                {nlStatus === 'idle' && (
+                                    <p className="text-[11px] text-slate-500 mt-2.5">No spam. Unsubscribe anytime.</p>
+                                )}
                             </div>
                         </div>
 
