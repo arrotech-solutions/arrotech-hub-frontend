@@ -5,12 +5,17 @@ import { BLOG_POSTS, BLOG_CATEGORIES, BlogPost } from '../data/blogData';
 import { apiService } from '../services/api';
 import { Helmet } from 'react-helmet-async';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://prod.api.arrotechsolutions.com';
+
 const Blog: React.FC = () => {
     const [posts, setPosts] = useState<BlogPost[]>(BLOG_POSTS);
     const [activeCategory, setActiveCategory] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const [hoveredCard, setHoveredCard] = useState<string | null>(null);
+    const [nlEmail, setNlEmail] = useState('');
+    const [nlStatus, setNlStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+    const [nlMessage, setNlMessage] = useState('');
 
     // Attempt API fetch, fallback to local data
     useEffect(() => {
@@ -321,17 +326,59 @@ const Blog: React.FC = () => {
                         <p className="text-slate-600 dark:text-slate-400 mb-8 max-w-xl mx-auto font-medium transition-colors">
                             Get the latest insights on automation, AI, and productivity delivered to your inbox every week.
                         </p>
-                        <div className="flex flex-col sm:flex-row items-center gap-3 max-w-md mx-auto">
+                        <form
+                            onSubmit={async (e) => {
+                                e.preventDefault();
+                                if (!nlEmail.trim() || nlStatus === 'loading') return;
+                                setNlStatus('loading');
+                                try {
+                                    const res = await fetch(`${API_BASE_URL}/api/public/subscribe`, {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ email: nlEmail, source_site: 'hub.arrotechsolutions.com', honeypot: '' }),
+                                    });
+                                    const data = await res.json();
+                                    if (res.ok && data.success) {
+                                        setNlStatus('success');
+                                        setNlMessage(data.message || 'Subscribed successfully!');
+                                        setNlEmail('');
+                                    } else {
+                                        setNlStatus('error');
+                                        setNlMessage('Something went wrong. Please try again.');
+                                    }
+                                } catch {
+                                    setNlStatus('error');
+                                    setNlMessage('Network error. Please try again.');
+                                }
+                            }}
+                            className="flex flex-col sm:flex-row items-center gap-3 max-w-md mx-auto"
+                        >
                             <input
                                 type="email"
                                 placeholder="you@company.com"
+                                value={nlEmail}
+                                onChange={(e) => { setNlEmail(e.target.value); if (nlStatus !== 'idle') setNlStatus('idle'); }}
                                 className="w-full px-5 py-3 rounded-xl bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/30 transition-colors"
+                                required
+                                disabled={nlStatus === 'loading'}
                             />
-                            <button className="w-full sm:w-auto px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-semibold text-sm hover:bg-slate-800 dark:hover:bg-slate-100 transition-all hover:shadow-[0_6px_20px_rgba(0,0,0,0.15)] dark:hover:shadow-none whitespace-nowrap">
-                                Subscribe
+                            <button
+                                type="submit"
+                                disabled={nlStatus === 'loading'}
+                                className="w-full sm:w-auto px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-semibold text-sm hover:bg-slate-800 dark:hover:bg-slate-100 transition-all hover:shadow-[0_6px_20px_rgba(0,0,0,0.15)] dark:hover:shadow-none whitespace-nowrap disabled:opacity-50"
+                            >
+                                {nlStatus === 'loading' ? 'Subscribing...' : 'Subscribe'}
                             </button>
-                        </div>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-4 transition-colors">No spam. Unsubscribe anytime.</p>
+                        </form>
+                        {nlStatus === 'success' && (
+                            <p className="text-sm text-emerald-600 dark:text-emerald-400 mt-3 font-medium">✅ {nlMessage}</p>
+                        )}
+                        {nlStatus === 'error' && (
+                            <p className="text-sm text-red-600 dark:text-red-400 mt-3 font-medium">❌ {nlMessage}</p>
+                        )}
+                        {nlStatus === 'idle' && (
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-4 transition-colors">No spam. Unsubscribe anytime.</p>
+                        )}
                     </div>
                 </section>
             </div>
