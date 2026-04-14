@@ -89,6 +89,16 @@ const FloatingActionMenu: React.FC = () => {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  // Listen for custom event to open assistant from anywhere
+  useEffect(() => {
+    const handleOpenAssistant = () => {
+      setIsOpen(false);
+      setShowAssistant(true);
+    };
+    window.addEventListener('open-ai-assistant', handleOpenAssistant);
+    return () => window.removeEventListener('open-ai-assistant', handleOpenAssistant);
+  }, []);
+
   // Don't show when: tutorial is active or user disabled via settings
   if (tutorialActive || !showFloatingMenu) return null;
 
