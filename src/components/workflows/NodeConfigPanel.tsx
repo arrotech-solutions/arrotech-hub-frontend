@@ -101,6 +101,11 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
     const requiredFields: string[] = inputSchema?.required || [];
 
     const renderField = (name: string, schema: any) => {
+        const isLongText = ['system_prompt', 'prompt', 'context', 'message', 'description', 'base_content', 'text'].includes(name.toLowerCase());
+        const inputBaseStyles = `w-full px-3.5 py-2.5 text-sm rounded-xl shadow-sm focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/50 outline-none transition-all duration-200`;
+        const darkModeStyles = `bg-black/20 border border-white/10 text-white placeholder:text-gray-500 focus:bg-black/40`;
+        const lightModeStyles = `bg-white border border-gray-200 focus:bg-white placeholder:text-gray-400 focus:border-purple-400`;
+
         // Handle dynamic options
         let dynamicSource = 
             schema['x-dynamic-options'] || 
@@ -128,7 +133,7 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
             return (
                 <div className="relative">
                     <select
-                        className={`w-full px-3 py-2.5 text-sm rounded-xl focus:ring-2 focus:ring-blue-500/50 appearance-none outline-none transition-all ${isDark ? 'bg-black/20 border border-white/10 text-white focus:bg-black/40' : 'bg-black/5 border border-black/5 focus:bg-white'}`}
+                        className={`${inputBaseStyles} appearance-none ${isDark ? darkModeStyles : lightModeStyles}`}
                         value={localParams[name] || ''}
                         onChange={e => handleParamChange(name, e.target.value)}
                         disabled={isLoading}
@@ -147,9 +152,9 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
                         )}
                     </select>
                     {isLoading ? (
-                        <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-blue-500 animate-spin" />
+                        <Loader2 className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-500 animate-spin" />
                     ) : (
-                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+                        <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                     )}
                 </div>
             );
@@ -159,7 +164,7 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
             return (
                 <div className="relative">
                     <select
-                        className={`w-full px-3 py-2.5 text-sm rounded-xl focus:ring-2 focus:ring-blue-500/50 appearance-none outline-none transition-all ${isDark ? 'bg-black/20 border border-white/10 text-white focus:bg-black/40' : 'bg-black/5 border border-black/5 focus:bg-white'}`}
+                        className={`${inputBaseStyles} appearance-none ${isDark ? darkModeStyles : lightModeStyles}`}
                         value={localParams[name] || ''}
                         onChange={e => handleParamChange(name, e.target.value)}
                     >
@@ -170,7 +175,7 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
                             </option>
                         ))}
                     </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+                    <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                 </div>
             );
         }
@@ -178,14 +183,16 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
         switch (schema.type) {
             case 'boolean':
                 return (
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-3 pt-1 pb-2">
                         <button
                             onClick={() => handleParamChange(name, !localParams[name])}
-                            className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${localParams[name] ? 'bg-blue-600' : 'bg-gray-200'}`}
+                            className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500/40 ${localParams[name] ? 'bg-purple-600' : (isDark ? 'bg-gray-700' : 'bg-gray-200')}`}
                         >
-                            <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${localParams[name] ? 'translate-x-5' : 'translate-x-0'}`} />
+                            <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${localParams[name] ? 'translate-x-5' : 'translate-x-0'}`} />
                         </button>
-                        <span className="text-xs text-gray-500">{localParams[name] ? 'True' : 'False'}</span>
+                        <span className={`text-xs font-medium ${localParams[name] ? (isDark ? 'text-purple-400' : 'text-purple-600') : (isDark ? 'text-gray-500' : 'text-gray-500')}`}>
+                            {localParams[name] ? 'Enabled' : 'Disabled'}
+                        </span>
                     </div>
                 );
             case 'integer':
@@ -193,8 +200,8 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
                 return (
                     <input
                         type="text"
-                        placeholder={`Enter ${name} or {{variable}}`}
-                        className={`w-full px-3 py-2.5 text-sm rounded-xl focus:ring-2 focus:ring-blue-500/50 outline-none transition-all ${isDark ? 'bg-black/20 border border-white/10 text-white placeholder:text-gray-500 focus:bg-black/40' : 'bg-black/5 border border-black/5 focus:bg-white placeholder:text-gray-500'}`}
+                        placeholder={`Enter ${name.replace(/_/g, ' ')} or {{variable}}`}
+                        className={`${inputBaseStyles} ${isDark ? darkModeStyles : lightModeStyles}`}
                         value={localParams[name] ?? ''}
                         onChange={e => {
                             const val = e.target.value;
@@ -208,11 +215,22 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
                     />
                 );
             default:
+                if (isLongText) {
+                    return (
+                        <textarea
+                            placeholder={`Enter ${name.replace(/_/g, ' ')}...`}
+                            rows={4}
+                            className={`${inputBaseStyles} resize-y min-h-[100px] leading-relaxed ${isDark ? darkModeStyles : lightModeStyles}`}
+                            value={localParams[name] || ''}
+                            onChange={e => handleParamChange(name, e.target.value)}
+                        />
+                    );
+                }
                 return (
                     <input
                         type="text"
-                        placeholder={`Enter ${name}`}
-                        className={`w-full px-3 py-2.5 text-sm rounded-xl focus:ring-2 focus:ring-blue-500/50 outline-none transition-all ${isDark ? 'bg-black/20 border border-white/10 text-white placeholder:text-gray-500 focus:bg-black/40' : 'bg-black/5 border border-black/5 focus:bg-white placeholder:text-gray-500'}`}
+                        placeholder={`Enter ${name.replace(/_/g, ' ')}`}
+                        className={`${inputBaseStyles} ${isDark ? darkModeStyles : lightModeStyles}`}
                         value={localParams[name] || ''}
                         onChange={e => handleParamChange(name, e.target.value)}
                     />
@@ -245,11 +263,10 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
                     <label className={`block text-xs font-bold uppercase tracking-wider mb-1.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                         Step Description
                     </label>
-                    <input
-                        type="text"
+                    <textarea
                         value={localDescription}
                         onChange={e => { setLocalDescription(e.target.value); setIsDirty(true); }}
-                        className={`w-full px-3 py-2.5 text-sm rounded-xl focus:ring-2 focus:ring-blue-500/50 outline-none transition-all ${isDark ? 'bg-black/20 border border-white/10 text-white placeholder:text-gray-500 focus:bg-black/40' : 'bg-black/5 border border-black/5 focus:bg-white placeholder:text-gray-500'}`}
+                        className={`w-full px-3.5 py-2.5 text-sm rounded-xl shadow-sm focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/50 outline-none transition-all duration-200 resize-y min-h-[80px] leading-relaxed ${isDark ? 'bg-black/20 border border-white/10 text-white placeholder:text-gray-500 focus:bg-black/40' : 'bg-white border border-gray-200 focus:bg-white placeholder:text-gray-400 focus:border-purple-400'}`}
                         placeholder="What does this step do?"
                     />
                 </div>
@@ -261,21 +278,39 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
                             Parameters
                         </label>
                         <div className="space-y-3">
-                            {Object.entries(properties).map(([name, schema]: [string, any]) => (
+                            {Object.entries(properties).map(([name, schema]: [string, any]) => {
+                                const isSessionKey = name === 'session_key';
+                                return (
                                 <div key={name}>
                                     <div className="flex items-center justify-between mb-1">
                                         <label className={`text-xs font-semibold ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
                                             {name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                                             {requiredFields.includes(name) && <span className="text-red-500 ml-0.5">*</span>}
                                         </label>
-                                        <span className={`text-[9px] uppercase font-bold ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>{schema.type}</span>
+                                        <div className="flex items-center gap-1.5">
+                                            {isSessionKey && (
+                                                <span className={`inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold tracking-wide ${isDark ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' : 'bg-purple-50 text-purple-600 border border-purple-200'}`}>
+                                                    💬 Context Memory
+                                                </span>
+                                            )}
+                                            <span className={`text-[9px] uppercase font-bold ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>{schema.type}</span>
+                                        </div>
                                     </div>
                                     {schema.description && (
                                         <p className="text-[10px] text-gray-400 mb-1.5">{schema.description}</p>
                                     )}
+                                    {isSessionKey && !localParams[name] && (
+                                        <button
+                                            onClick={() => handleParamChange(name, '{{session_key}}')}
+                                            className={`mb-1.5 inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-semibold transition-all ${isDark ? 'bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 border border-purple-500/20' : 'bg-purple-50 text-purple-600 hover:bg-purple-100 border border-purple-200'}`}
+                                        >
+                                            ⚡ Auto-fill with {'{{session_key}}'}
+                                        </button>
+                                    )}
                                     {renderField(name, schema)}
                                 </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </div>
                 )}
