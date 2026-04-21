@@ -171,10 +171,10 @@ const TOOL_CATEGORIES = {
         color: 'violet',
         keywords: ['rag_', 'pinecone_', 'qdrant_', 'weaviate_', 'llamaparse_', 'unstructured_', 'firecrawl_']
     },
-    'AI Models': {
+    'AI & LLM': {
         icon: BrainCircuit,
         color: 'fuchsia',
-        keywords: ['ai_embeddings', 'ai_']
+        keywords: ['ai_text_generation', 'ai_embeddings', 'ai_']
     },
     'General': {
         icon: Settings,
@@ -214,6 +214,10 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
     const [workflowSteps, setWorkflowSteps] = useState<WorkflowStep[]>([]);
     const [editingStep, setEditingStep] = useState<string | null>(null);
     const [stepParams, setStepParams] = useState<Record<string, any>>({});
+    
+    // Workflow Variables
+    const [workflowVariablesSchema, setWorkflowVariablesSchema] = useState<Record<string, any>>({});
+    const [workflowVariableValues, setWorkflowVariableValues] = useState<Record<string, any>>({});
 
     // UI state
     const [loading, setLoading] = useState(false);
@@ -245,6 +249,24 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                 setCategory(initialData.workflow_metadata?.category || '');
                 setTags(initialData.workflow_metadata?.tags?.join(', ') || '');
 
+                // Extract variables (schema and values)
+                const vars = initialData.variables || {};
+                const schema: Record<string, any> = {};
+                const values: Record<string, any> = {};
+                
+                Object.entries(vars).forEach(([key, val]) => {
+                    if (typeof val === 'object' && val !== null && !Array.isArray(val) && ('type' in val || 'description' in val || 'enum' in val || 'default' in val)) {
+                        schema[key] = val;
+                        values[key] = (val as any).default || '';
+                    } else {
+                        values[key] = val;
+                        schema[key] = { type: typeof val === 'number' ? 'number' : 'string', description: key.replace(/_/g, ' ') };
+                    }
+                });
+                
+                setWorkflowVariablesSchema(schema);
+                setWorkflowVariableValues(values);
+
                 // Map steps
                 if (initialData.steps) {
                     const mappedSteps = initialData.steps.map((s: any) => ({
@@ -270,6 +292,8 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                 setCategory('');
                 setTags('');
                 setWorkflowSteps([]);
+                setWorkflowVariablesSchema({});
+                setWorkflowVariableValues({});
             }
             setSearchQuery('');
             setSelectedCategory('All');
@@ -434,7 +458,7 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                     steps: steps,
                     trigger_type: triggerType,
                     trigger_config: triggerConfig,
-                    variables: {},
+                    variables: workflowVariableValues,
                     workflow_metadata: {
                         category: category,
                         tags: tags.split(',').map(t => t.trim()).filter(Boolean)
@@ -455,7 +479,7 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                     steps: steps,
                     trigger_type: triggerType,
                     trigger_config: triggerConfig,
-                    variables: {}
+                    variables: workflowVariableValues
                 });
 
                 if (response.success && response.data) {
@@ -534,52 +558,48 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
     const renderInputField = (name: string, schema: any, tool: MCPTool | ToolInfo) => {
         const fieldType = schema.type || 'string';
         const isRequired = schema.required || false;
+        const isLongText = ['system_prompt', 'prompt', 'context', 'message', 'description', 'base_content', 'text'].includes(name.toLowerCase());
+        const premiumClasses = "w-full px-4 py-3 text-sm rounded-xl shadow-sm focus:ring-2 focus:ring-purple-500/40 focus:border-purple-500 outline-none transition-all duration-200 border border-gray-200 bg-white dark:bg-slate-800/80 dark:border-slate-700/80 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500";
         
-        // Search for dynamic options metadata in multiple possible key formats
-        // This is extremely robust to handle any backend-to-frontend casing transformations
         let dynamicSource = 
             schema['x-dynamic-options'] || 
             schema.x_dynamic_options || 
             schema.xDynamicOptions ||
             schema['x-dynamic-ui'];
 
-        // Custom handling for Google Drive folder selection
         if (tool?.name === 'rag_ingest_source' && name === 'url_or_id') {
             if (stepParams['source_type'] === 'google_drive') {
                 dynamicSource = 'google_workspace_drive.list_folders';
             }
         }
 
-        // Handle dynamic options
         if (dynamicSource) {
             const toolId = (tool as any).id || tool.name;
             const fieldKey = `${toolId}.${name}`;
             
-            // Trigger fetch if not loaded
             if (!dynamicOptions[fieldKey] && !loadingDynamic[fieldKey]) {
-                console.log(`[WorkflowBuilder] Triggering dynamic fetch for ${fieldKey} using ${dynamicSource}`);
                 fetchDynamicOptions(fieldKey, dynamicSource);
             }
 
             return (
                 <div className="relative">
                     <select
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm appearance-none bg-white"
+                        className={`${premiumClasses} appearance-none`}
                         value={stepParams[name] || ''}
                         onChange={(e) => setStepParams({ ...stepParams, [name]: e.target.value })}
                         disabled={loadingDynamic[fieldKey]}
                         required={isRequired}
                     >
-                        <option value="">{loadingDynamic[fieldKey] ? 'Loading options...' : `Select ${name}...`}</option>
+                        <option value="">{loadingDynamic[fieldKey] ? 'Loading options...' : `Select ${name.replace(/_/g, ' ')}...`}</option>
                         {dynamicOptions[fieldKey]?.map((option: any) => (
                             <option key={option.value} value={option.value}>
                                 {option.label}
                             </option>
                         ))}
                     </select>
-                    <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                    <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none">
                         {loadingDynamic[fieldKey] ? (
-                            <Loader2 className="w-4 h-4 text-gray-400 animate-spin" />
+                            <Loader2 className="w-4 h-4 text-purple-500 animate-spin" />
                         ) : (
                             <ChevronDown className="w-4 h-4 text-gray-400" />
                         )}
@@ -588,24 +608,23 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
             );
         }
 
-        // Render select dropdown if enum is provided
         if (schema.enum && Array.isArray(schema.enum)) {
             return (
                 <div className="relative">
                     <select
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm appearance-none bg-white"
+                        className={`${premiumClasses} appearance-none`}
                         value={stepParams[name] || ''}
                         onChange={(e) => setStepParams({ ...stepParams, [name]: e.target.value })}
                         required={isRequired}
                     >
-                        <option value="">Select {name}...</option>
+                        <option value="">Select {name.replace(/_/g, ' ')}...</option>
                         {schema.enum.map((option: string) => (
                             <option key={option} value={option}>
                                 {option.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                             </option>
                         ))}
                     </select>
-                    <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                    <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none">
                         <ChevronDown className="w-4 h-4 text-gray-400" />
                     </div>
                 </div>
@@ -613,16 +632,20 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
         }
 
         switch (fieldType) {
-            case 'string':
+            case 'boolean':
                 return (
-                    <input
-                        type="text"
-                        placeholder={`Enter ${name}`}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
-                        value={stepParams[name] || ''}
-                        onChange={(e) => setStepParams({ ...stepParams, [name]: e.target.value })}
-                        required={isRequired}
-                    />
+                    <div className="flex items-center space-x-3 pt-2 pb-1">
+                        <button
+                            type="button"
+                            onClick={() => setStepParams({ ...stepParams, [name]: !stepParams[name] })}
+                            className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500/40 ${stepParams[name] ? 'bg-purple-600' : 'bg-gray-200 dark:bg-slate-700'}`}
+                        >
+                            <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${stepParams[name] ? 'translate-x-5' : 'translate-x-0'}`} />
+                        </button>
+                        <span className="text-sm font-medium text-gray-700 dark:text-slate-300">
+                            {stepParams[name] ? 'Enabled' : 'Disabled'}
+                        </span>
+                    </div>
                 );
 
             case 'integer':
@@ -630,8 +653,8 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                 return (
                     <input
                         type="text"
-                        placeholder={`Enter ${name} or {{variable}}`}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                        placeholder={`Enter ${name.replace(/_/g, ' ')} or {{variable}}`}
+                        className={premiumClasses}
                         value={stepParams[name] || ''}
                         onChange={(e) => {
                             const val = e.target.value;
@@ -646,28 +669,24 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                     />
                 );
 
-            case 'boolean':
-                return (
-                    <div className="flex items-center space-x-3 pt-1">
-                        <button
-                            type="button"
-                            onClick={() => setStepParams({ ...stepParams, [name]: !stepParams[name] })}
-                            className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${stepParams[name] ? 'bg-purple-600' : 'bg-gray-200 dark:bg-slate-700'}`}
-                        >
-                            <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${stepParams[name] ? 'translate-x-5' : 'translate-x-0'}`} />
-                        </button>
-                        <span className="text-sm text-gray-600 dark:text-slate-400">
-                            {stepParams[name] ? 'Enabled' : 'Disabled'}
-                        </span>
-                    </div>
-                );
-
             default:
+                if (isLongText) {
+                    return (
+                        <textarea
+                            placeholder={`Enter ${name.replace(/_/g, ' ')}...`}
+                            rows={4}
+                            className={`${premiumClasses} resize-y min-h-[100px] leading-relaxed`}
+                            value={stepParams[name] || ''}
+                            onChange={(e) => setStepParams({ ...stepParams, [name]: e.target.value })}
+                            required={isRequired}
+                        />
+                    );
+                }
                 return (
                     <input
                         type="text"
-                        placeholder={`Enter ${name}`}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                        placeholder={`Enter ${name.replace(/_/g, ' ')}`}
+                        className={premiumClasses}
                         value={stepParams[name] || ''}
                         onChange={(e) => setStepParams({ ...stepParams, [name]: e.target.value })}
                         required={isRequired}
@@ -928,6 +947,28 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                                                     </p>
                                                 </div>
                                             )}
+                                            {triggerConfig.platform === 'whatsapp' && (
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                                                        WhatsApp Event *
+                                                    </label>
+                                                    <select
+                                                        value={triggerConfig.event_type || ''}
+                                                        onChange={(e) => setTriggerConfig({ ...triggerConfig, event_type: e.target.value })}
+                                                        className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                                                        required
+                                                    >
+                                                        <option value="">Select Event</option>
+                                                        <option value="whatsapp_message_received">Message Received (Incoming WhatsApp messages)</option>
+                                                        <option value="whatsapp_new_contact">New Contact</option>
+                                                        <option value="whatsapp_keyword_detected">Keyword Detected</option>
+                                                    </select>
+                                                    <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
+                                                        Whenever this WhatsApp event occurs, the workflow will be automatically triggered.
+                                                    </p>
+                                                </div>
+                                            )}
+
                                             {triggerConfig.platform === 'telegram' && (
                                                 <div>
                                                     <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
@@ -984,6 +1025,57 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                                             </p>
                                         </div>
                                     )}
+                                </div>
+                            )}
+
+                            {Object.keys(workflowVariablesSchema).length > 0 && (
+                                <div className="bg-purple-50 dark:bg-purple-900/10 p-4 rounded-lg border border-purple-200 dark:border-purple-500/30 space-y-4 mt-6">
+                                    <h4 className="text-sm font-medium text-purple-900 dark:text-purple-300 border-b border-purple-200 dark:border-purple-500/30 pb-2 mb-2 flex items-center">
+                                        <Settings className="w-4 h-4 mr-2" />
+                                        Agent Configuration Variables
+                                    </h4>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {Object.entries(workflowVariablesSchema).map(([key, schema]) => {
+                                            const isRequired = schema.required;
+                                            const hasOptions = schema.enum && Array.isArray(schema.enum);
+                                            
+                                            return (
+                                                <div key={key}>
+                                                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                                                        {key.replace(/_/g, ' ')}
+                                                        {isRequired && <span className="text-red-500 ml-1">*</span>}
+                                                    </label>
+                                                    {hasOptions ? (
+                                                        <select
+                                                            value={workflowVariableValues[key] || ''}
+                                                            onChange={(e) => setWorkflowVariableValues({ ...workflowVariableValues, [key]: e.target.value })}
+                                                            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                                                            required={isRequired}
+                                                        >
+                                                            <option value="">Select an option</option>
+                                                            {schema.enum.map((opt: string) => (
+                                                                <option key={opt} value={opt}>{opt}</option>
+                                                            ))}
+                                                        </select>
+                                                    ) : (
+                                                        <input
+                                                            type={schema.type === 'number' ? 'number' : 'text'}
+                                                            value={workflowVariableValues[key] || ''}
+                                                            onChange={(e) => setWorkflowVariableValues({ ...workflowVariableValues, [key]: e.target.value })}
+                                                            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                                                            placeholder={`Enter ${key.replace(/_/g, ' ')}`}
+                                                            required={isRequired}
+                                                        />
+                                                    )}
+                                                    {schema.description && (
+                                                        <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
+                                                            {schema.description}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
                                 </div>
                             )}
 
@@ -1213,18 +1305,39 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
 
                                                 {isEditing && tool && tool.inputSchema?.properties && (
                                                     <div className="px-4 pb-4 pt-2 border-t border-gray-100 dark:border-slate-700 space-y-3">
-                                                        {Object.entries(tool.inputSchema.properties).map(([name, schema]: [string, any]) => (
+                                                        {Object.entries(tool.inputSchema.properties).map(([name, schema]: [string, any]) => {
+                                                            const isSessionKey = name === 'session_key';
+                                                            return (
                                                             <div key={name}>
-                                                                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                                                                    {name.replace(/_/g, ' ')}
-                                                                    {schema.required && <span className="text-red-500 ml-1">*</span>}
-                                                                </label>
+                                                                <div className="flex items-center justify-between mb-1">
+                                                                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">
+                                                                        {name.replace(/_/g, ' ')}
+                                                                        {schema.required && <span className="text-red-500 ml-1">*</span>}
+                                                                    </label>
+                                                                    {isSessionKey && (
+                                                                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300 border border-purple-200 dark:border-purple-500/30">
+                                                                            💬 Context Memory
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                                {isSessionKey && !stepParams[name] && (
+                                                                    <button
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            setStepParams(prev => ({ ...prev, [name]: '{{session_key}}' }));
+                                                                        }}
+                                                                        className="mb-1.5 inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-semibold transition-all bg-purple-50 text-purple-600 hover:bg-purple-100 border border-purple-200 dark:bg-purple-500/10 dark:text-purple-400 dark:hover:bg-purple-500/20 dark:border-purple-500/20"
+                                                                    >
+                                                                        ⚡ Auto-fill with {'{{session_key}}'}
+                                                                    </button>
+                                                                )}
                                                                 {renderInputField(name, schema, tool)}
                                                                 {schema.description && (
                                                                     <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">{schema.description}</p>
                                                                 )}
                                                             </div>
-                                                        ))}
+                                                            );
+                                                        })}
                                                         <div className="flex space-x-2 pt-2">
                                                             <button
                                                                 onClick={(e) => {
