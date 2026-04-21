@@ -84,7 +84,7 @@ function getToolCategory(toolName: string): string {
         'Accounting': { keywords: ['accounting', 'kra', 'itax', 'quickbooks', 'xero'] },
         'Logistics': { keywords: ['logistics', 'amitruck', 'lori', 'sendy'] },
         'Knowledge Base': { keywords: ['rag_', 'pinecone_', 'qdrant_', 'weaviate_', 'llamaparse_', 'unstructured_', 'firecrawl_'] },
-        'AI Models': { keywords: ['ai_embeddings', 'ai_'] },
+        'AI & LLM': { keywords: ['ai_text_generation', 'ai_embeddings', 'ai_'] },
         'Slack': { prefix: 'slack_' },
         'HubSpot': { prefix: 'hubspot_' },
         'Analytics': { prefix: 'ga4_' },
@@ -869,6 +869,32 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
                                             </p>
                                         </div>
                                     )}
+                                    {triggerConfig.platform === 'whatsapp' && (
+                                        <div className="space-y-4">
+                                            <div>
+                                                <label className={`block text-xs font-bold uppercase tracking-wider mb-1.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>WhatsApp Event *</label>
+                                                <select
+                                                    className={`w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all ${
+                                                        isDark 
+                                                            ? 'bg-gray-800 border-gray-700 text-white focus:border-blue-500' 
+                                                            : 'bg-gray-50 border-gray-200 text-gray-800 focus:border-blue-500 focus:bg-white'
+                                                    }`}
+                                                    value={triggerConfig.event_type || ''}
+                                                    onChange={(e) => updateTriggerConfig('event_type', e.target.value)}
+                                                    required
+                                                >
+                                                    <option value="">Select Event</option>
+                                                    <option value="whatsapp_message_received">Message Received (Incoming WhatsApp messages)</option>
+                                                    <option value="whatsapp_new_contact">New Contact</option>
+                                                    <option value="whatsapp_keyword_detected">Keyword Detected</option>
+                                                </select>
+                                                <p className={`mt-2 text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+                                                    Whenever this WhatsApp event occurs, the workflow will be automatically triggered.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
+
                                     {triggerConfig.platform === 'telegram' && (
                                         <div>
                                             <label className={`block text-xs font-bold uppercase tracking-wider mb-1.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Telegram Event *</label>
