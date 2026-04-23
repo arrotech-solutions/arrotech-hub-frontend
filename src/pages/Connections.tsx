@@ -270,6 +270,74 @@ const Integrations: React.FC = () => {
   }, [navigate, fetchData]);
 
 
+  // Handle WhatsApp Embedded Signup code exchange
+  const handleWhatsAppEmbeddedCode = async (code: string) => {
+    const toastId = toast.loading('Connecting your WhatsApp Business account...');
+    try {
+      const res = await apiService.connectWhatsAppEmbedded(code);
+      if (res.success) {
+        toast.success('WhatsApp Business connected successfully!', { id: toastId });
+        fetchData();
+      } else {
+        toast.error('Failed to connect WhatsApp', { id: toastId });
+      }
+    } catch (error) {
+      toast.error('Failed to verify WhatsApp connection', { id: toastId });
+    }
+  };
+
+  // Launch WhatsApp Embedded Signup via Meta JS SDK
+  const launchWhatsAppEmbeddedSignup = () => {
+    const appId = import.meta.env.VITE_FACEBOOK_APP_ID;
+    const configId = import.meta.env.VITE_FACEBOOK_CONFIG_ID;
+
+    if (!appId) {
+      toast.error('WhatsApp integration is not configured. Please contact support.');
+      return;
+    }
+
+    const FB = (window as any).FB;
+    if (!FB) {
+      toast.error("Facebook SDK isn't loaded yet. Please check your internet connection or disable ad-blockers.");
+      return;
+    }
+
+    try {
+      FB.init({
+        appId: appId,
+        cookie: true,
+        version: 'v22.0'
+      });
+    } catch (e) {
+      console.log('FB SDK init warning:', e);
+    }
+
+    const loginOptions: any = {
+      response_type: 'code',
+      override_default_response_type: true,
+      extras: {
+        setup: {},
+        featureType: '',
+        sessionInfoVersion: '2'
+      }
+    };
+
+    if (configId) {
+      loginOptions.config_id = configId;
+    } else {
+      loginOptions.scope = 'business_management,whatsapp_business_management,whatsapp_business_messaging';
+    }
+
+    FB.login((response: any) => {
+      if (response.authResponse) {
+        handleWhatsAppEmbeddedCode(response.authResponse.code);
+      } else {
+        console.log('User cancelled WhatsApp signup or did not fully authorize.', response);
+        toast.error('WhatsApp setup was cancelled or incomplete.');
+      }
+    }, loginOptions);
+  };
+
   const handleConnect = async (platform: ConnectionPlatform) => {
     // Check if already connected
     const existing = connections.find(c => c.platform === platform.id);
@@ -328,28 +396,10 @@ const Integrations: React.FC = () => {
       }
     }
 
-    // Redirect to WhatsApp Auth if it's WhatsApp AND NOT already connected
+    // WhatsApp: Use Embedded Signup (Meta JS SDK popup) instead of redirect
     if (platform.id === 'whatsapp' && !existing) {
-      try {
-        toast.loading('Redirecting to WhatsApp...', { id: 'oauth-redirect' });
-        const { url } = await apiService.getWhatsAppAuthUrl();
-        window.location.href = url;
-        return;
-      } catch (error: any) {
-        toast.dismiss('oauth-redirect');
-        if (error.response?.status === 402) {
-          const details = error.response.data;
-          setUpgradeModal({
-            isOpen: true,
-            feature: details.feature || 'WhatsApp Business integration',
-            requiredTier: details.required_tier || 'Biashara Lite',
-            currentTier: details.current_tier || 'Free'
-          });
-        } else {
-          toast.error(error.message || 'Failed to initiate connection');
-        }
-        return;
-      }
+      launchWhatsAppEmbeddedSignup();
+      return;
     }
 
     // Redirect to Facebook Auth if it's Facebook AND NOT already connected
