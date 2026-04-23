@@ -1035,10 +1035,65 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                                         Agent Configuration Variables
                                     </h4>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {Object.entries(workflowVariablesSchema).map(([key, schema]) => {
+                                        {Object.entries(workflowVariablesSchema).map(([key, schema]: [string, any]) => {
+                                            const showIf = schema.show_if;
+                                            if (showIf && workflowVariableValues[showIf.field] !== showIf.value) {
+                                                return null;
+                                            }
+
                                             const isRequired = schema.required;
                                             const hasOptions = schema.enum && Array.isArray(schema.enum);
                                             
+                                            let dynamicSource = 
+                                                schema['x-dynamic-options'] || 
+                                                schema.x_dynamic_options || 
+                                                schema.xDynamicOptions ||
+                                                schema['x-dynamic-ui'];
+
+                                            if (dynamicSource) {
+                                                const fieldKey = `agent_var_${key}`;
+                                                if (!dynamicOptions[fieldKey] && !loadingDynamic[fieldKey]) {
+                                                    fetchDynamicOptions(fieldKey, dynamicSource);
+                                                }
+                                                
+                                                return (
+                                                    <div key={key}>
+                                                        <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                                                            {key.replace(/_/g, ' ')}
+                                                            {isRequired && <span className="text-red-500 ml-1">*</span>}
+                                                        </label>
+                                                        <div className="relative">
+                                                            <select
+                                                                value={workflowVariableValues[key] || ''}
+                                                                onChange={(e) => setWorkflowVariableValues({ ...workflowVariableValues, [key]: e.target.value })}
+                                                                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm appearance-none"
+                                                                disabled={loadingDynamic[fieldKey]}
+                                                                required={isRequired}
+                                                            >
+                                                                <option value="">{loadingDynamic[fieldKey] ? 'Loading options...' : `Select ${key.replace(/_/g, ' ')}...`}</option>
+                                                                {dynamicOptions[fieldKey]?.map((option: any) => (
+                                                                    <option key={option.value} value={option.value}>
+                                                                        {option.label}
+                                                                    </option>
+                                                                ))}
+                                                            </select>
+                                                            <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none">
+                                                                {loadingDynamic[fieldKey] ? (
+                                                                    <div className="w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+                                                                ) : (
+                                                                    <ChevronDown className="w-4 h-4 text-gray-400" />
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                        {schema.description && (
+                                                            <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
+                                                                {schema.description}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                );
+                                            }
+
                                             return (
                                                 <div key={key}>
                                                     <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
