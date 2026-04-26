@@ -174,7 +174,9 @@ const Integrations: React.FC = () => {
     const error = params.get('error');
 
     if (error) {
-      toast.error('Connection failed: ' + error);
+      const detail = params.get('detail');
+      const errorMessage = detail ? decodeURIComponent(detail) : error;
+      toast.error('Connection failed: ' + errorMessage, { duration: 8000 });
       navigate('/connections', { replace: true });
       processedCallback.current = true;
 
