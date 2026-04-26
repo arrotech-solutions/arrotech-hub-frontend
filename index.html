@@ -67,12 +67,21 @@
   <noscript>You need to enable JavaScript to run this app.</noscript>
   <div id="root"></div>
   <script type="module" src="/src/index.tsx"></script>
-  <!-- Facebook SDK for Embedded Signup -->
+  <!-- Facebook SDK for WhatsApp Embedded Signup -->
   <script>
     window.fbAsyncInit = function() {
-      // FB.init will be called by the application code when ready
+      var appId = document.querySelector('meta[name="fb-app-id"]');
+      if (appId && appId.content) {
+        FB.init({
+          appId: appId.content,
+          cookie: true,
+          xfbml: false,
+          version: 'v22.0'
+        });
+      }
     };
   </script>
+  <meta name="fb-app-id" content="%VITE_FACEBOOK_APP_ID%" />
   <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>
 </body>
 </html>
