@@ -56,6 +56,7 @@ const Integrations: React.FC = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [isKraModalOpen, setIsKraModalOpen] = useState(false);
   const [upgradeModal, setUpgradeModal] = useState({ isOpen: false, feature: '', requiredTier: '', currentTier: '' });
+  const [showWhatsAppChoice, setShowWhatsAppChoice] = useState(false);
   const [selectedPlatform, setSelectedPlatform] = useState<ConnectionPlatform | null>(null);
   const [formData, setFormData] = useState({ platform: '', name: '', config: {} as any });
   const [editingConnection, setEditingConnection] = useState<Connection | null>(null);
@@ -270,6 +271,142 @@ const Integrations: React.FC = () => {
   }, [navigate, fetchData]);
 
 
+  // Handle WhatsApp Embedded Signup code exchange
+  const handleWhatsAppEmbeddedCode = async (code: string) => {
+    const toastId = toast.loading('Connecting your WhatsApp Business account...');
+    try {
+      const res = await apiService.connectWhatsAppEmbedded(code);
+      if (res.success) {
+        toast.success('WhatsApp Business connected successfully!', { id: toastId });
+        fetchData();
+      } else {
+        toast.error('Failed to connect WhatsApp', { id: toastId });
+      }
+    } catch (error) {
+      toast.error('Failed to verify WhatsApp connection', { id: toastId });
+    }
+  };
+
+  // Fallback: Connect WhatsApp via redirect OAuth (for users with existing WABAs)
+  const connectWhatsAppViaRedirect = async () => {
+    try {
+      toast.loading('Redirecting to Meta...', { id: 'oauth-redirect' });
+      const { url } = await apiService.getWhatsAppAuthUrl();
+      window.location.href = url;
+    } catch (error: any) {
+      toast.dismiss('oauth-redirect');
+      if (error.response?.status === 402 || error.response?.data?.error === 'upgrade_required') {
+        const details = error.response?.data?.detail || error.response?.data || {};
+        setUpgradeModal({
+          isOpen: true,
+          feature: details.feature || 'WhatsApp Business integration',
+          requiredTier: details.required_tier || 'Free',
+          currentTier: details.current_tier || 'Free'
+        });
+      } else {
+        toast.error('Failed to initiate WhatsApp connection');
+      }
+    }
+  };
+
+  // Launch WhatsApp Embedded Signup via Meta JS SDK
+  const launchWhatsAppEmbeddedSignup = () => {
+    const appId = import.meta.env.VITE_FACEBOOK_APP_ID;
+    const configId = import.meta.env.VITE_FACEBOOK_CONFIG_ID;
+
+    if (!appId) {
+      toast.error('WhatsApp integration is not configured. Please contact support.');
+      return;
+    }
+
+    const FB = (window as any).FB;
+    if (!FB) {
+      // If SDK isn't loaded, fall back to redirect OAuth
+      toast('Facebook SDK not available. Redirecting to Meta login...', { icon: '🔄' });
+      connectWhatsAppViaRedirect();
+      return;
+    }
+
+    try {
+      FB.init({
+        appId: appId,
+        cookie: true,
+        version: 'v22.0'
+      });
+    } catch (e) {
+      console.log('FB SDK init warning:', e);
+    }
+
+    const loginOptions: any = {
+      response_type: 'code',
+      override_default_response_type: true,
+      extras: {
+        setup: {},
+        featureType: '',
+        sessionInfoVersion: '3'
+      }
+    };
+
+    if (configId) {
+      loginOptions.config_id = configId;
+    } else {
+      loginOptions.scope = 'business_management,whatsapp_business_management,whatsapp_business_messaging';
+    }
+
+    FB.login((response: any) => {
+      if (response.authResponse) {
+        handleWhatsAppEmbeddedCode(response.authResponse.code);
+      } else {
+        console.log('User cancelled WhatsApp signup or did not fully authorize.', response);
+        // Offer the redirect OAuth as fallback when Embedded Signup fails
+        toast((t) => (
+          <div>
+            <p style={{ marginBottom: '8px' }}>
+              <strong>Could not complete setup via popup.</strong>
+            </p>
+            <p style={{ marginBottom: '12px', fontSize: '14px', color: '#666' }}>
+              If your business is already linked, try connecting via redirect instead.
+            </p>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                onClick={() => {
+                  toast.dismiss(t.id);
+                  connectWhatsAppViaRedirect();
+                }}
+                style={{
+                  padding: '6px 16px',
+                  background: '#25D366',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  fontSize: '13px'
+                }}
+              >
+                Connect via Redirect
+              </button>
+              <button
+                onClick={() => toast.dismiss(t.id)}
+                style={{
+                  padding: '6px 16px',
+                  background: '#f3f4f6',
+                  color: '#374151',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '13px'
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        ), { duration: 15000 });
+      }
+    }, loginOptions);
+  };
+
   const handleConnect = async (platform: ConnectionPlatform) => {
     // Check if already connected
     const existing = connections.find(c => c.platform === platform.id);
@@ -328,28 +465,10 @@ const Integrations: React.FC = () => {
       }
     }
 
-    // Redirect to WhatsApp Auth if it's WhatsApp AND NOT already connected
+    // WhatsApp: Show choice modal (new account vs existing account)
     if (platform.id === 'whatsapp' && !existing) {
-      try {
-        toast.loading('Redirecting to WhatsApp...', { id: 'oauth-redirect' });
-        const { url } = await apiService.getWhatsAppAuthUrl();
-        window.location.href = url;
-        return;
-      } catch (error: any) {
-        toast.dismiss('oauth-redirect');
-        if (error.response?.status === 402) {
-          const details = error.response.data;
-          setUpgradeModal({
-            isOpen: true,
-            feature: details.feature || 'WhatsApp Business integration',
-            requiredTier: details.required_tier || 'Biashara Lite',
-            currentTier: details.current_tier || 'Free'
-          });
-        } else {
-          toast.error(error.message || 'Failed to initiate connection');
-        }
-        return;
-      }
+      setShowWhatsAppChoice(true);
+      return;
     }
 
     // Redirect to Facebook Auth if it's Facebook AND NOT already connected
@@ -1231,6 +1350,88 @@ const Integrations: React.FC = () => {
                 </div>
 
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* WhatsApp Connection Choice Modal */}
+      {showWhatsAppChoice && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowWhatsAppChoice(false)} />
+          <div className="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-200 dark:border-slate-700">
+            {/* Header */}
+            <div className="px-6 pt-6 pb-4">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 rounded-xl bg-[#25D366]/10 flex items-center justify-center">
+                  <WhatsAppLogo className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Connect WhatsApp Business</h3>
+              </div>
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                Choose how you'd like to connect your WhatsApp Business account to Arrotech Hub.
+              </p>
+            </div>
+
+            {/* Options */}
+            <div className="px-6 pb-2 space-y-3">
+              {/* Option 1: New Setup */}
+              <button
+                onClick={() => {
+                  setShowWhatsAppChoice(false);
+                  launchWhatsAppEmbeddedSignup();
+                }}
+                className="w-full text-left p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 hover:border-[#25D366] dark:hover:border-[#25D366] hover:bg-[#25D366]/5 transition-all group"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-lg">🆕</span>
+                  </div>
+                  <div>
+                    <div className="font-semibold text-slate-900 dark:text-white group-hover:text-[#25D366] transition-colors">
+                      New to WhatsApp Business
+                    </div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                      Create a new WhatsApp Business Account and register a phone number.
+                      Best if you don't have a WhatsApp Business account yet.
+                    </p>
+                  </div>
+                </div>
+              </button>
+
+              {/* Option 2: Existing Account */}
+              <button
+                onClick={() => {
+                  setShowWhatsAppChoice(false);
+                  connectWhatsAppViaRedirect();
+                }}
+                className="w-full text-left p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 hover:border-[#25D366] dark:hover:border-[#25D366] hover:bg-[#25D366]/5 transition-all group"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-lg">🔗</span>
+                  </div>
+                  <div>
+                    <div className="font-semibold text-slate-900 dark:text-white group-hover:text-[#25D366] transition-colors">
+                      I already have an account
+                    </div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                      Connect an existing WhatsApp Business Account to Arrotech Hub.
+                      Best if you already have a WABA set up in Meta Business Suite.
+                    </p>
+                  </div>
+                </div>
+              </button>
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 py-4 mt-1">
+              <button
+                onClick={() => setShowWhatsAppChoice(false)}
+                className="w-full py-2.5 text-sm font-medium text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>

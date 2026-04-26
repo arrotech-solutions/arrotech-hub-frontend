@@ -138,7 +138,7 @@ const WhatsAppDashboard: React.FC = () => {
             FB.init({
                 appId: appId,
                 cookie: true,
-                version: 'v20.0'
+                version: 'v22.0'
             });
         } catch (e) {
             console.log("FB SDK init warning:", e);
