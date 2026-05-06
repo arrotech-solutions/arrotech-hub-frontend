@@ -2663,19 +2663,18 @@ class ApiService {
     return response.data;
   }
 
-  // M-Pesa Agent endpoints
   async getMpesaAgentConfig(): Promise<ApiResponse<MpesaAgentConfig>> {
-    const response = await this.api.get('/api/agents/mpesa/config');
+    const response = await this.api.get('/api/agents/daraja/config');
     return response.data;
   }
 
   async updateMpesaAgentConfig(config: Partial<MpesaAgentConfig>): Promise<ApiResponse<MpesaAgentConfig>> {
-    const response = await this.api.post('/api/agents/mpesa/config', config);
+    const response = await this.api.post('/api/agents/daraja/config', config);
     return response.data;
   }
 
   async getMpesaPaymentSummary(days: number = 1): Promise<ApiResponse<MpesaPaymentSummary>> {
-    const response = await this.api.get('/api/agents/mpesa/summary', { params: { days } });
+    const response = await this.api.get('/api/agents/daraja/summary', { params: { days } });
     return response.data;
   }
 
@@ -2684,12 +2683,12 @@ class ApiService {
     offset?: number;
     status?: 'pending' | 'matched' | 'unmatched';
   } = {}): Promise<ApiResponse<MpesaPaymentListResponse>> {
-    const response = await this.api.get('/api/agents/mpesa/payments', { params });
+    const response = await this.api.get('/api/agents/daraja/payments', { params });
     return response.data;
   }
 
   async getUnmatchedMpesaPayments(limit: number = 10): Promise<ApiResponse<{ payments: MpesaPayment[] }>> {
-    const response = await this.api.get('/api/agents/mpesa/payments/unmatched', { params: { limit } });
+    const response = await this.api.get('/api/agents/daraja/payments/unmatched', { params: { limit } });
     return response.data;
   }
 
