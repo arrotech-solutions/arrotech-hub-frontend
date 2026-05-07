@@ -21,12 +21,14 @@ interface ToolResultWidgetProps {
     message: Message;
     isDarkMode: boolean;
     responseMode?: 'simple' | 'detailed';
+    onViewSources?: (sources: any[]) => void;
 }
 
 const ToolResultWidget: React.FC<ToolResultWidgetProps> = ({
     message,
     isDarkMode,
     responseMode = 'simple',
+    onViewSources,
 }) => {
     if (!message.tools_called) return null;
 
@@ -72,7 +74,11 @@ const ToolResultWidget: React.FC<ToolResultWidgetProps> = ({
 
                                         {/* Web Search Sources UI */}
                                         {tool.name === 'web_search' && tool.result.sources && Array.isArray(tool.result.sources) && (
-                                            <SearchSourceCards sources={tool.result.sources} isDarkMode={isDarkMode} />
+                                            <SearchSourceCards 
+                                                sources={tool.result.sources} 
+                                                isDarkMode={isDarkMode} 
+                                                onViewSources={onViewSources}
+                                            />
                                         )}
 
                                         {/* Image Result UI */}

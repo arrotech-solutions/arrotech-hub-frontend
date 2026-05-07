@@ -5,18 +5,22 @@ import { SearchSource } from '../../types';
 interface SearchSourceCardsProps {
   sources: SearchSource[];
   isDarkMode: boolean;
+  onViewSources?: (sources: SearchSource[]) => void;
 }
 
-const SearchSourceCards: React.FC<SearchSourceCardsProps> = ({ sources, isDarkMode }) => {
+const SearchSourceCards: React.FC<SearchSourceCardsProps> = ({ sources, isDarkMode, onViewSources }) => {
   if (!sources || sources.length === 0) return null;
 
   return (
     <div className="mb-4">
-      {/* Header */}
-      <div className="flex items-center space-x-2 mb-3">
-        <Globe size={14} className="text-cyan-500" />
-        <span className={`text-[10px] font-bold uppercase tracking-widest ${
-          isDarkMode ? 'text-cyan-400' : 'text-cyan-600'
+      {/* Header - Clickable to open sidebar */}
+      <div 
+        className={`flex items-center space-x-2 mb-3 cursor-pointer group/header w-fit transition-all hover:translate-x-1`}
+        onClick={() => onViewSources && onViewSources(sources)}
+      >
+        <Globe size={14} className="text-cyan-500 group-hover/header:animate-pulse" />
+        <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${
+          isDarkMode ? 'text-cyan-400 group-hover/header:text-cyan-300' : 'text-cyan-600 group-hover/header:text-cyan-500'
         }`}>
           Sources ({sources.length})
         </span>

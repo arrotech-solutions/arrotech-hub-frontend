@@ -88,6 +88,7 @@ export interface ToolCall {
   arguments: Record<string, any>;
   result?: Record<string, any>;
   success?: boolean;
+  context?: ToolContextEvent | any;
 }
 
 export interface ExtractedToolCall {
@@ -174,6 +175,8 @@ export interface MessageCreate {
   provider?: string;
   use_reasoning?: boolean;
   use_search?: boolean;
+  current_time?: string;
+  timezone?: string;
 }
 
 export interface ConversationCreate {
