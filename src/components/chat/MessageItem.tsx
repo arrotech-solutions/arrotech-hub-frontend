@@ -1,12 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     User,
     Bot,
     Copy,
+    Check,
     Edit,
     ChevronLeft,
     ChevronRight,
-    RefreshCw
+    RefreshCw,
+    ThumbsUp,
+    ThumbsDown,
+    Volume2,
+    VolumeX,
 } from 'lucide-react';
 import { Message } from '../../types';
 import ToolResultWidget from './ToolResultWidget';
@@ -14,6 +19,7 @@ import ResponseModeToggle from './ResponseModeToggle';
 import ReasoningBubble, { extractThought } from './ReasoningBubble';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { createMarkdownComponents } from './CodeBlock';
 
 interface MessageItemProps {
     message: Message;
@@ -32,7 +38,17 @@ interface MessageItemProps {
     formatTime: (timestamp: string) => string;
     responseMode?: 'simple' | 'detailed';
     onResponseModeChange?: (mode: 'simple' | 'detailed') => void;
+    onRegenerate?: () => void;
+    onViewSources?: (sources: any[]) => void;
 }
+
+const FEEDBACK_REASONS = [
+    'Inaccurate',
+    'Not helpful',
+    'Too verbose',
+    'Incomplete',
+    'Other',
+];
 
 const MessageItem: React.FC<MessageItemProps> = ({
     message,
@@ -51,20 +67,89 @@ const MessageItem: React.FC<MessageItemProps> = ({
     formatTime,
     responseMode = 'simple',
     onResponseModeChange,
+    onRegenerate,
+    onViewSources,
 }) => {
     const isUser = message.role === 'user';
     const isEditing = editingMessageId === message.id;
     const hasVersions = messageVersions.length > 0;
+
+    // Feedback state
+    const [feedbackState, setFeedbackState] = useState<'none' | 'up' | 'down'>('none');
+    const [showFeedbackMenu, setShowFeedbackMenu] = useState(false);
+    const [copied, setCopied] = useState(false);
+    const [isSpeaking, setIsSpeaking] = useState(false);
 
     // Extract thought from content
     const { cleanContent } = (!isUser && message.content)
         ? extractThought(message.content)
         : { cleanContent: message.content };
 
-    const copyToClipboard = (text: string) => {
-        navigator.clipboard.writeText(text);
-        // You might want to trigger a toast here, but for now we'll keep it simple
+    const copyToClipboard = async (text: string) => {
+        try {
+            await navigator.clipboard.writeText(text);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        } catch {
+            // Fallback
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        }
     };
+
+    const handleFeedback = (type: 'up' | 'down') => {
+        if (type === 'down') {
+            setShowFeedbackMenu(true);
+            setFeedbackState('down');
+        } else {
+            setFeedbackState(feedbackState === 'up' ? 'none' : 'up');
+            setShowFeedbackMenu(false);
+            // TODO: Send feedback to backend
+            // apiService.sendMessageFeedback(message.id, { helpful: true });
+        }
+    };
+
+    const handleFeedbackReason = (reason: string) => {
+        setShowFeedbackMenu(false);
+        // TODO: Send feedback to backend
+        // apiService.sendMessageFeedback(message.id, { helpful: false, reason });
+        console.log('Feedback:', { messageId: message.id, helpful: false, reason });
+    };
+
+    const handleReadAloud = () => {
+        if (isSpeaking) {
+            window.speechSynthesis.cancel();
+            setIsSpeaking(false);
+            return;
+        }
+
+        // Stop any current speech
+        window.speechSynthesis.cancel();
+
+        const utterance = new SpeechSynthesisUtterance(cleanContent);
+
+        // Find a good voice if possible (optional, but improves UX)
+        const voices = window.speechSynthesis.getVoices();
+        const preferredVoice = voices.find(v => v.lang.startsWith('en') && v.name.includes('Google')) || voices[0];
+        if (preferredVoice) utterance.voice = preferredVoice;
+
+        utterance.rate = 1.0;
+        utterance.pitch = 1.0;
+
+        utterance.onend = () => setIsSpeaking(false);
+        utterance.onerror = () => setIsSpeaking(false);
+
+        window.speechSynthesis.speak(utterance);
+        setIsSpeaking(true);
+    };
+
+    const markdownComponents = createMarkdownComponents(isDarkMode);
 
     return (
         <div className={`group flex flex-col mb-8 animate-in fade-in slide-in-from-bottom-2 duration-500
@@ -124,27 +209,7 @@ const MessageItem: React.FC<MessageItemProps> = ({
                                     <div className={`prose prose-sm max-w-none ${isDarkMode ? 'prose-invert' : 'prose-gray'} mt-1`}>
                                         <ReactMarkdown
                                             remarkPlugins={[remarkGfm]}
-                                            components={{
-                                                code({node, inline, className, children, ...props}: any) {
-                                                  const match = /language-(\w+)/.exec(className || '')
-                                                  return !inline && match ? (
-                                                    <div className="relative rounded-lg overflow-hidden my-4 border border-gray-700/50 not-prose">
-                                                      <div className="flex items-center px-4 py-2 bg-gray-900 border-b border-gray-800">
-                                                        <span className="text-xs text-gray-400 font-mono lowercase">{match[1]}</span>
-                                                      </div>
-                                                      <div className="overflow-x-auto bg-gray-950 p-4">
-                                                        <code className={className} {...props}>
-                                                          {children}
-                                                        </code>
-                                                      </div>
-                                                    </div>
-                                                  ) : (
-                                                    <code className={`${className} px-1.5 py-0.5 rounded-md ${isDarkMode ? 'bg-gray-700/50 text-indigo-300' : 'bg-indigo-50 text-indigo-600'}`} {...props}>
-                                                      {children}
-                                                    </code>
-                                                  )
-                                                }
-                                            }}
+                                            components={markdownComponents}
                                         >
                                             {cleanContent || ''}
                                         </ReactMarkdown>
@@ -172,6 +237,7 @@ const MessageItem: React.FC<MessageItemProps> = ({
                                             message={message}
                                             isDarkMode={isDarkMode}
                                             responseMode={responseMode}
+                                            onViewSources={onViewSources}
                                         />
                                     </div>
                                 )}
@@ -181,7 +247,7 @@ const MessageItem: React.FC<MessageItemProps> = ({
 
                     {/* Metadata & Actions */}
                     {!isEditing && (
-                        <div className={`flex items-center mt-2 space-x-4 transition-opacity duration-200
+                        <div className={`flex items-center mt-2 space-x-3 transition-opacity duration-200
               ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}
               ${isUser ? 'flex-row-reverse space-x-reverse' : ''}`}
                         >
@@ -189,7 +255,7 @@ const MessageItem: React.FC<MessageItemProps> = ({
                                 {formatTime(message.created_at)}
                             </span>
 
-                            {message.tokens_used && (
+                            {message.tokens_used != null && message.tokens_used > 0 && (
                                 <div className="flex items-center space-x-1">
                                     <div className="w-1 h-1 rounded-full bg-current opacity-40" />
                                     <span className="text-[10px] font-medium">{message.tokens_used} tokens</span>
@@ -219,22 +285,99 @@ const MessageItem: React.FC<MessageItemProps> = ({
                                 </div>
                             )}
 
-                            {/* Quick Actions */}
-                            <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            {/* Quick Actions — always visible area */}
+                            <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                {/* Copy */}
                                 <button
                                     onClick={() => copyToClipboard(message.content)}
-                                    className="p-1 hover:text-indigo-500 transition-colors"
-                                    title="Copy"
+                                    className={`p-1.5 rounded-lg transition-all ${copied
+                                            ? 'text-emerald-500'
+                                            : 'hover:text-indigo-500 hover:bg-black/5 dark:hover:bg-white/5'
+                                        }`}
+                                    title="Copy message"
                                 >
-                                    <Copy size={12} />
+                                    {copied ? <Check size={13} /> : <Copy size={13} />}
                                 </button>
+
+                                {/* Read Aloud */}
+                                <button
+                                    onClick={handleReadAloud}
+                                    className={`p-1.5 rounded-lg transition-all ${isSpeaking
+                                            ? 'text-indigo-500 bg-indigo-500/10'
+                                            : 'hover:text-indigo-500 hover:bg-black/5 dark:hover:bg-white/5'
+                                        }`}
+                                    title={isSpeaking ? "Stop reading" : "Read aloud"}
+                                >
+                                    {isSpeaking ? <VolumeX size={13} /> : <Volume2 size={13} />}
+                                </button>
+
+                                {/* Edit (user messages only) */}
                                 {isUser && (
                                     <button
                                         onClick={() => startEditingMessage(message)}
-                                        className="p-1 hover:text-indigo-500 transition-colors"
-                                        title="Edit"
+                                        className="p-1.5 rounded-lg hover:text-indigo-500 hover:bg-black/5 dark:hover:bg-white/5 transition-all"
+                                        title="Edit message"
                                     >
-                                        <Edit size={12} />
+                                        <Edit size={13} />
+                                    </button>
+                                )}
+
+                                {/* Feedback (assistant messages only) */}
+                                {!isUser && (
+                                    <>
+                                        <button
+                                            onClick={() => handleFeedback('up')}
+                                            className={`p-1.5 rounded-lg transition-all ${feedbackState === 'up'
+                                                    ? 'text-emerald-500 bg-emerald-500/10'
+                                                    : 'hover:text-emerald-500 hover:bg-black/5 dark:hover:bg-white/5'
+                                                }`}
+                                            title="Good response"
+                                        >
+                                            <ThumbsUp size={13} />
+                                        </button>
+                                        <div className="relative">
+                                            <button
+                                                onClick={() => handleFeedback('down')}
+                                                className={`p-1.5 rounded-lg transition-all ${feedbackState === 'down'
+                                                        ? 'text-red-400 bg-red-500/10'
+                                                        : 'hover:text-red-400 hover:bg-black/5 dark:hover:bg-white/5'
+                                                    }`}
+                                                title="Bad response"
+                                            >
+                                                <ThumbsDown size={13} />
+                                            </button>
+
+                                            {/* Feedback reason dropdown */}
+                                            {showFeedbackMenu && (
+                                                <div className={`absolute bottom-full mb-2 right-0 w-40 rounded-xl border shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-bottom-2
+                                                    ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
+                                                >
+                                                    <div className="p-1">
+                                                        {FEEDBACK_REASONS.map(reason => (
+                                                            <button
+                                                                key={reason}
+                                                                onClick={() => handleFeedbackReason(reason)}
+                                                                className={`w-full text-left px-3 py-1.5 text-xs rounded-lg transition-colors
+                                                                    ${isDarkMode ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-50 text-gray-700'}`}
+                                                            >
+                                                                {reason}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </>
+                                )}
+
+                                {/* Regenerate (last assistant message only) */}
+                                {!isUser && isLast && onRegenerate && (
+                                    <button
+                                        onClick={onRegenerate}
+                                        className="p-1.5 rounded-lg hover:text-indigo-500 hover:bg-black/5 dark:hover:bg-white/5 transition-all"
+                                        title="Regenerate response"
+                                    >
+                                        <RefreshCw size={13} />
                                     </button>
                                 )}
                             </div>
