@@ -15,9 +15,12 @@ import ChatSidebar from '../components/chat/ChatSidebar';
 import MessageList from '../components/chat/MessageList';
 import ChatInput from '../components/chat/ChatInput';
 import ArtifactPanel from '../components/chat/ArtifactPanel';
+import SourcesPanel from '../components/chat/SourcesPanel';
 import CapabilityExplorer from '../components/chat/CapabilityExplorer';
 import { useSubscription } from '../hooks/useSubscription';
 import { useStreamingChat } from '../hooks/useStreamingChat';
+import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
+import { SearchSource } from '../types';
 
 // TypeScript declarations for speech recognition
 declare global {
@@ -50,18 +53,20 @@ const Chat: React.FC = () => {
   const [currentVersion, setCurrentVersion] = useState<{ [key: number]: number }>({});
 
   const {
+    streamState,
     isStreaming,
+    isDone,
     content: streamingContent,
-    reasoningContent,
     activeArtifact,
-    thinkingSteps,
-    activeTools,
-    toolContexts,
-    searchSources,
+    sources: streamingSources,
     error: streamError,
     sendStreamingMessage,
-    cancelStream
+    cancelStream,
+    flushStreamState,
   } = useStreamingChat();
+
+  const [activeSources, setActiveSources] = useState<SearchSource[] | null>(null);
+  const [showSourcesPanel, setShowSourcesPanel] = useState(false);
 
   // Workflow & Agent State
   const [showWorkflowBuilder, setShowWorkflowBuilder] = useState(false);
@@ -79,6 +84,8 @@ const Chat: React.FC = () => {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  // Track the conversation ID we're streaming for (to prevent cross-conversation flush)
+  const streamingConversationRef = useRef<number | null>(null);
 
   // -- Initialization & Effects --
 
@@ -120,6 +127,10 @@ const Chat: React.FC = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // ── Seamless turn completion ──────────────────────────────────────────────
+  // The isDone effect is removed in favor of direct finalization in sendMessage
+  // to prevent flickering and unnecessary database re-fetches.
 
   // Speech Recognition Setup
   useEffect(() => {
@@ -240,6 +251,11 @@ const Chat: React.FC = () => {
     }
   };
 
+  const streamStateRef = useRef(streamState);
+  useEffect(() => {
+    streamStateRef.current = streamState;
+  }, [streamState]);
+
   const sendMessage = async () => {
     if (selectedProvider && !isProviderAvailable(selectedProvider)) {
       toast.error(`Provider ${getProviderDisplayName(selectedProvider)} not available`);
@@ -288,29 +304,51 @@ const Chat: React.FC = () => {
       loadConversations();
       refreshUsage();
 
+      // Track which conversation this stream belongs to
+      streamingConversationRef.current = conversationToUse!.id;
+
       await sendStreamingMessage(
         conversationToUse!.id,
         messageContent,
         selectedProvider,
         useReasoning,
-        useSearch,
-        // On success callback (optional)
-        () => {
-          console.log('Stream fully saved');
-        }
+        useSearch
       );
       
-      // Always reload messages and stop loading after the stream completes (even if error)
-      loadMessages(conversationToUse!.id);
-      setIsLoading(false);
+      // ── Seamless Handover ──
+      // Instead of reloading from DB, we finalize the local state instantly.
+      const finalState = streamStateRef.current;
+      if (finalState.content || finalState.activityLog.length > 0) {
+        const assistantMsg: Message = {
+          id: finalState.lastMessageId || (Date.now() + 1),
+          conversation_id: conversationToUse!.id,
+          role: 'assistant',
+          content: finalState.content,
+          tools_called: finalState.finalToolsCalled,
+          created_at: new Date().toISOString(),
+          status: 'completed'
+        };
+        
+        setMessages(prev => {
+          // Prevent duplicates if by any chance it's already there
+          if (prev.some(m => m.id === assistantMsg.id)) return prev;
+          return [...prev, assistantMsg];
+        });
+
+        // Small delay to ensure React has painted the new message before we hide the ghost
+        setTimeout(() => {
+          flushStreamState();
+          setIsLoading(false);
+          streamingConversationRef.current = null;
+        }, 50);
+      }
 
     } catch (error) {
-      // Only toast for connection-level failures (e.g. network errors, fetch failures)
-      // Stream-level errors (e.g. provider issues) are already displayed inline by the streaming UI
       console.error('Send message error:', error);
       toast.error('Failed to send message');
       setInputMessage(messageContent);
       setIsLoading(false);
+      streamingConversationRef.current = null;
     }
   };
 
@@ -408,6 +446,23 @@ const Chat: React.FC = () => {
     setShowWorkflowBuilder(true);
   };
 
+  // ── Keyboard Shortcuts ────────────────────────────────────────────────────
+  useKeyboardShortcuts({
+    onNewChat: createNewConversation,
+    onToggleSidebar: () => setSidebarCollapsed(prev => !prev),
+    onFocusInput: () => inputRef.current?.focus(),
+    onCancelStream: cancelStream,
+    onEditLastMessage: () => {
+      const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
+      if (lastUserMsg) {
+        setEditingMessage(lastUserMsg.id);
+        setEditingMessageText(lastUserMsg.content);
+      }
+    },
+    isStreaming,
+    inputRef,
+  });
+
   // -- Render --
   return (
     <div className={`flex h-screen overflow-hidden transition-colors duration-500
@@ -481,18 +536,14 @@ const Chat: React.FC = () => {
           </div>
         </header>
 
-        {/* Message List */}
+        {/* Message List — now with unified streamState */}
         <MessageList
           messages={messages}
           isDarkMode={isDarkMode}
           isLoading={isLoading}
+          streamState={streamState}
           isStreaming={isStreaming}
-          streamingContent={streamingContent}
-          reasoningContent={reasoningContent}
-          thinkingSteps={thinkingSteps}
-          activeTools={activeTools}
-          toolContexts={toolContexts}
-          searchSources={searchSources}
+          onCancelStream={cancelStream}
           responseMode={responseMode}
           onResponseModeChange={(mode) => {
             setResponseMode(mode);
@@ -513,6 +564,22 @@ const Chat: React.FC = () => {
           messagesEndRef={messagesEndRef}
           setInputMessage={setInputMessage}
           onOpenCapabilityExplorer={() => setShowCapabilityExplorer(true)}
+          onRegenerate={() => {
+            // Find the last user message and re-send it
+            const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
+            if (lastUserMsg && currentConversation) {
+              setInputMessage(lastUserMsg.content);
+              // Trigger send on next tick after state update
+              setTimeout(() => {
+                const btn = document.querySelector('.chat-send-btn') as HTMLButtonElement;
+                if (btn) btn.click();
+              }, 50);
+            }
+          }}
+          onViewSources={(sources) => {
+            setActiveSources(sources);
+            setShowSourcesPanel(true);
+          }}
         />
 
         {/* Chat Input Area */}
@@ -544,7 +611,20 @@ const Chat: React.FC = () => {
         <ArtifactPanel
           artifact={activeArtifact}
           isDarkMode={isDarkMode}
-          onClose={() => { /* the user can close, we'd need to add a way to hide it via state if needed, for now just null the state or implement a local close state */ }}
+          onClose={() => { /* close logic */ }}
+        />
+      )}
+
+      {/* Sources Sidebar */}
+      {(showSourcesPanel || (isStreaming && streamingSources?.length > 0)) && (
+        <SourcesPanel
+          sources={showSourcesPanel && activeSources ? activeSources : streamingSources}
+          isOpen={showSourcesPanel || (isStreaming && streamingSources?.length > 0)}
+          onClose={() => {
+            setShowSourcesPanel(false);
+            setActiveSources(null);
+          }}
+          isDarkMode={isDarkMode}
         />
       )}
 

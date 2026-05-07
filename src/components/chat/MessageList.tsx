@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     Bot,
+    ArrowDown,
     MessageCircle,
     Sparkles,
     ChevronRight,
@@ -15,27 +16,19 @@ import {
 } from 'lucide-react';
 import { Conversation, Message, SearchSource, ToolContextEvent } from '../../types';
 import MessageItem from './MessageItem';
-import StreamingMessageBubble from './StreamingMessageBubble';
-import ThinkingIndicator from './ThinkingIndicator';
-import SearchSourceCards from './SearchSourceCards';
-import ToolInsightCard from './ToolInsightCard';
-import ResponseModeToggle from './ResponseModeToggle';
+import StreamingActivityLog from './StreamingActivityLog';
 import apiService from '../../services/api';
 
-import { ThinkingStep } from '../../hooks/useStreamingChat';
-import { ToolCall } from '../../types';
+import { StreamingState } from '../../hooks/useStreamingChat';
 
 interface MessageListProps {
     messages: Message[];
     isDarkMode: boolean;
     isLoading: boolean;
-    isStreaming?: boolean;
-    streamingContent?: string;
-    reasoningContent?: string;
-    thinkingSteps?: ThinkingStep[];
-    activeTools?: ToolCall[];
-    toolContexts?: Record<string, ToolContextEvent>;
-    searchSources?: SearchSource[];
+    // New unified streaming state
+    streamState: StreamingState;
+    isStreaming: boolean;
+    onCancelStream: () => void;
     responseMode?: 'simple' | 'detailed';
     onResponseModeChange?: (mode: 'simple' | 'detailed') => void;
     currentConversation: Conversation | null;
@@ -53,19 +46,17 @@ interface MessageListProps {
     messagesEndRef: React.RefObject<HTMLDivElement>;
     setInputMessage: (message: string) => void;
     onOpenCapabilityExplorer?: () => void;
+    onRegenerate?: () => void;
+    onViewSources?: (sources: SearchSource[]) => void;
 }
 
 const MessageList: React.FC<MessageListProps> = ({
     messages,
     isDarkMode,
     isLoading,
-    isStreaming = false,
-    streamingContent = '',
-    reasoningContent = '',
-    thinkingSteps = [],
-    activeTools = [],
-    toolContexts = {},
-    searchSources = [],
+    streamState,
+    isStreaming,
+    onCancelStream,
     responseMode = 'simple',
     onResponseModeChange,
     currentConversation,
@@ -83,7 +74,28 @@ const MessageList: React.FC<MessageListProps> = ({
     messagesEndRef,
     setInputMessage,
     onOpenCapabilityExplorer,
+    onRegenerate,
+    onViewSources,
 }) => {
+    // -- Scroll-to-bottom FAB --
+    const [showScrollFab, setShowScrollFab] = useState(false);
+    const scrollContainerRef = React.useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                setShowScrollFab(!entry.isIntersecting);
+            },
+            { root: null, threshold: 0 }
+        );
+        const target = messagesEndRef.current;
+        if (target) observer.observe(target);
+        return () => { if (target) observer.unobserve(target); };
+    }, [messagesEndRef, messages.length]);
+
+    const scrollToBottom = useCallback(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [messagesEndRef]);
     // -- Discovery data for dynamic welcome screen --
     const [discoveryData, setDiscoveryData] = useState<any>(null);
     const [discoveryLoading, setDiscoveryLoading] = useState(false);
@@ -275,7 +287,7 @@ const MessageList: React.FC<MessageListProps> = ({
             <div className="max-w-4xl mx-auto flex flex-col min-h-full">
                 {!currentConversation ? (
                     renderWelcomeScreen()
-                ) : messages.length === 0 ? (
+                ) : messages.length === 0 && !isStreaming ? (
                     <div className="flex-1 flex flex-col items-center justify-center text-center py-20 animate-in fade-in duration-700 chat-messages-empty">
                         <div className={`w-16 h-16 rounded-3xl flex items-center justify-center mb-6
               ${isDarkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
@@ -295,11 +307,13 @@ const MessageList: React.FC<MessageListProps> = ({
                                 key={msg.id}
                                 message={msg}
                                 isDarkMode={isDarkMode}
-                                isLast={idx === messages.length - 1}
+                                isLast={idx === messages.length - 1 && !isStreaming}
                                 responseMode={responseMode || 'simple'}
                                 onResponseModeChange={onResponseModeChange}
                                 messageVersions={messageVersions[msg.id]}
+                                onViewSources={onViewSources}
                                 currentVersionIndex={currentVersion[msg.id] || 0}
+                                onRegenerate={idx === messages.length - 1 && msg.role === 'assistant' ? onRegenerate : undefined}
                                 switchVersion={switchVersion}
                                 editingMessageId={editingMessageId}
                                 editingMessageText={editingMessageText}
@@ -337,58 +351,37 @@ const MessageList: React.FC<MessageListProps> = ({
                             </div>
                         )}
 
-                        {/* SSE Streaming UI Elements */}
+                        {/* ── Claude Code-Style Streaming Activity Log ── */}
                         {isStreaming && (
-                            <div className="w-full max-w-[85%] mb-8 animate-in fade-in slide-in-from-bottom-2">
-                                {thinkingSteps && thinkingSteps.length > 0 && (
-                                    <div className="ml-11 mb-2">
-                                        <ThinkingIndicator steps={thinkingSteps} isDarkMode={isDarkMode} />
-                                    </div>
-                                )}
-                                {searchSources && searchSources.length > 0 && (
-                                    <div className="ml-11 mb-2">
-                                        <SearchSourceCards sources={searchSources} isDarkMode={isDarkMode} />
-                                    </div>
-                                )}
-                                {/* Tool Insight Cards - replaces bare tool_start/tool_result rendering */}
-                                {activeTools && activeTools.length > 0 && (
-                                    <div className="ml-11 mb-3 space-y-2">
-                                        <div className="flex items-center justify-between mb-1">
-                                            <span className={`text-[10px] font-bold uppercase tracking-widest ${isDarkMode ? 'text-gray-600' : 'text-gray-400'}`}>
-                                                Tools Used ({activeTools.length})
-                                            </span>
-                                            {onResponseModeChange && (
-                                                <ResponseModeToggle
-                                                    mode={responseMode || 'simple'}
-                                                    onChange={onResponseModeChange}
-                                                    isDarkMode={isDarkMode}
-                                                />
-                                            )}
-                                        </div>
-                                        {activeTools.map((tool, idx) => (
-                                            <ToolInsightCard
-                                                key={`${tool.name}_${idx}`}
-                                                tool={tool}
-                                                context={toolContexts?.[tool.name]}
-                                                isDarkMode={isDarkMode}
-                                                mode={responseMode}
-                                            />
-                                        ))}
-                                    </div>
-                                )}
-                                {streamingContent && (
-                                    <StreamingMessageBubble 
-                                        content={streamingContent} 
-                                        reasoningContent={reasoningContent}
-                                        isDarkMode={isDarkMode} 
-                                    />
-                                )}
-                            </div>
+                            <StreamingActivityLog
+                                streamState={streamState}
+                                isDarkMode={isDarkMode}
+                                onCancel={onCancelStream}
+                                // Hide the ghost content if the real assistant message is already in the list
+                                hideContent={streamState.phase === 'done' && messages.length > 0 && messages[messages.length - 1].role === 'assistant'}
+                                onViewSources={onViewSources}
+                            />
                         )}
                     </>
                 )}
                 <div ref={messagesEndRef} className="h-4" />
             </div>
+
+            {/* Scroll-to-bottom FAB */}
+            {showScrollFab && (
+                <button
+                    onClick={scrollToBottom}
+                    className={`fixed bottom-32 right-8 z-30 p-3 rounded-full border shadow-lg transition-all duration-300
+                        hover:scale-110 active:scale-95 animate-in fade-in slide-in-from-bottom-4
+                        ${isDarkMode
+                            ? 'bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700 shadow-black/30'
+                            : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50 shadow-gray-300/30'
+                        }`}
+                    title="Scroll to bottom"
+                >
+                    <ArrowDown size={18} />
+                </button>
+            )}
         </div>
     );
 };
