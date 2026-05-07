@@ -2,59 +2,117 @@ import { useState, useCallback, useRef } from 'react';
 import { StreamEvent, ToolCall, SearchSource, ToolContextEvent } from '../types';
 import { apiService } from '../services/api';
 
-export interface ThinkingStep {
-  text: string;
+// ─── Activity Log Model ────────────────────────────────────────────────────
+// Every streaming event becomes a sequential ActivityItem in a single array.
+// The UI renders them top-to-bottom, producing a Claude Code-style timeline.
+
+export type StreamPhase = 'idle' | 'thinking' | 'executing' | 'streaming' | 'done' | 'error';
+
+export interface ActivityThinking {
+  kind: 'thinking';
+  text: string;            // Accumulated reasoning text
   isComplete: boolean;
   timestamp: string;
 }
 
-export interface StreamingState {
-  isStreaming: boolean;
-  content: string;
-  reasoningContent: string;
-  activeArtifact: any | null;
-  thinkingSteps: ThinkingStep[];
-  activeTools: ToolCall[];
-  toolContexts: Record<string, ToolContextEvent>;
-  searchSources: SearchSource[];
-  error: string | null;
+export interface ActivityToolStart {
+  kind: 'tool_start';
+  toolName: string;
+  displayName: string;     // Human-readable name
+  args: Record<string, any>;
+  startedAt: number;       // Date.now() for elapsed calc
+  platform?: string;
+  platformIcon?: string;
+  platformColor?: string;
+  category?: string;
+  reason?: string;
 }
 
-export function useStreamingChat() {
-  const [state, setState] = useState<StreamingState>({
-    isStreaming: false,
-    content: '',
-    reasoningContent: '',
-    activeArtifact: null,
-    thinkingSteps: [],
-    activeTools: [],
-    toolContexts: {},
-    searchSources: [],
-    error: null,
-  });
+export interface ActivityToolResult {
+  kind: 'tool_result';
+  toolName: string;
+  success: boolean;
+  summary: string;
+  elapsedMs: number;
+  platform?: string;
+  platformIcon?: string;
+  platformColor?: string;
+  category?: string;
+}
 
+export interface ActivitySearchSources {
+  kind: 'search_sources';
+  sources: SearchSource[];
+}
+
+export interface ActivityContentStart {
+  kind: 'content_start';   // Marker: content streaming has begun
+}
+
+export type ActivityItem =
+  | ActivityThinking
+  | ActivityToolStart
+  | ActivityToolResult
+  | ActivitySearchSources
+  | ActivityContentStart;
+
+// ─── Streaming State ───────────────────────────────────────────────────────
+
+export interface StreamingState {
+  phase: StreamPhase;
+  activityLog: ActivityItem[];
+  content: string;
+  reasoningContent: string;
+  error: string | null;
+  // Legacy compat: activeArtifact
+  activeArtifact: any | null;
+  sources: SearchSource[]; // Added this
+  // Keep raw tool contexts for ToolInsightCard in historic messages
+  toolContexts: Record<string, ToolContextEvent>;
+  // Final metadata
+  lastMessageId?: number;
+  finalToolsCalled?: any[];
+}
+
+const INITIAL_STATE: StreamingState = {
+  phase: 'idle',
+  activityLog: [],
+  content: '',
+  reasoningContent: '',
+  error: null,
+  activeArtifact: null,
+  sources: [], // Added this
+  toolContexts: {},
+};
+
+// ─── Hook ──────────────────────────────────────────────────────────────────
+
+export function useStreamingChat() {
+  const [state, setState] = useState<StreamingState>({ ...INITIAL_STATE });
   const abortControllerRef = useRef<AbortController | null>(null);
+  // Track tool start times for elapsed-time calculation
+  const toolStartTimes = useRef<Record<string, number>>({});
 
   const resetState = useCallback(() => {
-    setState({
-      isStreaming: false,
-      content: '',
-      reasoningContent: '',
-      activeArtifact: null,
-      thinkingSteps: [],
-      activeTools: [],
-      toolContexts: {},
-      searchSources: [],
-      error: null,
-    });
+    setState({ ...INITIAL_STATE });
+    toolStartTimes.current = {};
   }, []);
 
   const cancelStream = useCallback(() => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
-      setState(prev => ({ ...prev, isStreaming: false }));
+      setState(prev => ({ ...prev, phase: 'done' }));
     }
+  }, []);
+
+  /**
+   * Flush streaming state. Called by Chat.tsx after server messages are loaded
+   * so the streamed content doesn't flash away before the real message appears.
+   */
+  const flushStreamState = useCallback(() => {
+    setState({ ...INITIAL_STATE });
+    toolStartTimes.current = {};
   }, []);
 
   const sendStreamingMessage = useCallback(async (
@@ -67,45 +125,90 @@ export function useStreamingChat() {
   ) => {
     // Cancel any existing stream
     cancelStream();
-    
-    // Reset state for new message
-    resetState();
-    setState(prev => ({ ...prev, isStreaming: true }));
+
+    // Reset for new message
+    toolStartTimes.current = {};
+    setState({
+      ...INITIAL_STATE,
+      phase: 'thinking',
+    });
 
     abortControllerRef.current = new AbortController();
+    let contentStarted = false;
+
+    // Get current local time and timezone
+    const currentTime = new Date().toISOString();
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
     try {
       await apiService.sendMessageStream(
         conversationId,
-        { 
-          content, 
+        {
+          content,
           provider,
           use_reasoning: useReasoning,
-          use_search: useSearch 
+          use_search: useSearch,
+          current_time: currentTime,
+          timezone: timezone,
         },
         (event: StreamEvent) => {
           setState(prev => {
-            const newState = { ...prev };
+            const next = { ...prev };
+            const log = [...prev.activityLog];
 
             switch (event.type) {
-              case 'thinking':
-                // Mark previous step complete, add new one
-                const newSteps = [...prev.thinkingSteps];
-                if (newSteps.length > 0) {
-                  newSteps[newSteps.length - 1].isComplete = true;
-                }
-                newSteps.push({
-                  text: event.content || '',
-                  isComplete: false,
-                  timestamp: event.timestamp || new Date().toISOString()
-                });
-                newState.thinkingSteps = newSteps;
-                break;
+              // ── Thinking ──────────────────────────────────────────
+              case 'thinking': {
+                next.phase = 'thinking';
+                // Find existing thinking item or create new
+                const lastThinking = log.length > 0 && log[log.length - 1].kind === 'thinking'
+                  ? log[log.length - 1] as ActivityThinking
+                  : null;
 
+                if (lastThinking) {
+                  // Append to existing thinking block
+                  log[log.length - 1] = {
+                    ...lastThinking,
+                    text: lastThinking.text + (event.content || ''),
+                  };
+                } else {
+                  log.push({
+                    kind: 'thinking',
+                    text: event.content || '',
+                    isComplete: false,
+                    timestamp: event.timestamp || new Date().toISOString(),
+                  });
+                }
+                break;
+              }
+
+              // ── Reasoning Delta (streamed reasoning from model) ───
+              case 'reasoning_delta': {
+                next.phase = 'thinking';
+                next.reasoningContent = prev.reasoningContent + (event.delta || '');
+
+                // Also update thinking activity item for the timeline
+                const lastItem = log.length > 0 ? log[log.length - 1] : null;
+                if (lastItem && lastItem.kind === 'thinking') {
+                  log[log.length - 1] = {
+                    ...lastItem as ActivityThinking,
+                    text: (lastItem as ActivityThinking).text + (event.delta || ''),
+                  };
+                } else {
+                  log.push({
+                    kind: 'thinking',
+                    text: event.delta || '',
+                    isComplete: false,
+                    timestamp: new Date().toISOString(),
+                  });
+                }
+                break;
+              }
+
+              // ── Tool Context (why this tool was chosen) ───────────
               case 'tool_context': {
-                // Store tool context for the upcoming tool call
                 const toolName = event.tool || '';
-                newState.toolContexts = {
+                next.toolContexts = {
                   ...prev.toolContexts,
                   [toolName]: {
                     tool: toolName,
@@ -114,111 +217,135 @@ export function useStreamingChat() {
                     platform_color: event.platform_color || 'gray',
                     category: event.category || 'general',
                     connection_status: event.connection_status || 'built-in',
-                    reason: event.reason || `Using ${toolName}`
-                  }
+                    reason: event.reason || `Using ${toolName}`,
+                  },
                 };
-                // Add a thinking step for why this tool was chosen
-                const contextSteps = [...prev.thinkingSteps];
-                if (contextSteps.length > 0) {
-                  contextSteps[contextSteps.length - 1].isComplete = true;
-                }
-                contextSteps.push({
-                  text: event.reason || `Selected ${toolName}`,
-                  isComplete: true,
-                  timestamp: new Date().toISOString()
-                });
-                newState.thinkingSteps = contextSteps;
                 break;
               }
 
-              case 'tool_start':
-                newState.activeTools = [
-                  ...prev.activeTools,
-                  {
-                    id: `tool_${Date.now()}_${Math.random()}`,
-                    name: event.tool || '',
-                    arguments: event.args || {}
-                  }
-                ];
-                // Also add a thinking step for visual feedback
-                const toolSteps = [...newState.thinkingSteps];
-                if (toolSteps.length > 0) {
-                  toolSteps[toolSteps.length - 1].isComplete = true;
+              // ── Tool Start ────────────────────────────────────────
+              case 'tool_start': {
+                next.phase = 'executing';
+                const toolName = event.tool || '';
+                const startTime = Date.now();
+                toolStartTimes.current[toolName] = startTime;
+
+                // Close any open thinking block
+                const lastTh = log.length > 0 && log[log.length - 1].kind === 'thinking'
+                  ? log[log.length - 1] as ActivityThinking
+                  : null;
+                if (lastTh && !lastTh.isComplete) {
+                  log[log.length - 1] = { ...lastTh, isComplete: true };
                 }
-                toolSteps.push({
-                  text: `Executing ${event.tool}...`,
-                  isComplete: false,
-                  timestamp: new Date().toISOString()
-                });
-                newState.thinkingSteps = toolSteps;
-                break;
 
-              case 'tool_result':
-                newState.activeTools = prev.activeTools.map(tool => {
-                  if (tool.name === event.tool && !tool.result) {
-                    return {
-                      ...tool,
-                      success: event.success,
-                      result: {
-                        summary: event.summary,
-                        platform: event.platform,
-                        platform_icon: event.platform_icon,
-                        platform_color: event.platform_color,
-                        category: event.category
-                      }
-                    };
-                  }
-                  return tool;
+                // Get context for this tool if available
+                const ctx = next.toolContexts[toolName];
+
+                log.push({
+                  kind: 'tool_start',
+                  toolName,
+                  displayName: toolName.replace(/_/g, ' '),
+                  args: event.args || {},
+                  startedAt: startTime,
+                  platform: ctx?.platform,
+                  platformIcon: ctx?.platform_icon,
+                  platformColor: ctx?.platform_color,
+                  category: ctx?.category,
+                  reason: ctx?.reason,
                 });
                 break;
+              }
 
-              case 'reasoning_delta':
-                // Update reasoning text directly when streamed from the model
-                newState.reasoningContent += (event.delta || '');
+              // ── Tool Result ───────────────────────────────────────
+              case 'tool_result': {
+                const toolName = event.tool || '';
+                const startTime = toolStartTimes.current[toolName] || Date.now();
+                const elapsed = Date.now() - startTime;
+
+                const ctx = next.toolContexts[toolName];
+
+                log.push({
+                  kind: 'tool_result',
+                  toolName,
+                  success: event.success !== false,
+                  summary: event.summary || `Completed ${toolName.replace(/_/g, ' ')}`,
+                  elapsedMs: elapsed,
+                  platform: ctx?.platform || event.platform,
+                  platformIcon: ctx?.platform_icon || event.platform_icon,
+                  platformColor: ctx?.platform_color || event.platform_color,
+                  category: ctx?.category || event.category,
+                });
                 break;
+              }
 
-              case 'search_sources':
-                // Populate search sources for DeepSeek-style source cards
+              // ── Search Sources ────────────────────────────────────
+              case 'search_sources': {
                 if (event.sources && event.sources.length > 0) {
-                  newState.searchSources = [...prev.searchSources, ...event.sources];
+                  next.sources = event.sources;
+                  log.push({
+                    kind: 'search_sources',
+                    sources: event.sources,
+                  });
                 }
                 break;
+              }
 
+              // ── Content ───────────────────────────────────────────
               case 'content_delta':
-              case 'content':
-                // Mark all thinking as complete once content starts flowing
-                if (newState.thinkingSteps.length > 0) {
-                  newState.thinkingSteps[newState.thinkingSteps.length - 1].isComplete = true;
-                }
-                if (event.type === 'content_delta') {
-                  newState.content += event.delta;
-                } else if (event.type === 'content') {
-                  newState.content = event.content || '';
-                }
-                break;
+              case 'content': {
+                // Mark start of content streaming
+                if (!contentStarted) {
+                  contentStarted = true;
+                  next.phase = 'streaming';
 
-              case 'error':
-                newState.error = event.error || 'An error occurred during streaming';
-                newState.isStreaming = false;
-                break;
-
-              case 'message_saved':
-              case 'done':
-                if (event.type === 'message_saved' && onSuccess) {
-                  onSuccess(event.message_id);
-                }
-                
-                if (event.type === 'done') {
-                  // Final polish of state
-                  if (newState.thinkingSteps.length > 0) {
-                    newState.thinkingSteps[newState.thinkingSteps.length - 1].isComplete = true;
+                  // Close any open thinking block
+                  for (let i = log.length - 1; i >= 0; i--) {
+                    if (log[i].kind === 'thinking' && !(log[i] as ActivityThinking).isComplete) {
+                      log[i] = { ...(log[i] as ActivityThinking), isComplete: true };
+                      break;
+                    }
                   }
-                  newState.isStreaming = false;
+
+                  log.push({ kind: 'content_start' });
+                }
+
+                if (event.type === 'content_delta') {
+                  next.content = prev.content + (event.delta || '');
+                } else {
+                  next.content = event.content || '';
                 }
                 break;
+              }
+
+              // ── Error ─────────────────────────────────────────────
+              case 'error': {
+                next.error = event.error || 'An error occurred during streaming';
+                next.phase = 'error';
+                break;
+              }
+
+              // ── Done / Message Saved ──────────────────────────────
+              case 'message_saved': {
+                next.lastMessageId = event.message_id;
+                if (onSuccess) onSuccess(event.message_id);
+                break;
+              }
+
+              case 'done': {
+                // Close any open thinking blocks
+                for (let i = 0; i < log.length; i++) {
+                  if (log[i].kind === 'thinking' && !(log[i] as ActivityThinking).isComplete) {
+                    log[i] = { ...(log[i] as ActivityThinking), isComplete: true };
+                  }
+                }
+                next.finalToolsCalled = event.tools_called;
+                next.phase = 'done';
+                break;
+              }
             }
 
-            return newState;
+            next.activityLog = log;
+            return next;
           });
         },
         abortControllerRef.current.signal
@@ -230,19 +357,37 @@ export function useStreamingChat() {
         console.error('Stream error:', err);
         setState(prev => ({
           ...prev,
-          isStreaming: false,
-          error: err.message || 'Failed to connect to chat stream'
+          phase: 'error',
+          error: err.message || 'Failed to connect to chat stream',
         }));
       }
     } finally {
       abortControllerRef.current = null;
     }
-  }, [cancelStream, resetState]);
+  }, [cancelStream]);
+
+  // ─── Computed booleans for backward compat ──────────────────────────────
+  // isStreaming remains true until the state is explicitly flushed to 'idle'.
+  // This prevents flickering during the transition from ghost state to real message state.
+  const isStreaming = state.phase !== 'idle' && state.phase !== 'error';
+  const isDone = state.phase === 'done';
 
   return {
-    ...state,
+    // Core state
+    streamState: state,
+    // Computed
+    isStreaming,
+    isDone,
+    // Legacy compat (direct access)
+    content: state.content,
+    reasoningContent: state.reasoningContent,
+    activeArtifact: state.activeArtifact,
+    sources: state.sources,
+    error: state.error,
+    // Actions
     sendStreamingMessage,
     cancelStream,
-    resetState
+    resetState,
+    flushStreamState,
   };
 }
