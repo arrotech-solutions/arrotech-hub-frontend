@@ -471,6 +471,31 @@
   animation: float 6s ease-in-out infinite;
 }
 
+.animate-float-delayed {
+  animation: float 6s ease-in-out infinite;
+  animation-delay: 3s;
+}
+
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.perspective-2000 {
+  perspective: 2000px;
+}
+
+.rotate-y-2 {
+  transform: rotateY(2deg);
+}
+
+.hover\:rotate-y-2:hover {
+  transform: rotateY(2deg);
+}
+
+.rotate-y-12 {
+  transform: rotateY(12deg);
+}
+
 /* Utilities for dynamic text */
 .typing-effect {
   border-right: 2px solid;
@@ -490,3 +515,87 @@
     border-color: theme('colors.purple.500');
   }
 }
+
+/* Nav Bar Premium Effects */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes nav-glid {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
+
+.glass-nav {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.dark .glass-nav {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+@keyframes mesh-gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Performance Optimization: Content Visibility */
+.section-perf-optimized {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 5000px; /* Placeholder size for better scrollbar stability */
+}
+
+/* Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .mesh-gradient, .mesh-gradient-subtle, .animate-float, .animate-float-delayed, .animate-shimmer {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+.mesh-gradient {
+  background: linear-gradient(-45deg, #0f172a, #1e293b, #0ea5e9, #6366f1);
+  background-size: 400% 400%;
+  animation: mesh-gradient 15s ease infinite;
+}
+
+.mesh-gradient-subtle {
+  background: linear-gradient(-45deg, rgba(14, 165, 233, 0.05), rgba(99, 102, 241, 0.05), rgba(15, 23, 42, 0.1));
+  background-size: 400% 400%;
+  animation: mesh-gradient 20s ease infinite;
+}
+
+.animate-ring {
+  animation: ring 2s ease-in-out infinite;
+}
+
+@keyframes progress-horizontal {
+  0% { transform: scaleX(0); }
+  100% { transform: scaleX(1); }
+}
+
+.animate-progress-horizontal {
+  animation: progress-horizontal 10s linear infinite;
+}
+
+.nav-link-active::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  background: currentColor;
+  border-radius: 50%;
+}

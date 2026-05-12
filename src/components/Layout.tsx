@@ -121,13 +121,21 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       description: 'Automated processes',
       badge: 'New'
     },
-    // {
-    //   name: 'Agents',
-    //   href: '/agents',
-    //   icon: Bot,
-    //   description: 'AI agents management',
-    //   badge: null
-    // },
+    {
+      name: 'Agents',
+      icon: Bot,
+      description: 'AI-powered agents',
+      badge: 'New',
+      children: [
+        {
+          name: 'Coding Agent',
+          href: '/coding-agent',
+          icon: Code,
+          description: 'Autonomous code generation',
+          badge: 'New'
+        }
+      ]
+    },
     {
       name: 'Usage',
       href: '/usage',
@@ -394,13 +402,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
         <div className="fixed inset-y-0 left-0 w-80 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl shadow-2xl border-r border-gray-200/50 dark:border-slate-800/50 flex flex-col transition-colors duration-300">
           <div className="flex-shrink-0 flex items-center justify-between p-6 border-b border-gray-200/50 dark:border-slate-800/50">
-            <div className="flex items-center space-x-3">
-              <img src={logo} alt="Arrotech Hub" className="w-10 h-10 object-contain" />
+            <div className="flex items-center space-x-2.5">
+              <img src={logo} alt="Arrotech Hub" className="w-[30px] h-[30px] object-contain" />
               <div>
-                <h1 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-blue-600 dark:from-white dark:to-blue-400 bg-clip-text text-transparent">
-                  Arrotech Hub
+                <h1 className="text-[16px] font-black bg-gradient-to-r from-gray-900 to-blue-600 dark:from-white dark:to-blue-400 bg-clip-text text-transparent tracking-tight leading-none">
+                  ARROTECH
                 </h1>
-                <p className="text-xs text-gray-500 dark:text-slate-400">AI-Powered Platform</p>
+                <p className="text-[7px] uppercase tracking-widest font-bold text-gray-400 dark:text-slate-500 mt-0.5">AI Platform</p>
               </div>
             </div>
             <button
@@ -461,19 +469,19 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           {/* Header */}
           <div className="flex-shrink-0 flex items-center justify-between p-6 border-b border-gray-200/50 dark:border-slate-800/50">
             {!collapsed && (
-              <div className="flex items-center space-x-3">
-                <img src={logo} alt="Arrotech Hub" className="w-10 h-10 object-contain" />
+              <div className="flex items-center space-x-2.5">
+                <img src={logo} alt="Arrotech Hub" className="w-[30px] h-[30px] object-contain" />
                 <div>
-                  <h1 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-blue-600 dark:from-white dark:to-blue-400 bg-clip-text text-transparent">
-                    Arrotech Hub
+                  <h1 className="text-[16px] font-black bg-gradient-to-r from-gray-900 to-blue-600 dark:from-white dark:to-blue-400 bg-clip-text text-transparent tracking-tight leading-none">
+                    ARROTECH
                   </h1>
-                  <p className="text-xs text-gray-500 dark:text-slate-400">AI-Powered Platform</p>
+                  <p className="text-[7px] uppercase tracking-widest font-bold text-gray-400 dark:text-slate-500 mt-0.5">AI Platform</p>
                 </div>
               </div>
             )}
             {collapsed && (
               <div className="mx-auto">
-                <img src={logo} alt="Arrotech Hub" className="w-10 h-10 object-contain" />
+                <img src={logo} alt="Arrotech Hub" className="w-7 h-7 object-contain" />
               </div>
             )}
             <button

@@ -122,14 +122,26 @@ const WhatsAppDashboard: React.FC = () => {
         const appId = import.meta.env.VITE_FACEBOOK_APP_ID;
         const configId = import.meta.env.VITE_FACEBOOK_CONFIG_ID;
 
+        const fallbackToRedirect = async () => {
+            try {
+                toast('Redirecting to Meta login...', { icon: '🔄' });
+                const { url } = await apiService.getWhatsAppAuthUrl();
+                window.location.href = url;
+            } catch (e) {
+                toast.error('Failed to initiate WhatsApp connection');
+            }
+        };
+
         if (!appId) {
-            toast.error("Missing Meta App ID. Please add VITE_FACEBOOK_APP_ID to your .env file.");
+            console.warn('VITE_FACEBOOK_APP_ID not set — falling back to redirect OAuth');
+            fallbackToRedirect();
             return;
         }
 
         const FB = (window as any).FB;
         if (!FB) {
-            toast.error("Facebook SDK isn't loaded yet. Check your internet connection or ad-blocker.");
+            // If SDK isn't loaded, fall back to redirect OAuth
+            fallbackToRedirect();
             return;
         }
 
