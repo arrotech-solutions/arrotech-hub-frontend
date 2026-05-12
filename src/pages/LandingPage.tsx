@@ -28,7 +28,8 @@ import {
     Lock,
     DollarSign,
     Cpu,
-    Activity
+    Activity,
+    Rocket
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import SEO from '../components/SEO';
@@ -52,41 +53,16 @@ import tiktokLogo from '../assets/apps/tiktok.png';
 import outlookLogo from '../assets/apps/outlook.png';
 
 import HeroAIChatMockup from '../components/HeroAIChatMockup';
+import UnifiedPlatformShowcase from '../components/UnifiedPlatformShowcase';
 
 const LandingPage: React.FC = () => {
     const { user } = useAuth();
     const [activeTab, setActiveTab] = useState('engineering');
 
-    // Live Activity Simulation State
-    const [activities, setActivities] = useState([
-        { id: 1, type: 'slack', user: 'Sarah K.', action: 'mentioned you in #design', time: 'Just now', icon: MessageSquare, color: 'text-blue-500', bg: 'bg-blue-100' },
-        { id: 2, type: 'jira', user: 'System', action: 'Ticket EXP-1024 updated', time: '2m ago', icon: GitBranch, color: 'text-orange-500', bg: 'bg-orange-100' },
-        { id: 3, type: 'gmail', user: 'Client A', action: 'New proposal request', time: '15m ago', icon: Mail, color: 'text-red-500', bg: 'bg-red-100' },
-    ]);
-
-    // Simulate incoming activity
-    useEffect(() => {
-        const newActivities = [
-            { type: 'github', user: 'Alex D.', action: 'pushed to main', time: 'Just now', icon: Code2, color: 'text-slate-800', bg: 'bg-slate-200' },
-            { type: 'calendar', user: 'Team', action: 'Standup in 10m', time: 'Just now', icon: Calendar, color: 'text-purple-500', bg: 'bg-purple-100' },
-            { type: 'hubspot', user: 'Lead', action: 'viewed pricing page', time: 'Just now', icon: TrendingUp, color: 'text-teal-500', bg: 'bg-teal-100' },
-        ];
-
-        const interval = setInterval(() => {
-            const randomActivity = newActivities[Math.floor(Math.random() * newActivities.length)];
-            setActivities(prev => [
-                { ...randomActivity, id: Date.now() },
-                ...prev.slice(0, 3) // Keep only recent 4
-            ]);
-        }, 4000);
-
-        return () => clearInterval(interval);
-    }, []);
-
-    // Scroll Reveal System
-    const useScrollReveal = () => {
-        const ref = useRef<HTMLDivElement>(null);
+    // Use intersection observer for reveal animations
+    const useReveal = () => {
         const [isVisible, setIsVisible] = useState(false);
+        const ref = useRef<HTMLDivElement>(null);
 
         useEffect(() => {
             const observer = new IntersectionObserver(
@@ -96,29 +72,29 @@ const LandingPage: React.FC = () => {
                         observer.unobserve(entry.target);
                     }
                 },
-                { threshold: 0.15, rootMargin: '0px 0px -60px 0px' }
+                { threshold: 0.1 }
             );
-            if (ref.current) observer.observe(ref.current);
-            return () => observer.disconnect();
+
+            if (ref.current) {
+                observer.observe(ref.current);
+            }
+
+            return () => {
+                if (ref.current) {
+                    observer.unobserve(ref.current);
+                }
+            };
         }, []);
 
         return { ref, isVisible };
     };
 
-
-
-    // Create reveal refs for each section
-    const heroReveal = useScrollReveal();
-    const bentoReveal = useScrollReveal();
-    const aiReveal = useScrollReveal();
-    const teamsReveal = useScrollReveal();
-    const creatorReveal = useScrollReveal();
-    const chaosReveal = useScrollReveal();
-    const securityReveal = useScrollReveal();
-    const ctaReveal = useScrollReveal();
-
-
-
+    const bentoReveal = useReveal();
+    const aiReveal = useReveal();
+    const adaptReveal = useReveal();
+    const creatorReveal = useReveal();
+    const chaosReveal = useReveal();
+    const securityReveal = useReveal();
 
     const integrations = [
         { name: 'Slack', logo: slackLogo },
@@ -140,81 +116,67 @@ const LandingPage: React.FC = () => {
     ];
 
     return (
-        <div className="text-slate-900 dark:text-slate-50 overflow-x-hidden transition-colors duration-300">
-            <SEO
-                title="Unified Inbox & Workspace Platform"
-                description="Manage emails, messages, and workflows in one unified workspace. Connect Slack, Gmail, M-Pesa, and 50+ apps with AI-powered automation. Built for modern teams."
-                url="/"
+        <div className="min-h-screen bg-white dark:bg-slate-950 transition-colors duration-500 overflow-x-hidden">
+            <SEO 
+                title="Arrotech Hub | The Intelligent Command Center for Modern Teams"
+                description="Unify your tools, tasks, and teams in one intelligent platform. Arrotech Hub uses autonomous agents and seamless integrations to 10x your team's productivity."
             />
 
-            {/* Hero Section */}
-            <section className="relative z-10 pt-16 pb-12 sm:pb-20 px-4 sm:px-6 lg:px-8 flex flex-col items-center overflow-hidden">
+            {/* Premium Hero Section */}
+            <section className="relative pt-20 pb-16 lg:pt-32 lg:pb-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
+                {/* Dynamic Mesh Gradient Background */}
+                <div className="absolute inset-0 mesh-gradient-subtle opacity-50 dark:opacity-30 pointer-events-none"></div>
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-indigo-500/10 via-transparent to-transparent dark:from-indigo-900/20 pointer-events-none"></div>
+                
+                {/* Floating Elements for Premium Feel */}
+                <div className="absolute top-1/4 -left-20 w-96 h-96 bg-blue-500/10 rounded-full blur-[60px] md:blur-[100px] animate-pulse"></div>
+                <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-indigo-500/10 rounded-full blur-[60px] md:blur-[100px] animate-pulse" style={{ animationDelay: '2s' }}></div>
 
-                {/* Subtle, calm background glow */}
-                <div className="absolute inset-0 top-[-20%] left-[-10%] w-[60%] h-[60%] bg-purple-500/5 dark:bg-purple-900/10 rounded-full blur-[140px] pointer-events-none"></div>
-                <div className="absolute inset-0 top-[10%] right-[-10%] w-[50%] h-[50%] bg-blue-500/5 dark:bg-blue-900/10 rounded-full blur-[120px] pointer-events-none"></div>
-
-                <div ref={heroReveal.ref} className={`w-full max-w-7xl mx-auto relative z-20 transition-all duration-700 ${heroReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 xl:gap-20 items-center">
-                        {/* Left Content Area */}
-                        <div className="max-w-2xl">
-                            {/* Announcement Badge */}
-                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-indigo-50 dark:from-indigo-900/30 to-purple-50 dark:to-purple-900/30 border border-indigo-100 dark:border-indigo-800/50 text-indigo-700 dark:text-indigo-300 text-[11px] sm:text-xs font-bold uppercase tracking-widest mb-6 lg:mb-8 shadow-sm">
-                                <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
+                <div className="max-w-7xl mx-auto relative z-10">
+                    <div className="grid lg:grid-cols-2 gap-12 items-center">
+                        {/* Left Side: Content */}
+                        <div className="text-left">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-xs font-bold uppercase tracking-wider mb-8 animate-fade-in">
+                                <Sparkles size={14} className="animate-pulse" />
                                 <span>Reimagining the Workspace</span>
                             </div>
-
-                            {/* Main Headline */}
-                            <h1 className="text-4xl sm:text-5xl lg:text-5xl xl:text-[3.5rem] font-extrabold mb-8 tracking-tight leading-[1.1] text-slate-900 dark:text-white">
-                                The workspace that <br className="hidden sm:block" />
-                                <span className="bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 bg-clip-text text-transparent">executes the work.</span>
+                            
+                            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 dark:text-white mb-6 tracking-tight leading-[1.05] animate-slide-up transition-colors">
+                                The workspace that <br />
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-cyan-500 to-indigo-600 dark:from-blue-400 dark:via-cyan-300 dark:to-indigo-400">executes the work.</span>
                             </h1>
+                            
+                            <div className="space-y-5 mb-8 animate-slide-up-delayed">
+                                <div className="flex items-start gap-3">
+                                    <div className="w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-[10px] font-bold text-slate-400">1</div>
+                                    <p className="text-base text-slate-600 dark:text-slate-400 leading-snug">
+                                        <span className="font-bold text-slate-900 dark:text-white">Unify context.</span> Chat, Tasks, Data, and 50+ Apps in one place.
+                                    </p>
+                                </div>
+                                <div className="flex items-start gap-3">
+                                    <div className="w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-[10px] font-bold text-slate-400">2</div>
+                                    <p className="text-base text-slate-600 dark:text-slate-400 leading-snug">
+                                        <span className="font-bold text-slate-900 dark:text-white">Deploy intelligence.</span> AI Agents that think, reason, and act autonomously.
+                                    </p>
+                                </div>
+                                <div className="flex items-start gap-3">
+                                    <div className="w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-[10px] font-bold text-slate-400">3</div>
+                                    <p className="text-base text-slate-600 dark:text-slate-400 leading-snug">
+                                        <span className="font-bold text-slate-900 dark:text-white">Run on autopilot.</span> Create infinite Workflows with zero coding.
+                                    </p>
+                                </div>
+                            </div>
 
-                            {/* Subheadline (Structured like ClickUp) */}
-                            <ul className="text-base sm:text-lg text-slate-600 dark:text-slate-300 mb-10 leading-relaxed max-w-xl space-y-4">
-                                <li className="flex items-start gap-3">
-                                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs font-bold mt-0.5 shadow-sm border border-indigo-200 dark:border-indigo-800/60">1</span>
-                                    <span>
-                                        <strong className="text-slate-900 dark:text-white block sm:inline">Unify context.</strong> Chat, Tasks, Data, and 50+ Apps in one place.
-                                    </span>
-                                </li>
-                                <li className="flex items-start gap-3">
-                                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 flex items-center justify-center text-xs font-bold mt-0.5 shadow-sm border border-purple-200 dark:border-purple-800/60">2</span>
-                                    <span>
-                                        <strong className="text-slate-900 dark:text-white block sm:inline">Deploy intelligence.</strong> AI Agents that think, reason, and act autonomously.
-                                    </span>
-                                </li>
-                                <li className="flex items-start gap-3">
-                                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xs font-bold mt-0.5 shadow-sm border border-emerald-200 dark:border-emerald-800/60">3</span>
-                                    <span>
-                                        <strong className="text-slate-900 dark:text-white block sm:inline">Run on autopilot.</strong> Create infinite Workflows with zero coding.
-                                    </span>
-                                </li>
-                            </ul>
-
-                            {/* CTAs */}
-                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-start gap-3 w-full sm:w-auto">
-                                {user ? (
-                                    <Link
-                                        to="/unified"
-                                        className="group inline-flex items-center justify-center gap-2 bg-slate-900 text-white dark:bg-white dark:text-slate-900 px-6 py-3 rounded-lg font-bold text-sm transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5 hover:ring-2 ring-slate-900/20 dark:ring-white/20"
-                                    >
-                                        Open Dashboard
-                                        <LayoutDashboard className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                                    </Link>
-                                ) : (
-                                    <Link
-                                        to="/register"
-                                        className="group inline-flex items-center justify-center gap-2 bg-slate-900 text-white dark:bg-white dark:text-slate-900 px-6 py-3 rounded-lg font-bold text-sm transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5 hover:ring-2 ring-slate-900/20 dark:ring-white/20"
-                                    >
-                                        Start Building for Free
-                                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                                    </Link>
-                                )}
+                            <div className="flex flex-col sm:flex-row gap-4 animate-slide-up-delayed-2">
+                                <Link
+                                    to="/register"
+                                    className="w-full sm:w-auto bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 px-8 py-4 rounded-xl font-bold text-lg transition-all shadow-xl hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-2"
+                                >
+                                    Start Building for Free <ArrowRight size={20} />
+                                </Link>
                                 <Link
                                     to="/pricing"
-                                    className="group inline-flex items-center justify-center gap-2 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 px-6 py-3 rounded-lg font-bold text-sm transition-all duration-300 shadow-sm hover:shadow"
+                                    className="w-full sm:w-auto bg-white dark:bg-slate-900 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 px-8 py-4 rounded-xl font-bold text-lg transition-all flex items-center justify-center"
                                 >
                                     View Pricing
                                 </Link>
@@ -240,16 +202,18 @@ const LandingPage: React.FC = () => {
                         </div>
 
                         {/* Right Area: AI Mockup */}
-                        <div className="w-full h-full flex justify-center lg:justify-end items-center mt-8 lg:mt-0 relative">
-                            {/* Extra subtle background glow for the right side */}
-                            <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/5 to-purple-500/10 dark:from-indigo-900/20 dark:to-purple-900/20 blur-2xl rounded-full pointer-events-none"></div>
-                            <HeroAIChatMockup />
+                        <div className="w-full h-full flex justify-center lg:justify-end items-center mt-12 lg:mt-0 relative perspective-2000">
+                            <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/10 to-purple-500/20 dark:from-indigo-900/30 dark:to-purple-900/30 blur-[60px] md:blur-[120px] rounded-full pointer-events-none -mr-40"></div>
+                            <div className="absolute -top-10 -left-10 w-24 h-24 bg-white/10 backdrop-blur-3xl rounded-3xl border border-white/20 shadow-2xl z-0 animate-float hidden xl:block"></div>
+                            <div className="absolute -bottom-10 right-20 w-32 h-32 bg-indigo-500/10 backdrop-blur-3xl rounded-[2rem] border border-indigo-500/20 shadow-2xl z-0 animate-float-delayed hidden xl:block"></div>
+
+                            <div className="relative z-10 w-full max-w-3xl lg:max-w-none transform lg:scale-110 xl:scale-125 lg:translate-x-10 transition-all duration-1000">
+                                <HeroAIChatMockup />
+                            </div>
                         </div>
                     </div>
                 </div>
             </section>
-
-
 
             {/* Scrolling Marquee */}
             <section className="py-8 overflow-hidden transition-colors">
@@ -266,190 +230,15 @@ const LandingPage: React.FC = () => {
                 </div>
             </section>
 
-            {/* Bento Grid Features */}
-            <section id="features" className="relative z-10 py-14 md:py-20 px-4 sm:px-6 lg:px-8 bg-transparent transition-colors">
-                <div ref={bentoReveal.ref} className={`max-w-7xl mx-auto transition-all duration-700 ${bentoReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-                    <div className="text-center mb-10 md:mb-16">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 text-slate-700 dark:text-slate-300 text-xs font-semibold uppercase tracking-widest mb-6">
-                            <Sparkles className="w-3.5 h-3.5" />
-                            Core Platform
-                        </div>
-                        <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4 sm:mb-5 tracking-tighter leading-[1.1] transition-colors">
-                            The OS for <span className="text-slate-500 dark:text-slate-400">high-performance teams.</span>
-                        </h2>
-                        <p className="text-lg text-slate-500/90 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed font-medium transition-colors">
-                            Unified inbox, AI agents, workflow automation, and 50+ integrations — all in one intelligent workspace.
-                        </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-4 sm:gap-6 h-auto md:h-[850px]">
-                        {/* Large Main Card: Unified Dashboard */}
-                        <div className="md:col-span-2 md:row-span-2 bg-white dark:bg-slate-900/50 rounded-2xl sm:rounded-[2.5rem] p-6 sm:p-8 md:p-12 shadow-[0_4px_20px_rgb(0,0,0,0.03)] dark:shadow-[0_4px_20px_rgb(0,0,0,0.2)] hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] dark:hover:shadow-[0_12px_40px_rgb(0,0,0,0.3)] transition-all duration-500 flex flex-col overflow-hidden border border-slate-100 dark:border-slate-800 relative group hover:-translate-y-1.5 backdrop-blur-xl">
-                            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-br from-purple-50 dark:from-purple-900/20 to-blue-50 dark:to-blue-900/20 rounded-full blur-[80px] -mr-20 -mt-20 pointer-events-none"></div>
-
-                            <div className="relative z-10 mb-8">
-                                <span className="inline-flex items-center justify-center p-4 bg-slate-100 dark:bg-slate-800 rounded-2xl mb-6 text-slate-700 dark:text-slate-300 shadow-[0_2px_8px_rgb(0,0,0,0.04)] dark:shadow-none border border-slate-200/50 dark:border-slate-700/50">
-                                    <LayoutDashboard className="w-8 h-8" />
-                                </span>
-                                <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-3 sm:mb-4 tracking-tight leading-tight transition-colors">Unified & Synchronized</h3>
-                                <p className="text-lg text-slate-500/90 dark:text-slate-400 max-w-md leading-relaxed transition-colors">
-                                    Your emails, assignments, and calendar events in one intelligent stream.
-                                </p>
-                            </div>
-
-                            {/* Live Data Dashboard Mockup */}
-                            <div className="flex-1 bg-slate-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700/50 rounded-t-3xl shadow-sm relative overflow-hidden group-hover:scale-[1.02] transition-transform duration-500">
-                                <div className="absolute top-4 left-4 right-4 bottom-0 bg-white dark:bg-slate-900 rounded-t-2xl shadow-lg border border-gray-200 dark:border-slate-700/50 p-6 flex flex-col">
-                                    <div className="flex items-center justify-between mb-6">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 font-bold text-lg">JD</div>
-                                            <div>
-                                                <div className="text-base font-bold text-slate-900 dark:text-white">John Doe</div>
-                                                <div className="text-xs text-green-600 flex items-center gap-1 font-medium">
-                                                    <span className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse"></span>
-                                                    Online
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="flex gap-2">
-                                            <div className="px-4 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-full text-xs font-bold text-slate-600 dark:text-slate-400">Inbox (4)</div>
-                                            <div className="px-4 py-1.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded-full text-xs font-bold">Tasks (12)</div>
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-4 flex-1 overflow-visible">
-                                        <div className="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-2">Recent Activity</div>
-                                        {activities.map((activity) => (
-                                            <div key={activity.id} className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-800/80 rounded-xl border border-slate-100 dark:border-slate-700/50 animate-slide-in-right hover:bg-white dark:hover:bg-slate-800 hover:shadow-md transition-all cursor-pointer group/item">
-                                                <div className={`w-10 h-10 rounded-xl ${activity.bg.replace('100', '100 dark:bg-opacity-20 ')} flex items-center justify-center ${activity.color} shadow-sm`}>
-                                                    <activity.icon className="w-5 h-5" />
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="flex justify-between items-center mb-1">
-                                                        <p className="text-base font-bold text-slate-900 dark:text-white">{activity.user}</p>
-                                                        <span className="text-[11px] font-medium text-slate-400 dark:text-slate-500">{activity.time}</span>
-                                                    </div>
-                                                    <p className="text-sm text-slate-600 dark:text-slate-400 truncate font-medium">{activity.action}</p>
-                                                </div>
-                                                <button className="opacity-0 group-hover/item:opacity-100 p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-all">
-                                                    <ArrowRight className="w-4 h-4 text-slate-500 dark:text-slate-400" />
-                                                </button>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Top Right Card: AI Agents */}
-                        <div className="md:col-span-2 bg-slate-900 dark:bg-slate-950 text-white rounded-2xl sm:rounded-[2.5rem] p-6 sm:p-10 shadow-[0_4px_20px_rgb(0,0,0,0.2)] hover:shadow-[0_12px_40px_rgb(0,0,0,0.3)] overflow-hidden relative group hover:-translate-y-1.5 transition-all duration-500 dark:border border-slate-800">
-                            <div className="absolute top-0 right-0 w-64 h-64 bg-purple-600/30 rounded-full blur-[60px] pointer-events-none"></div>
-                            <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-600/20 rounded-full blur-[50px] pointer-events-none"></div>
-
-                            <div className="relative z-10 h-full flex flex-col">
-                                <div className="flex justify-between items-start mb-6">
-                                    <div>
-                                        <h3 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2 flex items-center gap-2 sm:gap-3 tracking-tight text-white">
-                                            <Bot className="w-7 h-7 text-indigo-400" />
-                                            AI Agents
-                                        </h3>
-                                        <p className="text-slate-400 text-sm sm:text-base leading-relaxed">Autonomous agents that handle support, sales, and ops 24/7.</p>
-                                    </div>
-                                    <div className="flex -space-x-2">
-                                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 border-2 border-slate-900 dark:border-slate-950 flex items-center justify-center text-[10px] font-bold shadow-lg" title="Sales Agent">SA</div>
-                                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 border-2 border-slate-900 dark:border-slate-950 flex items-center justify-center text-[10px] font-bold shadow-lg" title="Support Agent">CS</div>
-                                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 border-2 border-slate-900 dark:border-slate-950 flex items-center justify-center text-[10px] font-bold shadow-lg" title="DevOps Agent">DO</div>
-                                    </div>
-                                </div>
-
-                                {/* Simulated Chat Interface */}
-                                <div className="flex-1 bg-slate-800/80 dark:bg-slate-900/80 rounded-2xl p-5 border border-slate-700/50 dark:border-slate-700/30 space-y-4 shadow-inner backdrop-blur-sm">
-                                    <div className="flex justify-end">
-                                        <div className="bg-purple-600 text-white px-5 py-3 rounded-2xl rounded-tr-sm text-sm font-medium max-w-[85%] shadow-lg">
-                                            Book a meeting with sales for top leads.
-                                        </div>
-                                    </div>
-                                    <div className="flex justify-start items-end gap-2">
-                                        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center shadow-lg flex-shrink-0"><Bot className="w-3.5 h-3.5 text-white" /></div>
-                                        <div className="bg-slate-700 dark:bg-slate-800 text-slate-200 px-4 py-2.5 rounded-2xl rounded-tl-sm text-sm font-medium shadow-md">
-                                            <div className="flex items-center gap-2">
-                                                <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
-                                                Scanning CRM... Found <span className="text-green-400 font-bold">3 hot leads</span>.
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="flex justify-start items-end gap-2 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-                                        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center shadow-lg flex-shrink-0"><Bot className="w-3.5 h-3.5 text-white" /></div>
-                                        <div className="bg-slate-700 dark:bg-slate-800 text-slate-200 px-4 py-2.5 rounded-2xl rounded-tl-sm text-sm font-medium shadow-md">
-                                            Sending calendar invites... <span className="text-green-400 font-bold">Done! ✓</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Bottom Middle Card: Automation */}
-                        <div className="md:col-span-1 bg-white dark:bg-slate-900/50 rounded-2xl sm:rounded-[2.5rem] p-6 sm:p-10 border border-slate-100 dark:border-slate-800 shadow-[0_4px_20px_rgb(0,0,0,0.03)] dark:shadow-[0_4px_20px_rgb(0,0,0,0.2)] hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] dark:hover:shadow-[0_12px_40px_rgb(0,0,0,0.3)] hover:-translate-y-1.5 transition-all duration-500 flex flex-col justify-between group overflow-hidden min-h-[280px] sm:min-h-[320px] relative backdrop-blur-xl">
-                            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-400 to-purple-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
-                            <div className="w-14 h-14 bg-blue-100 dark:bg-blue-900/40 rounded-2xl flex items-center justify-center mb-5 text-blue-600 dark:text-blue-400 group-hover:rotate-12 transition-transform shadow-sm">
-                                <Zap className="w-7 h-7" />
-                            </div>
-                            <div className="mb-6">
-                                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2 tracking-tight transition-colors">Automation</h3>
-                                <p className="text-slate-500/90 dark:text-slate-400 text-sm font-medium leading-relaxed transition-colors">Visual workflow builder with drag-and-drop.</p>
-                            </div>
-                            {/* 3-Step Pipeline Visual */}
-                            <div className="flex items-center gap-1 mt-auto">
-                                <div className="flex flex-col items-center gap-1 flex-1">
-                                    <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
-                                        <Mail className="w-5 h-5" />
-                                    </div>
-                                    <span className="text-[10px] font-bold text-slate-400">Trigger</span>
-                                </div>
-                                <div className="flex-1 h-0.5 bg-gray-200 rounded-full overflow-hidden -mt-3">
-                                    <div className="h-full bg-gradient-to-r from-blue-500 to-purple-500 w-full origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-700 delay-100"></div>
-                                </div>
-                                <div className="flex flex-col items-center gap-1 flex-1">
-                                    <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center text-purple-600 group-hover:scale-110 transition-transform delay-200">
-                                        <Cpu className="w-5 h-5" />
-                                    </div>
-                                    <span className="text-[10px] font-bold text-slate-400">Process</span>
-                                </div>
-                                <div className="flex-1 h-0.5 bg-gray-200 rounded-full overflow-hidden -mt-3">
-                                    <div className="h-full bg-gradient-to-r from-purple-500 to-green-500 w-full origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-700 delay-400"></div>
-                                </div>
-                                <div className="flex flex-col items-center gap-1 flex-1">
-                                    <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center text-green-600 group-hover:scale-110 transition-transform delay-300">
-                                        <CheckCircle2 className="w-5 h-5" />
-                                    </div>
-                                    <span className="text-[10px] font-bold text-slate-400">Deliver</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Bottom Right Card: Connect */}
-                        <div className="md:col-span-1 bg-gradient-to-br from-pink-50 to-orange-50 dark:from-pink-900/20 dark:to-orange-900/10 rounded-2xl sm:rounded-[2.5rem] p-6 sm:p-10 border border-pink-100 dark:border-pink-900/30 shadow-[0_4px_20px_rgb(249,168,212,0.2)] dark:shadow-none hover:shadow-[0_12px_40px_rgb(249,168,212,0.4)] dark:hover:shadow-[0_12px_40px_rgb(249,168,212,0.1)] hover:-translate-y-1.5 transition-all duration-500 flex flex-col justify-between group min-h-[280px] sm:min-h-[320px] relative backdrop-blur-xl">
-                            <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,_var(--tw-gradient-stops))] from-orange-100/50 dark:from-orange-500/10 via-transparent to-transparent rounded-[2.5rem] pointer-events-none"></div>
-                            <div className="relative z-10">
-                                <div className="w-14 h-14 bg-pink-100 dark:bg-pink-900/40 rounded-2xl flex items-center justify-center mb-5 text-pink-600 dark:text-pink-400 group-hover:scale-110 transition-transform shadow-sm">
-                                    <GitBranch className="w-7 h-7" />
-                                </div>
-                                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2 tracking-tight transition-colors">Connect</h3>
-                                <p className="text-slate-500/90 dark:text-slate-400 text-sm font-medium mb-6 leading-relaxed transition-colors">Integrate with 50+ apps your team already uses.</p>
-                            </div>
-                            <div className="flex -space-x-2 mt-auto relative z-10">
-                                {[slackLogo, gmailLogo, notionLogo, asanaLogo].map((logo, i) => (
-                                    <img key={i} src={logo} alt="app" className="w-11 h-11 rounded-full border-3 border-white dark:border-slate-800 bg-white dark:bg-slate-800 object-contain shadow-md transition-all duration-300 hover:scale-125 hover:z-10 hover:-translate-y-1" style={{ animationDelay: `${i * 0.1}s` }} />
-                                ))}
-                                <div className="w-11 h-11 rounded-full bg-white dark:bg-slate-800 border-3 border-white dark:border-slate-800 flex items-center justify-center text-xs font-extrabold text-slate-500 dark:text-slate-400 shadow-md hover:scale-125 hover:-translate-y-1 transition-all duration-300 cursor-pointer">+47</div>
-                            </div>
-                        </div>
-                    </div>
+            {/* High-Fidelity Platform Showcase */}
+            <section id="features" className="relative z-10 transition-colors section-perf-optimized">
+                <div ref={bentoReveal.ref} className={`transition-all duration-1000 ${bentoReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'}`}>
+                    <UnifiedPlatformShowcase />
                 </div>
             </section>
 
             {/* AI Powerhouse Section */}
-            <section className="py-14 md:py-20 px-4 sm:px-6 lg:px-8 bg-transparent text-slate-900 dark:text-white relative overflow-hidden transition-colors">
+            <section className="py-14 md:py-20 px-4 sm:px-6 lg:px-8 bg-transparent text-slate-900 dark:text-white relative overflow-hidden transition-colors section-perf-optimized">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-indigo-900/5 dark:from-indigo-900/20 via-transparent dark:via-transparent to-transparent pointer-events-none"></div>
 
                 <div ref={aiReveal.ref} className={`max-w-7xl mx-auto relative z-10 transition-all duration-700 ${aiReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
@@ -480,52 +269,46 @@ const LandingPage: React.FC = () => {
                             </div>
                             <div className="p-6 space-y-2 text-gray-300">
                                 <p><span className="text-green-400">$</span> ollama run llama3:instruct</p>
+                                <br />
                                 <p className="text-blue-400">&gt;&gt;&gt; Loading model...</p>
                                 <p className="text-gray-500">Subject: Project Alpha</p>
                                 <p className="text-gray-500">Context: 4096 tokens</p>
                                 <p className="text-gray-500">Privacy: Offline (0 data sent)</p>
                                 <br />
-                                <p className="typing-effect border-r-2 border-gray-500 inline-block pr-1">Analyzed 15 local documents. Found 3 key insights...</p>
-                                <span className="animate-pulse ml-1 inline-block w-2 h-4 bg-green-500 align-middle"></span>
+                                <p className="animate-pulse">_ Analyzed 15 local documents. Found 3 key insights...</p>
                             </div>
                         </div>
 
-                        {/* Right: Cloud Intelligence (Glass Style) */}
-                        <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-3xl p-1 px-1 backdrop-blur-xl border border-white/10 relative">
-                            <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-3xl blur opacity-20 animate-pulse"></div>
-                            <div className="bg-slate-900/90 rounded-[1.4rem] p-8 h-full relative z-10">
-                                <div className="flex items-center justify-between mb-8">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center">
-                                            <Sparkles className="w-5 h-5 text-white" />
-                                        </div>
-                                        <div>
-                                            <h3 className="font-bold text-lg">Cloud Models</h3>
-                                            <p className="text-slate-500 text-sm">Top-tier reasoning</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex -space-x-2">
-                                        {/* Fake Logos for GPT, Claude, Gemini */}
-                                        <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-[10px] font-bold">GPT</div>
-                                        <div className="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center text-[10px] font-bold">CLD</div>
-                                        <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-[10px] font-bold">GEM</div>
-                                    </div>
+                        {/* Right: Cloud Intelligence */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="p-6 bg-white dark:bg-slate-900/50 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm transition-all hover:shadow-md">
+                                <div className="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400 mb-4">
+                                    <Bot className="w-6 h-6" />
                                 </div>
-                                <div className="space-y-4">
-                                    <div className="bg-white/5 rounded-lg p-4 border border-white/5">
-                                        <div className="flex justify-between items-center mb-2">
-                                            <span className="text-xs font-bold text-purple-400 uppercase">Input</span>
-                                            <span className="text-xs text-slate-500">GPT-4 Turbo</span>
-                                        </div>
-                                        <p className="text-slate-300 text-sm">"Draft a legal contract for a freelance designer based on California law..."</p>
+                                <h3 className="font-bold text-slate-900 dark:text-white mb-2">Cloud Models</h3>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Top-tier reasoning with GPT-4, Claude 3.5, and Gemini Pro.</p>
+                            </div>
+                            <div className="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm flex flex-col items-center justify-center text-center opacity-50 grayscale">
+                                <div className="flex gap-2 mb-3">
+                                    <div className="w-6 h-6 rounded bg-slate-200 dark:bg-slate-700"></div>
+                                    <div className="w-6 h-6 rounded bg-slate-200 dark:bg-slate-700"></div>
+                                    <div className="w-6 h-6 rounded bg-slate-200 dark:bg-slate-700"></div>
+                                </div>
+                                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Coming Soon</p>
+                            </div>
+                            <div className="col-span-2 p-6 bg-indigo-600 dark:bg-indigo-500 rounded-2xl text-white shadow-xl relative overflow-hidden group">
+                                <div className="absolute top-0 right-0 p-4 opacity-20 group-hover:opacity-40 transition-opacity">
+                                    <Globe className="w-16 h-16" />
+                                </div>
+                                <div className="relative z-10">
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <div className="w-2 h-2 rounded-full bg-green-400 animate-ping"></div>
+                                        <span className="text-[10px] font-bold uppercase tracking-wider">Reasoning Engine</span>
                                     </div>
-                                    <div className="bg-indigo-600/20 rounded-lg p-4 border border-indigo-500/20">
-                                        <div className="flex justify-between items-center mb-2">
-                                            <span className="text-xs font-bold text-indigo-400 uppercase">Response</span>
-                                            <span className="text-xs text-indigo-300">1.2s latency</span>
-                                        </div>
-                                        <p className="text-indigo-200 text-sm">Here is a draft contract compliant with AB5...</p>
-                                    </div>
+                                    <p className="text-sm font-medium mb-4 opacity-90 italic">"Draft a legal contract for a freelance designer based on California law..."</p>
+                                    <div className="h-px bg-white/20 mb-4"></div>
+                                    <p className="text-[10px] font-bold opacity-70 mb-1">Response (1.2s latency)</p>
+                                    <p className="text-sm font-bold">Here is a draft contract compliant with AB5...</p>
                                 </div>
                             </div>
                         </div>
@@ -533,207 +316,126 @@ const LandingPage: React.FC = () => {
                 </div>
             </section>
 
-            {/* "Built for Teams" Tabs Section (Monday.com style) */}
-            <section className="py-14 md:py-20 px-4 sm:px-6 lg:px-8 bg-transparent transition-colors">
-                <div ref={teamsReveal.ref} className={`max-w-7xl mx-auto transition-all duration-700 ${teamsReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+            {/* Adaptability Section */}
+            <section className="py-14 md:py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-slate-950 transition-colors section-perf-optimized">
+                <div ref={adaptReveal.ref} className={`max-w-7xl mx-auto transition-all duration-700 ${adaptReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                     <div className="text-center mb-16">
-                        <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4 sm:mb-5 tracking-tighter leading-[1.1] transition-colors">
-                            Built for every team
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400 text-xs font-bold uppercase tracking-wider mb-6">
+                            <Users className="w-4 h-4" />
+                            <span>Versatile</span>
+                        </div>
+                        <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-5 sm:mb-6 tracking-tighter leading-[1.1] transition-colors">
+                            Built for every team.
                         </h2>
                         <p className="text-lg text-slate-500/90 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed font-medium transition-colors">
                             From engineering sprints to marketing launches — one platform that adapts to how your team actually works.
                         </p>
-
-                        {/* Tabs Navigation */}
-                        <div className="flex flex-wrap justify-center gap-2 mt-10">
-                            {[
-                                { id: 'engineering', label: 'Engineering', icon: Code2, color: 'from-purple-600 to-indigo-600', ring: 'ring-purple-500/30' },
-                                { id: 'marketing', label: 'Marketing', icon: Megaphone, color: 'from-pink-500 to-rose-500', ring: 'ring-pink-500/30' },
-                                { id: 'sales', label: 'Sales', icon: Briefcase, color: 'from-blue-500 to-cyan-500', ring: 'ring-blue-500/30' },
-                                { id: 'support', label: 'Support', icon: Headphones, color: 'from-green-500 to-emerald-500', ring: 'ring-green-500/30' },
-                            ].map((tab) => (
-                                <button
-                                    key={tab.id}
-                                    onClick={() => setActiveTab(tab.id)}
-                                    className={`flex items-center gap-2 px-6 py-3 rounded-full text-sm font-bold transition-all duration-300 ${activeTab === tab.id
-                                        ? `bg-gradient-to-r ${tab.color} text-white shadow-lg shadow-black/10 scale-105 ring-4 ${tab.ring}`
-                                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700 hover:scale-[1.02]'
-                                        }`}
-                                >
-                                    <tab.icon className="w-4 h-4" />
-                                    {tab.label}
-                                </button>
-                            ))}
-                        </div>
                     </div>
 
-                    {/* Tab Content Area */}
-                    <div className="bg-gradient-to-br from-slate-50 to-white dark:from-slate-900/50 dark:to-slate-800/50 rounded-2xl sm:rounded-[2.5rem] p-5 sm:p-8 md:p-14 border border-gray-100 dark:border-slate-800 shadow-xl shadow-gray-200/50 dark:shadow-none overflow-hidden relative backdrop-blur-xl transition-colors">
-                        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-white dark:bg-purple-900/20 rounded-full blur-[100px] opacity-70 pointer-events-none"></div>
+                    <div className="flex flex-wrap justify-center gap-4 mb-12">
+                        {['engineering', 'marketing', 'sales', 'support'].map((tab) => (
+                            <button
+                                key={tab}
+                                onClick={() => setActiveTab(tab)}
+                                className={`px-6 py-2.5 rounded-full text-sm font-bold capitalize transition-all border ${
+                                    activeTab === tab
+                                        ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white shadow-lg'
+                                        : 'bg-transparent text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-600'
+                                }`}
+                            >
+                                {tab}
+                            </button>
+                        ))}
+                    </div>
 
-                        <div className="grid md:grid-cols-2 gap-12 items-center relative z-10">
+                    <div className="bg-slate-50 dark:bg-slate-900/50 rounded-[2.5rem] p-8 md:p-12 border border-slate-200 dark:border-slate-800 transition-colors">
+                        <div className="grid md:grid-cols-2 gap-12 items-center">
                             <div>
-                                <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mb-4 sm:mb-6 tracking-tight leading-tight transition-colors">
+                                <h3 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mb-6">
                                     {activeTab === 'engineering' && "Ship faster with automated workflows."}
-                                    {activeTab === 'marketing' && "Launch campaigns in record time."}
-                                    {activeTab === 'sales' && "Close deals without the busywork."}
-                                    {activeTab === 'support' && "Delight customers with instant answers."}
+                                    {activeTab === 'marketing' && "Launch campaigns with data-driven AI."}
+                                    {activeTab === 'sales' && "Close deals with intelligent CRM automation."}
+                                    {activeTab === 'support' && "Delight customers with instant AI responses."}
                                 </h3>
-                                <p className="text-base text-slate-500/90 dark:text-slate-400 mb-8 leading-relaxed transition-colors">
+                                <p className="text-slate-600 dark:text-slate-400 mb-8 leading-relaxed">
                                     {activeTab === 'engineering' && "Connect Jira, GitHub, and Slack. Automatically create tickets from bug reports and sync status updates tailored for developers."}
-                                    {activeTab === 'marketing' && "Sync leads from Facebook Ads to HubSpot. Auto-generate social posts with AI and approve them in one click."}
-                                    {activeTab === 'sales' && "Enrich leads automatically. Schedule meetings and follow up with prospects without leaving your dashboard."}
-                                    {activeTab === 'support' && "Unified inbox for email, chat, and social. AI agents resolve 60% of tickets instantly, routing complex issues to your team."}
+                                    {activeTab === 'marketing' && "Unify your social channels, ad data, and email lists. Let AI analyze trends and generate content drafts for your next big push."}
+                                    {activeTab === 'sales' && "Seamlessly sync HubSpot, Salesforce, and LinkedIn. Never miss a lead again with autonomous follow-up agents and deal tracking."}
+                                    {activeTab === 'support' && "Consolidate WhatsApp, Email, and Intercom. Our agents learn from your knowledge base to resolve 70% of tickets instantly."}
                                 </p>
-                                <ul className="space-y-4 mb-8">
-                                    {(() => {
-                                        const features: Record<string, string[]> = {
-                                            engineering: ["Git integration & PR tracking", "Automated QA pipelines", "Sprint sync across tools"],
-                                            marketing: ["Campaign automation", "Social listening & scheduling", "Asset management & approvals"],
-                                            sales: ["Intelligent lead scoring", "Auto-scheduling & follow-ups", "CRM sync & enrichment"],
-                                            support: ["Omnichannel inbox", "SLA monitoring & alerts", "AI auto-responses"],
-                                        };
-                                        return (features[activeTab] || []).map((feature, i) => (
-                                            <li key={`${activeTab}-${i}`} className="flex items-center gap-3 text-slate-700 dark:text-slate-300 font-medium animate-fade-in-up transition-colors" style={{ animationDelay: `${i * 0.1}s` }}>
-                                                <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-green-600 flex-shrink-0">
-                                                    <CheckCircle className="w-4 h-4" />
-                                                </div>
-                                                {feature}
-                                            </li>
-                                        ));
-                                    })()}
+                                <ul className="space-y-4 mb-10">
+                                    <li className="flex items-center gap-3">
+                                        <div className="w-5 h-5 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400 flex-shrink-0">
+                                            <CheckCircle2 size={14} />
+                                        </div>
+                                        <span className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                                            {activeTab === 'engineering' ? "Git integration & PR tracking" : "Unified channel management"}
+                                        </span>
+                                    </li>
+                                    <li className="flex items-center gap-3">
+                                        <div className="w-5 h-5 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400 flex-shrink-0">
+                                            <CheckCircle2 size={14} />
+                                        </div>
+                                        <span className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                                            {activeTab === 'engineering' ? "Automated QA pipelines" : "Real-time performance analytics"}
+                                        </span>
+                                    </li>
+                                    <li className="flex items-center gap-3">
+                                        <div className="w-5 h-5 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400 flex-shrink-0">
+                                            <CheckCircle2 size={14} />
+                                        </div>
+                                        <span className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                                            {activeTab === 'engineering' ? "Sprint sync across tools" : "AI-powered creative assets"}
+                                        </span>
+                                    </li>
                                 </ul>
-                                <Link to="/register" className="inline-flex items-center gap-2 text-slate-900 dark:text-white font-semibold hover:text-purple-600 transition-colors group">
-                                    Learn more <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                                </Link>
+                                <button className="text-indigo-600 dark:text-indigo-400 font-bold flex items-center gap-2 hover:gap-3 transition-all">
+                                    Learn more <ArrowRight size={18} />
+                                </button>
                             </div>
-                            {/* Rich Dashboard Mockup */}
-                            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-gray-200/80 dark:border-slate-800 overflow-hidden relative transition-colors">
-                                {/* Window Chrome */}
-                                <div className="bg-slate-100 dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 px-4 py-3 flex items-center gap-2">
-                                    <div className="w-3 h-3 rounded-full bg-red-400"></div>
-                                    <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
-                                    <div className="w-3 h-3 rounded-full bg-green-400"></div>
-                                    <span className="ml-3 text-xs text-slate-400 dark:text-slate-500 font-medium">Arrotech Hub — {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</span>
-                                </div>
-
-                                <div className="p-6 min-h-[320px]">
-                                    {activeTab === 'engineering' && (
-                                        <div className="space-y-3 animate-fade-in-up">
-                                            <div className="flex items-center justify-between mb-4">
-                                                <span className="text-sm font-bold text-slate-800 dark:text-slate-200">Sprint Board</span>
-                                                <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full font-bold">Sprint 24</span>
-                                            </div>
-                                            {[
-                                                { title: 'Fix auth middleware', status: 'In Review', color: 'bg-yellow-100 text-yellow-700', pr: 'PR #342' },
-                                                { title: 'Deploy v2.4 to staging', status: 'Deployed', color: 'bg-green-100 text-green-700', pr: 'PR #340' },
-                                                { title: 'API rate limiter', status: 'In Progress', color: 'bg-blue-100 text-blue-700', pr: 'PR #345' },
-                                                { title: 'Database migration', status: 'Queued', color: 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300', pr: 'PR #347' },
-                                            ].map((item, i) => (
-                                                <div key={i} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-gray-100 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors animate-fade-in-up" style={{ animationDelay: `${i * 0.08}s` }}>
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="w-2 h-2 rounded-full bg-purple-500"></div>
-                                                        <span className="text-sm font-medium text-slate-800 dark:text-slate-200">{item.title}</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">{item.pr}</span>
-                                                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${item.color}`}>{item.status}</span>
-                                                    </div>
-                                                </div>
-                                            ))}
+                            <div className="relative group">
+                                <div className="absolute -inset-4 bg-indigo-500/10 rounded-[2rem] blur-2xl group-hover:bg-indigo-500/20 transition-all"></div>
+                                <div className="relative bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden transition-colors">
+                                    <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-3 h-3 rounded-full bg-red-400"></div>
+                                            <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
+                                            <div className="w-3 h-3 rounded-full bg-green-400"></div>
                                         </div>
-                                    )}
-
-                                    {activeTab === 'marketing' && (
-                                        <div className="space-y-3 animate-fade-in-up">
-                                            <div className="flex items-center justify-between mb-4">
-                                                <span className="text-sm font-bold text-slate-800 dark:text-slate-200">Campaign Dashboard</span>
-                                                <span className="text-xs bg-pink-100 text-pink-700 px-2 py-1 rounded-full font-bold">Q1 2026</span>
-                                            </div>
-                                            <div className="grid grid-cols-2 gap-3 mb-4">
-                                                <div className="bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/10 rounded-xl p-4 border border-pink-100 dark:border-pink-900/30">
-                                                    <p className="text-xs text-pink-600 font-bold">Total Reach</p>
-                                                    <p className="text-2xl font-extrabold text-slate-900 dark:text-white">2.4M</p>
-                                                    <p className="text-xs text-green-600 font-bold">+18%</p>
+                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Arrotech Hub — {activeTab}</span>
+                                    </div>
+                                    <div className="p-6">
+                                        {activeTab === 'engineering' && (
+                                            <div className="space-y-4">
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-sm font-bold text-slate-900 dark:text-white">Sprint Board</span>
+                                                    <span className="text-xs bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-500">Sprint 24</span>
                                                 </div>
-                                                <div className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/10 rounded-xl p-4 border border-purple-100 dark:border-purple-900/30">
-                                                    <p className="text-xs text-purple-600 font-bold">Conversions</p>
-                                                    <p className="text-2xl font-extrabold text-slate-900 dark:text-white">12.8K</p>
-                                                    <p className="text-xs text-green-600 font-bold">+24%</p>
-                                                </div>
-                                            </div>
-                                            {['Email Drip — Product Launch', 'Instagram Reels — Brand', 'LinkedIn Ads — B2B'].map((campaign, i) => (
-                                                <div key={i} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-gray-100 dark:border-slate-700 animate-fade-in-up" style={{ animationDelay: `${i * 0.08}s` }}>
-                                                    <span className="text-sm font-medium text-slate-800 dark:text-slate-200">{campaign}</span>
-                                                    <div className="w-24 h-2 bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                                                        <div className="h-full bg-gradient-to-r from-pink-500 to-rose-400 rounded-full" style={{ width: `${[85, 62, 45][i]}%` }}></div>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-
-                                    {activeTab === 'sales' && (
-                                        <div className="space-y-3 animate-fade-in-up">
-                                            <div className="flex items-center justify-between mb-4">
-                                                <span className="text-sm font-bold text-slate-800 dark:text-slate-200">Deal Pipeline</span>
-                                                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-bold">$284K ARR</span>
-                                            </div>
-                                            {[
-                                                { name: 'Acme Corp', stage: 'Negotiation', value: '$48K', avatar: 'AC', hot: true },
-                                                { name: 'TechFlow Inc', stage: 'Demo Scheduled', value: '$32K', avatar: 'TF', hot: true },
-                                                { name: 'DataBridge', stage: 'Proposal Sent', value: '$65K', avatar: 'DB', hot: false },
-                                                { name: 'CloudSync Ltd', stage: 'Qualifying', value: '$22K', avatar: 'CS', hot: false },
-                                            ].map((deal, i) => (
-                                                <div key={i} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-gray-100 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors animate-fade-in-up" style={{ animationDelay: `${i * 0.08}s` }}>
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-white text-[10px] font-bold">{deal.avatar}</div>
-                                                        <div>
-                                                            <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{deal.name}</p>
-                                                            <p className="text-xs text-slate-400 dark:text-slate-500">{deal.stage}</p>
+                                                <div className="space-y-2">
+                                                    <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700/50 flex items-center justify-between">
+                                                        <div className="flex items-center gap-3">
+                                                            <GitBranch className="w-4 h-4 text-purple-500" />
+                                                            <span className="text-xs font-medium">Fix auth middleware</span>
                                                         </div>
+                                                        <span className="text-[9px] font-bold bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 px-1.5 py-0.5 rounded">In Review</span>
                                                     </div>
-                                                    <div className="flex items-center gap-2">
-                                                        {deal.hot && <span className="text-[10px] bg-orange-100 text-orange-600 px-1.5 py-0.5 rounded font-bold">HOT</span>}
-                                                        <span className="text-sm font-bold text-slate-900 dark:text-white">{deal.value}</span>
+                                                    <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700/50 flex items-center justify-between">
+                                                        <div className="flex items-center gap-3">
+                                                            <Zap className="w-4 h-4 text-amber-500" />
+                                                            <span className="text-xs font-medium">Deploy v2.4 to staging</span>
+                                                        </div>
+                                                        <span className="text-[9px] font-bold bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400 px-1.5 py-0.5 rounded">Deployed</span>
                                                     </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-
-                                    {activeTab === 'support' && (
-                                        <div className="space-y-3 animate-fade-in-up">
-                                            <div className="flex items-center justify-between mb-4">
-                                                <span className="text-sm font-bold text-slate-800 dark:text-slate-200">Ticket Queue</span>
-                                                <div className="flex items-center gap-2">
-                                                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                                                    <span className="text-xs text-green-600 font-bold">AI Active</span>
                                                 </div>
                                             </div>
-                                            {[
-                                                { subject: 'Login issues on mobile', from: 'user@client.com', urgency: 'High', channel: 'Email', aiResolved: false },
-                                                { subject: 'How to export reports?', from: '@james_k', urgency: 'Low', channel: 'Chat', aiResolved: true },
-                                                { subject: 'Billing discrepancy', from: 'finance@acme.co', urgency: 'Med', channel: 'Email', aiResolved: false },
-                                                { subject: 'API rate limit question', from: '@dev_sarah', urgency: 'Low', channel: 'Slack', aiResolved: true },
-                                            ].map((ticket, i) => (
-                                                <div key={i} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-gray-100 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors animate-fade-in-up" style={{ animationDelay: `${i * 0.08}s` }}>
-                                                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                                                        <div className={`w-2 h-2 rounded-full flex-shrink-0 ${ticket.urgency === 'High' ? 'bg-red-500' : ticket.urgency === 'Med' ? 'bg-yellow-500' : 'bg-green-500'}`}></div>
-                                                        <div className="min-w-0">
-                                                            <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">{ticket.subject}</p>
-                                                            <p className="text-xs text-slate-400 dark:text-slate-500 truncate">{ticket.from} via {ticket.channel}</p>
-                                                        </div>
-                                                    </div>
-                                                    {ticket.aiResolved && (
-                                                        <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold whitespace-nowrap ml-2 flex items-center gap-1">
-                                                            <Bot className="w-3 h-3" /> Resolved
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
+                                        )}
+                                        {activeTab !== 'engineering' && (
+                                            <div className="flex flex-col items-center justify-center py-10 opacity-50 grayscale">
+                                                <LayoutDashboard className="w-12 h-12 text-slate-300 mb-4" />
+                                                <p className="text-xs font-bold text-slate-400">Updating View...</p>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -742,15 +444,13 @@ const LandingPage: React.FC = () => {
             </section>
 
             {/* Creator Economy Section */}
-            <section className="py-14 md:py-20 px-4 sm:px-6 lg:px-8 bg-transparent relative overflow-hidden transition-colors">
+            <section className="py-14 md:py-20 px-4 sm:px-6 lg:px-8 bg-transparent relative overflow-hidden transition-colors section-perf-optimized">
                 <div ref={creatorReveal.ref} className={`max-w-7xl mx-auto transition-all duration-700 ${creatorReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                     <div className="grid md:grid-cols-2 gap-16 items-center">
                         <div className="order-2 md:order-1">
-                            {/* Visual for Creator Economy */}
                             <div className="relative">
-                                <div className="absolute -inset-4 bg-gradient-to-r from-pink-500 to-purple-600 rounded-[2rem] opacity-30 blur-xl"></div>
+                                <div className="absolute -inset-4 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-[2rem] opacity-30 blur-xl"></div>
                                 <div className="relative bg-white dark:bg-slate-900/50 rounded-[2rem] shadow-2xl dark:shadow-none p-8 border border-gray-100 dark:border-slate-800 backdrop-blur-xl transition-colors">
-                                    {/* Earnings Card */}
                                     <div className="bg-slate-900 text-white rounded-2xl p-6 mb-6 shadow-lg transform rotate-[-2deg] hover:rotate-0 transition-transform duration-300 relative overflow-hidden dark:border dark:border-slate-700/50">
                                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer bg-[length:200%_100%]"></div>
                                         <div className="flex justify-between items-start mb-4">
@@ -768,7 +468,6 @@ const LandingPage: React.FC = () => {
                                         </div>
                                     </div>
 
-                                    {/* Recent Transactions */}
                                     <div className="space-y-4">
                                         <p className="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider">Recent</p>
                                         <div className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-slate-800/80 rounded-xl transition-colors cursor-pointer">
@@ -800,7 +499,7 @@ const LandingPage: React.FC = () => {
                             </div>
                         </div>
                         <div className="order-1 md:order-2">
-                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 text-xs font-bold uppercase tracking-wider mb-6">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-wider mb-6">
                                 <DollarSign className="w-4 h-4" />
                                 <span>Monetization</span>
                             </div>
@@ -836,21 +535,16 @@ const LandingPage: React.FC = () => {
                 </div>
             </section>
 
-            {/* "Chaos vs Order" Comparison (ClickUp style) */}
-            <section className="py-14 md:py-20 px-4 sm:px-6 lg:px-8 bg-transparent text-slate-900 dark:text-white overflow-hidden relative transition-colors">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-900/5 via-transparent to-transparent dark:from-blue-900/20 dark:via-transparent dark:to-transparent pointer-events-none"></div>
-                {/* Floating ambient orbs */}
-                <div className="absolute top-20 left-[10%] w-72 h-72 bg-red-500/5 dark:bg-red-500/10 rounded-full blur-[100px] animate-float pointer-events-none"></div>
-                <div className="absolute bottom-20 right-[10%] w-72 h-72 bg-purple-500/5 dark:bg-purple-500/10 rounded-full blur-[100px] animate-float pointer-events-none" style={{ animationDelay: '3s' }}></div>
-
+            {/* "Chaos vs Order" Comparison */}
+            <section className="py-14 md:py-20 px-4 sm:px-6 lg:px-8 bg-transparent text-slate-900 dark:text-white overflow-hidden relative transition-colors section-perf-optimized">
                 <div ref={chaosReveal.ref} className={`max-w-7xl mx-auto relative z-10 transition-all duration-700 ${chaosReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                     <div className="text-center mb-16">
                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/5 dark:bg-white/5 border border-slate-800/10 dark:border-white/10 text-slate-600 dark:text-slate-400 text-xs font-bold uppercase tracking-wider mb-6">
                             <Activity className="w-3.5 h-3.5" />
-                            Before &amp; After
+                            Before & After
                         </div>
                         <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-5 tracking-tighter leading-[1.1] text-slate-900 dark:text-white transition-colors">
-                            Stop the chaos. <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-blue-500 dark:from-purple-400 dark:to-blue-400">Start flowing.</span>
+                            Stop the chaos. <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500 dark:from-blue-400 dark:to-cyan-400">Start flowing.</span>
                         </h2>
                         <p className="text-lg text-slate-500/90 dark:text-slate-400/90 max-w-2xl mx-auto leading-relaxed font-medium transition-colors">
                             Your team juggles 10+ tools daily. We consolidate them into one intelligent platform — so you can focus on what matters.
@@ -858,7 +552,7 @@ const LandingPage: React.FC = () => {
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-6 md:gap-0 relative">
-                        {/* Center VS Divider (desktop only) */}
+                        {/* Center VS Divider */}
                         <div className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
                             <div className="w-16 h-16 rounded-full bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-600 flex items-center justify-center shadow-2xl transition-colors">
                                 <span className="text-sm font-extrabold text-slate-400 dark:text-slate-300">VS</span>
@@ -892,8 +586,7 @@ const LandingPage: React.FC = () => {
                         </div>
 
                         {/* After Side */}
-                        <div className="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/30 dark:to-blue-900/30 border border-purple-200 dark:border-purple-500/30 rounded-3xl md:rounded-l-none p-8 md:p-10 relative shadow-2xl ring-1 ring-purple-200 dark:ring-purple-500/20 transition-colors">
-                            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-blue-500/5 rounded-3xl md:rounded-l-none pointer-events-none"></div>
+                        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/30 border border-blue-200 dark:border-blue-500/20 rounded-3xl md:rounded-l-none p-8 md:p-10 relative shadow-2xl transition-colors">
                             <div className="relative z-10">
                                 <div className="flex items-center gap-3 mb-8">
                                     <span className="px-3 py-1.5 bg-green-500/15 text-green-600 dark:text-green-400 rounded-full text-xs font-bold border border-green-500/20 flex items-center gap-1.5">
@@ -903,11 +596,11 @@ const LandingPage: React.FC = () => {
                                 </div>
                                 <div className="flex flex-col gap-4">
                                     {[
-                                        { text: 'One unified dashboard for everything', icon: LayoutDashboard, gradient: 'from-purple-100 to-indigo-100 dark:from-purple-600/20 dark:to-indigo-600/20', border: 'border-purple-200 dark:border-purple-500/20' },
-                                        { text: 'AI-prioritized inbox, zero clutter', icon: Mail, gradient: 'from-blue-100 to-cyan-100 dark:from-blue-600/20 dark:to-cyan-600/20', border: 'border-blue-200 dark:border-blue-500/20' },
+                                        { text: 'One unified dashboard for everything', icon: LayoutDashboard, gradient: 'from-blue-100 to-indigo-100 dark:from-blue-600/20 dark:to-indigo-600/20', border: 'border-blue-200 dark:border-blue-500/20' },
+                                        { text: 'AI-prioritized inbox, zero clutter', icon: Mail, gradient: 'from-cyan-100 to-blue-100 dark:from-cyan-600/20 dark:to-blue-600/20', border: 'border-cyan-200 dark:border-cyan-500/20' },
                                         { text: 'Automated workflows save 4+ hrs/day', icon: Zap, gradient: 'from-amber-100 to-orange-100 dark:from-amber-600/20 dark:to-orange-600/20', border: 'border-amber-200 dark:border-amber-500/20' },
-                                        { text: 'Smart scheduling across all calendars', icon: Calendar, gradient: 'from-green-100 to-emerald-100 dark:from-green-600/20 dark:to-emerald-600/20', border: 'border-green-200 dark:border-green-500/20' },
-                                        { text: 'Integrated docs, wikis & knowledge base', icon: FileText, gradient: 'from-pink-100 to-rose-100 dark:from-pink-600/20 dark:to-rose-600/20', border: 'border-pink-200 dark:border-pink-500/20' },
+                                        { text: 'Smart scheduling across all calendars', icon: Calendar, gradient: 'from-emerald-100 to-green-100 dark:from-emerald-600/20 dark:to-green-600/20', border: 'border-emerald-200 dark:border-emerald-500/20' },
+                                        { text: 'Integrated docs, wikis & knowledge base', icon: FileText, gradient: 'from-slate-100 to-blue-100 dark:from-slate-600/20 dark:to-blue-600/20', border: 'border-slate-200 dark:border-blue-500/20' },
                                     ].map((item, i) => (
                                         <div key={i} className={`p-4 bg-gradient-to-r ${item.gradient} rounded-xl border ${item.border} flex items-center gap-4 animate-pop-in hover:scale-[1.02] transition-transform`} style={{ animationDelay: `${i * 0.1}s` }}>
                                             <div className="w-9 h-9 rounded-lg bg-white/50 dark:bg-white/10 flex items-center justify-center text-green-600 dark:text-green-400 flex-shrink-0">
@@ -930,7 +623,7 @@ const LandingPage: React.FC = () => {
                         ].map((metric, i) => (
                             <div key={i} className="text-center p-6 bg-slate-100/50 dark:bg-white/[0.03] rounded-2xl border border-slate-200 dark:border-white/5 hover:border-purple-300 dark:hover:border-purple-500/20 transition-colors">
                                 <div className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white mb-1">
-                                    {metric.value}<span className="text-purple-600 dark:text-purple-400">{metric.unit}</span>
+                                    {metric.value}<span className="text-blue-600 dark:text-blue-400">{metric.unit}</span>
                                 </div>
                                 <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">{metric.label}</p>
                             </div>
@@ -940,7 +633,7 @@ const LandingPage: React.FC = () => {
             </section>
 
             {/* Security Section */}
-            <section className="py-14 md:py-20 px-4 sm:px-6 lg:px-8 relative transition-colors">
+            <section className="py-14 md:py-20 px-4 sm:px-6 lg:px-8 relative transition-colors section-perf-optimized">
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
                 <div ref={securityReveal.ref} className={`max-w-7xl mx-auto relative z-10 transition-all duration-700 ${securityReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                     <div className="text-center mb-16">
@@ -993,42 +686,55 @@ const LandingPage: React.FC = () => {
                 </div>
             </section>
 
-            {/* Final CTA */}
-            <section className="relative z-10 py-14 md:py-20 px-4 sm:px-6 lg:px-8 overflow-hidden bg-transparent transition-colors">
-                <div ref={ctaReveal.ref} className={`max-w-5xl mx-auto transition-all duration-700 ${ctaReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-                    <div className="bg-slate-900 rounded-2xl sm:rounded-[3rem] p-8 sm:p-12 md:p-20 text-center relative overflow-hidden shadow-2xl">
-                        {/* Decorative Background */}
-                        <div className="absolute inset-0">
-                            <div className="absolute top-[-50%] left-[20%] w-[600px] h-[600px] bg-purple-600/30 rounded-full blur-[120px] animate-float"></div>
-                            <div className="absolute bottom-[-50%] right-[20%] w-[500px] h-[500px] bg-blue-600/30 rounded-full blur-[120px] animate-float" style={{ animationDelay: '3s' }}></div>
-                        </div>
+            {/* Final Premium CTA */}
+            <section className="py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+                <div className="max-w-7xl mx-auto">
+                    <div className="relative group overflow-hidden rounded-[3rem] border border-white/20 shadow-2xl">
+                        <div className="absolute inset-0 mesh-gradient opacity-90"></div>
+                        <div className="absolute inset-0 bg-slate-950/40 backdrop-blur-3xl"></div>
+                        
+                        {/* Animated Orbs */}
+                        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-500/20 rounded-full blur-[60px] md:blur-[120px] -mr-40 -mt-40 animate-pulse"></div>
+                        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-500/20 rounded-full blur-[60px] md:blur-[120px] -ml-40 -mb-40 animate-pulse" style={{ animationDelay: '2s' }}></div>
 
-                        <div className="relative z-10">
-                            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-6 sm:mb-8 tracking-tighter leading-[1.1]">
-                                Ready for the <span className="text-purple-400">future of work?</span>
+                        <div className="relative z-10 py-20 md:py-28 px-8 md:px-16 text-center">
+                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-white text-xs font-bold uppercase tracking-widest mb-10 backdrop-blur-md">
+                                <Rocket size={16} className="text-amber-400" />
+                                <span>Ready to 10x your productivity?</span>
+                            </div>
+                            
+                            <h2 className="text-3xl md:text-5xl font-black text-white mb-8 tracking-tighter leading-tight">
+                                Join the future of <br className="hidden md:block" /> 
+                                <span className="bg-gradient-to-r from-blue-300 to-cyan-400 bg-clip-text text-transparent italic">intelligent work.</span>
                             </h2>
-                            <p className="text-lg text-slate-400/90 mb-12 max-w-2xl mx-auto leading-relaxed font-medium">
-                                Join thousands of teams using Arrotech to boost productivity and reclaim their time.
+                            
+                            <p className="text-xl text-slate-200 max-w-2xl mx-auto mb-12 font-medium leading-relaxed opacity-90">
+                                Experience the only unified command center that thinks, automates, and executes alongside you.
                             </p>
 
-                            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
                                 <Link
                                     to="/register"
-                                    className="w-full sm:w-auto bg-white text-slate-900 hover:bg-slate-100 px-6 sm:px-10 py-3.5 sm:py-4 rounded-xl font-bold text-sm sm:text-base transition-all shadow-xl hover:shadow-2xl hover:-translate-y-0.5"
+                                    className="w-full sm:w-auto bg-white text-slate-900 hover:bg-slate-50 px-10 py-5 rounded-2xl font-black text-lg transition-all shadow-[0_20px_50px_rgba(255,255,255,0.2)] hover:shadow-[0_20px_80px_rgba(255,255,255,0.4)] hover:-translate-y-1 active:scale-95"
                                 >
                                     Get Started Free
                                 </Link>
-                                <button onClick={() => scrollToSection('features')} className="w-full sm:w-auto bg-white/10 hover:bg-white/20 text-white border border-white/20 px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl font-semibold text-[15px] sm:text-[16px] transition-all backdrop-blur-md hover:scale-[1.02] hover:border-white/40">
-                                    See Features
-                                </button>
-                                <button className="w-full sm:w-auto bg-white/10 hover:bg-white/20 text-white border border-white/20 px-6 sm:px-10 py-3.5 sm:py-4 rounded-xl font-semibold text-[15px] sm:text-[16px] transition-all backdrop-blur-md hover:scale-[1.02] hover:border-white/40">
-                                    Contact Sales
+                                <button className="w-full sm:w-auto bg-white/10 hover:bg-white/20 text-white border border-white/30 px-10 py-5 rounded-2xl font-bold text-lg transition-all backdrop-blur-xl hover:scale-[1.02] active:scale-95 flex items-center gap-3">
+                                    Book Demo <ArrowRight size={20} />
                                 </button>
                             </div>
 
-                            <p className="mt-8 text-slate-400 text-sm">
-                                No credit card required • 14-day free trial
-                            </p>
+                            <div className="mt-12 flex flex-wrap justify-center gap-8 text-slate-300">
+                                <div className="flex items-center gap-2 text-sm font-bold">
+                                    <CheckCircle2 size={16} className="text-emerald-400" /> No credit card
+                                </div>
+                                <div className="flex items-center gap-2 text-sm font-bold">
+                                    <CheckCircle2 size={16} className="text-emerald-400" /> 14-day trial
+                                </div>
+                                <div className="flex items-center gap-2 text-sm font-bold">
+                                    <CheckCircle2 size={16} className="text-emerald-400" /> Cancel anytime
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

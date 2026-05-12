@@ -543,6 +543,17 @@ class ApiService {
     return response.data;
   }
 
+  // GitHub OAuth endpoints
+  async getGitHubAuthUrl(): Promise<{ auth_url: string; state: string }> {
+    const response = await this.api.get('/api/github/auth-url');
+    return response.data;
+  }
+
+  async getGitHubCallback(code: string, state: string): Promise<{ success: boolean; error?: string }> {
+    const response = await this.api.get(`/api/github/callback?code=${code}&state=${state}`);
+    return response.data;
+  }
+
 
   async getWhatsAppAuthUrl(): Promise<{ url: string }> {
     const response = await this.api.get('/api/whatsapp/auth-url');
