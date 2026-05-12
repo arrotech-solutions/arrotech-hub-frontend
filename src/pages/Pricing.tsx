@@ -37,7 +37,7 @@ const PLANS = [
         tagline: 'Unified Visibility',
         price: 0,
         priceDisplay: '0',
-        description: 'Perfect for discovery. See all your work in one place.',
+        description: 'See all your work in one place. Read-only access to get started.',
         icon: Shield,
         gradient: 'from-slate-500 to-slate-600',
         bgGradient: 'from-slate-50 to-slate-100',
@@ -49,23 +49,23 @@ const PLANS = [
                 'Unified Inbox (Read-only)',
                 'Unified Calendar (View-only)',
                 'Unified Tasks (View-only)',
-                '1 email provider',
-                '1 messaging provider',
-                '1 calendar provider',
-                '1 task tool',
                 'AI Chat (Basic)',
                 'AI Briefing (Weekly)',
-                '3 workflows (templates)',
+                'WhatsApp, Slack, or Teams (1)',
+                'Gmail or Outlook (1)',
+                'Jira, Trello, Asana, or ClickUp (1)',
+                'Workflow Marketplace (Browse)',
+                '3 workflows (templates only)',
                 '100 AI actions/month',
                 '500 automation runs/month',
             ],
             excluded: [
-                'Send & reply messages',
-                'Create/edit events',
+                'Send & reply to messages',
+                'Create/edit calendar events',
                 'Create/update tasks',
+                'Social media integrations',
+                'WhatsApp auto-replies & broadcasts',
                 'Smart Scheduler',
-                'AI-assisted replies',
-                'Team members'
             ]
         },
         limits: {
@@ -81,7 +81,7 @@ const PLANS = [
         tagline: 'Unified Action',
         price: 1500,
         priceDisplay: '1,500',
-        description: 'Essential tools for solo productivity.',
+        description: 'Send, reply, and take action across all your tools.',
         icon: Zap,
         gradient: 'from-blue-500 to-blue-600',
         bgGradient: 'from-blue-50 to-indigo-50',
@@ -91,14 +91,15 @@ const PLANS = [
         features: {
             included: [
                 'Unified Inbox (Send & Reply)',
-                'Create tasks from messages',
                 'Unified Calendar (Create & Edit)',
                 'Unified Tasks (Create & Update)',
-                '2 email providers',
-                '2 messaging providers',
-                '1 task tool synced',
-                'AI Chat (Core)',
+                'Create tasks from messages',
+                'AI Chat (Workspace context)',
                 'AI Briefing (Daily & Weekly)',
+                '2 email + 2 messaging providers',
+                'Google Workspace + Zoho CRM',
+                'Telegram integration',
+                'Workflow Marketplace (Import)',
                 '5 workflows',
                 '500 AI actions/month',
                 '2,000 automation runs/month',
@@ -106,7 +107,8 @@ const PLANS = [
             excluded: [
                 'AI-assisted replies',
                 'Smart Scheduler',
-                'Team members'
+                'Social media management',
+                'WhatsApp auto-replies & broadcasts',
             ]
         },
         limits: {
@@ -122,7 +124,7 @@ const PLANS = [
         tagline: 'Unified Operations',
         price: 5000,
         priceDisplay: '5,000',
-        description: 'For teams that need AI power and smart automation.',
+        description: 'Full AI power, social media, and smart automation for growing teams.',
         icon: Building2,
         gradient: 'from-indigo-500 to-purple-600',
         bgGradient: 'from-indigo-50 to-purple-50',
@@ -131,22 +133,25 @@ const PLANS = [
         popular: true,
         features: {
             included: [
+                'Everything in Starter, plus:',
                 'AI-assisted email replies',
                 'Smart Scheduler (AI)',
-                'Unified Tasks with analytics',
-                'Multi-tool sync (5 per category)',
-                'AI Chat (Advanced)',
-                'AI Briefing (Custom schedule)',
+                'WhatsApp auto-replies & broadcasts',
+                'TikTok Dashboard & content tools',
+                'Facebook, Instagram, LinkedIn, X',
+                'HubSpot, Salesforce CRM',
+                'Zoom, Notion, QuickBooks, Xero',
+                'Task analytics & progress tracking',
+                'API access (5,000 req/day)',
+                '3 team members',
                 '30 workflows',
                 '2,000 AI actions/month',
-                '15,000 automation runs/month',
-                '3 team members',
-                'Priority support'
+                'Priority support',
             ],
             excluded: [
-                'Multi-client inboxes',
-                'SLA tracking',
-                'Dedicated support'
+                'Multi-client inbox management',
+                'SLA tracking & alerts',
+                'Advanced scheduling rules',
             ]
         },
         limits: {
@@ -162,7 +167,7 @@ const PLANS = [
         tagline: 'Unified Command Center',
         price: 10000,
         priceDisplay: '10,000',
-        description: 'For agencies managing multiple clients at scale.',
+        description: 'Multi-client management, unlimited integrations, and dedicated support.',
         icon: Crown,
         gradient: 'from-purple-500 to-pink-600',
         bgGradient: 'from-purple-50 to-pink-50',
@@ -171,17 +176,20 @@ const PLANS = [
         popular: false,
         features: {
             included: [
+                'Everything in Business, plus:',
                 'Multi-client inbox management',
                 'SLA tracking & alerts',
                 'Advanced Smart Scheduler',
-                'Unlimited providers per category',
+                'Cross-client calendar view',
+                'Client-separated tasks & reports',
                 'AI Chat (Power Mode)',
                 'AI Briefing (Real-time)',
+                'Unlimited integrations',
                 'Unlimited workflows',
-                '5,000 AI actions/month',
-                '50,000 automation runs/month',
+                'API access (50,000 req/day)',
                 '10 team members',
-                'Dedicated support'
+                '5,000 AI actions/month',
+                'Dedicated support',
             ],
             excluded: []
         },
@@ -198,7 +206,7 @@ const PLANS = [
         tagline: 'Custom Solution',
         price: null,
         priceDisplay: 'Custom',
-        description: 'Tailored for large organizations with complex needs.',
+        description: 'White-label, SSO, compliance, and dedicated infrastructure.',
         icon: Sparkles,
         gradient: 'from-amber-500 to-orange-600',
         bgGradient: 'from-amber-50 to-orange-50',
@@ -208,13 +216,13 @@ const PLANS = [
         features: {
             included: [
                 'Everything in Pro, plus:',
-                'Dedicated AI models (optional)',
+                'Dedicated AI models',
+                'White-labeling & SSO',
                 'Compliance & audit logs',
                 'Private deployments',
-                'White-labeling & SSO',
                 'Custom integrations (2/year)',
                 'Unlimited team members',
-                'Dedicated account manager'
+                'Dedicated account manager',
             ],
             excluded: []
         },
@@ -235,10 +243,11 @@ const FEATURE_COMPARISON = [
         features: [
             { name: 'Read messages', free: true, starter: true, business: true, pro: true },
             { name: 'Send & reply', free: false, starter: true, business: true, pro: true },
+            { name: 'Create tasks from messages', free: false, starter: true, business: true, pro: true },
             { name: 'AI-assisted replies', free: false, starter: false, business: true, pro: true },
             { name: 'Message triggers', free: false, starter: false, business: true, pro: true },
             { name: 'Multi-client inboxes', free: false, starter: false, business: false, pro: true },
-            { name: 'SLA tracking', free: false, starter: false, business: false, pro: true },
+            { name: 'SLA tracking & alerts', free: false, starter: false, business: false, pro: true },
         ]
     },
     {
@@ -247,10 +256,11 @@ const FEATURE_COMPARISON = [
         features: [
             { name: 'View events', free: true, starter: true, business: true, pro: true },
             { name: 'Create & edit events', free: false, starter: true, business: true, pro: true },
-            { name: 'Smart Scheduler', free: false, starter: false, business: true, pro: true },
+            { name: 'Smart Scheduler (AI)', free: false, starter: false, business: true, pro: true },
             { name: 'Conflict detection', free: false, starter: false, business: true, pro: true },
             { name: 'Auto follow-ups', free: false, starter: false, business: true, pro: true },
-            { name: 'Advanced rules', free: false, starter: false, business: false, pro: true },
+            { name: 'Advanced scheduling rules', free: false, starter: false, business: false, pro: true },
+            { name: 'Cross-client calendar', free: false, starter: false, business: false, pro: true },
         ]
     },
     {
@@ -260,29 +270,63 @@ const FEATURE_COMPARISON = [
             { name: 'View tasks', free: true, starter: true, business: true, pro: true },
             { name: 'Create & update tasks', free: false, starter: true, business: true, pro: true },
             { name: 'Multiple task tools', free: false, starter: false, business: true, pro: true },
-            { name: 'Task analytics', free: false, starter: false, business: true, pro: true },
-            { name: 'Client separation', free: false, starter: false, business: false, pro: true },
+            { name: 'Task analytics & progress', free: false, starter: false, business: true, pro: true },
+            { name: 'Client-separated tasks', free: false, starter: false, business: false, pro: true },
             { name: 'Advanced reports', free: false, starter: false, business: false, pro: true },
         ]
     },
     {
-        category: 'AI Features',
+        category: 'AI & Automation',
         icon: Bot,
         features: [
-            { name: 'AI Chat', free: 'Basic', starter: 'Core', business: 'Advanced', pro: 'Power Mode' },
+            { name: 'AI Chat', free: 'Basic', starter: 'Workspace', business: 'Advanced', pro: 'Power Mode' },
             { name: 'AI Briefing', free: 'Weekly', starter: 'Daily/Weekly', business: 'Custom', pro: 'Real-time' },
-            { name: 'Smart Scheduler', free: false, starter: false, business: 'Core', pro: 'Advanced' },
+            { name: 'Smart Scheduler', free: false, starter: false, business: true, pro: 'Advanced' },
+            { name: 'Workflow Builder', free: '3 templates', starter: '5 workflows', business: '30 workflows', pro: 'Unlimited' },
+            { name: 'Workflow Marketplace', free: 'Browse', starter: 'Import', business: 'Publish', pro: 'Full access' },
+            { name: 'MCP Tools & Agent Hub', free: 'Basic', starter: 'Basic', business: true, pro: true },
+        ]
+    },
+    {
+        category: 'Integrations',
+        icon: Globe,
+        features: [
+            { name: 'Gmail / Outlook', free: true, starter: true, business: true, pro: true },
+            { name: 'Slack / Teams / Telegram', free: true, starter: true, business: true, pro: true },
+            { name: 'WhatsApp Business', free: true, starter: true, business: true, pro: true },
+            { name: 'Jira / Trello / Asana / ClickUp', free: true, starter: true, business: true, pro: true },
+            { name: 'Google Workspace / Zoho CRM', free: false, starter: true, business: true, pro: true },
+            { name: 'HubSpot / Salesforce', free: false, starter: false, business: true, pro: true },
+            { name: 'Facebook / Instagram / LinkedIn / X', free: false, starter: false, business: true, pro: true },
+            { name: 'TikTok Dashboard', free: false, starter: false, business: true, pro: true },
+            { name: 'Zoom / Notion', free: false, starter: false, business: true, pro: true },
+            { name: 'QuickBooks / Xero', free: false, starter: false, business: true, pro: true },
+        ]
+    },
+    {
+        category: 'WhatsApp Business',
+        icon: Headphones,
+        features: [
+            { name: 'Connect WhatsApp', free: true, starter: true, business: true, pro: true },
+            { name: 'Contact management', free: true, starter: true, business: true, pro: true },
+            { name: 'Auto-reply rules', free: false, starter: false, business: true, pro: true },
+            { name: 'AI-powered replies', free: false, starter: false, business: true, pro: true },
+            { name: 'Broadcast campaigns', free: false, starter: false, business: true, pro: true },
         ]
     },
     {
         category: 'Limits & Support',
         icon: TrendingUp,
         features: [
-            { name: 'AI Actions/month', free: '100', starter: '500', business: '2,000', pro: '5,000' },
+            { name: 'AI actions/month', free: '100', starter: '500', business: '2,000', pro: '5,000' },
             { name: 'Automation runs/month', free: '500', starter: '2,000', business: '15,000', pro: '50,000' },
             { name: 'Active workflows', free: '3', starter: '5', business: '30', pro: 'Unlimited' },
             { name: 'Team members', free: '1', starter: '1', business: '3', pro: '10' },
             { name: 'Providers per category', free: '1', starter: '2', business: '5', pro: 'Unlimited' },
+            { name: 'API access', free: false, starter: false, business: '5K req/day', pro: '50K req/day' },
+            { name: 'Organization management', free: false, starter: false, business: true, pro: true },
+            { name: 'Security (2FA / Passkeys)', free: true, starter: true, business: true, pro: true },
+            { name: 'Support level', free: 'Community', starter: 'Email', business: 'Priority', pro: 'Dedicated' },
         ]
     }
 ];
@@ -314,6 +358,7 @@ const Pricing: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [showComparison, setShowComparison] = useState(false);
     const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
+    const [expandedPlans, setExpandedPlans] = useState<Set<string>>(new Set());
 
 
     // Fetch Paystack public key on mount - ONLY if user is logged in
@@ -476,7 +521,7 @@ const Pricing: React.FC = () => {
             {/* ================================================================ */}
             <section className="relative pb-16 md:pb-24 -mt-8">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 items-start">
                         {PLANS.map((plan) => {
                             const Icon = plan.icon;
                             const isCurrentPlan = user?.subscription_tier === plan.id;
@@ -583,18 +628,33 @@ const Pricing: React.FC = () => {
                                         <div className="mt-6 pt-6 border-t border-gray-100 dark:border-slate-800">
                                             <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">What's included:</h4>
                                             <ul className="space-y-2.5">
-                                                {plan.features.included.slice(0, 6).map((feature, idx) => (
+                                                {(expandedPlans.has(plan.id) ? plan.features.included : plan.features.included.slice(0, 6)).map((feature, idx) => (
                                                     <li key={idx} className="flex items-start gap-2 text-sm text-gray-600 dark:text-slate-400">
                                                         <Check className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
                                                         <span>{feature}</span>
                                                     </li>
                                                 ))}
-                                                {plan.features.included.length > 6 && (
-                                                    <li className="text-sm text-indigo-600 dark:text-indigo-400 font-medium">
-                                                        +{plan.features.included.length - 6} more features
-                                                    </li>
-                                                )}
                                             </ul>
+                                            {plan.features.included.length > 6 && (
+                                                <button
+                                                    onClick={() => setExpandedPlans(prev => {
+                                                        const next = new Set(prev);
+                                                        if (next.has(plan.id)) {
+                                                            next.delete(plan.id);
+                                                        } else {
+                                                            next.add(plan.id);
+                                                        }
+                                                        return next;
+                                                    })}
+                                                    className="mt-3 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors flex items-center gap-1"
+                                                >
+                                                    {expandedPlans.has(plan.id)
+                                                        ? 'Show less'
+                                                        : `+${plan.features.included.length - 6} more features`
+                                                    }
+                                                    <ChevronDown className={`w-4 h-4 transition-transform ${expandedPlans.has(plan.id) ? 'rotate-180' : ''}`} />
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
                                 </div>

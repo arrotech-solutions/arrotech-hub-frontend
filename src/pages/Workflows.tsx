@@ -38,6 +38,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { useSubscription } from '../hooks/useSubscription';
+import { useWebSocket } from '../hooks/useWebSocket';
 import toast from 'react-hot-toast';
 import EnhancedWorkflowCreator from '../components/EnhancedWorkflowCreator';
 import ExecuteWorkflowModal from '../components/ExecuteWorkflowModal';
@@ -94,9 +95,49 @@ const Workflows: React.FC = () => {
     draft: 0,
     completed: 0,
     executions: 0,
-    running: 0,
     failed: 0
   });
+
+  // Real-time updates
+  const { isConnected, lastEvent } = useWebSocket();
+
+  useEffect(() => {
+    if (!lastEvent) return;
+
+    if (lastEvent.type === 'workflow_execution_started') {
+      const data = lastEvent.data;
+      setExecutions(prev => {
+        if (prev.some(e => e.id === data.execution_id)) return prev;
+
+        // Find workflow to get some default info
+        const wf = workflows.find(w => w.id === data.workflow_id);
+
+        const newExecution: WorkflowExecution = {
+          id: data.execution_id,
+          workflow_id: data.workflow_id,
+          status: 'running',
+          trigger_type: wf?.trigger_type || 'event',
+          created_at: new Date().toISOString(),
+          started_at: new Date().toISOString(),
+          user_id: user?.id || 0,
+        };
+        return [newExecution, ...prev];
+      });
+    } else if (lastEvent.type === 'workflow_execution_completed') {
+      const data = lastEvent.data;
+      setExecutions(prev => prev.map(e =>
+        e.id === data.execution_id
+          ? { ...e, status: data.status, completed_at: data.completed_at }
+          : e
+      ));
+    } else if (lastEvent.type === 'workflow_step_started' || lastEvent.type === 'workflow_step_completed') {
+      const data = lastEvent.data;
+      // If we are currently viewing this execution, reload the step executions
+      if (selectedExecution && selectedExecution.id === data.execution_id) {
+        loadStepExecutions(selectedExecution.id);
+      }
+    }
+  }, [lastEvent, workflows, user]);
 
   useEffect(() => {
     loadWorkflows();
@@ -404,64 +445,128 @@ const Workflows: React.FC = () => {
       : null;
 
     return (
-      <div key={execution.id} className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 hover:shadow-lg transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-500/50 group">
-        <div className="p-6">
+      <div key={execution.id} className="relative bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl rounded-2xl border border-white/20 dark:border-slate-700/50 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 overflow-hidden flex flex-col group">
+        <div className={`absolute top-0 left-0 right-0 h-1 ${execution.status === 'running' ? 'bg-blue-500 animate-pulse' : execution.status === 'completed' ? 'bg-green-500' : execution.status === 'failed' ? 'bg-red-500' : 'bg-gray-200 dark:bg-slate-700'}`}></div>
+        <div className="p-5 flex-1 flex flex-col">
           <div className="flex items-start justify-between mb-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg">
-                <PlayCircle className="w-5 h-5 text-white" />
+            <div className="flex items-center space-x-3 flex-1 min-w-0 pr-2">
+              <div className="p-2.5 bg-gradient-to-br from-purple-500/10 to-blue-600/10 dark:from-purple-500/20 dark:to-blue-600/20 rounded-xl shrink-0">
+                <PlayCircle className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+              <div className="min-w-0 flex-1">
+                <h3 className="text-base font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">
                   {workflow?.name || `Workflow ${execution.workflow_id}`}
                 </h3>
-                <p className="text-sm text-gray-500 dark:text-slate-400">Execution #{execution.id}</p>
+                <div className="flex items-center space-x-2 mt-0.5">
+                  <span className="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest">
+                    ID: {execution.id}
+                  </span>
+                  <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-slate-600"></span>
+                  <span className="flex items-center space-x-1 text-[10px] font-bold text-gray-500 dark:text-slate-400">
+                    <Zap className="w-3 h-3 text-amber-500" />
+                    <span className="capitalize">{execution.trigger_type}</span>
+                  </span>
+                </div>
               </div>
             </div>
-            <div className={`px-3 py-1 rounded-full text-xs font-medium flex items-center space-x-1 border ${getStatusColor(execution.status)}`}>
+            <div className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider flex items-center space-x-1.5 shrink-0 border ${getStatusColor(execution.status)}`}>
               {getStatusIcon(execution.status)}
-              <span className="capitalize">{execution.status}</span>
+              <span>{execution.status}</span>
             </div>
           </div>
 
-          <div className="flex items-center justify-between text-xs text-gray-500 dark:text-slate-400 mb-4">
-            <div className="flex items-center space-x-4">
-              <span className="flex items-center space-x-1">
-                <Clock className="w-3 h-3" />
-                <span>{new Date(execution.created_at).toLocaleDateString()}</span>
-              </span>
-              {duration && (
-                <span className="flex items-center space-x-1">
-                  <Target className="w-3 h-3" />
+          <div className="mt-auto pt-4 border-t border-gray-100 dark:border-slate-800/50 flex items-center justify-between">
+            <div className="flex items-center space-x-4 text-xs font-medium text-gray-500 dark:text-slate-400">
+              <div className="flex items-center space-x-1.5" title="Started At">
+                <Clock className="w-3.5 h-3.5" />
+                <span>{new Date(execution.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+              </div>
+              {duration !== null && (
+                <div className="flex items-center space-x-1.5" title="Duration">
+                  <Target className="w-3.5 h-3.5" />
                   <span>{duration}s</span>
-                </span>
+                </div>
               )}
             </div>
-            <span className="flex items-center space-x-1">
-              <Zap className="w-3 h-3" />
-              <span>{execution.trigger_type}</span>
-            </span>
-          </div>
-
-          <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-slate-700/50">
-            <div className="flex space-x-2">
-              <button
-                onClick={() => handleViewExecution(execution)}
-                className="flex items-center space-x-1 px-3 py-1.5 text-xs bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-sm"
-              >
-                <Eye className="w-3 h-3" />
-                <span>View Details</span>
-              </button>
+            
+            <div className="flex items-center space-x-2">
               {execution.status === 'running' && (
                 <button
                   onClick={() => handleCancelExecution(execution.id)}
-                  className="flex items-center space-x-1 px-3 py-1.5 text-xs bg-red-100 dark:bg-red-500/10 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-500/20 transition-colors"
+                  className="p-1.5 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors"
+                  title="Cancel Execution"
                 >
-                  <X className="w-3 h-3" />
-                  <span>Cancel</span>
+                  <X className="w-4 h-4" />
                 </button>
               )}
+              <button
+                onClick={() => handleViewExecution(execution)}
+                className="flex items-center space-x-1.5 px-3 py-1.5 text-xs bg-gray-900 dark:bg-slate-700 text-white rounded-lg hover:bg-black dark:hover:bg-slate-600 hover:shadow-lg transition-all font-bold"
+              >
+                <Eye className="w-3.5 h-3.5" />
+                <span>Details</span>
+              </button>
             </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderExecutionList = (execution: WorkflowExecution) => {
+    const workflow = workflows.find(w => w.id === execution.workflow_id);
+    const duration = execution.started_at && execution.completed_at
+      ? Math.round((new Date(execution.completed_at).getTime() - new Date(execution.started_at).getTime()) / 1000)
+      : null;
+
+    return (
+      <div key={execution.id} className="group bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm hover:shadow-md hover:border-blue-200 dark:hover:border-blue-500/50 transition-all duration-300 flex items-center p-4 relative overflow-hidden">
+        <div className={`absolute left-0 top-0 bottom-0 w-1 ${execution.status === 'running' ? 'bg-blue-500 animate-pulse' : execution.status === 'completed' ? 'bg-green-500' : execution.status === 'failed' ? 'bg-red-500' : 'bg-gray-200 dark:bg-slate-700'}`}></div>
+
+        <div className="ml-2 w-10 h-10 rounded-lg bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-800 flex items-center justify-center shrink-0 text-gray-500 dark:text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:bg-blue-50 dark:group-hover:bg-blue-500/10 transition-colors">
+          <PlayCircle className="w-5 h-5" />
+        </div>
+
+        <div className="ml-4 flex-1 min-w-0 grid grid-cols-12 gap-4 items-center">
+          <div className="col-span-4 pr-2">
+            <h3 className="text-sm font-bold text-gray-900 dark:text-white truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+              {workflow?.name || `Workflow ${execution.workflow_id}`}
+            </h3>
+            <p className="text-xs text-gray-500 dark:text-slate-400 truncate">Execution #{execution.id}</p>
+          </div>
+
+          <div className="col-span-3 flex flex-col space-y-1">
+            <div title={`Trigger: ${execution.trigger_type}`} className="flex items-center space-x-1.5 w-fit px-1.5 py-0.5 rounded bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-800 text-[10px] text-gray-600 dark:text-slate-400 font-medium">
+              <Zap className="w-2.5 h-2.5 text-amber-500 shrink-0" />
+              <span className="capitalize truncate">{execution.trigger_type}</span>
+            </div>
+            <div className="flex items-center space-x-1 text-[10px] text-gray-400 dark:text-slate-500 font-medium whitespace-nowrap">
+              <Clock className="w-2.5 h-2.5 shrink-0" />
+              <span className="truncate">{new Date(execution.created_at).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+            </div>
+          </div>
+
+          <div className="col-span-2 flex items-center text-xs text-gray-500 dark:text-slate-400 font-medium">
+            <Target className="w-3.5 h-3.5 mr-1.5 shrink-0" />
+            <span className="truncate">{duration !== null ? `${duration}s` : '-'}</span>
+          </div>
+
+          <div className="col-span-2 min-w-0">
+            <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border max-w-full ${getStatusColor(execution.status)}`}>
+              <span className="mr-1 shrink-0">{getStatusIcon(execution.status)}</span>
+              <span className="truncate">{execution.status}</span>
+            </span>
+          </div>
+
+          <div className="col-span-1 flex items-center justify-end space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            {execution.status === 'running' && (
+              <button onClick={() => handleCancelExecution(execution.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Cancel">
+                <X className="w-4 h-4" />
+              </button>
+            )}
+            <button onClick={() => handleViewExecution(execution)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="View Details">
+              <Eye className="w-4 h-4" />
+            </button>
           </div>
         </div>
       </div>
@@ -968,8 +1073,36 @@ const Workflows: React.FC = () => {
               </button>
             </div>
           ) : (
-            <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-4'}>
-              {filteredExecutions.map(renderExecutionCard)}
+            <div className="space-y-8">
+              {/* Active Runs Section */}
+              {filteredExecutions.some(e => e.status === 'running' || e.status === 'pending') && (
+                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  <h4 className="text-lg font-black text-gray-900 dark:text-white mb-6 flex items-center space-x-3">
+                    <div className="relative flex h-3 w-3">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
+                    </div>
+                    <span>Currently Running</span>
+                    <span className="px-2.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 text-xs font-bold">
+                      {filteredExecutions.filter(e => e.status === 'running' || e.status === 'pending').length} Active
+                    </span>
+                  </h4>
+                  <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-4'}>
+                    {filteredExecutions.filter(e => e.status === 'running' || e.status === 'pending').map(viewMode === 'grid' ? renderExecutionCard : renderExecutionList)}
+                  </div>
+                </div>
+              )}
+
+              {/* Historical Runs Section */}
+              <div className={filteredExecutions.some(e => e.status === 'running' || e.status === 'pending') ? 'pt-8 border-t border-gray-100 dark:border-slate-800' : ''}>
+                <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center space-x-2">
+                  <Clock className="w-5 h-5 text-gray-400 dark:text-slate-500" />
+                  <span>Execution History</span>
+                </h4>
+                <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-4'}>
+                  {filteredExecutions.filter(e => e.status !== 'running' && e.status !== 'pending').map(viewMode === 'grid' ? renderExecutionCard : renderExecutionList)}
+                </div>
+              </div>
             </div>
           )
         ) : (
@@ -1157,27 +1290,25 @@ const Workflows: React.FC = () => {
         {showExecutionModal && selectedExecution && (
           <div className="fixed inset-0 bg-slate-900/60 dark:bg-black/70 backdrop-blur-md flex items-center justify-center z-[60] p-4 sm:p-6 transition-all duration-300">
             <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-3xl shadow-2xl w-full max-w-7xl h-[85vh] overflow-hidden flex flex-col border border-white/20 dark:border-slate-800/80 ring-1 ring-black/5">
-              
+
               {/* Top Header Bar */}
               <div className="flex-none flex items-center justify-between px-6 py-5 bg-white/50 dark:bg-slate-900/50 border-b border-gray-100 dark:border-slate-800 backdrop-blur-md relative z-10">
                 <div className="flex items-center space-x-4">
-                  <div className={`p-3 rounded-2xl flex items-center justify-center ${
-                    selectedExecution.status === 'completed' ? 'bg-green-100 dark:bg-green-500/20 text-green-600' :
-                    selectedExecution.status === 'failed' ? 'bg-red-100 dark:bg-red-500/20 text-red-600' :
-                    selectedExecution.status === 'running' ? 'bg-blue-100 dark:bg-blue-500/20 text-blue-600 animate-pulse' :
-                    'bg-gray-100 dark:bg-slate-800 text-gray-500'
-                  }`}>
+                  <div className={`p-3 rounded-2xl flex items-center justify-center ${selectedExecution.status === 'completed' ? 'bg-green-100 dark:bg-green-500/20 text-green-600' :
+                      selectedExecution.status === 'failed' ? 'bg-red-100 dark:bg-red-500/20 text-red-600' :
+                        selectedExecution.status === 'running' ? 'bg-blue-100 dark:bg-blue-500/20 text-blue-600 animate-pulse' :
+                          'bg-gray-100 dark:bg-slate-800 text-gray-500'
+                    }`}>
                     {getStatusIcon(selectedExecution.status)}
                   </div>
                   <div>
                     <h2 className="text-xl font-bold tracking-tight text-gray-900 dark:text-white flex items-center space-x-3">
                       <span>Execution Inspector</span>
-                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider ${
-                        selectedExecution.status === 'completed' ? 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400' :
-                        selectedExecution.status === 'failed' ? 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400' :
-                        selectedExecution.status === 'running' ? 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400' :
-                        'bg-gray-100 text-gray-700 dark:bg-slate-800 dark:text-gray-400'
-                      }`}>
+                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider ${selectedExecution.status === 'completed' ? 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400' :
+                          selectedExecution.status === 'failed' ? 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400' :
+                            selectedExecution.status === 'running' ? 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400' :
+                              'bg-gray-100 text-gray-700 dark:bg-slate-800 dark:text-gray-400'
+                        }`}>
                         {selectedExecution.status}
                       </span>
                     </h2>
@@ -1196,32 +1327,30 @@ const Workflows: React.FC = () => {
 
               {/* Main Split Body */}
               <div className="flex-1 flex overflow-hidden">
-                
+
                 {/* Left Pane: Timeline Drawer */}
                 <div className="w-1/3 min-w-[300px] max-w-[400px] border-r border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-900/30 overflow-y-auto px-6 py-8">
                   <h3 className="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-6 px-2">Execution Timeline</h3>
-                  
+
                   <div className="relative">
                     {/* Vertical Connector Line */}
                     <div className="absolute left-[27px] top-8 bottom-8 w-0.5 bg-gray-200 dark:bg-slate-800 rounded-full" />
-                    
+
                     {/* Overall Overview Node */}
-                    <button 
+                    <button
                       onClick={() => setSelectedStepId(null)}
                       className={`relative z-10 w-full text-left mb-6 group transition-all duration-200 ${!selectedStepId ? 'scale-[1.02]' : 'opacity-70 hover:opacity-100 hover:scale-[1.01]'}`}
                     >
-                      <div className={`p-4 rounded-2xl border backdrop-blur-sm transition-all shadow-sm ${
-                        !selectedStepId 
-                          ? 'bg-white dark:bg-slate-800 border-purple-200 dark:border-purple-500/30 ring-4 ring-purple-500/10' 
+                      <div className={`p-4 rounded-2xl border backdrop-blur-sm transition-all shadow-sm ${!selectedStepId
+                          ? 'bg-white dark:bg-slate-800 border-purple-200 dark:border-purple-500/30 ring-4 ring-purple-500/10'
                           : 'bg-white/80 dark:bg-slate-800/80 border-gray-100 dark:border-slate-700/50 hover:border-gray-300 dark:hover:border-slate-600'
-                      }`}>
+                        }`}>
                         <div className="flex items-center space-x-4">
-                          <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 border-4 border-gray-50 dark:border-slate-900 ${
-                            selectedExecution.status === 'completed' ? 'bg-green-500 text-white' :
-                            selectedExecution.status === 'failed' ? 'bg-red-500 text-white' :
-                            selectedExecution.status === 'running' ? 'bg-blue-500 text-white ring-4 ring-blue-500/20' :
-                            'bg-gray-400 text-white'
-                          }`}>
+                          <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 border-4 border-gray-50 dark:border-slate-900 ${selectedExecution.status === 'completed' ? 'bg-green-500 text-white' :
+                              selectedExecution.status === 'failed' ? 'bg-red-500 text-white' :
+                                selectedExecution.status === 'running' ? 'bg-blue-500 text-white ring-4 ring-blue-500/20' :
+                                  'bg-gray-400 text-white'
+                            }`}>
                             <Activity className="w-3 h-3" />
                           </div>
                           <div className="min-w-0">
@@ -1239,28 +1368,26 @@ const Workflows: React.FC = () => {
                       {stepExecutions.map((stepExecution, index) => {
                         const isSelected = selectedStepId === stepExecution.id;
                         return (
-                          <button 
+                          <button
                             key={stepExecution.id}
                             onClick={() => setSelectedStepId(stepExecution.id)}
                             className={`relative z-10 w-full text-left group transition-all duration-200 ${isSelected ? 'scale-[1.02]' : 'opacity-70 hover:opacity-100 hover:scale-[1.01]'}`}
                           >
-                            <div className={`p-4 rounded-2xl border backdrop-blur-sm transition-all shadow-sm ${
-                              isSelected 
-                                ? 'bg-white dark:bg-slate-800 border-blue-200 dark:border-blue-500/50 ring-4 ring-blue-500/10' 
+                            <div className={`p-4 rounded-2xl border backdrop-blur-sm transition-all shadow-sm ${isSelected
+                                ? 'bg-white dark:bg-slate-800 border-blue-200 dark:border-blue-500/50 ring-4 ring-blue-500/10'
                                 : 'bg-white/80 dark:bg-slate-800/80 border-gray-100 dark:border-slate-700/50 hover:border-gray-300 dark:hover:border-slate-600'
-                            }`}>
+                              }`}>
                               <div className="flex items-start justify-between">
                                 <div className="flex items-start space-x-4">
-                                  <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 border-4 border-gray-50 dark:border-slate-900 mt-0.5 ${
-                                    stepExecution.status === 'completed' ? 'bg-green-500 text-white' :
-                                    stepExecution.status === 'failed' ? 'bg-red-500 text-white' :
-                                    stepExecution.status === 'running' ? 'bg-blue-500 text-white ring-4 ring-blue-500/20' :
-                                    'bg-gray-200 dark:bg-slate-700 text-gray-500'
-                                  }`}>
+                                  <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 border-4 border-gray-50 dark:border-slate-900 mt-0.5 ${stepExecution.status === 'completed' ? 'bg-green-500 text-white' :
+                                      stepExecution.status === 'failed' ? 'bg-red-500 text-white' :
+                                        stepExecution.status === 'running' ? 'bg-blue-500 text-white ring-4 ring-blue-500/20' :
+                                          'bg-gray-200 dark:bg-slate-700 text-gray-500'
+                                    }`}>
                                     {stepExecution.status === 'completed' ? <CheckCircle className="w-3 h-3" /> :
-                                     stepExecution.status === 'failed' ? <AlertCircle className="w-3 h-3" /> :
-                                     stepExecution.status === 'running' ? <PlayCircle className="w-3 h-3" /> :
-                                     <span className="text-[10px] font-bold">{index + 1}</span>}
+                                      stepExecution.status === 'failed' ? <AlertCircle className="w-3 h-3" /> :
+                                        stepExecution.status === 'running' ? <PlayCircle className="w-3 h-3" /> :
+                                          <span className="text-[10px] font-bold">{index + 1}</span>}
                                   </div>
                                   <div className="min-w-0 pr-2">
                                     <h4 className={`text-sm font-bold truncate ${isSelected ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>
@@ -1272,7 +1399,7 @@ const Workflows: React.FC = () => {
                                     <div className="flex items-center space-x-2 mt-2">
                                       {stepExecution.started_at && (
                                         <span className="text-[10px] font-medium text-gray-400 dark:text-slate-500 bg-gray-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">
-                                          {new Date(stepExecution.started_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'})}
+                                          {new Date(stepExecution.started_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                                         </span>
                                       )}
                                       {stepExecution.retry_count > 0 && (
@@ -1302,7 +1429,7 @@ const Workflows: React.FC = () => {
                 {/* Right Pane: Details Inspector */}
                 <div className="flex-1 overflow-y-auto bg-white dark:bg-[#0a0f1c] relative">
                   {(() => {
-                    const viewData = selectedStepId 
+                    const viewData = selectedStepId
                       ? stepExecutions.find(s => s.id === selectedStepId)
                       : selectedExecution;
 
@@ -1393,7 +1520,7 @@ const Workflows: React.FC = () => {
                             </div>
                           )}
                         </div>
-                        
+
                       </div>
                     );
                   })()}

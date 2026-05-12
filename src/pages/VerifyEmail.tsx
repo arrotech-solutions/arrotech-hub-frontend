@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth';
 import SEO from '../components/SEO';
 import { ThemeToggle } from '../components/ThemeToggle';
 import logo from '../assets/Logo/fulllogo_transparent.png';
+import logoIcon from '../assets/Logo/icononly_transparent_nobuffer.png';
 
 const RESEND_COOLDOWN = 60; // seconds
 
@@ -180,8 +181,9 @@ const VerifyEmail: React.FC = () => {
         <div className="max-w-md w-full">
           {/* Logo & Header */}
           <div className="text-center mb-6">
-            <div className="inline-block mb-4">
-              <img src={logo} alt="Arrotech Hub" className="h-12 w-auto object-contain" />
+            <div className="inline-flex items-center gap-2 group hover:scale-[1.02] transition-transform mb-4">
+              <img src={logoIcon} alt="Arrotech Hub" className="h-6 w-auto object-contain" />
+              <span className="text-[15px] font-black bg-gradient-to-r from-slate-900 to-blue-600 dark:from-white dark:to-blue-400 bg-clip-text text-transparent tracking-tighter">ARROTECH</span>
             </div>
             <div className="relative mx-auto w-20 h-20 mb-5">
               <div className="absolute inset-0 bg-violet-500/10 dark:bg-violet-500/20 rounded-full animate-pulse" />
