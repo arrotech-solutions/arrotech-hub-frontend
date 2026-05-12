@@ -10,6 +10,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from '../assets/Logo/fulllogo_transparent.png';
+import logoIcon from '../assets/Logo/icononly_transparent_nobuffer.png';
 import { useAuth } from '../hooks/useAuth';
 import SEO from '../components/SEO';
 import { ThemeToggle } from '../components/ThemeToggle';
@@ -278,9 +279,10 @@ const Login: React.FC = () => {
         <div className="max-w-md w-full space-y-6">
           {/* Header */}
           <div className="text-center">
-            <div className="flex items-center justify-center mb-3">
-              <Link to="/" className="hover:scale-110 transition-transform">
-                <img src={logo} alt="Arrotech Hub" className="h-16 w-auto object-contain" />
+            <div className="flex items-center justify-center mb-4">
+              <Link to="/" className="flex items-center gap-2 group hover:scale-[1.02] transition-transform">
+                <img src={logoIcon} alt="Arrotech Hub" className="h-8 w-auto object-contain" />
+                <span className="text-[18px] font-black bg-gradient-to-r from-slate-900 to-blue-600 dark:from-white dark:to-blue-400 bg-clip-text text-transparent tracking-tighter">ARROTECH</span>
               </Link>
             </div>
             <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-1 tracking-tighter leading-tight transition-colors">
