@@ -61,6 +61,7 @@ const CreateOrganization = lazy(() => import('./pages/CreateOrganization'));
 const OrganizationSettings = lazy(() => import('./pages/OrganizationSettings'));
 const AcceptInvite = lazy(() => import('./pages/AcceptInvite'));
 const VerifyEmail = lazy(() => import('./pages/VerifyEmail'));
+const CodingAgent = lazy(() => import('./pages/CodingAgent'));
 
 
 
@@ -328,6 +329,19 @@ const AppRoutes: React.FC = () => {
       /> */}
 
       <Route
+        path="/coding-agent"
+        element={
+          <ProtectedRoute>
+            <RequireVerifiedEmail>
+              <Layout>
+                <CodingAgent />
+              </Layout>
+            </RequireVerifiedEmail>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
         path="/usage"
         element={
           <ProtectedRoute>
@@ -523,6 +537,7 @@ const DefaultGlobalCommands: React.FC = () => {
   // Apps & Tools
   useCommand({ id: 'nav-workflows', name: 'Workflows', section: 'Apps', icon: <GitBranch className="w-4 h-4" />, shortcut: ['g', 'w'], action: () => navigate('/workflows') });
   useCommand({ id: 'nav-agents', name: 'AI Agents', section: 'Apps', icon: <Bot className="w-4 h-4" />, shortcut: ['g', 'a'], action: () => navigate('/agents') });
+  useCommand({ id: 'nav-coding-agent', name: 'Coding Agent', section: 'Apps', icon: <Bot className="w-4 h-4" />, shortcut: ['g', 'e'], action: () => navigate('/coding-agent') });
   useCommand({ id: 'nav-whatsapp', name: 'WhatsApp', section: 'Social', icon: <MessageCircle className="w-4 h-4" />, action: () => navigate('/whatsapp') });
   useCommand({ id: 'nav-tiktok', name: 'TikTok', section: 'Social', icon: <Video className="w-4 h-4" />, action: () => navigate('/tiktok') });
   useCommand({ id: 'nav-marketplace', name: 'Marketplace', section: 'Apps', icon: <ShoppingBag className="w-4 h-4" />, action: () => navigate('/marketplace') });

@@ -40,7 +40,8 @@ import {
   InstagramLogo,
   SalesforceLogo,
   AirtableLogo,
-  XeroLogo
+  XeroLogo,
+  GitHubLogo
 } from '../components/BrandIcons';
 import KraPinModal from '../components/KraPinModal';
 import TelegramLogoImg from '../assets/apps/telegram.png';
@@ -107,6 +108,7 @@ const Integrations: React.FC = () => {
       case 'airtable': return <AirtableLogo {...props} />;
       case 'xero': return <XeroLogo {...props} />;
       case 'telegram': return <img src={TelegramLogoImg} alt="Telegram" {...props} />;
+      case 'github': return <GitHubLogo {...props} />;
       default: return <Database {...props} className="text-gray-400 p-2" />;
     }
   };
@@ -120,7 +122,7 @@ const Integrations: React.FC = () => {
     if (id.includes('shopify') || id.includes('jumia')) return 'E-commerce';
     if (id.includes('mpesa') || id.includes('airtel') || id.includes('stripe')) return 'Payment';
     if (id.includes('quickbooks') || id.includes('xero')) return 'Accounting';
-    if (id.includes('clickup') || id.includes('asana') || id.includes('trello') || id.includes('notion') || id.includes('jira') || id.includes('airtable')) return 'Productivity';
+    if (id.includes('clickup') || id.includes('asana') || id.includes('trello') || id.includes('notion') || id.includes('jira') || id.includes('airtable') || id.includes('github')) return 'Productivity';
     return 'Other';
   };
 
@@ -221,6 +223,8 @@ const Integrations: React.FC = () => {
         toast.success('Xero connected successfully!');
       } else if (success === 'linkedin_connected') {
         toast.success('LinkedIn connected successfully!');
+      } else if (success === 'github_connected') {
+        toast.success('GitHub connected successfully!');
       } else if (success === 'telegram_connected') {
         toast.success('Telegram connected successfully!');
       } else {
@@ -317,14 +321,17 @@ const Integrations: React.FC = () => {
     const configId = import.meta.env.VITE_FACEBOOK_CONFIG_ID;
 
     if (!appId) {
-      toast.error('WhatsApp integration is not configured. Please contact support.');
+      // Embedded signup requires Meta App ID; fall back to redirect OAuth which works without it
+      console.warn('VITE_FACEBOOK_APP_ID not set — falling back to redirect OAuth');
+      toast('Setting up WhatsApp via Meta login...', { icon: '🔄' });
+      connectWhatsAppViaRedirect();
       return;
     }
 
     const FB = (window as any).FB;
     if (!FB) {
       // If SDK isn't loaded, fall back to redirect OAuth
-      toast('Facebook SDK not available. Redirecting to Meta login...', { icon: '🔄' });
+      toast('Redirecting to Meta login...', { icon: '🔄' });
       connectWhatsAppViaRedirect();
       return;
     }
@@ -809,6 +816,30 @@ const Integrations: React.FC = () => {
           });
         } else {
           toast.error('Failed to initiate HubSpot connection');
+        }
+        return;
+      }
+    }
+
+    // Redirect to GitHub OAuth
+    if (platform.id === 'github' && !existing) {
+      try {
+        toast.loading('Redirecting to GitHub...', { id: 'oauth-redirect' });
+        const { auth_url } = await apiService.getGitHubAuthUrl();
+        window.location.href = auth_url;
+        return;
+      } catch (error: any) {
+        toast.dismiss('oauth-redirect');
+        if (error.response?.status === 402 || error.response?.data?.error === 'upgrade_required') {
+          const details = error.response?.data?.detail || error.response?.data || {};
+          setUpgradeModal({
+            isOpen: true,
+            feature: details.feature || 'GitHub integration',
+            requiredTier: details.required_tier || 'Business Pro',
+            currentTier: details.current_tier || 'Free'
+          });
+        } else {
+          toast.error('Failed to initiate GitHub connection');
         }
         return;
       }
