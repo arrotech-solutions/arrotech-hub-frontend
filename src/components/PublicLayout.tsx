@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, ChevronDown, LayoutDashboard, ArrowRight, Sun, Moon, BookOpen, LifeBuoy, Plug } from 'lucide-react';
+import { Menu, X, ChevronDown, LayoutDashboard, ArrowRight, Sun, Moon, BookOpen, LifeBuoy, Plug, FileText } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import logo from '../assets/Logo/fulllogo_transparent.png';
+import logoIcon from '../assets/Logo/icononly_transparent_nobuffer.png';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://prod.api.arrotechsolutions.com';
 
@@ -96,84 +97,113 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
 
             {/* Header */}
             <header
-                className={`fixed w-full top-0 z-50 transition-all duration-500 pt-4 flex justify-center`}
+                className={`fixed w-full top-0 z-50 transition-all duration-700 ${scrolled ? 'pt-2' : 'pt-6'} flex justify-center px-4`}
             >
-                <div className={`transition-all duration-500 w-full ${scrolled ? 'max-w-5xl px-3 sm:px-4' : 'max-w-7xl px-4 sm:px-6 lg:px-8'}`}>
-                    <div className={`relative flex justify-between items-center transition-all duration-500 rounded-full px-4 py-2 ${scrolled
-                            ? 'bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-gray-200/50 dark:border-slate-700/50 shadow-[0_8px_30px_rgb(0,0,0,0.08)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)]'
-                            : 'bg-transparent border border-transparent'
+                <div className={`transition-all duration-700 w-full ${scrolled ? 'max-w-4xl' : 'max-w-7xl'}`}>
+                    <nav className={`relative flex justify-between items-center transition-all duration-700 rounded-[2rem] px-6 py-3 ${scrolled
+                            ? 'bg-white/70 dark:bg-slate-950/70 backdrop-blur-3xl border border-white/40 dark:border-slate-800/40 shadow-[0_20px_50px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)]'
+                            : 'bg-white/40 dark:bg-slate-900/40 backdrop-blur-md border border-white/20 dark:border-slate-800/20'
                         }`}>
                         {/* Logo */}
-                        <Link to="/" className="relative flex items-center gap-2 group py-1">
-                            <img src={logo} alt="Arrotech Hub" className="h-9 sm:h-11 w-auto object-contain transition-all duration-300 group-hover:scale-[1.03] group-hover:opacity-90 dark:brightness-0 dark:invert" />
-                        </Link>
+                        <div className="flex-shrink-0">
+                            <Link to="/" className="relative flex items-center gap-2 group py-1">
+                                <img src={logoIcon} alt="Arrotech Hub" className="h-[32px] w-auto object-contain transition-all duration-300 group-hover:scale-[1.03] group-hover:opacity-90 dark:brightness-0 dark:invert" />
+                                <span className="text-[16px] sm:text-[18px] font-black bg-gradient-to-r from-slate-900 to-blue-600 dark:from-white dark:to-blue-400 bg-clip-text text-transparent tracking-tighter">ARROTECH</span>
+                            </Link>
+                        </div>
 
                         {/* Desktop Navigation */}
-                        <div className="hidden md:flex items-center gap-1 bg-slate-50/50 dark:bg-slate-800/30 backdrop-blur-xl px-1.5 py-1.5 rounded-full border border-slate-200/50 dark:border-slate-700/50 shadow-inner mx-auto absolute left-1/2 transform -translate-x-1/2">
-                            <button onClick={() => scrollToSection('features')} className="relative px-5 py-2 text-[13px] font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-full transition-all duration-300 group/nav overflow-hidden">
-                                <span className="relative z-10">Features</span>
-                                <div className="absolute inset-0 bg-white dark:bg-slate-700 rounded-full scale-0 group-hover/nav:scale-100 opacity-0 group-hover/nav:opacity-100 transition-all duration-300 origin-center shadow-sm"></div>
+                        <div className="hidden md:flex flex-1 items-center justify-center gap-1">
+                            <button 
+                                onClick={() => scrollToSection('features')} 
+                                className="relative px-4 py-2 text-[14px] font-bold text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white transition-all duration-300 group/nav"
+                            >
+                                <span className="relative z-10">Automation</span>
+                                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-1 bg-blue-600 dark:bg-blue-400 rounded-full transition-all duration-300 group-hover/nav:w-4 opacity-0 group-hover/nav:opacity-100"></div>
                             </button>
-                            <button onClick={() => scrollToSection('demo-video')} className="relative px-5 py-2 text-[13px] font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-full transition-all duration-300 group/nav overflow-hidden">
-                                <span className="relative z-10">How it Works</span>
-                                <div className="absolute inset-0 bg-white dark:bg-slate-700 rounded-full scale-0 group-hover/nav:scale-100 opacity-0 group-hover/nav:opacity-100 transition-all duration-300 origin-center shadow-sm"></div>
-                            </button>
-                            <Link to="/pricing" className="relative px-5 py-2 text-[13px] font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-full transition-all duration-300 group/nav overflow-hidden">
-                                <span className="relative z-10">Pricing</span>
-                                <div className="absolute inset-0 bg-white dark:bg-slate-700 rounded-full scale-0 group-hover/nav:scale-100 opacity-0 group-hover/nav:opacity-100 transition-all duration-300 origin-center shadow-sm"></div>
-                            </Link>
 
-                            {/* Resources Dropdown Mega Menu */}
+                            <Link to="/pricing" className="relative px-4 py-2 text-[14px] font-bold text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white transition-all duration-300 group/nav">
+                                <span className="relative z-10">Pricing</span>
+                                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-1 bg-blue-600 dark:bg-blue-400 rounded-full transition-all duration-300 group-hover/nav:w-4 opacity-0 group-hover/nav:opacity-100"></div>
+                            </Link>
+                            
+                            {/* Resources Mega Menu Trigger */}
                             <div className="relative group/menu">
                                 <button
-                                    className="relative flex items-center gap-1.5 px-5 py-2 text-[13px] font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-full transition-all duration-300 group/nav overflow-hidden"
-                                    onMouseEnter={() => setResourcesOpen(true)}
+                                    className="relative flex items-center gap-1.5 px-4 py-2 text-[14px] font-bold text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white transition-all duration-300 group/nav"
                                 >
                                     <span className="relative z-10 flex items-center gap-1">
                                         Resources
-                                        <ChevronDown className="w-3.5 h-3.5 opacity-50 group-hover/menu:rotate-180 group-hover/menu:opacity-100 transition-all duration-300" />
+                                        <ChevronDown className="w-3.5 h-3.5 opacity-50 group-hover/menu:rotate-180 transition-transform duration-300" />
                                     </span>
-                                    <div className="absolute inset-0 bg-white dark:bg-slate-700 rounded-full scale-0 group-hover/nav:scale-100 opacity-0 group-hover/nav:opacity-100 transition-all duration-300 origin-center shadow-sm"></div>
+                                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-1 bg-blue-600 dark:bg-blue-400 rounded-full transition-all duration-300 group-hover/nav:w-4 opacity-0 group-hover/nav:opacity-100"></div>
                                 </button>
 
-                                <div className="absolute top-full left-1/2 -translate-x-1/2 pt-4 w-72 invisible opacity-0 group-hover/menu:visible group-hover/menu:opacity-100 transition-all duration-300 transform translate-y-2 group-hover/menu:translate-y-0 z-50">
-                                    <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border border-gray-100/60 dark:border-slate-700/60 rounded-3xl shadow-2xl shadow-black/[0.1] dark:shadow-black/[0.4] p-3 flex flex-col gap-1 relative overflow-hidden">
-                                        <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 dark:bg-purple-900/30 blur-2xl rounded-full pointer-events-none"></div>
+                                <div className="absolute top-full left-1/2 -translate-x-1/2 pt-6 w-[500px] invisible opacity-0 group-hover/menu:visible group-hover/menu:opacity-100 transition-all duration-500 transform translate-y-4 group-hover/menu:translate-y-0 z-50">
+                                    <div className="bg-white/95 dark:bg-slate-950/95 backdrop-blur-3xl border border-white/20 dark:border-slate-800/40 rounded-[2.5rem] shadow-[0_30px_100px_rgba(0,0,0,0.15)] dark:shadow-[0_30px_100px_rgba(0,0,0,0.6)] p-6 overflow-hidden">
+                                        {/* Background glow in mega menu */}
+                                        <div className="absolute top-0 right-0 w-40 h-40 bg-blue-500/10 dark:bg-blue-600/20 blur-3xl rounded-full -mr-20 -mt-20"></div>
+                                        <div className="absolute bottom-0 left-0 w-40 h-40 bg-purple-500/10 dark:bg-purple-600/20 blur-3xl rounded-full -ml-20 -mb-20"></div>
                                         
-                                        <Link to="/blog" className="flex items-start gap-4 p-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-2xl group/item transition-colors">
-                                            <div className="p-2.5 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl group-hover/item:scale-110 group-hover/item:bg-blue-100 dark:group-hover/item:bg-blue-500/20 transition-all duration-300 align-top">
-                                                <BookOpen className="w-5 h-5" />
+                                        <div className="grid grid-cols-2 gap-4 relative z-10">
+                                            <div className="col-span-1 space-y-2">
+                                                <h5 className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500 px-3 mb-3">Learn & Support</h5>
+                                                <Link to="/blog" className="flex items-center gap-4 p-3 hover:bg-slate-50 dark:hover:bg-slate-900/50 rounded-2xl group/item transition-all duration-300">
+                                                    <div className="flex-shrink-0 w-10 h-10 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center group-hover/item:scale-110 group-hover/item:bg-blue-600 group-hover/item:text-white transition-all duration-300">
+                                                        <BookOpen className="w-5 h-5" />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm font-bold text-slate-900 dark:text-white group-hover/item:translate-x-1 transition-transform">Blog</p>
+                                                        <p className="text-[11px] text-slate-500 dark:text-slate-400">Industry insights</p>
+                                                    </div>
+                                                </Link>
+                                                <Link to="/help" className="flex items-center gap-4 p-3 hover:bg-slate-50 dark:hover:bg-slate-900/50 rounded-2xl group/item transition-all duration-300">
+                                                    <div className="flex-shrink-0 w-10 h-10 bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-xl flex items-center justify-center group-hover/item:scale-110 group-hover/item:bg-amber-600 group-hover/item:text-white transition-all duration-300">
+                                                        <LifeBuoy className="w-5 h-5" />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm font-bold text-slate-900 dark:text-white group-hover/item:translate-x-1 transition-transform">Help Center</p>
+                                                        <p className="text-[11px] text-slate-500 dark:text-slate-400">Guides & Tutorials</p>
+                                                    </div>
+                                                </Link>
                                             </div>
-                                            <div>
-                                                <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-0.5 group-hover/item:text-blue-600 dark:group-hover/item:text-blue-400 transition-colors">Blog</h4>
-                                                <p className="text-xs text-slate-500 dark:text-slate-400 leading-tight">Latest news, articles and product updates.</p>
+                                            <div className="col-span-1 space-y-2">
+                                                <h5 className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500 px-3 mb-3">Ecosystem</h5>
+                                                <Link to="/integrations/gmail" className="flex items-center gap-4 p-3 hover:bg-slate-50 dark:hover:bg-slate-900/50 rounded-2xl group/item transition-all duration-300">
+                                                    <div className="flex-shrink-0 w-10 h-10 bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 rounded-xl flex items-center justify-center group-hover/item:scale-110 group-hover/item:bg-purple-600 group-hover/item:text-white transition-all duration-300">
+                                                        <Plug className="w-5 h-5" />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm font-bold text-slate-900 dark:text-white group-hover/item:translate-x-1 transition-transform">Integrations</p>
+                                                        <p className="text-[11px] text-slate-500 dark:text-slate-400">Connect your tools</p>
+                                                    </div>
+                                                </Link>
+                                                <a href="https://docs.arrotechsolutions.com/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 p-3 hover:bg-slate-50 dark:hover:bg-slate-900/50 rounded-2xl group/item transition-all duration-300">
+                                                    <div className="flex-shrink-0 w-10 h-10 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl flex items-center justify-center group-hover/item:scale-110 group-hover/item:bg-emerald-600 group-hover/item:text-white transition-all duration-300">
+                                                        <FileText className="w-5 h-5" />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm font-bold text-slate-900 dark:text-white group-hover/item:translate-x-1 transition-transform">Documentation</p>
+                                                        <p className="text-[11px] text-slate-500 dark:text-slate-400">Developer API & Guides</p>
+                                                    </div>
+                                                </a>
                                             </div>
-                                        </Link>
-                                        <Link to="/help" className="flex items-start gap-4 p-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-2xl group/item transition-colors">
-                                            <div className="p-2.5 bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-xl group-hover/item:scale-110 group-hover/item:bg-amber-100 dark:group-hover/item:bg-amber-500/20 transition-all duration-300 align-top">
-                                                <LifeBuoy className="w-5 h-5" />
-                                            </div>
-                                            <div>
-                                                <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-0.5 group-hover/item:text-amber-600 dark:group-hover/item:text-amber-400 transition-colors">Help Center</h4>
-                                                <p className="text-xs text-slate-500 dark:text-slate-400 leading-tight">Guides and tutorials to get you started.</p>
-                                            </div>
-                                        </Link>
-                                        <Link to="/integrations/gmail" className="flex items-start gap-4 p-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-2xl group/item transition-colors">
-                                            <div className="p-2.5 bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 rounded-xl group-hover/item:scale-110 group-hover/item:bg-purple-100 dark:group-hover/item:bg-purple-500/20 transition-all duration-300 align-top">
-                                                <Plug className="w-5 h-5" />
-                                            </div>
-                                            <div>
-                                                <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-0.5 group-hover/item:text-purple-600 dark:group-hover/item:text-purple-400 transition-colors">Integrations</h4>
-                                                <p className="text-xs text-slate-500 dark:text-slate-400 leading-tight">Connect with Gmail, Slack, Jira and more.</p>
-                                            </div>
-                                        </Link>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+
+                            <Link 
+                                to="/help" 
+                                className="relative px-4 py-2 text-[14px] font-bold text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white transition-all duration-300 group/nav"
+                            >
+                                <span className="relative z-10">Support</span>
+                                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-1 bg-blue-600 dark:bg-blue-400 rounded-full transition-all duration-300 group-hover/nav:w-4 opacity-0 group-hover/nav:opacity-100"></div>
+                            </Link>
                         </div>
 
                         {/* Auth Buttons & Theme Toggle */}
-                        <div className="hidden md:flex items-center gap-3">
+                        <div className="hidden md:flex items-center gap-3 flex-shrink-0">
                             <button
                                 onClick={() => setIsDark(!isDark)}
                                 className="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors flex items-center justify-center hover:rotate-12 transform"
@@ -185,22 +215,22 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
                             {user ? (
                                 <Link
                                     to="/unified"
-                                    className="group relative inline-flex items-center justify-center gap-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-2.5 rounded-full text-[13px] font-bold transition-all duration-300 shadow-[0_4px_14px_0_rgb(0,0,0,0.1)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.15)] hover:-translate-y-0.5 overflow-hidden"
+                                    className="group relative inline-flex items-center justify-center gap-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-2.5 rounded-full text-[13px] font-black transition-all duration-500 shadow-[0_10px_30px_rgba(0,0,0,0.2)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.6)] hover:shadow-[0_15px_40px_rgba(0,0,0,0.3)] hover:-translate-y-1 overflow-hidden"
                                 >
-                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 dark:via-black/10 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
+                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 dark:via-black/20 to-transparent -translate-x-full group-hover:animate-shimmer"></div>
                                     <LayoutDashboard className="w-4 h-4 relative z-10" />
                                     <span className="relative z-10">Dashboard</span>
                                 </Link>
                             ) : (
                                 <>
-                                    <Link to="/login" className="text-[13px] font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors px-2">Log in</Link>
+                                    <Link to="/login" className="text-[14px] font-bold text-slate-600 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white transition-colors px-2">Log in</Link>
                                     <Link
                                         to="/register"
-                                        className="group relative inline-flex items-center justify-center gap-1.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-2.5 rounded-full text-[13px] font-bold transition-all duration-300 shadow-[0_4px_14px_0_rgb(0,0,0,0.1)] dark:shadow-none hover:shadow-[0_6px_20px_rgba(0,0,0,0.15)] hover:-translate-y-0.5 overflow-hidden"
+                                        className="group relative inline-flex items-center justify-center gap-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-7 py-2.5 rounded-full text-[13px] font-black transition-all duration-500 shadow-[0_10px_30px_rgba(0,0,0,0.2)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.6)] hover:shadow-[0_15px_40px_rgba(0,0,0,0.3)] hover:-translate-y-1 overflow-hidden"
                                     >
-                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 dark:via-black/10 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
+                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 dark:via-black/20 to-transparent -translate-x-full group-hover:animate-shimmer"></div>
                                         <span className="relative z-10">Get Started</span>
-                                        <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform relative z-10" />
+                                        <ArrowRight className="w-4 h-4 relative z-10 group-hover:translate-x-1 transition-transform" />
                                     </Link>
                                 </>
                             )}
@@ -221,7 +251,7 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
                                 {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
                             </button>
                         </div>
-                    </div>
+                    </nav>
                 </div>
 
                 {/* Mobile Menu Overlay */}
@@ -229,32 +259,37 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
                     <div className="flex flex-col justify-center h-full max-w-sm mx-auto px-6 py-20 gap-8">
                         <div className={`flex flex-col gap-6 transition-all duration-700 ease-out ${mobileMenuOpen ? 'translate-y-0 opacity-100 delay-100' : 'translate-y-8 opacity-0'}`}>
                             <button onClick={() => { scrollToSection('features'); setMobileMenuOpen(false); }} className="text-left text-2xl font-bold text-slate-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center justify-between group">
-                                Features
-                                <ArrowRight className="w-5 h-5 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-blue-500" />
-                            </button>
-                            <button onClick={() => { scrollToSection('demo-video'); setMobileMenuOpen(false); }} className="text-left text-2xl font-bold text-slate-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center justify-between group">
-                                How it Works
+                                Automation
                                 <ArrowRight className="w-5 h-5 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-blue-500" />
                             </button>
                             <Link onClick={() => setMobileMenuOpen(false)} to="/pricing" className="text-left text-2xl font-bold text-slate-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center justify-between group">
                                 Pricing
                                 <ArrowRight className="w-5 h-5 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-blue-500" />
                             </Link>
-
+                            <div className="flex flex-col gap-4 mt-2">
+                                <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest px-1">Resources</span>
+                                <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+                                    <Link onClick={() => setMobileMenuOpen(false)} to="/blog" className="text-base font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors flex items-center gap-3">
+                                        <BookOpen className="w-4 h-4 text-slate-400" /> Blog
+                                    </Link>
+                                    <Link onClick={() => setMobileMenuOpen(false)} to="/help" className="text-base font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors flex items-center gap-3">
+                                        <LifeBuoy className="w-4 h-4 text-slate-400" /> Help Center
+                                    </Link>
+                                    <Link onClick={() => setMobileMenuOpen(false)} to="/integrations/gmail" className="text-base font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors flex items-center gap-3">
+                                        <Plug className="w-4 h-4 text-slate-400" /> Integrations
+                                    </Link>
+                                    <a onClick={() => setMobileMenuOpen(false)} href="https://docs.arrotechsolutions.com/" target="_blank" rel="noopener noreferrer" className="text-base font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors flex items-center gap-3">
+                                        <FileText className="w-4 h-4 text-slate-400" /> Documentation
+                                    </a>
+                                </div>
+                            </div>
+                            
                             <div className="h-px w-full bg-slate-200 dark:bg-slate-800 my-2"></div>
 
-                            <div className="flex flex-col gap-4">
-                                <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Resources</span>
-                                <Link onClick={() => setMobileMenuOpen(false)} to="/blog" className="text-lg font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors flex items-center gap-3">
-                                    <BookOpen className="w-4 h-4 text-slate-400" /> Blog
-                                </Link>
-                                <Link onClick={() => setMobileMenuOpen(false)} to="/help" className="text-lg font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors flex items-center gap-3">
-                                    <LifeBuoy className="w-4 h-4 text-slate-400" /> Help Center
-                                </Link>
-                                <Link onClick={() => setMobileMenuOpen(false)} to="/integrations/gmail" className="text-lg font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors flex items-center gap-3">
-                                    <Plug className="w-4 h-4 text-slate-400" /> Integrations
-                                </Link>
-                            </div>
+                            <Link onClick={() => setMobileMenuOpen(false)} to="/help" className="text-left text-2xl font-bold text-slate-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center justify-between group">
+                                Support
+                                <ArrowRight className="w-5 h-5 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-blue-500" />
+                            </Link>
                         </div>
 
                         <div className={`mt-auto transition-all duration-700 ease-out ${mobileMenuOpen ? 'translate-y-0 opacity-100 delay-300' : 'translate-y-8 opacity-0'}`}>
@@ -289,7 +324,8 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
                         {/* Brand & Newsletter */}
                         <div className="col-span-2 md:col-span-4 flex flex-col items-start">
                             <Link to="/" className="flex items-center gap-2 mb-5 group">
-                                <img src={logo} alt="Arrotech Hub" className="h-[4.5rem] w-auto object-contain opacity-80 group-hover:opacity-100 transition-all dark:brightness-0 dark:invert" />
+                                <img src={logoIcon} alt="Arrotech Hub" className="h-[36px] sm:h-[40px] w-auto object-contain opacity-80 group-hover:opacity-100 transition-all dark:brightness-0 dark:invert" />
+                                <span className="text-[18px] sm:text-[24px] font-black bg-gradient-to-r from-slate-900 to-blue-600 dark:from-white dark:to-blue-400 bg-clip-text text-transparent tracking-tighter">ARROTECH</span>
                             </Link>
                             <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-8 max-w-xs transition-colors">
                                 The intelligent workspace that unifies your tools, tasks, and teams. Built for teams that move fast.
@@ -355,8 +391,9 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
                         <div className="col-span-1 md:col-span-2 md:col-start-6">
                             <h4 className="font-semibold text-slate-900 dark:text-white text-xs mb-5 transition-colors">Product</h4>
                             <ul className="space-y-3">
-                                <li><button onClick={() => scrollToSection('features')} className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors text-left">Features</button></li>
+                                <li><button onClick={() => scrollToSection('features')} className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors text-left">Automation</button></li>
                                 <li><Link to="/pricing" className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">Pricing</Link></li>
+                                <li><Link to="/help" className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">Support</Link></li>
                                 <li><Link to="/changelog" className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">Changelog</Link></li>
                                 <li><Link to="/docs" className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">Documentation</Link></li>
                             </ul>

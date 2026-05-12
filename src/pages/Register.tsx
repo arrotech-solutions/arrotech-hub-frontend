@@ -14,6 +14,7 @@ import { useAuth } from '../hooks/useAuth';
 import SEO from '../components/SEO';
 import { ThemeToggle } from '../components/ThemeToggle';
 import logo from '../assets/Logo/fulllogo_transparent.png';
+import logoIcon from '../assets/Logo/icononly_transparent_nobuffer.png';
 
 // Microsoft Icon SVG component
 const MicrosoftIcon = () => (
@@ -150,9 +151,10 @@ const Register: React.FC = () => {
 
       <div className="flex-1 flex items-center justify-center px-4 py-4">
         <div className="max-w-md w-full">
-          <div className="text-center mb-3">
-            <Link to="/" className="inline-block hover:scale-110 transition-transform mb-2">
-              <img src={logo} alt="Arrotech Hub" className="h-12 w-auto object-contain" />
+          <div className="text-center mb-4">
+            <Link to="/" className="inline-flex items-center gap-2 group hover:scale-[1.02] transition-transform mb-2">
+              <img src={logoIcon} alt="Arrotech Hub" className="h-7 w-auto object-contain" />
+              <span className="text-[16px] font-black bg-gradient-to-r from-slate-900 to-blue-600 dark:from-white dark:to-blue-400 bg-clip-text text-transparent tracking-tighter">ARROTECH</span>
             </Link>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-1 tracking-tighter leading-tight transition-colors">Join Arrotech Hub</h1>
             <p className="text-sm text-slate-500 dark:text-slate-400 font-medium transition-colors">Create your account</p>
