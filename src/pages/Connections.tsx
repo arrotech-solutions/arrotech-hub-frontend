@@ -356,10 +356,11 @@ const Integrations: React.FC = () => {
       }
     };
 
+    // Always request scope explicitly so Meta's permission consent screen is visible
+    // (required for App Review screencast — reviewers must see users granting each permission)
+    loginOptions.scope = 'business_management,whatsapp_business_management,whatsapp_business_messaging';
     if (configId) {
       loginOptions.config_id = configId;
-    } else {
-      loginOptions.scope = 'business_management,whatsapp_business_management,whatsapp_business_messaging';
     }
 
     FB.login((response: any) => {
