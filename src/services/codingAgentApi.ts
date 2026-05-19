@@ -25,6 +25,7 @@ export interface ToolResult {
   output: any;
   error: string | null;
   duration_ms: number;
+  requires_approval?: boolean;
 }
 
 export interface DirectoryEntry {
@@ -32,6 +33,48 @@ export interface DirectoryEntry {
   path: string;
   type: 'file' | 'directory';
   size: number | null;
+}
+
+export interface ChatMessage {
+  role: 'user' | 'assistant' | 'tool';
+  content: string;
+  tool_call_id?: string;
+  tool_calls?: any[];
+}
+
+export interface ChatResponse {
+  type: 'message' | 'tool_calls' | 'error';
+  content?: string;
+  calls?: {
+    id: string;
+    tool: string;
+    args: any;
+  }[];
+}
+
+export interface PlannedTask {
+  id: string;
+  title: string;
+  description: string;
+  skill_name: string;
+  tools_needed: string[];
+  depends_on: string[];
+  priority: string;
+  status: 'planned' | 'ready' | 'in_progress' | 'completed' | 'failed' | 'blocked' | 'skipped';
+  estimated_complexity: number;
+  requires_human_approval: boolean;
+  checkpoint: boolean;
+  output?: string;
+  error?: string;
+}
+
+export interface ExecutionPlan {
+  id: string;
+  goal: string;
+  progress: string;
+  task_count: number;
+  success: boolean;
+  tasks: PlannedTask[];
 }
 
 // ── API Functions ─────────────────────────────────────────────────
@@ -63,12 +106,26 @@ export async function destroySession(sessionId: string): Promise<void> {
 export async function executeTool(
   sessionId: string,
   toolName: string,
-  args: Record<string, any> = {}
+  args: Record<string, any> = {},
+  approved: boolean = false
 ): Promise<ToolResult> {
   const resp = await api.request({
     method: 'POST',
     url: `/coding-agent/sessions/${sessionId}/tools`,
-    data: { tool_name: toolName, arguments: args },
+    data: { tool_name: toolName, arguments: args, approved },
+  });
+  return resp.data;
+}
+
+export async function sendChatMessage(
+  sessionId: string,
+  messages: ChatMessage[],
+  modelOverride?: string
+): Promise<ChatResponse> {
+  const resp = await api.request({
+    method: 'POST',
+    url: `/coding-agent/sessions/${sessionId}/chat`,
+    data: { messages, model_override: modelOverride || null },
   });
   return resp.data;
 }
