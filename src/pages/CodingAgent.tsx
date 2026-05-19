@@ -11,7 +11,8 @@ import {
 } from 'lucide-react';
 import {
   createSession, destroySession, executeTool, listDirectory, readFile,
-  getProjectStructure, gitStatus, CodingSession, ToolResult, DirectoryEntry
+  getProjectStructure, gitStatus, CodingSession, ToolResult, DirectoryEntry,
+  sendChatMessage, ChatMessage, ExecutionPlan
 } from '../services/codingAgentApi';
 
 // ── Types ────────────────────────────────────────────────────────────
@@ -33,6 +34,8 @@ interface ToolCall {
   error?: string;
   duration_ms?: number;
   timestamp: number;
+  requires_approval?: boolean;
+  llm_tool_call_id?: string;
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────
@@ -75,10 +78,14 @@ const CodingAgent: React.FC = () => {
   const [toolCalls, setToolCalls] = useState<ToolCall[]>([]);
   const [activeTab, setActiveTab] = useState<'terminal' | 'diff'>('terminal');
 
-  // Chat
+  // Chat & LLM
   const [chatInput, setChatInput] = useState('');
+  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
+  const [isAgentThinking, setIsAgentThinking] = useState(false);
+  const [pendingLLMMessages, setPendingLLMMessages] = useState<ChatMessage[]>([]);
   const [projectInfo, setProjectInfo] = useState<any>(null);
   const [gitInfo, setGitInfo] = useState<any>(null);
+  const [activePlan, setActivePlan] = useState<ExecutionPlan | null>(null);
 
   const terminalRef = useRef<HTMLDivElement>(null);
   const chatRef = useRef<HTMLDivElement>(null);
@@ -124,16 +131,17 @@ const CodingAgent: React.FC = () => {
       setToolCalls([]);
       setProjectInfo(null);
       setGitInfo(null);
+      setActivePlan(null);
       setDestroying(false);
     }
   };
 
   // ── Tool Execution ────────────────────────────────────────────────
 
-  const addToolCall = (tool: string, args: Record<string, any>, status: 'running' | 'success' | 'error', output?: any, error?: string, duration_ms?: number) => {
+  const addToolCall = (tool: string, args: Record<string, any>, status: 'running' | 'success' | 'error', output?: any, error?: string, duration_ms?: number, requires_approval?: boolean, llm_tool_call_id?: string) => {
     const call: ToolCall = {
       id: `${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
-      tool, args, status, output, error, duration_ms, timestamp: Date.now()
+      tool, args, status, output, error, duration_ms, timestamp: Date.now(), requires_approval, llm_tool_call_id
     };
     setToolCalls(prev => [...prev, call]);
     setTimeout(scrollChat, 100);
@@ -155,12 +163,137 @@ const CodingAgent: React.FC = () => {
         status: result.success ? 'success' : 'error',
         output: result.output,
         error: result.error || undefined,
-        duration_ms: result.duration_ms
+        duration_ms: result.duration_ms,
+        requires_approval: result.requires_approval
       });
       return result;
     } catch (err: any) {
       updateToolCall(callId, { status: 'error', error: err.message });
       return null;
+    }
+  };
+
+  const processLLM = async (messages: ChatMessage[]) => {
+    if (!session) return;
+    setIsAgentThinking(true);
+    try {
+      const response = await sendChatMessage(session.session_id, messages);
+      
+      if (response.type === 'message' && response.content) {
+        setChatHistory(prev => [...prev, { role: 'assistant', content: response.content! }]);
+      } else if (response.type === 'tool_calls' && response.calls) {
+        const assistantMsg: ChatMessage = { 
+          role: 'assistant', 
+          content: '', 
+          tool_calls: response.calls.map(c => ({
+            id: c.id,
+            type: 'function',
+            function: { name: c.tool, arguments: JSON.stringify(c.args) }
+          }))
+        };
+        
+        setChatHistory(prev => [...prev, assistantMsg]);
+        let nextMessages = [...messages, assistantMsg];
+        let haltedForApproval = false;
+
+        for (const call of response.calls) {
+           const uiCallId = addToolCall(call.tool, call.args, 'running', undefined, undefined, undefined, undefined, call.id);
+            try {
+             const result = await executeTool(session.session_id, call.tool, call.args);
+             if (result.requires_approval) {
+               updateToolCall(uiCallId, { status: 'error', error: 'Waiting for approval', requires_approval: true });
+               haltedForApproval = true;
+               setPendingLLMMessages(nextMessages);
+               break; 
+             } else {
+               updateToolCall(uiCallId, { status: result.success ? 'success' : 'error', output: result.output, error: result.error || undefined, duration_ms: result.duration_ms });
+               if (result.success && result.output && result.output.plan) {
+                 setActivePlan(result.output.plan);
+               }
+               nextMessages.push({
+                 role: 'tool',
+                 content: JSON.stringify(result.success ? result.output : { error: result.error }),
+                 tool_call_id: call.id
+               });
+             }
+           } catch (err: any) {
+             updateToolCall(uiCallId, { status: 'error', error: err.message });
+             nextMessages.push({
+               role: 'tool',
+               content: JSON.stringify({ error: err.message }),
+               tool_call_id: call.id
+             });
+           }
+        }
+
+        if (!haltedForApproval) {
+          setChatHistory(nextMessages);
+          await processLLM(nextMessages);
+        }
+      }
+    } catch (err: any) {
+      addToolCall('llm_error', {}, 'error', null, err.message);
+    } finally {
+      setIsAgentThinking(false);
+    }
+  };
+
+  const handleApproveTool = async (callId: string, toolName: string, args: Record<string, any>, llmToolCallId?: string) => {
+    if (!session) return;
+    updateToolCall(callId, { status: 'running', error: undefined, requires_approval: false });
+    try {
+      const result = await executeTool(session.session_id, toolName, args, true);
+      updateToolCall(callId, {
+        status: result.success ? 'success' : 'error',
+        output: result.output,
+        error: result.error || undefined,
+        duration_ms: result.duration_ms,
+        requires_approval: result.requires_approval
+      });
+
+      if (result.success && result.output && result.output.plan) {
+        setActivePlan(result.output.plan);
+      }
+
+      if (llmToolCallId && pendingLLMMessages.length > 0) {
+        const toolMsg: ChatMessage = {
+          role: 'tool',
+          content: JSON.stringify(result.success ? result.output : { error: result.error }),
+          tool_call_id: llmToolCallId
+        };
+        const nextMsgs = [...pendingLLMMessages, toolMsg];
+        setPendingLLMMessages([]);
+        setChatHistory(nextMsgs);
+        await processLLM(nextMsgs);
+      }
+    } catch (err: any) {
+      updateToolCall(callId, { status: 'error', error: err.message });
+      if (llmToolCallId && pendingLLMMessages.length > 0) {
+        const toolMsg: ChatMessage = {
+          role: 'tool',
+          content: JSON.stringify({ error: err.message }),
+          tool_call_id: llmToolCallId
+        };
+        const nextMsgs = [...pendingLLMMessages, toolMsg];
+        setPendingLLMMessages([]);
+        setChatHistory(nextMsgs);
+        await processLLM(nextMsgs);
+      }
+    }
+  };
+
+  const handleDenyTool = async (callId: string, llmToolCallId?: string) => {
+    updateToolCall(callId, { status: 'error', error: 'Execution denied by user.', requires_approval: false });
+    if (llmToolCallId && pendingLLMMessages.length > 0) {
+      const toolMsg: ChatMessage = {
+        role: 'tool',
+        content: JSON.stringify({ error: 'Execution denied by user.' }),
+        tool_call_id: llmToolCallId
+      };
+      const nextMsgs = [...pendingLLMMessages, toolMsg];
+      setPendingLLMMessages([]);
+      setChatHistory(nextMsgs);
+      await processLLM(nextMsgs);
     }
   };
 
@@ -262,7 +395,10 @@ const CodingAgent: React.FC = () => {
       return;
     }
 
-    await runTool('coding_run_command', { command: cmd });
+    const newMsg: ChatMessage = { role: 'user', content: cmd };
+    const nextHistory = [...chatHistory, newMsg];
+    setChatHistory(nextHistory);
+    await processLLM(nextHistory);
   };
 
   // ── Render Helpers ────────────────────────────────────────────────
@@ -569,24 +705,132 @@ const CodingAgent: React.FC = () => {
                 <p className="text-indigo-700/80 dark:text-indigo-300/80 text-xs">Workspace provisioned. I can read files, write code, run commands, and manage version control. How can I help?</p>
               </div>
 
-              {/* Simulated chat history based on tool calls */}
-              {toolCalls.map((call, idx) => (
-                <div key={`chat-${call.id}`} className="space-y-2 animate-in fade-in slide-in-from-bottom-2">
-                  <div className="bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl p-3 shadow-sm">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-5 h-5 rounded bg-indigo-500 flex items-center justify-center shadow-md dark:shadow-lg">
-                        <Code className="w-3 h-3 text-white" />
+              {/* Active Plan Panel */}
+              {activePlan && (
+                <div className="bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/50 rounded-xl p-4 text-sm text-slate-800 dark:text-slate-200 mb-4 animate-in fade-in slide-in-from-top-2">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-bold flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
+                      <LayoutTemplate className="w-4 h-4" /> Active Plan
+                    </h4>
+                    <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300">
+                      {activePlan.progress || '0%'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 mb-3">{activePlan.goal}</p>
+                  
+                  <div className="space-y-2">
+                    {activePlan.tasks.map((task: any) => (
+                      <div key={task.id} className={`flex items-start gap-2 p-2 rounded-lg border ${task.status === 'in_progress' ? 'bg-white dark:bg-slate-800 border-indigo-200 dark:border-indigo-800 shadow-sm' : 'bg-transparent border-transparent'} transition-colors`}>
+                        <div className="mt-0.5 shrink-0">
+                          {task.status === 'completed' && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />}
+                          {task.status === 'in_progress' && <Loader2 className="w-3.5 h-3.5 text-indigo-500 animate-spin" />}
+                          {task.status === 'failed' && <XCircle className="w-3.5 h-3.5 text-rose-500" />}
+                          {(task.status === 'planned' || task.status === 'ready' || task.status === 'blocked') && <div className="w-3.5 h-3.5 rounded-full border-2 border-slate-300 dark:border-slate-600" />}
+                          {task.status === 'skipped' && <span className="text-[10px] text-slate-400">⏭</span>}
+                        </div>
+                        <div>
+                          <div className={`text-[13px] font-medium ${task.status === 'completed' ? 'text-slate-500 line-through decoration-slate-300 dark:decoration-slate-600' : 'text-slate-700 dark:text-slate-200'}`}>
+                            {task.title}
+                          </div>
+                          {task.status === 'in_progress' && (
+                            <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">{task.description}</div>
+                          )}
+                        </div>
                       </div>
-                      <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">Action</span>
-                      {getStatusIcon(call.status)}
-                    </div>
-                    <div className="text-[13px] text-slate-800 dark:text-slate-300 bg-slate-50 dark:bg-slate-950 p-2 rounded-lg font-mono border border-slate-200 dark:border-slate-800/50 shadow-inner dark:shadow-none">
-                      <span className="text-indigo-600 dark:text-indigo-400 font-semibold">{formatToolName(call.tool)}</span>
-                      <span className="text-slate-500 ml-2">{JSON.stringify(call.args)}</span>
-                    </div>
+                    ))}
                   </div>
                 </div>
-              ))}
+              )}
+
+              {/* Unified Chat Feed */}
+              {chatHistory.map((msg, idx) => {
+                if (msg.role === 'user') {
+                  return (
+                    <div key={`chat-${idx}`} className="flex justify-end animate-in fade-in slide-in-from-right-2">
+                      <div className="bg-indigo-600 text-white px-4 py-2.5 rounded-2xl rounded-br-sm max-w-[85%] text-[13px] shadow-sm">
+                        {msg.content}
+                      </div>
+                    </div>
+                  );
+                }
+
+                if (msg.role === 'assistant') {
+                  return (
+                    <div key={`chat-${idx}`} className="space-y-3">
+                      {msg.content && (
+                        <div className="flex justify-start animate-in fade-in slide-in-from-left-2">
+                          <div className="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-4 py-3 rounded-2xl rounded-bl-sm max-w-[85%] text-[13px] shadow-sm border border-slate-100 dark:border-slate-700 whitespace-pre-wrap">
+                            {msg.content}
+                          </div>
+                        </div>
+                      )}
+                      {msg.tool_calls && msg.tool_calls.map((tc: any) => {
+                        const call = toolCalls.find(c => c.llm_tool_call_id === tc.id);
+                        if (!call) return null; // Wait for it to be added
+                        return (
+                          <div key={`tc-${call.id}`} className="space-y-2 animate-in fade-in slide-in-from-bottom-2">
+                            <div className="bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl p-3 shadow-sm">
+                              {call.requires_approval ? (
+                                <>
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <div className="w-5 h-5 rounded bg-amber-500 flex items-center justify-center shadow-md dark:shadow-lg">
+                                      <span className="text-white text-xs font-bold">!</span>
+                                    </div>
+                                    <span className="text-xs font-semibold text-amber-600 dark:text-amber-500">Action Requires Approval</span>
+                                  </div>
+                                  <div className="text-[13px] text-slate-800 dark:text-slate-300 bg-amber-50 dark:bg-amber-950/20 p-2 rounded-lg font-mono border border-amber-200 dark:border-amber-900/50 shadow-inner dark:shadow-none mb-3">
+                                    <span className="text-amber-700 dark:text-amber-400 font-semibold">{formatToolName(call.tool)}</span>
+                                    <span className="text-slate-500 dark:text-slate-400 ml-2">{JSON.stringify(call.args)}</span>
+                                  </div>
+                                  <div className="flex items-center gap-2 mt-2">
+                                    <button 
+                                      onClick={() => handleApproveTool(call.id, call.tool, call.args, tc.id)}
+                                      className="flex-1 bg-amber-500 hover:bg-amber-600 text-white py-1.5 px-3 rounded-lg text-xs font-bold transition-colors"
+                                    >
+                                      Approve
+                                    </button>
+                                    <button 
+                                      onClick={() => handleDenyTool(call.id, tc.id)}
+                                      className="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 py-1.5 px-3 rounded-lg text-xs font-semibold transition-colors border border-slate-200 dark:border-slate-600"
+                                    >
+                                      Deny
+                                    </button>
+                                  </div>
+                                </>
+                              ) : (
+                                <>
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <div className="w-5 h-5 rounded bg-indigo-500 flex items-center justify-center shadow-md dark:shadow-lg">
+                                      <Code className="w-3 h-3 text-white" />
+                                    </div>
+                                    <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">Action</span>
+                                    {getStatusIcon(call.status)}
+                                  </div>
+                                  <div className="text-[13px] text-slate-800 dark:text-slate-300 bg-slate-50 dark:bg-slate-950 p-2 rounded-lg font-mono border border-slate-200 dark:border-slate-800/50 shadow-inner dark:shadow-none">
+                                    <span className="text-indigo-600 dark:text-indigo-400 font-semibold">{formatToolName(call.tool)}</span>
+                                    <span className="text-slate-500 ml-2">{JSON.stringify(call.args)}</span>
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                }
+
+                return null; // role: 'tool' is hidden since it's displayed in the ToolCall UI
+              })}
+              
+              {isAgentThinking && (
+                <div className="flex justify-start animate-in fade-in">
+                  <div className="bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-4 py-3 rounded-2xl rounded-bl-sm text-[13px] shadow-sm border border-slate-100 dark:border-slate-700 flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin text-indigo-500" />
+                    Agent is thinking...
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Chat Input */}
