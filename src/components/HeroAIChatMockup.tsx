@@ -44,7 +44,7 @@ const HeroAIChatMockup: React.FC = () => {
         <div className="w-full max-w-3xl text-left relative z-10 sm:mx-auto h-[400px] sm:h-[550px] lg:h-[600px] perspective-2000">
             {/* Background Glows */}
             <div className="absolute -top-20 -right-20 w-64 h-64 bg-blue-500/20 rounded-full blur-[100px] animate-pulse pointer-events-none"></div>
-            <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-indigo-500/20 rounded-full blur-[100px] animate-pulse pointer-events-none [animation-delay:2s]"></div>
+            <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-blue-500/20 rounded-full blur-[100px] animate-pulse pointer-events-none [animation-delay:2s]"></div>
 
             {/* Main Window Container */}
             <div className="bg-white/80 dark:bg-slate-950/90 backdrop-blur-3xl border border-white/20 dark:border-slate-800/50 rounded-[2.5rem] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.25)] dark:shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] overflow-hidden ring-1 ring-white/50 dark:ring-white/10 flex flex-col h-full relative transition-all duration-700 transform hover:rotate-y-2 group">
@@ -69,19 +69,19 @@ const HeroAIChatMockup: React.FC = () => {
                             <Bell size={16} className="text-slate-400 md:w-[18px]" />
                             <div className="absolute top-0 right-0 w-1.5 md:w-2 h-1.5 md:h-2 bg-rose-500 rounded-full border border-white dark:border-slate-900"></div>
                         </div>
-                        <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 border border-white dark:border-slate-800 shadow-lg"></div>
+                        <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 border border-white dark:border-slate-800 shadow-lg"></div>
                     </div>
                 </div>
 
                 <div className="flex flex-1 overflow-hidden">
                     {/* Compact Sidebar */}
                     <div className="w-12 md:w-16 bg-slate-50/50 dark:bg-slate-950/50 border-r border-slate-200/30 dark:border-slate-800/30 flex flex-col items-center py-4 md:py-6 gap-4 md:gap-6 shrink-0">
-                        <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-600/20 group-hover:scale-110 transition-transform">
+                        <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-600/20 group-hover:scale-110 transition-transform">
                             <div className="w-5 h-5 bg-white rounded-sm rotate-45"></div>
                         </div>
                         <div className="flex-1 flex flex-col gap-4">
                             {[LayoutDashboard, Bot, Inbox, CheckSquare, Activity].map((Icon, i) => (
-                                <div key={i} className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer ${i === 1 ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'}`}>
+                                <div key={i} className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer ${i === 1 ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'}`}>
                                     <Icon size={20} />
                                 </div>
                             ))}
@@ -96,7 +96,7 @@ const HeroAIChatMockup: React.FC = () => {
                         {/* Mesh Gradient Background */}
                         <div className="absolute inset-0 opacity-10 pointer-events-none">
                             <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_20%_20%,_var(--tw-gradient-stops))] from-blue-500 via-transparent to-transparent"></div>
-                            <div className="absolute bottom-0 right-0 w-full h-full bg-[radial-gradient(circle_at_80%_80%,_var(--tw-gradient-stops))] from-indigo-500 via-transparent to-transparent"></div>
+                            <div className="absolute bottom-0 right-0 w-full h-full bg-[radial-gradient(circle_at_80%_80%,_var(--tw-gradient-stops))] from-blue-500 via-transparent to-transparent"></div>
                         </div>
 
                         {/* Top Context Bar */}
@@ -107,7 +107,7 @@ const HeroAIChatMockup: React.FC = () => {
                             </div>
                             <div className="flex items-center gap-2 md:gap-4">
                                 <div className="flex items-center gap-1 md:gap-2">
-                                    <div className="w-1 md:w-1.5 h-1 md:h-1.5 rounded-full bg-indigo-500 animate-pulse"></div>
+                                    <div className="w-1 md:w-1.5 h-1 md:h-1.5 rounded-full bg-blue-500 animate-pulse"></div>
                                     <span className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-tighter">AI Reasoning: 98%</span>
                                 </div>
                             </div>
@@ -118,7 +118,7 @@ const HeroAIChatMockup: React.FC = () => {
                             {/* Message Loop */}
                             {step >= 1 && (
                                 <div className="flex flex-col items-end animate-in fade-in slide-in-from-right-4 duration-500">
-                                    <div className="bg-indigo-600 text-white px-4 md:px-5 py-2 md:py-3 rounded-2xl rounded-tr-none shadow-xl shadow-indigo-600/10 text-[11px] md:text-[13px] font-medium max-w-[85%] leading-relaxed">
+                                    <div className="bg-blue-600 text-white px-4 md:px-5 py-2 md:py-3 rounded-2xl rounded-tr-none shadow-xl shadow-blue-600/10 text-[11px] md:text-[13px] font-medium max-w-[85%] leading-relaxed">
                                         Update the Acme Corp deal to Closed-Won, sync it to Jira, and trigger the onboarding workflow.
                                     </div>
                                     <div className="mt-2 flex items-center gap-2">
@@ -136,9 +136,9 @@ const HeroAIChatMockup: React.FC = () => {
                                     <div className="space-y-3 flex-1">
                                         <div className="bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/50 p-4 rounded-2xl rounded-tl-none shadow-sm flex items-center gap-4">
                                             <div className="flex gap-1">
-                                                <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                                                <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                                                <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce"></div>
+                                                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                                                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                                                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce"></div>
                                             </div>
                                             <span className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
                                                 {step === 3 && "Accessing HubSpot Data Layer..."}
@@ -157,14 +157,14 @@ const HeroAIChatMockup: React.FC = () => {
                                     </div>
                                     <div className="space-y-4 flex-1">
                                         <div className="bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/50 p-4 md:p-5 rounded-2xl rounded-tl-none shadow-lg">
-                                            <p className="text-[11px] md:text-[13px] text-slate-600 dark:text-slate-300 font-medium mb-3 md:mb-4">I've executed the synchronized updates for <span className="text-indigo-600 font-bold">Acme Corp</span>:</p>
+                                            <p className="text-[11px] md:text-[13px] text-slate-600 dark:text-slate-300 font-medium mb-3 md:mb-4">I've executed the synchronized updates for <span className="text-blue-600 font-bold">Acme Corp</span>:</p>
                                             
                                             <div className="grid grid-cols-2 gap-1.5 md:gap-2">
                                                 {[
                                                     { icon: Target, label: 'HubSpot', desc: 'Closed-Won', color: 'text-orange-500', bg: 'bg-orange-500/10' },
                                                     { icon: Trello, label: 'Jira', desc: 'Epic Moved', color: 'text-blue-500', bg: 'bg-blue-500/10' },
-                                                    { icon: MessageSquare, label: 'Slack', desc: 'Broadcasted', color: 'text-purple-500', bg: 'bg-purple-500/10' },
-                                                    { icon: Mail, label: 'Gmail', desc: 'Sequence Sent', color: 'text-indigo-500', bg: 'bg-indigo-500/10' },
+                                                    { icon: MessageSquare, label: 'Slack', desc: 'Broadcasted', color: 'text-cyan-500', bg: 'bg-cyan-500/10' },
+                                                    { icon: Mail, label: 'Gmail', desc: 'Sequence Sent', color: 'text-blue-500', bg: 'bg-blue-500/10' },
                                                 ].map((action, i) => (
                                                     <div key={i} className="flex items-center gap-2 md:gap-3 p-2 md:p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800 transition-all hover:bg-white dark:hover:bg-slate-800 group/card">
                                                         <div className={`w-6 h-6 md:w-8 md:h-8 rounded-lg ${action.bg} flex items-center justify-center ${action.color} group-hover/card:scale-110 transition-transform flex-shrink-0`}>
@@ -208,7 +208,7 @@ const HeroAIChatMockup: React.FC = () => {
                                 </div>
                                 <div className="flex-1 text-[13px] text-slate-400 font-medium">Ask AI to run complex cross-app tasks...</div>
                                 <div className="flex gap-2">
-                                    <div className="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center shadow-lg shadow-indigo-600/20">
+                                    <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center shadow-lg shadow-blue-600/20">
                                         <Search size={16} />
                                     </div>
                                 </div>
@@ -239,9 +239,9 @@ const HeroAIChatMockup: React.FC = () => {
                                 </div>
                                 <div className="h-12 flex items-end gap-1 px-1">
                                     {[30, 45, 25, 60, 40, 85, 55, 70].map((h, i) => (
-                                        <div key={i} className="flex-1 bg-indigo-500/10 rounded-t-sm relative group overflow-hidden">
+                                        <div key={i} className="flex-1 bg-blue-500/10 rounded-t-sm relative group overflow-hidden">
                                             <div 
-                                                className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-indigo-600 to-indigo-400 transition-all duration-1000 delay-300"
+                                                className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-blue-600 to-blue-400 transition-all duration-1000 delay-300"
                                                 style={{ height: `${step > 0 ? h : 0}%` }}
                                             ></div>
                                         </div>
@@ -279,7 +279,7 @@ const HeroAIChatMockup: React.FC = () => {
                                 <Sparkles size={20} className="mb-3 text-white/80" />
                                 <p className="text-[11px] font-black uppercase tracking-widest opacity-80 mb-1">AI Suggestion</p>
                                 <p className="text-[12px] font-bold leading-tight mb-3">Optimize Slack-to-Jira pipeline for 15% faster triage.</p>
-                                <button className="w-full py-2 bg-white text-indigo-600 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-lg hover:scale-105 transition-transform">Apply Logic</button>
+                                <button className="w-full py-2 bg-white text-blue-600 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-lg hover:scale-105 transition-transform">Apply Logic</button>
                             </div>
                         </div>
                     </div>
@@ -300,7 +300,7 @@ const HeroAIChatMockup: React.FC = () => {
 
             {/* Absolute Floating Badges for extra depth */}
             <div className="absolute -left-12 top-1/4 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-white/20 dark:border-slate-800/50 p-4 rounded-2xl shadow-2xl hidden xl:flex flex-col items-center gap-1 animate-float z-20">
-                <PieChart size={24} className="text-purple-500 mb-2" />
+                <PieChart size={24} className="text-cyan-500 mb-2" />
                 <span className="text-[10px] font-black text-slate-400">ALLOCATION</span>
                 <span className="text-sm font-black text-slate-900 dark:text-white">82%</span>
             </div>
