@@ -54,12 +54,9 @@ class ApiService {
   private api: AxiosInstance;
 
   constructor() {
-    // Use production URL or fallback to environment variable
+    // Use baseURL purely from environment variables (.env)
     const getBaseURL = () => {
-      const envURL = import.meta.env.VITE_API_URL;
-      if (envURL) return envURL;
-      // Default to production API
-      return 'https://mini-hub.fly.dev';
+      return import.meta.env.VITE_API_URL || '';
     };
 
     this.api = axios.create({
