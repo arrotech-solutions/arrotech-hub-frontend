@@ -86,10 +86,10 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
     }, [pathname, hash]);
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-50 transition-colors duration-300 selection:bg-purple-100 selection:text-purple-900 dark:selection:bg-purple-900 dark:selection:text-purple-100">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-50 transition-colors duration-300 selection:bg-cyan-100 selection:text-cyan-900 dark:selection:bg-cyan-900 dark:selection:text-cyan-100">
             {/* Mesh Gradient Background */}
             <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-                <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-gradient-to-br from-purple-200/40 to-pink-200/40 dark:from-purple-900/20 dark:to-pink-900/20 blur-[120px] animate-pulse" />
+                <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-gradient-to-br from-cyan-200/40 to-pink-200/40 dark:from-cyan-900/20 dark:to-pink-900/20 blur-[120px] animate-pulse" />
                 <div className="absolute top-[10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-gradient-to-bl from-cyan-200/40 to-blue-200/40 dark:from-cyan-900/20 dark:to-blue-900/20 blur-[120px] animate-float" />
                 <div className="absolute bottom-[-10%] left-[20%] w-[50%] h-[50%] rounded-full bg-gradient-to-t from-violet-200/30 to-fuchsia-100/30 dark:from-violet-900/10 dark:to-fuchsia-900/10 blur-[140px]" />
                 <div className="absolute top-[40%] left-[30%] w-[30%] h-[30%] rounded-full bg-white/60 dark:bg-black/20 blur-[100px] animate-pulse delay-700" />
@@ -143,7 +143,7 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
                                     <div className="bg-white/95 dark:bg-slate-950/95 backdrop-blur-3xl border border-white/20 dark:border-slate-800/40 rounded-[2.5rem] shadow-[0_30px_100px_rgba(0,0,0,0.15)] dark:shadow-[0_30px_100px_rgba(0,0,0,0.6)] p-6 overflow-hidden">
                                         {/* Background glow in mega menu */}
                                         <div className="absolute top-0 right-0 w-40 h-40 bg-blue-500/10 dark:bg-blue-600/20 blur-3xl rounded-full -mr-20 -mt-20"></div>
-                                        <div className="absolute bottom-0 left-0 w-40 h-40 bg-purple-500/10 dark:bg-purple-600/20 blur-3xl rounded-full -ml-20 -mb-20"></div>
+                                        <div className="absolute bottom-0 left-0 w-40 h-40 bg-cyan-500/10 dark:bg-cyan-600/20 blur-3xl rounded-full -ml-20 -mb-20"></div>
                                         
                                         <div className="grid grid-cols-2 gap-4 relative z-10">
                                             <div className="col-span-1 space-y-2">
@@ -170,7 +170,7 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
                                             <div className="col-span-1 space-y-2">
                                                 <h5 className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500 px-3 mb-3">Ecosystem</h5>
                                                 <Link to="/integrations/gmail" className="flex items-center gap-4 p-3 hover:bg-slate-50 dark:hover:bg-slate-900/50 rounded-2xl group/item transition-all duration-300">
-                                                    <div className="flex-shrink-0 w-10 h-10 bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 rounded-xl flex items-center justify-center group-hover/item:scale-110 group-hover/item:bg-purple-600 group-hover/item:text-white transition-all duration-300">
+                                                    <div className="flex-shrink-0 w-10 h-10 bg-cyan-50 dark:bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 rounded-xl flex items-center justify-center group-hover/item:scale-110 group-hover/item:bg-cyan-600 group-hover/item:text-white transition-all duration-300">
                                                         <Plug className="w-5 h-5" />
                                                     </div>
                                                     <div>
@@ -300,7 +300,7 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
                                 </Link>
                             ) : (
                                 <div className="flex flex-col gap-3">
-                                    <Link onClick={() => setMobileMenuOpen(false)} to="/register" className="w-full flex items-center justify-center py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold shadow-lg shadow-blue-500/20 text-base transition-all active:scale-[0.98]">Get Started Free</Link>
+                                    <Link onClick={() => setMobileMenuOpen(false)} to="/register" className="w-full flex items-center justify-center py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-blue-600 text-white font-bold shadow-lg shadow-blue-500/20 text-base transition-all active:scale-[0.98]">Get Started Free</Link>
                                     <Link onClick={() => setMobileMenuOpen(false)} to="/login" className="w-full flex items-center justify-center py-4 rounded-2xl border-2 border-slate-200 dark:border-slate-800 font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 text-base transition-colors">Log in to account</Link>
                                 </div>
                             )}
@@ -317,7 +317,7 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
             {/* Premium Footer */}
             <footer className="relative z-10 border-t border-slate-200 dark:border-slate-800 bg-transparent text-slate-900 dark:text-white pt-10 pb-10 px-4 sm:px-6 lg:px-8 overflow-hidden transition-colors duration-300">
                 {/* Subtle glow */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[200px] bg-purple-500/10 dark:bg-purple-900/20 rounded-full blur-[120px] pointer-events-none"></div>
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[200px] bg-cyan-500/10 dark:bg-cyan-900/20 rounded-full blur-[120px] pointer-events-none"></div>
 
                 <div className="max-w-7xl mx-auto relative z-10">
                     <div className="grid grid-cols-2 md:grid-cols-12 gap-12 md:gap-8 mb-16">
@@ -364,7 +364,7 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
                                         placeholder="you@company.com"
                                         value={nlEmail}
                                         onChange={(e) => { setNlEmail(e.target.value); if (nlStatus !== 'idle') setNlStatus('idle'); }}
-                                        className="flex-1 bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/10 rounded-full px-5 py-2.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 dark:focus:ring-white/30 dark:focus:border-white/30 transition-all font-medium"
+                                        className="flex-1 bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/10 rounded-full px-5 py-2.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 focus:border-cyan-500 dark:focus:ring-white/30 dark:focus:border-white/30 transition-all font-medium"
                                         required
                                         disabled={nlStatus === 'loading'}
                                     />

@@ -1,386 +1,84 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
     Check,
     X,
     Sparkles,
-    Zap,
-    Building2,
-    Crown,
     Shield,
     ArrowRight,
-    Mail,
-    Calendar,
-    CheckSquare,
-    Bot,
-    Headphones,
     ChevronDown,
     Star,
-    TrendingUp,
     Globe,
-    CreditCard
+    CreditCard,
+    Headphones,
+    MessageCircle,
+    HelpCircle,
+    Clock,
+    Lock,
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import toast from 'react-hot-toast';
 import apiService from '../services/api';
 import { PaystackButton } from 'react-paystack';
 import SEO from '../components/SEO';
+import {
+    WORKSPACE_PLANS,
+    COMPARISON_CATEGORIES,
+    COMPARISON_LENSES,
+    LENS_CATEGORY_MAP,
+    WHATSAPP_JOURNEY,
+    PRICING_FAQS,
+    TRIAL_GUARDRAILS,
+    TRIAL_USAGE_CAPS,
+    PLAN_COLUMN_KEYS,
+    PLAN_COLUMN_LABELS,
+    type BillingCycle,
+    type ComparisonLens,
+    type WorkspacePlan,
+    type PlanColumnKey,
+} from '../data/pricingData';
 
-// ============================================================================
-// PLAN DEFINITIONS - Matches Master Implementation Prompt (Kenya-first KES)
-// ============================================================================
+const COLLAPSED_FEATURE_COUNT = 5;
 
-const PLANS = [
-    {
-        id: 'free',
-        name: 'Free',
-        tagline: 'Unified Visibility',
-        price: 0,
-        priceDisplay: '0',
-        description: 'See all your work in one place. Read-only access to get started.',
-        icon: Shield,
-        gradient: 'from-slate-500 to-slate-600',
-        bgGradient: 'from-slate-50 to-slate-100',
-        borderColor: 'border-slate-200',
-        highlight: false,
-        popular: false,
-        features: {
-            included: [
-                'Unified Inbox (Read-only)',
-                'Unified Calendar (View-only)',
-                'Unified Tasks (View-only)',
-                'AI Chat (Basic)',
-                'AI Briefing (Weekly)',
-                'WhatsApp, Slack, or Teams (1)',
-                'Gmail or Outlook (1)',
-                'Jira, Trello, Asana, or ClickUp (1)',
-                'Workflow Marketplace (Browse)',
-                '3 workflows (templates only)',
-                '100 AI actions/month',
-                '500 automation runs/month',
-            ],
-            excluded: [
-                'Send & reply to messages',
-                'Create/edit calendar events',
-                'Create/update tasks',
-                'Social media integrations',
-                'WhatsApp auto-replies & broadcasts',
-                'Smart Scheduler',
-            ]
-        },
-        limits: {
-            aiActions: 100,
-            automationRuns: 500,
-            workflows: 3,
-            teamMembers: 1
-        }
-    },
-    {
-        id: 'starter',
-        name: 'Starter',
-        tagline: 'Unified Action',
-        price: 1500,
-        priceDisplay: '1,500',
-        description: 'Send, reply, and take action across all your tools.',
-        icon: Zap,
-        gradient: 'from-blue-500 to-blue-600',
-        bgGradient: 'from-blue-50 to-indigo-50',
-        borderColor: 'border-blue-200',
-        highlight: false,
-        popular: false,
-        features: {
-            included: [
-                'Unified Inbox (Send & Reply)',
-                'Unified Calendar (Create & Edit)',
-                'Unified Tasks (Create & Update)',
-                'Create tasks from messages',
-                'AI Chat (Workspace context)',
-                'AI Briefing (Daily & Weekly)',
-                '2 email + 2 messaging providers',
-                'Google Workspace + Zoho CRM',
-                'Telegram integration',
-                'Workflow Marketplace (Import)',
-                '5 workflows',
-                '500 AI actions/month',
-                '2,000 automation runs/month',
-            ],
-            excluded: [
-                'AI-assisted replies',
-                'Smart Scheduler',
-                'Social media management',
-                'WhatsApp auto-replies & broadcasts',
-            ]
-        },
-        limits: {
-            aiActions: 500,
-            automationRuns: 2000,
-            workflows: 5,
-            teamMembers: 1
-        }
-    },
-    {
-        id: 'business',
-        name: 'Business',
-        tagline: 'Unified Operations',
-        price: 5000,
-        priceDisplay: '5,000',
-        description: 'Full AI power, social media, and smart automation for growing teams.',
-        icon: Building2,
-        gradient: 'from-indigo-500 to-purple-600',
-        bgGradient: 'from-indigo-50 to-purple-50',
-        borderColor: 'border-indigo-300',
-        highlight: true,
-        popular: true,
-        features: {
-            included: [
-                'Everything in Starter, plus:',
-                'AI-assisted email replies',
-                'Smart Scheduler (AI)',
-                'WhatsApp auto-replies & broadcasts',
-                'TikTok Dashboard & content tools',
-                'Facebook, Instagram, LinkedIn, X',
-                'HubSpot, Salesforce CRM',
-                'Zoom, Notion, QuickBooks, Xero',
-                'Task analytics & progress tracking',
-                'API access (5,000 req/day)',
-                '3 team members',
-                '30 workflows',
-                '2,000 AI actions/month',
-                'Priority support',
-            ],
-            excluded: [
-                'Multi-client inbox management',
-                'SLA tracking & alerts',
-                'Advanced scheduling rules',
-            ]
-        },
-        limits: {
-            aiActions: 2000,
-            automationRuns: 15000,
-            workflows: 30,
-            teamMembers: 3
-        }
-    },
-    {
-        id: 'pro',
-        name: 'Pro / Agency',
-        tagline: 'Unified Command Center',
-        price: 10000,
-        priceDisplay: '10,000',
-        description: 'Multi-client management, unlimited integrations, and dedicated support.',
-        icon: Crown,
-        gradient: 'from-purple-500 to-pink-600',
-        bgGradient: 'from-purple-50 to-pink-50',
-        borderColor: 'border-purple-200',
-        highlight: false,
-        popular: false,
-        features: {
-            included: [
-                'Everything in Business, plus:',
-                'Multi-client inbox management',
-                'SLA tracking & alerts',
-                'Advanced Smart Scheduler',
-                'Cross-client calendar view',
-                'Client-separated tasks & reports',
-                'AI Chat (Power Mode)',
-                'AI Briefing (Real-time)',
-                'Unlimited integrations',
-                'Unlimited workflows',
-                'API access (50,000 req/day)',
-                '10 team members',
-                '5,000 AI actions/month',
-                'Dedicated support',
-            ],
-            excluded: []
-        },
-        limits: {
-            aiActions: 5000,
-            automationRuns: 50000,
-            workflows: 'Unlimited',
-            teamMembers: 10
-        }
-    },
-    {
-        id: 'enterprise',
-        name: 'Enterprise',
-        tagline: 'Custom Solution',
-        price: null,
-        priceDisplay: 'Custom',
-        description: 'White-label, SSO, compliance, and dedicated infrastructure.',
-        icon: Sparkles,
-        gradient: 'from-amber-500 to-orange-600',
-        bgGradient: 'from-amber-50 to-orange-50',
-        borderColor: 'border-amber-200',
-        highlight: false,
-        popular: false,
-        features: {
-            included: [
-                'Everything in Pro, plus:',
-                'Dedicated AI models',
-                'White-labeling & SSO',
-                'Compliance & audit logs',
-                'Private deployments',
-                'Custom integrations (2/year)',
-                'Unlimited team members',
-                'Dedicated account manager',
-            ],
-            excluded: []
-        },
-        limits: {
-            aiActions: 'Unlimited',
-            automationRuns: 'Unlimited',
-            workflows: 'Unlimited',
-            teamMembers: 'Unlimited'
-        }
-    }
-];
+/** Shared collapsed heights so all plan cards align in a row */
+const CARD_PRICE_MIN_H = 'min-h-[3.25rem]';
+const CARD_DESC_MIN_H = 'min-h-[2.5rem]';
+const CARD_FEATURES_COLLAPSED_MIN_H = 'min-h-[7.75rem]';
 
-// Feature comparison data for the table
-const FEATURE_COMPARISON = [
-    {
-        category: 'Unified Inbox',
-        icon: Mail,
-        features: [
-            { name: 'Read messages', free: true, starter: true, business: true, pro: true },
-            { name: 'Send & reply', free: false, starter: true, business: true, pro: true },
-            { name: 'Create tasks from messages', free: false, starter: true, business: true, pro: true },
-            { name: 'AI-assisted replies', free: false, starter: false, business: true, pro: true },
-            { name: 'Message triggers', free: false, starter: false, business: true, pro: true },
-            { name: 'Multi-client inboxes', free: false, starter: false, business: false, pro: true },
-            { name: 'SLA tracking & alerts', free: false, starter: false, business: false, pro: true },
-        ]
-    },
-    {
-        category: 'Unified Calendar',
-        icon: Calendar,
-        features: [
-            { name: 'View events', free: true, starter: true, business: true, pro: true },
-            { name: 'Create & edit events', free: false, starter: true, business: true, pro: true },
-            { name: 'Smart Scheduler (AI)', free: false, starter: false, business: true, pro: true },
-            { name: 'Conflict detection', free: false, starter: false, business: true, pro: true },
-            { name: 'Auto follow-ups', free: false, starter: false, business: true, pro: true },
-            { name: 'Advanced scheduling rules', free: false, starter: false, business: false, pro: true },
-            { name: 'Cross-client calendar', free: false, starter: false, business: false, pro: true },
-        ]
-    },
-    {
-        category: 'Unified Tasks',
-        icon: CheckSquare,
-        features: [
-            { name: 'View tasks', free: true, starter: true, business: true, pro: true },
-            { name: 'Create & update tasks', free: false, starter: true, business: true, pro: true },
-            { name: 'Multiple task tools', free: false, starter: false, business: true, pro: true },
-            { name: 'Task analytics & progress', free: false, starter: false, business: true, pro: true },
-            { name: 'Client-separated tasks', free: false, starter: false, business: false, pro: true },
-            { name: 'Advanced reports', free: false, starter: false, business: false, pro: true },
-        ]
-    },
-    {
-        category: 'AI & Automation',
-        icon: Bot,
-        features: [
-            { name: 'AI Chat', free: 'Basic', starter: 'Workspace', business: 'Advanced', pro: 'Power Mode' },
-            { name: 'AI Briefing', free: 'Weekly', starter: 'Daily/Weekly', business: 'Custom', pro: 'Real-time' },
-            { name: 'Smart Scheduler', free: false, starter: false, business: true, pro: 'Advanced' },
-            { name: 'Workflow Builder', free: '3 templates', starter: '5 workflows', business: '30 workflows', pro: 'Unlimited' },
-            { name: 'Workflow Marketplace', free: 'Browse', starter: 'Import', business: 'Publish', pro: 'Full access' },
-            { name: 'MCP Tools & Agent Hub', free: 'Basic', starter: 'Basic', business: true, pro: true },
-        ]
-    },
-    {
-        category: 'Integrations',
-        icon: Globe,
-        features: [
-            { name: 'Gmail / Outlook', free: true, starter: true, business: true, pro: true },
-            { name: 'Slack / Teams / Telegram', free: true, starter: true, business: true, pro: true },
-            { name: 'WhatsApp Business', free: true, starter: true, business: true, pro: true },
-            { name: 'Jira / Trello / Asana / ClickUp', free: true, starter: true, business: true, pro: true },
-            { name: 'Google Workspace / Zoho CRM', free: false, starter: true, business: true, pro: true },
-            { name: 'HubSpot / Salesforce', free: false, starter: false, business: true, pro: true },
-            { name: 'Facebook / Instagram / LinkedIn / X', free: false, starter: false, business: true, pro: true },
-            { name: 'TikTok Dashboard', free: false, starter: false, business: true, pro: true },
-            { name: 'Zoom / Notion', free: false, starter: false, business: true, pro: true },
-            { name: 'QuickBooks / Xero', free: false, starter: false, business: true, pro: true },
-        ]
-    },
-    {
-        category: 'WhatsApp Business',
-        icon: Headphones,
-        features: [
-            { name: 'Connect WhatsApp', free: true, starter: true, business: true, pro: true },
-            { name: 'Contact management', free: true, starter: true, business: true, pro: true },
-            { name: 'Auto-reply rules', free: false, starter: false, business: true, pro: true },
-            { name: 'AI-powered replies', free: false, starter: false, business: true, pro: true },
-            { name: 'Broadcast campaigns', free: false, starter: false, business: true, pro: true },
-        ]
-    },
-    {
-        category: 'Limits & Support',
-        icon: TrendingUp,
-        features: [
-            { name: 'AI actions/month', free: '100', starter: '500', business: '2,000', pro: '5,000' },
-            { name: 'Automation runs/month', free: '500', starter: '2,000', business: '15,000', pro: '50,000' },
-            { name: 'Active workflows', free: '3', starter: '5', business: '30', pro: 'Unlimited' },
-            { name: 'Team members', free: '1', starter: '1', business: '3', pro: '10' },
-            { name: 'Providers per category', free: '1', starter: '2', business: '5', pro: 'Unlimited' },
-            { name: 'API access', free: false, starter: false, business: '5K req/day', pro: '50K req/day' },
-            { name: 'Organization management', free: false, starter: false, business: true, pro: true },
-            { name: 'Security (2FA / Passkeys)', free: true, starter: true, business: true, pro: true },
-            { name: 'Support level', free: 'Community', starter: 'Email', business: 'Priority', pro: 'Dedicated' },
-        ]
-    }
-];
-
-const FAQS = [
-    {
-        question: "Can I cancel my subscription at any time?",
-        answer: "Yes, you can cancel your subscription at any time from your account settings. Your access will continue until the end of your current billing period."
-    },
-    {
-        question: "How does the M-Pesa payment work?",
-        answer: "Select your preferred plan, choose M-Pesa as the payment method, and enter your phone number. You'll receive a prompt on your phone to complete the transaction securely."
-    },
-    {
-        question: "Is there a free trial for paid plans?",
-        answer: "Yes, all paid plans come with a 14-day free trial. You won't be charged until the trial period ends."
-    },
-    {
-        question: "What happens if I downgrade my plan?",
-        answer: "If you downgrade, you'll retain your current features until the end of your billing cycle. Afterwards, your account will revert to the limits of the new plan."
-    }
-];
-
+const MOBILE_PLAN_LABELS: Record<string, string> = {
+    free: 'Trial',
+    starter: 'Start',
+    business: 'Biz',
+    pro: 'Pro',
+};
 
 const Pricing: React.FC = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
     const [paystackKey, setPaystackKey] = useState('');
     const [loading, setLoading] = useState(false);
-    const [showComparison, setShowComparison] = useState(false);
-    const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
+    const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
     const [expandedPlans, setExpandedPlans] = useState<Set<string>>(new Set());
+    const [activeLens, setActiveLens] = useState<ComparisonLens>('all');
+    const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
+        new Set(['whatsapp', 'inbox'])
+    );
+    const [highlightedPlan, setHighlightedPlan] = useState<string | null>(null);
+    const [expandedFaqs, setExpandedFaqs] = useState<Set<number>>(new Set([0]));
 
-
-    // Fetch Paystack public key on mount - ONLY if user is logged in
-    // This prevents 401 redirects for unauthenticated visitors viewing pricing
     useEffect(() => {
-        if (!user) return; // Skip for unauthenticated users
-
-        const fetchConfig = async () => {
-            try {
-                const response = await apiService.getPaystackConfig();
-                if (response.success && response.data?.key) {
-                    setPaystackKey(response.data.key);
-                }
-            } catch (error) {
-                // Silently fail - user can still view pricing, just can't pay
-                console.error('Failed to fetch Paystack config:', error);
-            }
-        };
-        fetchConfig();
+        if (!user) return;
+        apiService.getPaystackConfig().then((response) => {
+            if (response.success && response.data?.key) setPaystackKey(response.data.key);
+        }).catch(() => {});
     }, [user]);
 
-    const handlePaymentSuccess = async (reference: any, planId: string) => {
+    const visibleCategories = useMemo(() => {
+        const ids = LENS_CATEGORY_MAP[activeLens];
+        return COMPARISON_CATEGORIES.filter((c) => ids.includes(c.id));
+    }, [activeLens]);
+
+    const handlePaymentSuccess = async (reference: { reference: string }) => {
         setLoading(true);
         try {
             const response = await apiService.verifyPaystackPayment(reference.reference);
@@ -390,269 +88,260 @@ const Pricing: React.FC = () => {
             } else {
                 toast.error('Payment verification failed. Please contact support.');
             }
-        } catch (error) {
-            console.error('Payment verification error:', error);
+        } catch {
             toast.error('Failed to verify payment. Please contact support.');
         } finally {
             setLoading(false);
         }
     };
 
-    const handlePaymentClose = () => {
-        toast('Payment cancelled. You can try again anytime.');
-    };
-
-    const getPaystackConfig = (plan: typeof PLANS[0]) => ({
+    const getPaystackConfig = (plan: WorkspacePlan) => ({
         reference: `sub_${plan.id}_${Date.now()}`,
         email: user?.email || '',
-        amount: (plan.price || 0) * 100, // Paystack expects amount in kobo/cents
+        amount: (plan.price || 0) * 100,
         publicKey: paystackKey,
         currency: 'KES',
         metadata: {
             plan_id: plan.id,
             user_id: user?.id,
             plan_name: plan.name,
-            custom_fields: [
-                {
-                    display_name: 'Plan',
-                    variable_name: 'plan',
-                    value: plan.name,
-                },
-            ],
+            custom_fields: [{ display_name: 'Plan', variable_name: 'plan', value: plan.name }],
         },
     });
 
-    const renderFeatureValue = (value: boolean | string) => {
-        if (value === true) {
-            return <Check className="w-5 h-5 text-emerald-500" />;
-        } else if (value === false) {
-            return <X className="w-5 h-5 text-gray-300" />;
-        }
-        return <span className="text-sm font-medium text-gray-700">{value}</span>;
+    const renderCell = (value: boolean | string, isTrialColumn = false) => {
+        if (value === true) return <Check className="w-5 h-5 text-emerald-500 mx-auto" />;
+        if (value === false) return <X className="w-5 h-5 text-gray-300 dark:text-slate-600 mx-auto" />;
+        const isTrialCap =
+            isTrialColumn &&
+            (typeof value === 'string' &&
+                (/total|uses|msgs|contacts|platform|days|Up to|×/i.test(value) || value === '1'));
+        return (
+            <span
+                className={`text-sm font-medium ${
+                    isTrialCap ? 'text-violet-700 dark:text-violet-300' : 'text-gray-700 dark:text-slate-300'
+                }`}
+            >
+                {value}
+            </span>
+        );
     };
+
+    const renderPlanCta = (plan: WorkspacePlan) => {
+        if (user?.subscription_tier === plan.id) {
+            return <div className="w-full py-3 px-4 bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 text-center rounded-xl font-semibold">Current Plan</div>;
+        }
+        if (plan.id === 'enterprise') {
+            return (
+                <a href="mailto:sales@arrotechsolutions.com?subject=Enterprise%20Plan%20Inquiry" className="block w-full py-3 px-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-center rounded-xl font-semibold hover:shadow-lg transition-all">
+                    Contact Sales
+                </a>
+            );
+        }
+        if (plan.id === 'free') {
+            return (
+                <Link to={user ? '/unified' : '/register'} className="block w-full py-3 px-4 bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-center rounded-xl font-semibold hover:shadow-lg transition-all">
+                    {user ? 'Continue trial' : 'Start 7-day trial'}
+                </Link>
+            );
+        }
+        if (user && paystackKey) {
+            return (
+                <PaystackButton
+                    {...getPaystackConfig(plan)}
+                    onSuccess={(ref) => handlePaymentSuccess(ref)}
+                    onClose={() => toast('Payment cancelled. You can try again anytime.')}
+                    className={`w-full py-3 px-4 bg-gradient-to-r ${plan.gradient} text-white text-center rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50`}
+                    text={loading ? 'Processing...' : `Upgrade to ${plan.name}`}
+                />
+            );
+        }
+        return (
+            <Link to="/register" className={`block w-full py-3 px-4 bg-gradient-to-r ${plan.gradient} text-white text-center rounded-xl font-semibold hover:shadow-lg transition-all`}>
+                Start with {plan.name}
+            </Link>
+        );
+    };
+
+    const yearlyDiscount = (monthly: number) => Math.round(monthly * 12 * 0.8);
+
+    const toggleCategory = (id: string) => {
+        setExpandedCategories((prev) => {
+            const next = new Set(prev);
+            if (next.has(id)) next.delete(id);
+            else next.add(id);
+            return next;
+        });
+    };
+
+    const getRowValue = (row: (typeof COMPARISON_CATEGORIES)[0]['features'][0], key: PlanColumnKey) => row[key];
 
     return (
         <div className="min-h-screen bg-transparent transition-colors">
             <SEO
-                title="Pricing | Flexible Plans for Teams"
-                description="Explore Arrotech Hub pricing. Start for free, upgrade to Pro or Enterprise. The most affordable unified workspace with M-Pesa support. Flexible plans for every team size."
+                title="Pricing | 7-Day Free Trial & Plans"
+                description="Start with a 7-day Business preview — full inbox, WhatsApp, and AI with fair usage caps. Upgrade from KES 1,500/mo. M-Pesa supported."
                 url="/pricing"
-                keywords={[
-                    'Arrotech Hub Pricing',
-                    'Unified Workspace Plans',
-                    'Business Automation Pricing',
-                    'M-Pesa Payment Subscription',
-                    'Affordable Workspace',
-                    'Free Plan'
-                ]}
+                keywords={['Arrotech Hub Pricing', 'WhatsApp Business API Kenya', 'Unified Workspace', 'M-Pesa Subscription']}
                 schema={{
-                    "@context": "https://schema.org",
-                    "@type": "FAQPage",
-                    "mainEntity": FAQS.map(faq => ({
-                        "@type": "Question",
-                        "name": faq.question,
-                        "acceptedAnswer": {
-                            "@type": "Answer",
-                            "text": faq.answer
-                        }
-                    }))
+                    '@context': 'https://schema.org',
+                    '@type': 'FAQPage',
+                    mainEntity: PRICING_FAQS.map((f) => ({
+                        '@type': 'Question',
+                        name: f.question,
+                        acceptedAnswer: { '@type': 'Answer', text: f.answer },
+                    })),
                 }}
             />
-            {/* ================================================================ */}
-            {/* HEADER - Standalone Navigation */}
-            {/* ================================================================ */}
 
-
-            {/* ================================================================ */}
-            {/* HERO SECTION */}
-            {/* ================================================================ */}
-            <section className="relative overflow-hidden py-16 md:py-24">
-                {/* Background Decorations */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-gradient-to-r from-indigo-400/20 to-purple-400/20 rounded-full blur-3xl -z-10" />
-                <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-l from-blue-400/10 to-cyan-400/10 rounded-full blur-3xl -z-10" />
-
-                <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 rounded-full text-sm font-semibold mb-6">
-                        <Sparkles className="w-4 h-4" />
-                        Simple, transparent pricing
-                    </div>
-
-                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 dark:text-white mb-6 tracking-tighter leading-[1.1] transition-colors">
-                        Choose the plan that
-                        <span className="block text-slate-500 dark:text-slate-400 transition-colors">
-                            fits your workflow
-                        </span>
+            {/* Hero */}
+            <section className="relative overflow-hidden py-12 sm:py-16 md:py-22">
+                <div className="absolute inset-0 -z-10">
+                    <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-indigo-400/15 rounded-full blur-3xl" />
+                    <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-emerald-400/10 rounded-full blur-3xl" />
+                </div>
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                    <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] font-bold text-slate-900 dark:text-white mb-4 sm:mb-5 tracking-tight leading-[1.08] px-1">
+                        One workspace.
+                        <span className="block bg-gradient-to-r from-indigo-600 to-emerald-600 bg-clip-text text-transparent">WhatsApp built in.</span>
                     </h1>
-
-                    <p className="text-lg md:text-xl text-slate-500/90 dark:text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed font-medium transition-colors">
-                        Start free, upgrade as you grow. All plans include our unified inbox, calendar, and task management.
-                        <span className="font-bold text-slate-800 dark:text-slate-200 transition-colors"> Pay with M-Pesa.</span>
+                    <p className="text-base sm:text-lg text-slate-500 dark:text-slate-400 max-w-xl mx-auto mb-6 sm:mb-8 font-medium leading-relaxed px-1">
+                        Start with a <span className="font-semibold text-violet-600 dark:text-violet-400">7-day Business preview</span> — no card required.
+                        WhatsApp, AI, and workflows included with fair caps so you can evaluate properly.
                     </p>
 
-                    {/* Billing Toggle */}
-                    <div className="inline-flex items-center gap-3 p-1.5 bg-gray-100 dark:bg-slate-800/80 rounded-2xl mb-8 border border-transparent dark:border-slate-700/50">
-                        <button
-                            onClick={() => setBillingCycle('monthly')}
-                            className={`px-6 py-2.5 rounded-xl font-semibold transition-all duration-300 ${billingCycle === 'monthly'
-                                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-[0_2px_8px_rgb(0,0,0,0.06)] scale-105'
-                                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-700/50'
+                    <div className="inline-flex items-center gap-3 p-1.5 bg-gray-100/80 dark:bg-slate-800/80 rounded-2xl backdrop-blur-sm">
+                        {(['monthly', 'yearly'] as BillingCycle[]).map((cycle) => (
+                            <button
+                                key={cycle}
+                                onClick={() => setBillingCycle(cycle)}
+                                className={`px-5 py-2.5 rounded-xl font-semibold text-sm transition-all capitalize flex items-center gap-2 ${
+                                    billingCycle === cycle
+                                        ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
+                                        : 'text-slate-500 hover:text-slate-800 dark:hover:text-white'
                                 }`}
-                        >
-                            Monthly
-                        </button>
-                        <button
-                            onClick={() => setBillingCycle('yearly')}
-                            className={`px-6 py-2.5 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 ${billingCycle === 'yearly'
-                                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-[0_2px_8px_rgb(0,0,0,0.06)] scale-105'
-                                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-700/50'
-                                }`}
-                        >
-                            Yearly
-                            <span className="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 text-xs font-bold rounded-full">
-                                Save 20%
-                            </span>
-                        </button>
+                            >
+                                {cycle}
+                                {cycle === 'yearly' && (
+                                    <span className="px-1.5 py-0.5 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold rounded-full uppercase tracking-wide">
+                                        −20%
+                                    </span>
+                                )}
+                            </button>
+                        ))}
                     </div>
                 </div>
             </section>
 
-            {/* ================================================================ */}
-            {/* PRICING CARDS */}
-            {/* ================================================================ */}
-            <section className="relative pb-16 md:pb-24 -mt-8">
+            {/* Plan cards — horizontal snap on mobile, equal collapsed height on desktop */}
+            <section className="pb-14 -mt-4">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 items-start">
-                        {PLANS.map((plan) => {
+                    <p className="text-center text-xs text-slate-400 mb-3 lg:hidden">Swipe to compare plans →</p>
+                    <div className="flex lg:grid lg:grid-cols-3 xl:grid-cols-5 xl:items-stretch gap-4 lg:gap-5 overflow-x-auto lg:overflow-visible snap-x snap-mandatory lg:snap-none pb-2 lg:pb-0 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0">
+                        {WORKSPACE_PLANS.map((plan) => {
                             const Icon = plan.icon;
-                            const isCurrentPlan = user?.subscription_tier === plan.id;
-                            const yearlyPrice = plan.price ? Math.round(plan.price * 12 * 0.8) : null;
-                            const displayPrice = billingCycle === 'yearly' && yearlyPrice
-                                ? yearlyPrice.toLocaleString()
-                                : plan.priceDisplay;
+                            const yearlyPrice = plan.price ? yearlyDiscount(plan.price) : null;
+                            const displayPrice = billingCycle === 'yearly' && yearlyPrice ? yearlyPrice.toLocaleString() : plan.priceDisplay;
+                            const isHighlighted = highlightedPlan === plan.id;
+                            const isExpanded = expandedPlans.has(plan.id);
+                            const visibleFeatures = isExpanded
+                                ? plan.features.included
+                                : plan.features.included.slice(0, COLLAPSED_FEATURE_COUNT);
 
                             return (
                                 <div
                                     key={plan.id}
-                                    className={`relative flex flex-col rounded-3xl border-2 bg-white/80 dark:bg-slate-900/80 dark:border-slate-800 backdrop-blur-sm transition-all duration-500 hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] dark:hover:shadow-none hover:-translate-y-2 ${plan.highlight
-                                        ? 'border-indigo-400 dark:border-indigo-500 shadow-[0_8px_30px_rgb(99,102,241,0.15)] scale-105 z-10'
-                                        : plan.borderColor
-                                        }`}
+                                    onMouseEnter={() => setHighlightedPlan(plan.id)}
+                                    onMouseLeave={() => setHighlightedPlan(null)}
+                                    className={`relative flex flex-col shrink-0 w-[min(100%,280px)] sm:w-[300px] lg:w-auto snap-center lg:snap-align-none rounded-2xl border bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm transition-all duration-300 ${
+                                        !isExpanded ? 'self-stretch' : 'self-start'
+                                    } ${
+                                        plan.highlight
+                                            ? 'border-indigo-400 dark:border-indigo-500 shadow-lg shadow-indigo-500/10 xl:scale-[1.03] z-10'
+                                            : isHighlighted
+                                              ? 'border-slate-300 dark:border-slate-600 shadow-md lg:-translate-y-1'
+                                              : 'border-slate-200 dark:border-slate-800'
+                                    }`}
                                 >
-                                    {/* Popular Badge */}
-                                    {plan.popular && (
-                                        <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                                            <div className="flex items-center gap-1.5 px-4 py-1.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-bold rounded-full shadow-lg">
-                                                <Star className="w-4 h-4 fill-current" />
-                                                Most Popular
-                                            </div>
+                                    {plan.isTrial && (
+                                        <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                                            <span className="inline-flex items-center gap-1 px-3 py-1 bg-violet-600 text-white text-xs font-bold rounded-full shadow">
+                                                <Clock className="w-3 h-3" /> 7 days free
+                                            </span>
+                                        </div>
+                                    )}
+                                    {plan.popular && !plan.isTrial && (
+                                        <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                                            <span className="inline-flex items-center gap-1 px-3 py-1 bg-indigo-600 text-white text-xs font-bold rounded-full shadow">
+                                                <Star className="w-3 h-3 fill-current" /> Popular
+                                            </span>
                                         </div>
                                     )}
 
-                                    <div className="p-6 flex-1 flex flex-col">
-                                        {/* Plan Header */}
-                                        <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${plan.gradient} flex items-center justify-center mb-4`}>
-                                            <Icon className="w-6 h-6 text-white" />
+                                    <div className="p-5 flex flex-col flex-1 h-full">
+                                        <div className="flex items-start justify-between gap-2 mb-3">
+                                            <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${plan.gradient} flex items-center justify-center shrink-0`}>
+                                                <Icon className="w-5 h-5 text-white" />
+                                            </div>
+                                            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold uppercase tracking-wide max-w-[48%] min-w-0">
+                                                <MessageCircle className="w-3 h-3 shrink-0" />
+                                                <span className="truncate">{plan.whatsappLevel}</span>
+                                            </span>
                                         </div>
 
-                                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">{plan.name}</h3>
-                                        <p className="text-sm text-gray-500 dark:text-slate-400 mb-4">{plan.tagline}</p>
+                                        <h3 className="text-lg font-bold text-gray-900 dark:text-white leading-tight">{plan.name}</h3>
+                                        <p className="text-xs text-gray-500 dark:text-slate-400 mb-3">{plan.tagline}</p>
 
-                                        {/* Pricing */}
-                                        <div className="mb-6">
-                                            {plan.price !== null ? (
-                                                <div className="flex items-baseline gap-1">
-                                                    <span className="text-sm text-gray-500 dark:text-slate-400">KES</span>
-                                                    <span className="text-4xl font-black text-gray-900 dark:text-white">{displayPrice}</span>
-                                                    <span className="text-gray-500 dark:text-slate-400">/{billingCycle === 'yearly' ? 'year' : 'mo'}</span>
+                                        <div className={`mb-3 ${CARD_PRICE_MIN_H}`}>
+                                            {plan.isTrial ? (
+                                                <>
+                                                    <div className="flex items-baseline gap-1">
+                                                        <span className="text-3xl font-black text-gray-900 dark:text-white leading-none">Free</span>
+                                                    </div>
+                                                    <p className="text-xs font-semibold text-violet-600 dark:text-violet-400 mt-1 leading-snug">
+                                                        7-day Business preview · then KES 1,500/mo
+                                                    </p>
+                                                </>
+                                            ) : plan.price !== null ? (
+                                                <div className="flex items-baseline gap-1 flex-wrap">
+                                                    <span className="text-xs text-gray-400">KES</span>
+                                                    <span className="text-3xl font-black text-gray-900 dark:text-white tabular-nums leading-none">{displayPrice}</span>
+                                                    <span className="text-sm text-gray-400">/{billingCycle === 'yearly' ? 'yr' : 'mo'}</span>
                                                 </div>
                                             ) : (
-                                                <div className="text-4xl font-black text-gray-900 dark:text-white">Custom</div>
-                                            )}
-                                            {billingCycle === 'yearly' && plan.price && (
-                                                <p className="text-sm text-emerald-600 dark:text-emerald-400 font-medium mt-1">
-                                                    Save KES {((plan.price * 12) - yearlyPrice!).toLocaleString()}/year
-                                                </p>
+                                                <span className="text-3xl font-black text-gray-900 dark:text-white leading-none">Custom</span>
                                             )}
                                         </div>
 
-                                        <p className="text-sm text-gray-600 dark:text-slate-400 mb-6">{plan.description}</p>
+                                        <p className={`text-xs text-gray-600 dark:text-slate-400 mb-4 leading-relaxed line-clamp-2 ${CARD_DESC_MIN_H}`}>
+                                            {plan.description}
+                                        </p>
+                                        {renderPlanCta(plan)}
 
-                                        {/* CTA Button */}
-                                        <div className="mt-auto">
-                                            {isCurrentPlan ? (
-                                                <div className="w-full py-3 px-4 bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 text-center rounded-xl font-semibold">
-                                                    Current Plan
-                                                </div>
-                                            ) : plan.id === 'enterprise' ? (
-                                                <a
-                                                    href="mailto:sales@arrotechsolutions.com?subject=Enterprise%20Plan%20Inquiry"
-                                                    className="block w-full py-3 px-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-center rounded-xl font-semibold hover:shadow-[0_6px_20px_rgba(245,158,11,0.3)] dark:hover:shadow-none hover:-translate-y-0.5 transition-all duration-300"
-                                                >
-                                                    Contact Sales
-                                                </a>
-                                            ) : plan.id === 'free' ? (
-                                                user ? (
-                                                    <Link
-                                                        to="/unified"
-                                                        className="block w-full py-3 px-4 bg-gray-900 dark:bg-slate-100 text-white dark:text-slate-900 text-center rounded-xl font-semibold hover:bg-gray-800 dark:hover:bg-white transition-all"
-                                                    >
-                                                        Go to Dashboard
-                                                    </Link>
-                                                ) : (
-                                                    <Link
-                                                        to="/register"
-                                                        className="block w-full py-3 px-4 bg-gray-900 dark:bg-slate-100 text-white dark:text-slate-900 text-center rounded-xl font-semibold hover:bg-gray-800 dark:hover:bg-white transition-all"
-                                                    >
-                                                        Get Started Free
-                                                    </Link>
-                                                )
-                                            ) : user && paystackKey ? (
-                                                <PaystackButton
-                                                    {...getPaystackConfig(plan)}
-                                                    onSuccess={(ref) => handlePaymentSuccess(ref, plan.id)}
-                                                    onClose={handlePaymentClose}
-                                                    className={`w-full py-3 px-4 bg-gradient-to-r ${plan.gradient} text-white text-center rounded-xl font-semibold hover:shadow-lg dark:hover:shadow-none transition-all disabled:opacity-50`}
-                                                    text={loading ? 'Processing...' : `Upgrade to ${plan.name}`}
-                                                />
-                                            ) : (
-                                                <Link
-                                                    to="/register"
-                                                    className={`block w-full py-3 px-4 bg-gradient-to-r ${plan.gradient} text-white text-center rounded-xl font-semibold hover:shadow-[0_6px_20px_rgba(0,0,0,0.15)] dark:hover:shadow-none hover:-translate-y-0.5 transition-all duration-300`}
-                                                >
-                                                    Start with {plan.name}
-                                                </Link>
-                                            )}
-                                        </div>
-
-                                        {/* Features List */}
-                                        <div className="mt-6 pt-6 border-t border-gray-100 dark:border-slate-800">
-                                            <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">What's included:</h4>
-                                            <ul className="space-y-2.5">
-                                                {(expandedPlans.has(plan.id) ? plan.features.included : plan.features.included.slice(0, 6)).map((feature, idx) => (
-                                                    <li key={idx} className="flex items-start gap-2 text-sm text-gray-600 dark:text-slate-400">
-                                                        <Check className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                                                        <span>{feature}</span>
+                                        <div className={`mt-5 pt-4 border-t border-gray-100 dark:border-slate-800 flex flex-col ${!isExpanded ? CARD_FEATURES_COLLAPSED_MIN_H : ''}`}>
+                                            <ul className="space-y-2">
+                                                {visibleFeatures.map((f, i) => (
+                                                    <li key={i} className="flex items-start gap-2 text-xs text-gray-600 dark:text-slate-400">
+                                                        <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
+                                                        <span>{f}</span>
                                                     </li>
                                                 ))}
                                             </ul>
-                                            {plan.features.included.length > 6 && (
+                                            {plan.features.included.length > COLLAPSED_FEATURE_COUNT && (
                                                 <button
-                                                    onClick={() => setExpandedPlans(prev => {
-                                                        const next = new Set(prev);
-                                                        if (next.has(plan.id)) {
-                                                            next.delete(plan.id);
-                                                        } else {
-                                                            next.add(plan.id);
-                                                        }
-                                                        return next;
-                                                    })}
-                                                    className="mt-3 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors flex items-center gap-1"
-                                                >
-                                                    {expandedPlans.has(plan.id)
-                                                        ? 'Show less'
-                                                        : `+${plan.features.included.length - 6} more features`
+                                                    type="button"
+                                                    onClick={() =>
+                                                        setExpandedPlans((p) => {
+                                                            const n = new Set(p);
+                                                            if (n.has(plan.id)) n.delete(plan.id);
+                                                            else n.add(plan.id);
+                                                            return n;
+                                                        })
                                                     }
-                                                    <ChevronDown className={`w-4 h-4 transition-transform ${expandedPlans.has(plan.id) ? 'rotate-180' : ''}`} />
+                                                    className="mt-auto pt-2 text-xs font-medium text-indigo-600 dark:text-indigo-400 flex items-center gap-1"
+                                                >
+                                                    {isExpanded ? 'Show less' : `+${plan.features.included.length - COLLAPSED_FEATURE_COUNT} more`}
+                                                    <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
                                                 </button>
                                             )}
                                         </div>
@@ -662,177 +351,291 @@ const Pricing: React.FC = () => {
                         })}
                     </div>
 
-                    {/* Compare Plans Button */}
-                    <div className="text-center mt-12">
-                        <button
-                            onClick={() => setShowComparison(!showComparison)}
-                            className="inline-flex items-center gap-2 px-8 py-4 bg-white dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-200 rounded-2xl font-semibold hover:border-indigo-300 dark:hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-all"
-                        >
-                            {showComparison ? 'Hide' : 'Compare all'} features
-                            <ChevronDown className={`w-5 h-5 transition-transform ${showComparison ? 'rotate-180' : ''}`} />
-                        </button>
-                    </div>
-                </div>
-            </section>
-
-            {/* ================================================================ */}
-            {/* FEATURE COMPARISON TABLE */}
-            {/* ================================================================ */}
-            {showComparison && (
-                <section className="pb-16 md:pb-24 animate-in slide-in-from-top-4">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="bg-white dark:bg-slate-900/50 rounded-3xl border border-gray-200 dark:border-slate-800 shadow-xl overflow-hidden">
-                            <div className="p-6 md:p-8 border-b border-gray-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
-                                <h2 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Feature Comparison</h2>
-                                <p className="text-slate-500 dark:text-slate-400 mt-2 font-medium">A detailed breakdown of what each plan includes</p>
+                    {/* Trial fair-use panel */}
+                    <div className="mt-8 sm:mt-10 max-w-4xl mx-auto rounded-2xl border border-violet-200 dark:border-violet-800/60 bg-gradient-to-br from-violet-50/80 to-indigo-50/50 dark:from-violet-950/30 dark:to-indigo-950/20 p-4 sm:p-6 md:p-8">
+                        <div className="flex flex-col md:flex-row md:items-start gap-5 md:gap-6">
+                            <div className="flex-1 min-w-0">
+                                <div className="flex items-start gap-2 mb-2">
+                                    <Lock className="w-4 h-4 text-violet-600 dark:text-violet-400 shrink-0 mt-0.5" />
+                                    <h3 className="font-bold text-sm sm:text-base text-gray-900 dark:text-white leading-snug">Trial includes the full experience — with fair caps</h3>
+                                </div>
+                                <p className="text-xs sm:text-sm text-gray-600 dark:text-slate-400 mb-4 leading-relaxed">
+                                    You&apos;ll use the same tools as Business customers. Limits apply once for the whole 7 days so teams can evaluate properly — not run production for free.
+                                </p>
+                                <ul className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2 text-xs text-gray-700 dark:text-slate-300">
+                                    <li><span className="text-violet-600 dark:text-violet-400 font-bold">{TRIAL_USAGE_CAPS.aiActionsTotal}</span> AI actions</li>
+                                    <li><span className="text-violet-600 dark:text-violet-400 font-bold">{TRIAL_USAGE_CAPS.whatsappMessagesSent}</span> WhatsApp msgs</li>
+                                    <li><span className="text-violet-600 dark:text-violet-400 font-bold">{TRIAL_USAGE_CAPS.broadcastRecipientsMax}</span> broadcast recipients</li>
+                                    <li><span className="text-violet-600 dark:text-violet-400 font-bold">{TRIAL_USAGE_CAPS.whatsappContacts}</span> contacts</li>
+                                    <li><span className="text-violet-600 dark:text-violet-400 font-bold">{TRIAL_USAGE_CAPS.activeWorkflows}</span> workflows</li>
+                                    <li><span className="text-violet-600 dark:text-violet-400 font-bold">{TRIAL_USAGE_CAPS.automationRunsTotal}</span> automations</li>
+                                </ul>
                             </div>
-
-                            <div className="overflow-x-auto">
-                                <table className="w-full">
-                                    <thead>
-                                        <tr className="bg-gray-50 dark:bg-slate-800/80 border-b border-gray-200 dark:border-slate-700">
-                                            <th className="text-left py-4 px-6 font-semibold text-gray-900 dark:text-white min-w-[200px]">Feature</th>
-                                            <th className="text-center py-4 px-4 font-semibold text-gray-700 dark:text-slate-300">Free</th>
-                                            <th className="text-center py-4 px-4 font-semibold text-gray-700 dark:text-slate-300">Starter</th>
-                                            <th className="text-center py-4 px-4 font-semibold text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30">Business</th>
-                                            <th className="text-center py-4 px-4 font-semibold text-gray-700 dark:text-slate-300">Pro</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
-                                        {FEATURE_COMPARISON.map((category, catIdx) => (
-                                            <React.Fragment key={catIdx}>
-                                                <tr className="bg-gray-50/50 dark:bg-slate-800/30">
-                                                    <td colSpan={5} className="py-4 px-6">
-                                                        <div className="flex items-center gap-2">
-                                                            <category.icon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-                                                            <span className="font-bold text-gray-900 dark:text-white">{category.category}</span>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                                {category.features.map((feature, featIdx) => (
-                                                    <tr key={featIdx} className="hover:bg-gray-50/50 dark:hover:bg-slate-800/50 transition-colors">
-                                                        <td className="py-3.5 px-6 text-sm text-gray-700 dark:text-slate-300">{feature.name}</td>
-                                                        <td className="py-3.5 px-4 text-center">{renderFeatureValue(feature.free)}</td>
-                                                        <td className="py-3.5 px-4 text-center">{renderFeatureValue(feature.starter)}</td>
-                                                        <td className="py-3.5 px-4 text-center bg-indigo-50/30 dark:bg-indigo-900/20">{renderFeatureValue(feature.business)}</td>
-                                                        <td className="py-3.5 px-4 text-center">{renderFeatureValue(feature.pro)}</td>
-                                                    </tr>
-                                                ))}
-                                            </React.Fragment>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            )}
-
-            {/* ================================================================ */}
-            {/* TRUST & PAYMENT SECTION */}
-            {/* ================================================================ */}
-            <section className="py-16 relative transition-colors">
-                <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <h2 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">
-                        Trusted by businesses across Kenya
-                    </h2>
-                    <p className="text-slate-600 dark:text-slate-400 mb-8 max-w-2xl mx-auto font-medium">
-                        Pay securely with M-Pesa through Paystack. Cancel anytime with no hidden fees.
-                    </p>
-
-                    <div className="flex flex-wrap items-center justify-center gap-6 md:gap-10">
-                        <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
-                            <Shield className="w-5 h-5 text-emerald-500" />
-                            <span className="text-sm">SSL Secured</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
-                            <CreditCard className="w-5 h-5 text-emerald-500" />
-                            <span className="text-sm">M-Pesa Supported</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
-                            <Globe className="w-5 h-5 text-emerald-500" />
-                            <span className="text-sm">Kenya-First Pricing</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
-                            <Headphones className="w-5 h-5 text-emerald-500" />
-                            <span className="text-sm">24/7 Support</span>
+                            <ul className="md:w-72 space-y-2 shrink-0">
+                                {TRIAL_GUARDRAILS.map((item, i) => (
+                                    <li key={i} className="flex items-start gap-2 text-xs text-gray-600 dark:text-slate-400">
+                                        <Check className="w-3.5 h-3.5 text-violet-500 shrink-0 mt-0.5" />
+                                        {item}
+                                    </li>
+                                ))}
+                            </ul>
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* ================================================================ */}
-            {/* FAQ SECTION */}
-            {/* ================================================================ */}
-            <section className="py-16 md:py-24">
-                <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <h2 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white text-center mb-12 tracking-tight transition-colors">
-                        Frequently Asked Questions
-                    </h2>
+            {/* WhatsApp journey — unique progression visual */}
+            <section className="py-14 md:py-16 border-y border-slate-200/80 dark:border-slate-800/80 bg-slate-50/60 dark:bg-slate-900/40">
+                <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center mb-10">
+                        <h2 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
+                            WhatsApp grows with your plan
+                        </h2>
+                        <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm md:text-base max-w-lg mx-auto">
+                            No bolt-on products. Upgrade once, unlock more WhatsApp power inside the same workspace.
+                        </p>
+                    </div>
 
-                    <div className="space-y-6">
+                    <div className="relative">
+                        <div className="hidden md:block absolute top-8 left-[12%] right-[12%] h-0.5 bg-gradient-to-r from-slate-200 via-emerald-300 to-indigo-400 dark:from-slate-700 dark:via-emerald-700 dark:to-indigo-600" />
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-3">
+                            {WHATSAPP_JOURNEY.map((step, idx) => {
+                                const plan = WORKSPACE_PLANS.find((p) => p.id === step.planId);
+                                return (
+                                    <button
+                                        key={step.planId}
+                                        type="button"
+                                        onClick={() => {
+                                            setActiveLens('whatsapp');
+                                            setExpandedCategories(new Set(['whatsapp']));
+                                            setHighlightedPlan(step.planId);
+                                            document.getElementById('feature-explorer')?.scrollIntoView({ behavior: 'smooth' });
+                                        }}
+                                        className={`relative text-left p-4 rounded-2xl border transition-all hover:shadow-md ${
+                                            highlightedPlan === step.planId
+                                                ? 'border-emerald-400 bg-white dark:bg-slate-900 shadow-md ring-2 ring-emerald-400/30'
+                                                : 'border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/80'
+                                        }`}
+                                    >
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white bg-gradient-to-br ${plan?.gradient ?? 'from-slate-500 to-slate-600'}`}>
+                                                {idx + 1}
+                                            </span>
+                                            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">{step.label}</span>
+                                        </div>
+                                        <p className="text-sm font-semibold text-gray-900 dark:text-white mb-2">{step.title}</p>
+                                        <ul className="space-y-1">
+                                            {step.capabilities.map((cap, i) => (
+                                                <li key={i} className="text-xs text-gray-500 dark:text-slate-400 flex items-start gap-1.5">
+                                                    <Check className="w-3 h-3 text-emerald-500 shrink-0 mt-0.5" />
+                                                    {cap}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Feature explorer — lens tabs + accordion categories */}
+            <section id="feature-explorer" className="py-16 md:py-20">
+                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-8">
+                        <div>
+                            <h2 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Feature explorer</h2>
+                            <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm md:text-base">
+                                Filter by area or open WhatsApp Business for the full breakdown.
+                            </p>
+                        </div>
+                        <div className="flex overflow-x-auto gap-2 pb-1 -mx-1 px-1 sm:flex-wrap sm:overflow-visible sm:mx-0 sm:px-0">
+                            {COMPARISON_LENSES.map(({ id, label, icon: LensIcon }) => (
+                                <button
+                                    key={id}
+                                    onClick={() => {
+                                        setActiveLens(id);
+                                        if (id === 'whatsapp') setExpandedCategories(new Set(['whatsapp']));
+                                        else if (id === 'all') setExpandedCategories(new Set(['whatsapp', 'inbox']));
+                                    }}
+                                    className={`inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all shrink-0 whitespace-nowrap ${
+                                        activeLens === id
+                                            ? id === 'whatsapp'
+                                                ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/20'
+                                                : 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20'
+                                            : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-slate-300'
+                                    }`}
+                                >
+                                    <LensIcon className="w-4 h-4" />
+                                    {label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Sticky mini header on scroll would be nice but keep simple — column labels */}
+                    <div className="hidden sm:grid grid-cols-[1fr_repeat(4,88px)] gap-2 px-4 py-3 mb-2 text-center">
+                        <div />
+                        {PLAN_COLUMN_KEYS.map((key) => (
+                            <div
+                                key={key}
+                                className={`text-xs font-bold uppercase tracking-wide ${
+                                    key === 'free'
+                                        ? 'text-violet-600 dark:text-violet-400'
+                                        : key === 'business'
+                                          ? 'text-indigo-600 dark:text-indigo-400'
+                                          : 'text-slate-500 dark:text-slate-400'
+                                }`}
+                            >
+                                {PLAN_COLUMN_LABELS[key]}
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="space-y-3">
+                        {visibleCategories.map((category) => {
+                            const isOpen = expandedCategories.has(category.id);
+                            const isWhatsApp = category.accent === 'whatsapp';
+
+                            return (
+                                <div
+                                    key={category.id}
+                                    className={`rounded-2xl border overflow-hidden transition-shadow ${
+                                        isWhatsApp
+                                            ? 'border-emerald-200 dark:border-emerald-800/60 shadow-sm shadow-emerald-500/5'
+                                            : 'border-slate-200 dark:border-slate-800'
+                                    } ${isOpen ? 'shadow-md' : ''}`}
+                                >
+                                    <button
+                                        onClick={() => toggleCategory(category.id)}
+                                        className={`w-full flex items-center justify-between px-5 py-4 text-left transition-colors ${
+                                            isWhatsApp
+                                                ? 'bg-emerald-50/80 dark:bg-emerald-950/30 hover:bg-emerald-50 dark:hover:bg-emerald-950/40'
+                                                : 'bg-white dark:bg-slate-900/60 hover:bg-slate-50 dark:hover:bg-slate-800/60'
+                                        }`}
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <div className={`p-2 rounded-xl ${isWhatsApp ? 'bg-emerald-100 dark:bg-emerald-900/40' : 'bg-slate-100 dark:bg-slate-800'}`}>
+                                                <category.icon className={`w-5 h-5 ${isWhatsApp ? 'text-emerald-600 dark:text-emerald-400' : 'text-indigo-600 dark:text-indigo-400'}`} />
+                                            </div>
+                                            <div>
+                                                <span className="font-bold text-gray-900 dark:text-white">{category.category}</span>
+                                                {isWhatsApp && (
+                                                    <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-0.5">{category.features.length} capabilities · tap to {isOpen ? 'collapse' : 'expand'}</p>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                                    </button>
+
+                                    {isOpen && (
+                                        <div className="divide-y divide-slate-100 dark:divide-slate-800 bg-white dark:bg-slate-900/40">
+                                            {category.features.map((row, ri) => (
+                                                <div
+                                                    key={ri}
+                                                    className={`grid grid-cols-1 sm:grid-cols-[1fr_repeat(4,88px)] gap-2 sm:gap-0 px-5 py-3.5 items-center hover:bg-slate-50/50 dark:hover:bg-slate-800/30 ${
+                                                        ri % 2 === 0 ? '' : 'bg-slate-50/30 dark:bg-slate-800/20'
+                                                    }`}
+                                                >
+                                                    <div className="sm:pr-4">
+                                                        <p className="text-sm text-gray-800 dark:text-slate-200">{row.name}</p>
+                                                        {row.hint && (
+                                                            <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5 flex items-start gap-1">
+                                                                <HelpCircle className="w-3 h-3 shrink-0 mt-0.5" />
+                                                                {row.hint}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                    <div className="grid grid-cols-2 gap-2 sm:contents mt-2 sm:mt-0 pt-2 sm:pt-0 border-t border-slate-100 dark:border-slate-800 sm:border-0">
+                                                        {PLAN_COLUMN_KEYS.map((key) => (
+                                                            <div key={key} className="flex sm:block items-center gap-2 sm:text-center min-w-0">
+                                                                <span className="sm:hidden text-[10px] font-bold uppercase text-slate-400 w-12 shrink-0">
+                                                                    {MOBILE_PLAN_LABELS[key] ?? PLAN_COLUMN_LABELS[key]}
+                                                                </span>
+                                                                <div className={`min-w-0 sm:min-w-full ${key === 'business' ? 'sm:bg-indigo-50/40 dark:sm:bg-indigo-900/10 sm:py-1 sm:rounded-lg' : key === 'free' ? 'sm:bg-violet-50/40 dark:sm:bg-violet-900/10 sm:py-1 sm:rounded-lg' : ''}`}>
+                                                                    {renderCell(getRowValue(row, key), key === 'free')}
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            </section>
+
+            {/* Trust */}
+            <section className="py-14 border-t border-slate-200 dark:border-slate-800">
+                <div className="max-w-4xl mx-auto px-4 text-center">
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">Trusted by teams across Kenya</p>
+                    <div className="flex flex-wrap justify-center gap-8">
                         {[
-                            {
-                                q: 'Can I switch plans anytime?',
-                                a: 'Yes! You can upgrade or downgrade your plan at any time. When upgrading, you\'ll be prorated for the remaining time. When downgrading, the new plan takes effect at the next billing cycle.'
-                            },
-                            {
-                                q: 'How does the M-Pesa payment work?',
-                                a: 'We use Paystack to process M-Pesa payments securely. When you subscribe, you\'ll receive an STK Push notification on your phone to complete the payment. It\'s fast and secure.'
-                            },
-                            {
-                                q: 'What happens when I hit my AI action limit?',
-                                a: 'At 80% usage, you\'ll receive a warning. At 100%, AI-powered features will be paused until your next billing cycle or until you upgrade. You can always upgrade mid-cycle.'
-                            },
-                            {
-                                q: 'Is there a free trial for paid plans?',
-                                a: 'The Free plan is unlimited and never expires. For paid plans, we offer a 14-day money-back guarantee. If you\'re not satisfied, contact us for a full refund.'
-                            }
-                        ].map((faq, idx) => (
-                            <div key={idx} className="bg-white dark:bg-slate-900/50 rounded-2xl border border-gray-200 dark:border-slate-800 p-6 hover:shadow-lg dark:hover:shadow-none transition-all">
-                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{faq.q}</h3>
-                                <p className="text-gray-600 dark:text-slate-400">{faq.a}</p>
+                            { icon: Shield, label: 'SSL Secured' },
+                            { icon: CreditCard, label: 'M-Pesa via Paystack' },
+                            { icon: Globe, label: 'Kenya-first pricing' },
+                            { icon: Headphones, label: 'Local support' },
+                        ].map(({ icon: Icon, label }) => (
+                            <div key={label} className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
+                                <Icon className="w-4 h-4 text-emerald-500" />
+                                <span className="text-sm">{label}</span>
                             </div>
                         ))}
                     </div>
                 </div>
             </section>
 
-            {/* ================================================================ */}
-            {/* FINAL CTA */}
-            {/* ================================================================ */}
-            <section className="py-16 md:py-20 relative transition-colors">
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4 tracking-tighter leading-[1.1]">
-                        Ready to unify your workflow?
-                    </h2>
-                    <p className="text-slate-600 dark:text-slate-400 text-lg mb-8 font-medium">
-                        Join thousands of professionals who've simplified their work with Arrotech Hub.
-                    </p>
-                    {user ? (
-                        <Link
-                            to="/unified"
-                            className="inline-flex items-center gap-2 px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-lg hover:shadow-xl hover:-translate-y-1 transition-all"
-                        >
-                            Go to Dashboard
-                            <ArrowRight className="w-5 h-5" />
-                        </Link>
-                    ) : (
-                        <Link
-                            to="/register"
-                            className="inline-flex items-center gap-2 px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-lg hover:shadow-xl hover:-translate-y-1 transition-all"
-                        >
-                            Get Started Free
-                            <ArrowRight className="w-5 h-5" />
-                        </Link>
-                    )}
+            {/* FAQ */}
+            <section className="py-16 md:py-20">
+                <div className="max-w-2xl mx-auto px-4">
+                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white text-center mb-8">Questions</h2>
+                    <div className="space-y-2">
+                        {PRICING_FAQS.map((faq, idx) => (
+                            <div key={idx} className="rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-white dark:bg-slate-900/50">
+                                <button
+                                    onClick={() =>
+                                        setExpandedFaqs((p) => {
+                                            const n = new Set(p);
+                                            n.has(idx) ? n.delete(idx) : n.add(idx);
+                                            return n;
+                                        })
+                                    }
+                                    className="w-full flex items-center justify-between p-4 text-left hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                                >
+                                    <span className="text-sm font-semibold text-gray-900 dark:text-white pr-4">{faq.question}</span>
+                                    <ChevronDown className={`w-4 h-4 text-gray-400 shrink-0 transition-transform ${expandedFaqs.has(idx) ? 'rotate-180' : ''}`} />
+                                </button>
+                                {expandedFaqs.has(idx) && (
+                                    <p className="px-4 pb-4 text-sm text-gray-600 dark:text-slate-400 leading-relaxed border-t border-slate-100 dark:border-slate-800 pt-3">
+                                        {faq.answer}
+                                    </p>
+                                )}
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </section>
 
-            {/* ================================================================ */}
-            {/* FOOTER */}
-            {/* ================================================================ */}
-
+            {/* CTA */}
+            <section className="pb-20">
+                <div className="max-w-3xl mx-auto px-4 text-center">
+                    <h2 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mb-3">Start with 7 days on us</h2>
+                    <p className="text-slate-500 dark:text-slate-400 mb-8 text-sm md:text-base">Full Business preview. Upgrade to Starter, Business, or Pro when you&apos;re ready.</p>
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                        <Link to={user ? '/unified' : '/register'} className="inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-violet-600 hover:bg-violet-700 text-white rounded-xl font-bold transition-all hover:-translate-y-0.5">
+                            {user ? 'Continue trial' : 'Start 7-day trial'} <ArrowRight className="w-4 h-4" />
+                        </Link>
+                        <Link to="/whatsapp" className="inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white rounded-xl font-bold transition-all hover:-translate-y-0.5">
+                            <MessageCircle className="w-4 h-4 text-emerald-500" /> WhatsApp dashboard
+                        </Link>
+                    </div>
+                </div>
+            </section>
         </div>
     );
 };
