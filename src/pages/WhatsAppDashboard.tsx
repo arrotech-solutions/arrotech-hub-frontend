@@ -9,6 +9,7 @@ import apiService from '../services/api';
 import toast from 'react-hot-toast';
 import { Connection } from '../types';
 import { Link } from 'react-router-dom';
+import ConversationsTab from '../components/whatsapp/ConversationsTab';
 
 interface Contact {
     id: number;
@@ -21,6 +22,7 @@ interface Contact {
     first_message_at: string | null;
     last_message_at: string | null;
     is_blocked: boolean;
+    assigned_to_id?: string | null;
     created_at: string;
 }
 
@@ -32,6 +34,7 @@ interface Message {
     media_url: string | null;
     status: string;
     is_auto_reply: boolean;
+    is_internal_note?: boolean;
     created_at: string;
     delivered_at: string | null;
     read_at: string | null;
@@ -464,172 +467,15 @@ const WhatsAppDashboard: React.FC = () => {
             {/* Main Content */}
             <div className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
                 {activeTab === 'contacts' && (
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-                        {/* Contact List */}
-                        <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border dark:border-slate-800 overflow-hidden transition-colors">
-                            <div className="p-4 border-b dark:border-slate-800">
-                                <div className="relative">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                                    <input
-                                        type="text"
-                                        placeholder="Search contacts..."
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border dark:border-slate-700 border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all dark:text-white"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="overflow-y-auto max-h-[400px] sm:max-h-[500px] lg:max-h-[600px] scrollbar-hide whatsapp-contacts-tut">
-                                {contacts.length === 0 ? (
-                                    <div className="p-8 text-center text-slate-500">
-                                        <Users className="w-12 h-12 mx-auto mb-3 text-slate-300 dark:text-slate-700" />
-                                        <p>No contacts yet</p>
-                                        <p className="text-sm">Contacts appear when customers message you</p>
-                                    </div>
-                                ) : (
-                                    contacts.map((contact) => (
-                                        <button
-                                            key={contact.id}
-                                            onClick={() => setSelectedContact(contact)}
-                                            className={`w-full p-4 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors border-b dark:border-slate-800 ${selectedContact?.id === contact.id ? 'bg-green-50 dark:bg-green-900/10' : ''
-                                                }`}
-                                        >
-                                            <div className="w-12 h-12 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center flex-shrink-0">
-                                                <span className="text-green-700 dark:text-green-400 font-semibold">
-                                                    {(contact.name || contact.profile_name || contact.phone_number).charAt(0).toUpperCase()}
-                                                </span>
-                                            </div>
-                                            <div className="flex-1 min-w-0 text-left">
-                                                <div className="font-medium text-slate-900 dark:text-white truncate">
-                                                    {contact.name || contact.profile_name || contact.phone_number}
-                                                </div>
-                                                <div className="text-sm text-slate-500 dark:text-slate-400 truncate">
-                                                    +{contact.phone_number}
-                                                </div>
-                                            </div>
-                                            <div className="text-right flex-shrink-0">
-                                                <div className="text-xs text-slate-400">
-                                                    {formatTime(contact.last_message_at)}
-                                                </div>
-                                                {contact.message_count > 0 && (
-                                                    <div className="inline-flex items-center justify-center px-1.5 py-0.5 bg-green-100 dark:bg-green-900/30 rounded text-[10px] font-bold text-green-700 dark:text-green-400 mt-1">
-                                                        {contact.message_count}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </button>
-                                    ))
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Chat View - Full screen on mobile when contact selected */}
-                        <div className={`lg:col-span-2 bg-white dark:bg-slate-900 rounded-xl shadow-sm border dark:border-slate-800 overflow-hidden flex flex-col h-[calc(100vh-200px)] sm:h-[500px] lg:h-[700px] transition-colors whatsapp-chat-tut ${selectedContact ? 'fixed inset-0 z-50 lg:relative lg:inset-auto' : 'hidden lg:flex'}`}>
-                            {selectedContact ? (
-                                <>
-                                    {/* Chat Header */}
-                                    <div className="p-4 border-b dark:border-slate-800 flex items-center gap-3 transition-colors">
-                                        <button
-                                            onClick={() => setSelectedContact(null)}
-                                            className="lg:hidden p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-600 dark:text-slate-400"
-                                        >
-                                            <ArrowLeft className="w-5 h-5" />
-                                        </button>
-                                        <div className="w-10 h-10 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center">
-                                            <span className="text-green-700 dark:text-green-400 font-semibold">
-                                                {(selectedContact.name || selectedContact.profile_name || selectedContact.phone_number).charAt(0).toUpperCase()}
-                                            </span>
-                                        </div>
-                                        <div className="flex-1">
-                                            <div className="font-medium text-slate-900 dark:text-white">
-                                                {selectedContact.name || selectedContact.profile_name || selectedContact.phone_number}
-                                            </div>
-                                            <div className="text-sm text-slate-500 dark:text-slate-400">+{selectedContact.phone_number}</div>
-                                        </div>
-                                        <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg group transition-colors">
-                                            <Phone className="w-5 h-5 text-slate-600 dark:text-slate-400 group-hover:text-green-600 dark:group-hover:text-green-400" />
-                                        </button>
-                                        <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-600 dark:text-slate-400">
-                                            <MoreVertical className="w-5 h-5" />
-                                        </button>
-                                    </div>
-
-                                    {/* Messages */}
-                                    <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50 dark:bg-slate-950/50 transition-colors">
-                                        {messages.length === 0 ? (
-                                            <div className="text-center text-slate-500 py-8">
-                                                <MessageCircle className="w-12 h-12 mx-auto mb-3 text-slate-300 dark:text-slate-700" />
-                                                <p>No messages yet</p>
-                                            </div>
-                                        ) : (
-                                            messages.map((msg) => (
-                                                <div
-                                                    key={msg.id}
-                                                    className={`flex ${msg.direction === 'outgoing' ? 'justify-end' : 'justify-start'}`}
-                                                >
-                                                    <div
-                                                        className={`max-w-[70%] rounded-2xl px-4 py-2 shadow-sm ${msg.direction === 'outgoing'
-                                                            ? 'bg-green-600 dark:bg-green-600 text-white rounded-br-md shadow-green-500/10'
-                                                            : 'bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-bl-md text-slate-900 dark:text-slate-100'
-                                                            }`}
-                                                    >
-                                                        {msg.is_auto_reply && (
-                                                            <div className={`text-[10px] font-bold uppercase tracking-wider mb-1 flex items-center gap-1 ${msg.direction === 'outgoing' ? 'text-green-100' : 'text-slate-400 dark:text-slate-500'
-                                                                }`}>
-                                                                <Bot className="w-3 h-3" /> Auto-reply
-                                                            </div>
-                                                        )}
-                                                        <p className="whitespace-pre-wrap text-sm leading-relaxed">{msg.content}</p>
-                                                        <div className={`text-[10px] mt-1 flex items-center justify-end gap-1 ${msg.direction === 'outgoing' ? 'text-green-100' : 'text-slate-400 dark:text-slate-500'
-                                                            }`}>
-                                                            {formatTime(msg.created_at)}
-                                                            {msg.direction === 'outgoing' && <MessageStatus status={msg.status} />}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            ))
-                                        )}
-                                    </div>
-
-                                    {/* Message Input */}
-                                    <div className="p-4 border-t dark:border-slate-800 bg-white dark:bg-slate-900 transition-colors">
-                                        <div className="flex items-center gap-3">
-                                            <input
-                                                type="text"
-                                                placeholder="Type a message..."
-                                                value={newMessage}
-                                                onChange={(e) => setNewMessage(e.target.value)}
-                                                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                                                className="flex-1 px-5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all dark:text-white text-sm"
-                                            />
-                                            <button
-                                                onClick={handleSendMessage}
-                                                disabled={!newMessage.trim() || sendingMessage}
-                                                className="p-3 bg-green-600 text-white rounded-full hover:bg-green-700 shadow-lg shadow-green-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"
-                                            >
-                                                {sendingMessage ? (
-                                                    <Loader2 className="w-5 h-5 animate-spin" />
-                                                ) : (
-                                                    <Send className="w-5 h-5" />
-                                                )}
-                                            </button>
-                                        </div>
-                                    </div>
-                                </>
-                            ) : (
-                                <div className="flex-1 flex items-center justify-center text-slate-500 dark:text-slate-400">
-                                    <div className="text-center">
-                                        <div className="w-20 h-20 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 border dark:border-slate-700">
-                                            <MessageCircle className="w-10 h-10 text-slate-300 dark:text-slate-600" />
-                                        </div>
-                                        <p className="text-lg font-bold text-slate-900 dark:text-white">Select a conversation</p>
-                                        <p className="text-sm">Choose a contact to view messages</p>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
+                    <ConversationsTab 
+                        contacts={contacts}
+                        selectedContact={selectedContact}
+                        setSelectedContact={setSelectedContact}
+                        messages={messages}
+                        setMessages={setMessages}
+                        fetchContacts={fetchContacts}
+                        fetchMessages={fetchMessages}
+                    />
                 )}
 
                 {activeTab === 'auto-reply' && (
