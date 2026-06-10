@@ -590,7 +590,7 @@ class ApiService {
     return response.data;
   }
 
-  async updateWhatsAppContact(contactId: number, data: { name?: string; tags?: string[]; notes?: string; is_blocked?: boolean }): Promise<ApiResponse<any>> {
+  async updateWhatsAppContact(contactId: number, data: { name?: string; tags?: string[]; notes?: string; is_blocked?: boolean; assigned_to_id?: string | null }): Promise<ApiResponse<any>> {
     const response = await this.api.put(`/api/whatsapp/contacts/${contactId}`, data);
     return response.data;
   }
@@ -605,7 +605,7 @@ class ApiService {
     return response.data;
   }
 
-  async sendWhatsAppMessage(contactId: number, data: { content: string; message_type?: string }): Promise<ApiResponse<any>> {
+  async sendWhatsAppMessage(contactId: number, data: { content: string; message_type?: string; is_internal_note?: boolean }): Promise<ApiResponse<any>> {
     const response = await this.api.post(`/api/whatsapp/contacts/${contactId}/messages`, data);
     return response.data;
   }
