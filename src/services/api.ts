@@ -564,7 +564,7 @@ class ApiService {
   }
 
   // WhatsApp Business API endpoints
-  async getWhatsAppContacts(params?: { search?: string; tag?: string; limit?: number; offset?: number }): Promise<ApiResponse<any>> {
+  async getWhatsAppContacts(params?: { search?: string; tag?: string; status?: string; assigned_to?: string; is_starred?: boolean; has_unread?: boolean; limit?: number; offset?: number }): Promise<ApiResponse<any>> {
     const response = await this.api.get('/api/whatsapp/contacts', { params });
     return response.data;
   }
@@ -590,7 +590,7 @@ class ApiService {
     return response.data;
   }
 
-  async updateWhatsAppContact(contactId: number, data: { name?: string; tags?: string[]; notes?: string; is_blocked?: boolean; assigned_to_id?: string | null }): Promise<ApiResponse<any>> {
+  async updateWhatsAppContact(contactId: number, data: { name?: string; tags?: string[]; notes?: string; is_blocked?: boolean; assigned_to_id?: string | null; status?: string; is_starred?: boolean }): Promise<ApiResponse<any>> {
     const response = await this.api.put(`/api/whatsapp/contacts/${contactId}`, data);
     return response.data;
   }
@@ -656,6 +656,50 @@ class ApiService {
 
   async getWhatsAppStats(): Promise<ApiResponse<any>> {
     const response = await this.api.get('/api/whatsapp/stats');
+    return response.data;
+  }
+
+  // WhatsApp Conversation Lifecycle
+  async markWhatsAppConversationRead(contactId: number): Promise<ApiResponse<any>> {
+    const response = await this.api.patch(`/api/whatsapp/contacts/${contactId}/read`);
+    return response.data;
+  }
+
+  async starWhatsAppContact(contactId: number, isStarred: boolean): Promise<ApiResponse<any>> {
+    const response = await this.api.put(`/api/whatsapp/contacts/${contactId}`, { is_starred: isStarred });
+    return response.data;
+  }
+
+  // WhatsApp Quick Replies
+  async getWhatsAppQuickReplies(): Promise<ApiResponse<any>> {
+    const response = await this.api.get('/api/whatsapp/quick-replies');
+    return response.data;
+  }
+
+  async createWhatsAppQuickReply(data: { title: string; shortcut: string; content: string; category?: string }): Promise<ApiResponse<any>> {
+    const response = await this.api.post('/api/whatsapp/quick-replies', data);
+    return response.data;
+  }
+
+  async updateWhatsAppQuickReply(replyId: number, data: { title: string; shortcut: string; content: string; category?: string }): Promise<ApiResponse<any>> {
+    const response = await this.api.put(`/api/whatsapp/quick-replies/${replyId}`, data);
+    return response.data;
+  }
+
+  async deleteWhatsAppQuickReply(replyId: number): Promise<ApiResponse<any>> {
+    const response = await this.api.delete(`/api/whatsapp/quick-replies/${replyId}`);
+    return response.data;
+  }
+
+  // WhatsApp Team Members
+  async getWhatsAppTeamMembers(): Promise<ApiResponse<any>> {
+    const response = await this.api.get('/api/whatsapp/team-members');
+    return response.data;
+  }
+
+  // WhatsApp Media
+  async sendWhatsAppMedia(contactId: number, params: { media_url: string; media_type: string; caption?: string }): Promise<ApiResponse<any>> {
+    const response = await this.api.post(`/api/whatsapp/contacts/${contactId}/media`, null, { params });
     return response.data;
   }
 
