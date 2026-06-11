@@ -19,10 +19,13 @@ interface Contact {
     tags: string[];
     notes: string | null;
     message_count: number;
+    unread_count: number;
     first_message_at: string | null;
     last_message_at: string | null;
     is_blocked: boolean;
     assigned_to_id?: string | null;
+    status?: string;
+    is_starred?: boolean;
     created_at: string;
 }
 
