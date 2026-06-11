@@ -172,6 +172,14 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
         };
     }, [selectedContact, fetchMessages]);
 
+    // Contacts list polling (every 10 seconds)
+    useEffect(() => {
+        const contactsPoll = setInterval(() => {
+            fetchContacts();
+        }, 10000);
+        return () => clearInterval(contactsPoll);
+    }, [fetchContacts]);
+
     // Quick replies trigger (typing /)
     useEffect(() => {
         if (newMessage.startsWith('/') && newMessage.length > 1) {
@@ -189,7 +197,8 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
         }
     }, [newMessage, quickReplies]);
 
-    const handleSendMessage = async () => {
+    const handleSendMessage = async (e: React.FormEvent) => {
+        e.preventDefault();
         if (!selectedContact || !newMessage.trim()) return;
 
         setSendingMessage(true);
@@ -210,6 +219,28 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
             toast.error(error.response?.data?.detail || 'Failed to send message');
         } finally {
             setSendingMessage(false);
+        }
+    };
+
+    const handleAttachMedia = async () => {
+        if (!selectedContact) return;
+        
+        // For now, since we don't have a backend S3 upload flow, prompt for a public URL
+        const url = window.prompt("Enter a public image URL to send (e.g. https://example.com/image.jpg):");
+        if (!url) return;
+        
+        try {
+            await apiService.sendWhatsAppMedia(selectedContact.id, {
+                media_url: url,
+                media_type: 'image',
+                caption: newMessage.trim() || undefined
+            });
+            setNewMessage('');
+            fetchMessages(selectedContact.id);
+            toast.success('Media message sent');
+        } catch (error) {
+            console.error("Failed to send media:", error);
+            toast.error("Failed to send media message.");
         }
     };
 
@@ -391,9 +422,9 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
         }
     };
 
-    // Client-side filtering
     const filteredContacts = contacts.filter(c => {
-        const matchesSearch = (c.name || c.profile_name || c.phone_number).toLowerCase().includes(searchQuery.toLowerCase());
+        const searchTarget = `${c.name || ''} ${c.profile_name || ''} ${c.phone_number || ''}`.toLowerCase();
+        const matchesSearch = searchTarget.includes(searchQuery.toLowerCase());
         const matchesStatus = statusFilter === 'all' || (c.status || 'open') === statusFilter;
         const matchesAgent = !filterAgent || c.assigned_to_id === filterAgent;
         const matchesStarred = !filterStarred || c.is_starred;
@@ -726,8 +757,10 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
 
                             <div className="flex items-end gap-2 p-2">
                                 <button
+                                    type="button"
+                                    onClick={handleAttachMedia}
                                     className="p-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-full transition-colors flex-shrink-0"
-                                    title="Attach file"
+                                    title="Attach file (via URL)"
                                 >
                                     <Paperclip className="w-5 h-5" />
                                 </button>
