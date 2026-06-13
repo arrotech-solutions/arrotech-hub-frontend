@@ -4,7 +4,7 @@ import {
     MessageCircle, Users, Search, Plus, Settings, Send,
     Phone, Clock, MoreVertical, Bot, Zap,
     CheckCheck, Check, X, Loader2, ArrowLeft,
-    Megaphone, Calendar, Play, Pause, Trash2
+    Megaphone, Calendar, Play, Pause, Trash2, Key, AlertCircle
 } from 'lucide-react';
 import apiService from '../services/api';
 import toast from 'react-hot-toast';
@@ -104,11 +104,15 @@ const WhatsAppDashboard: React.FC = () => {
     const [waConnection, setWaConnection] = useState<Connection | null>(null);
     const [phoneNumbers, setPhoneNumbers] = useState<any[]>([]);
     const [isSyncingNumbers, setIsSyncingNumbers] = useState(false);
-    const [businessProfile, setBusinessProfile] = useState<any>({
+    const [businessProfile, setBusinessProfile] = useState({
         name: '',
         description: '',
         industry: ''
     });
+
+    const [showRegistrationModal, setShowRegistrationModal] = useState(false);
+    const [registrationPin, setRegistrationPin] = useState('');
+    const [isRegistering, setIsRegistering] = useState(false);
 
     const handleEmbeddedCode = async (code: string, wabaId?: string, phoneNumberId?: string) => {
         const tId = toast.loading("Verifying your account...");
@@ -122,6 +126,35 @@ const WhatsAppDashboard: React.FC = () => {
             }
         } catch (e) {
             toast.error("Failed to verify code", { id: tId });
+        }
+    };
+
+    const handleRegisterPhone = async () => {
+        if (!registrationPin || registrationPin.length !== 6 || !/^\d+$/.test(registrationPin)) {
+            toast.error('PIN must be exactly 6 digits');
+            return;
+        }
+        if (!waConnection?.config?.phone_number_id) {
+            toast.error('Phone Number ID not found');
+            return;
+        }
+
+        setIsRegistering(true);
+        const tId = toast.loading('Registering phone number with Meta...');
+        try {
+            const res = await apiService.registerWhatsAppPhone(waConnection.config.phone_number_id, registrationPin);
+            if (res.success) {
+                toast.success('Phone number registered successfully!', { id: tId });
+                setShowRegistrationModal(false);
+                setRegistrationPin('');
+                fetchConnectionData();
+            } else {
+                toast.error('Failed to register: ' + (res.message || 'Unknown error'), { id: tId });
+            }
+        } catch (e: any) {
+            toast.error(e?.response?.data?.detail || 'Failed to register phone number', { id: tId });
+        } finally {
+            setIsRegistering(false);
         }
     };
 
@@ -799,9 +832,23 @@ const WhatsAppDashboard: React.FC = () => {
                                             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Your active WhatsApp Business connection</p>
                                         </div>
                                     </div>
-                                    <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-semibold rounded-full flex items-center gap-1.5 self-start sm:self-auto border border-green-200 dark:border-green-800/50">
-                                        <Check className="w-3.5 h-3.5" /> Active
-                                    </span>
+                                    {waConnection.config?.phone_status === 'PENDING' ? (
+                                        <div className="flex flex-col sm:flex-row items-center gap-3">
+                                            <span className="px-3 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 text-xs font-semibold rounded-full flex items-center gap-1.5 self-start sm:self-auto border border-yellow-200 dark:border-yellow-800/50">
+                                                <AlertCircle className="w-3.5 h-3.5" /> Pending Registration
+                                            </span>
+                                            <button
+                                                onClick={() => setShowRegistrationModal(true)}
+                                                className="px-4 py-1.5 bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-semibold rounded-lg transition-colors shadow-sm"
+                                            >
+                                                Complete Registration
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-semibold rounded-full flex items-center gap-1.5 self-start sm:self-auto border border-green-200 dark:border-green-800/50">
+                                            <Check className="w-3.5 h-3.5" /> Active
+                                        </span>
+                                    )}
                                 </div>
 
                                 <div className="space-y-1">
@@ -1126,6 +1173,69 @@ const WhatsAppDashboard: React.FC = () => {
                                     Create Rule
                                 </button>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Registration Modal */}
+            {showRegistrationModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 sm:p-8 w-full max-w-md shadow-2xl border border-slate-200 dark:border-slate-800 transform transition-all">
+                        <div className="flex justify-between items-center mb-6">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl">
+                                    <Key className="w-6 h-6 text-yellow-600 dark:text-yellow-500" />
+                                </div>
+                                <h2 className="text-xl font-bold text-slate-900 dark:text-white">Register Phone Number</h2>
+                            </div>
+                            <button
+                                onClick={() => setShowRegistrationModal(false)}
+                                className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+                        
+                        <div className="space-y-4">
+                            <p className="text-sm text-slate-600 dark:text-slate-400">
+                                Your number has been verified, but it needs to be registered with the WhatsApp Cloud API to start messaging. 
+                                Please create a secure 6-digit Two-Step Verification PIN.
+                            </p>
+                            
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                                    6-Digit PIN
+                                </label>
+                                <input
+                                    type="text"
+                                    maxLength={6}
+                                    placeholder="e.g. 123456"
+                                    value={registrationPin}
+                                    onChange={(e) => setRegistrationPin(e.target.value.replace(/\D/g, ''))}
+                                    className="w-full px-4 py-3 text-center tracking-widest text-lg font-mono bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all dark:text-white"
+                                />
+                                <p className="text-xs text-slate-500 mt-2">
+                                    Remember this PIN. You will need it if you ever re-register this number.
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div className="flex justify-end gap-3 mt-8">
+                            <button
+                                onClick={() => setShowRegistrationModal(false)}
+                                className="px-4 py-2 text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleRegisterPhone}
+                                disabled={isRegistering || registrationPin.length !== 6}
+                                className="px-5 py-2 bg-yellow-500 hover:bg-yellow-600 disabled:opacity-50 text-white text-sm font-semibold rounded-lg flex items-center gap-2 transition-colors shadow-sm"
+                            >
+                                {isRegistering ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                                Register Number
+                            </button>
                         </div>
                     </div>
                 </div>
