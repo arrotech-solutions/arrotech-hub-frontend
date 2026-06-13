@@ -278,10 +278,10 @@ const Integrations: React.FC = () => {
 
 
   // Handle WhatsApp Embedded Signup code exchange
-  const handleWhatsAppEmbeddedCode = async (code: string) => {
+  const handleWhatsAppEmbeddedCode = async (code: string, wabaId?: string, phoneNumberId?: string) => {
     const toastId = toast.loading('Connecting your WhatsApp Business account...');
     try {
-      const res = await apiService.connectWhatsAppEmbedded(code);
+      const res = await apiService.connectWhatsAppEmbedded(code, wabaId, phoneNumberId);
       if (res.success) {
         toast.success('WhatsApp Business connected successfully!', { id: toastId });
         fetchData();
@@ -365,7 +365,13 @@ const Integrations: React.FC = () => {
 
     FB.login((response: any) => {
       if (response.authResponse) {
-        handleWhatsAppEmbeddedCode(response.authResponse.code);
+        const { code } = response.authResponse;
+        // Meta's Embedded Signup with config_id may return these directly
+        const extras = response.authResponse;
+        const wabaId = extras.waba_id || extras.whatsapp_business_account_id;
+        const phoneNumberId = extras.phone_number_id;
+        console.log('[WhatsApp Embedded] authResponse:', { code: !!code, wabaId, phoneNumberId });
+        handleWhatsAppEmbeddedCode(code, wabaId, phoneNumberId);
       } else {
         console.log('User cancelled WhatsApp signup or did not fully authorize.', response);
         // Offer the redirect OAuth as fallback when Embedded Signup fails
