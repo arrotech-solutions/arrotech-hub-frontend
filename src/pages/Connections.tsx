@@ -1114,7 +1114,7 @@ const Integrations: React.FC = () => {
                     {getPlatformLogo(conn.platform)}
                   </div>
                   <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 max-w-[80px] truncate">{conn.name}</span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                  <span className={`w-1.5 h-1.5 rounded-full ${conn.platform === 'whatsapp' && conn.config?.phone_status === 'PENDING' ? 'bg-yellow-500' : 'bg-emerald-500'}`}></span>
                 </div>
               ))}
             </div>
@@ -1275,9 +1275,9 @@ const Integrations: React.FC = () => {
                     <div>
                       <h2 className="text-xl font-bold text-slate-900 dark:text-white">{selectedPlatform.name}</h2>
                       <div className="flex items-center gap-1.5 mt-0.5">
-                        <div className={`w-2 h-2 rounded-full ${editingConnection ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'}`}></div>
+                        <div className={`w-2 h-2 rounded-full ${editingConnection ? (editingConnection.platform === 'whatsapp' && editingConnection.config?.phone_status === 'PENDING' ? 'bg-yellow-500' : 'bg-emerald-500') : 'bg-slate-300 dark:bg-slate-600'}`}></div>
                         <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                          {editingConnection ? 'Connected' : 'Setup Required'}
+                          {editingConnection ? (editingConnection.platform === 'whatsapp' && editingConnection.config?.phone_status === 'PENDING' ? 'Pending Registration' : 'Connected') : 'Setup Required'}
                         </span>
                       </div>
                     </div>

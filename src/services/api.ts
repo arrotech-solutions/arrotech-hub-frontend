@@ -566,6 +566,14 @@ class ApiService {
     return response.data;
   }
 
+  async registerWhatsAppPhone(phoneNumberId: string, pin: string): Promise<ApiResponse<any>> {
+    const response = await this.api.post('/api/whatsapp/register-phone', {
+      phone_number_id: phoneNumberId,
+      pin: pin
+    });
+    return response.data;
+  }
+
   // WhatsApp Business API endpoints
   async getWhatsAppContacts(params?: { search?: string; tag?: string; status?: string; assigned_to?: string; is_starred?: boolean; has_unread?: boolean; limit?: number; offset?: number }): Promise<ApiResponse<any>> {
     const response = await this.api.get('/api/whatsapp/contacts', { params });
