@@ -366,11 +366,11 @@ const Integrations: React.FC = () => {
     FB.login((response: any) => {
       if (response.authResponse) {
         const { code } = response.authResponse;
-        // Meta's Embedded Signup with config_id may return these directly
-        const extras = response.authResponse;
+        // Meta's Embedded Signup with config_id may return these directly or inside setup
+        const extras = response.authResponse.setup || response.authResponse || {};
         const wabaId = extras.waba_id || extras.whatsapp_business_account_id;
         const phoneNumberId = extras.phone_number_id;
-        console.log('[WhatsApp Embedded] authResponse:', { code: !!code, wabaId, phoneNumberId });
+        console.log('[WhatsApp Embedded] authResponse:', response.authResponse, 'Extracted:', { code: !!code, wabaId, phoneNumberId });
         handleWhatsAppEmbeddedCode(code, wabaId, phoneNumberId);
       } else {
         console.log('User cancelled WhatsApp signup or did not fully authorize.', response);
