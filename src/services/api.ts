@@ -558,8 +558,11 @@ class ApiService {
     return response.data;
   }
 
-  async connectWhatsAppEmbedded(code: string): Promise<ApiResponse<any>> {
-    const response = await this.api.post('/api/whatsapp/embedded-callback', { code });
+  async connectWhatsAppEmbedded(code: string, wabaId?: string, phoneNumberId?: string): Promise<ApiResponse<any>> {
+    const payload: any = { code };
+    if (wabaId) payload.waba_id = wabaId;
+    if (phoneNumberId) payload.phone_number_id = phoneNumberId;
+    const response = await this.api.post('/api/whatsapp/embedded-callback', payload);
     return response.data;
   }
 
