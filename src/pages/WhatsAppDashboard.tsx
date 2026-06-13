@@ -109,10 +109,10 @@ const WhatsAppDashboard: React.FC = () => {
         industry: ''
     });
 
-    const handleEmbeddedCode = async (code: string) => {
+    const handleEmbeddedCode = async (code: string, wabaId?: string, phoneNumberId?: string) => {
         const tId = toast.loading("Verifying your account...");
         try {
-            const res = await apiService.connectWhatsAppEmbedded(code);
+            const res = await apiService.connectWhatsAppEmbedded(code, wabaId, phoneNumberId);
             if (res.success) {
                 toast.success("Successfully connected!", { id: tId });
                 fetchConnectionData();
@@ -181,7 +181,13 @@ const WhatsAppDashboard: React.FC = () => {
 
         FB.login((response: any) => {
             if (response.authResponse) {
-                handleEmbeddedCode(response.authResponse.code);
+                const { code } = response.authResponse;
+                // Meta's Embedded Signup with config_id may return these directly
+                const extras = response.authResponse;
+                const wabaId = extras.waba_id || extras.whatsapp_business_account_id;
+                const phoneNumberId = extras.phone_number_id;
+                console.log('[WhatsApp Embedded] authResponse:', { code: !!code, wabaId, phoneNumberId });
+                handleEmbeddedCode(code, wabaId, phoneNumberId);
             } else {
                 console.log('User cancelled login or did not fully authorize.', response);
                 toast.error("Setup cancelled or incomplete.");
