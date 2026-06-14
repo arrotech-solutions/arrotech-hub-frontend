@@ -191,12 +191,19 @@ const WhatsAppDashboard: React.FC = () => {
         const fallbackToRedirect = async () => {
             try {
                 toast('Redirecting to Meta login...', { icon: '🔄' });
-                const { url } = await apiService.getWhatsAppAuthUrl();
+                const { url } = await apiService.getWhatsAppAuthUrl(configId);
                 window.location.href = url;
             } catch (e) {
                 toast.error('Failed to initiate WhatsApp connection');
             }
         };
+
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        if (isMobile) {
+            console.warn('Mobile browser detected — using redirect OAuth flow instead of popup to prevent close_window issues');
+            fallbackToRedirect();
+            return;
+        }
 
         if (!appId) {
             console.warn('VITE_FACEBOOK_APP_ID not set — falling back to redirect OAuth');
