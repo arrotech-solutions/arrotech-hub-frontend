@@ -188,10 +188,10 @@ const WhatsAppDashboard: React.FC = () => {
         const appId = import.meta.env.VITE_FACEBOOK_APP_ID;
         const configId = import.meta.env.VITE_FACEBOOK_CONFIG_ID;
 
-        const fallbackToRedirect = async (useConfig = true) => {
+        const fallbackToRedirect = async () => {
             try {
                 toast('Redirecting to Meta login...', { icon: '🔄' });
-                const { url } = await apiService.getWhatsAppAuthUrl(useConfig ? configId : undefined);
+                const { url } = await apiService.getWhatsAppAuthUrl(configId);
                 window.location.href = url;
             } catch (e) {
                 toast.error('Failed to initiate WhatsApp connection');
@@ -200,11 +200,10 @@ const WhatsAppDashboard: React.FC = () => {
 
         const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
         if (isMobile) {
-            fallbackToRedirect(false); // Mobile must NOT use configId to avoid breaking the Meta 'Finish' button
+            console.warn('Mobile browser detected — using redirect OAuth flow instead of popup to prevent close_window issues');
+            fallbackToRedirect();
             return;
         }
-
-
 
         if (!appId) {
             console.warn('VITE_FACEBOOK_APP_ID not set — falling back to redirect OAuth');
@@ -544,7 +543,7 @@ const WhatsAppDashboard: React.FC = () => {
             {/* Main Content */}
             <div className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
                 {activeTab === 'contacts' && (
-                    <ConversationsTab 
+                    <ConversationsTab
                         contacts={contacts}
                         selectedContact={selectedContact}
                         setSelectedContact={setSelectedContact}
@@ -1238,13 +1237,13 @@ const WhatsAppDashboard: React.FC = () => {
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
-                        
+
                         <div className="space-y-4">
                             <p className="text-sm text-slate-600 dark:text-slate-400">
-                                Your number has been verified, but it needs to be registered with the WhatsApp Cloud API to start messaging. 
+                                Your number has been verified, but it needs to be registered with the WhatsApp Cloud API to start messaging.
                                 Please create a secure 6-digit Two-Step Verification PIN.
                             </p>
-                            
+
                             <div>
                                 <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                                     6-Digit PIN
@@ -1262,7 +1261,7 @@ const WhatsAppDashboard: React.FC = () => {
                                 </p>
                             </div>
                         </div>
-                        
+
                         <div className="flex justify-end gap-3 mt-8">
                             <button
                                 onClick={() => setShowRegistrationModal(false)}
@@ -1301,13 +1300,13 @@ const WhatsAppDashboard: React.FC = () => {
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
-                        
+
                         <div className="space-y-4">
                             <p className="text-sm text-slate-600 dark:text-slate-400">
                                 Are you sure you want to deregister this phone number? It will be completely disconnected from the WhatsApp Business API and you will no longer be able to send or receive messages until you register it again.
                             </p>
                         </div>
-                        
+
                         <div className="flex justify-end gap-3 mt-8">
                             <button
                                 onClick={() => setShowDeregisterModal(false)}
