@@ -552,9 +552,9 @@ class ApiService {
   }
 
 
-  async getWhatsAppAuthUrl(): Promise<{ url: string }> {
-    const response = await this.api.get('/api/whatsapp/auth-url');
-    // The backend returns { url: "..." }
+  async getWhatsAppAuthUrl(configId?: string): Promise<{ url: string }> {
+    const params = configId ? `?config_id=${configId}` : '';
+    const response = await this.api.get(`/api/whatsapp/auth-url${params}`);
     return response.data;
   }
 
