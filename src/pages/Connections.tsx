@@ -57,7 +57,6 @@ const Integrations: React.FC = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [isKraModalOpen, setIsKraModalOpen] = useState(false);
   const [upgradeModal, setUpgradeModal] = useState({ isOpen: false, feature: '', requiredTier: '', currentTier: '' });
-  const [showWhatsAppChoice, setShowWhatsAppChoice] = useState(false);
   const [selectedPlatform, setSelectedPlatform] = useState<ConnectionPlatform | null>(null);
   const [formData, setFormData] = useState({ platform: '', name: '', config: {} as any });
   const [editingConnection, setEditingConnection] = useState<Connection | null>(null);
@@ -70,7 +69,7 @@ const Integrations: React.FC = () => {
     switch (id) {
       case 'google_workspace':
       case 'google': return <GoogleLogo {...props} />;
-      case 'microsoft_teams': 
+      case 'microsoft_teams':
       case 'teams': return <MicrosoftTeamsLogo {...props} />;
       case 'zoom': return <ZoomLogo {...props} />;
       case 'asana': return <AsanaLogo {...props} />;
@@ -317,13 +316,6 @@ const Integrations: React.FC = () => {
 
   // Launch WhatsApp Embedded Signup via Meta JS SDK
   const launchWhatsAppEmbeddedSignup = () => {
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    if (isMobile) {
-      toast('Redirecting to Meta...', { icon: '🔄' });
-      connectWhatsAppViaRedirect();
-      return;
-    }
-
     const appId = import.meta.env.VITE_FACEBOOK_APP_ID;
     const configId = import.meta.env.VITE_FACEBOOK_CONFIG_ID;
 
@@ -381,51 +373,7 @@ const Integrations: React.FC = () => {
         handleWhatsAppEmbeddedCode(code, wabaId, phoneNumberId);
       } else {
         console.log('User cancelled WhatsApp signup or did not fully authorize.', response);
-        // Offer the redirect OAuth as fallback when Embedded Signup fails
-        toast((t) => (
-          <div>
-            <p style={{ marginBottom: '8px' }}>
-              <strong>Could not complete setup via popup.</strong>
-            </p>
-            <p style={{ marginBottom: '12px', fontSize: '14px', color: '#666' }}>
-              If your business is already linked, try connecting via redirect instead.
-            </p>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <button
-                onClick={() => {
-                  toast.dismiss(t.id);
-                  connectWhatsAppViaRedirect();
-                }}
-                style={{
-                  padding: '6px 16px',
-                  background: '#25D366',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontWeight: 600,
-                  fontSize: '13px'
-                }}
-              >
-                Connect via Redirect
-              </button>
-              <button
-                onClick={() => toast.dismiss(t.id)}
-                style={{
-                  padding: '6px 16px',
-                  background: '#f3f4f6',
-                  color: '#374151',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontSize: '13px'
-                }}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        ), { duration: 15000 });
+        toast.error('WhatsApp setup was cancelled or incomplete.');
       }
     }, loginOptions);
   };
@@ -488,9 +436,9 @@ const Integrations: React.FC = () => {
       }
     }
 
-    // WhatsApp: Show choice modal (new account vs existing account)
+    // WhatsApp: Launch Embedded Signup directly
     if (platform.id === 'whatsapp' && !existing) {
-      setShowWhatsAppChoice(true);
+      launchWhatsAppEmbeddedSignup();
       return;
     }
 
@@ -1397,88 +1345,6 @@ const Integrations: React.FC = () => {
                 </div>
 
               </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* WhatsApp Connection Choice Modal */}
-      {showWhatsAppChoice && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowWhatsAppChoice(false)} />
-          <div className="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-200 dark:border-slate-700">
-            {/* Header */}
-            <div className="px-6 pt-6 pb-4">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 rounded-xl bg-[#25D366]/10 flex items-center justify-center">
-                  <WhatsAppLogo className="w-6 h-6" />
-                </div>
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Connect WhatsApp Business</h3>
-              </div>
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                Choose how you'd like to connect your WhatsApp Business account to Arrotech Hub.
-              </p>
-            </div>
-
-            {/* Options */}
-            <div className="px-6 pb-2 space-y-3">
-              {/* Option 1: New Setup */}
-              <button
-                onClick={() => {
-                  setShowWhatsAppChoice(false);
-                  launchWhatsAppEmbeddedSignup();
-                }}
-                className="w-full text-left p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 hover:border-[#25D366] dark:hover:border-[#25D366] hover:bg-[#25D366]/5 transition-all group"
-              >
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <span className="text-lg">🆕</span>
-                  </div>
-                  <div>
-                    <div className="font-semibold text-slate-900 dark:text-white group-hover:text-[#25D366] transition-colors">
-                      New to WhatsApp Business
-                    </div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                      Create a new WhatsApp Business Account and register a phone number.
-                      Best if you don't have a WhatsApp Business account yet.
-                    </p>
-                  </div>
-                </div>
-              </button>
-
-              {/* Option 2: Existing Account */}
-              <button
-                onClick={() => {
-                  setShowWhatsAppChoice(false);
-                  connectWhatsAppViaRedirect();
-                }}
-                className="w-full text-left p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 hover:border-[#25D366] dark:hover:border-[#25D366] hover:bg-[#25D366]/5 transition-all group"
-              >
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <span className="text-lg">🔗</span>
-                  </div>
-                  <div>
-                    <div className="font-semibold text-slate-900 dark:text-white group-hover:text-[#25D366] transition-colors">
-                      I already have an account
-                    </div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                      Connect an existing WhatsApp Business Account to Arrotech Hub.
-                      Best if you already have a WABA set up in Meta Business Suite.
-                    </p>
-                  </div>
-                </div>
-              </button>
-            </div>
-
-            {/* Footer */}
-            <div className="px-6 py-4 mt-1">
-              <button
-                onClick={() => setShowWhatsAppChoice(false)}
-                className="w-full py-2.5 text-sm font-medium text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
-              >
-                Cancel
-              </button>
             </div>
           </div>
         </div>
