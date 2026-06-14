@@ -188,10 +188,10 @@ const WhatsAppDashboard: React.FC = () => {
         const appId = import.meta.env.VITE_FACEBOOK_APP_ID;
         const configId = import.meta.env.VITE_FACEBOOK_CONFIG_ID;
 
-        const fallbackToRedirect = async () => {
+        const fallbackToRedirect = async (useConfig = true) => {
             try {
                 toast('Redirecting to Meta login...', { icon: '🔄' });
-                const { url } = await apiService.getWhatsAppAuthUrl(configId);
+                const { url } = await apiService.getWhatsAppAuthUrl(useConfig ? configId : undefined);
                 window.location.href = url;
             } catch (e) {
                 toast.error('Failed to initiate WhatsApp connection');
@@ -200,10 +200,11 @@ const WhatsAppDashboard: React.FC = () => {
 
         const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
         if (isMobile) {
-            console.warn('Mobile browser detected — using redirect OAuth flow instead of popup to prevent close_window issues');
-            fallbackToRedirect();
+            fallbackToRedirect(false); // Mobile must NOT use configId to avoid breaking the Meta 'Finish' button
             return;
         }
+
+
 
         if (!appId) {
             console.warn('VITE_FACEBOOK_APP_ID not set — falling back to redirect OAuth');

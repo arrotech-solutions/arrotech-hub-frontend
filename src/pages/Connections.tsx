@@ -317,6 +317,13 @@ const Integrations: React.FC = () => {
 
   // Launch WhatsApp Embedded Signup via Meta JS SDK
   const launchWhatsAppEmbeddedSignup = () => {
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (isMobile) {
+      toast('Redirecting to Meta...', { icon: '🔄' });
+      connectWhatsAppViaRedirect();
+      return;
+    }
+
     const appId = import.meta.env.VITE_FACEBOOK_APP_ID;
     const configId = import.meta.env.VITE_FACEBOOK_CONFIG_ID;
 
