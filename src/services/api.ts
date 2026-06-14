@@ -574,6 +574,13 @@ class ApiService {
     return response.data;
   }
 
+  async deregisterWhatsAppPhone(phoneNumberId: string): Promise<ApiResponse<any>> {
+    const response = await this.api.post('/api/whatsapp/deregister-phone', {
+      phone_number_id: phoneNumberId
+    });
+    return response.data;
+  }
+
   // WhatsApp Business API endpoints
   async getWhatsAppContacts(params?: { search?: string; tag?: string; status?: string; assigned_to?: string; is_starred?: boolean; has_unread?: boolean; limit?: number; offset?: number }): Promise<ApiResponse<any>> {
     const response = await this.api.get('/api/whatsapp/contacts', { params });
