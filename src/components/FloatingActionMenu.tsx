@@ -7,6 +7,7 @@ import {
   MessageSquare,
   Sparkles,
   ChevronRight,
+  MessageCircle,
 } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
@@ -41,6 +42,7 @@ const FloatingActionMenu: React.FC = () => {
   const [showFloatingMenu, setShowFloatingMenu] = useState(() => localStorage.getItem('showFloatingMenu') !== 'false');
   const [showTutorials, setShowTutorials] = useState(() => localStorage.getItem('showTutorials') !== 'false');
   const [showAIAssistant, setShowAIAssistant] = useState(() => localStorage.getItem('showAIAssistant') !== 'false');
+  const [showWhatsAppSupport, setShowWhatsAppSupport] = useState(() => localStorage.getItem('showWhatsAppSupport') !== 'false');
 
   // Listen for storage changes (from Settings page)
   useEffect(() => {
@@ -48,6 +50,7 @@ const FloatingActionMenu: React.FC = () => {
       setShowFloatingMenu(localStorage.getItem('showFloatingMenu') !== 'false');
       setShowTutorials(localStorage.getItem('showTutorials') !== 'false');
       setShowAIAssistant(localStorage.getItem('showAIAssistant') !== 'false');
+      setShowWhatsAppSupport(localStorage.getItem('showWhatsAppSupport') !== 'false');
     };
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
@@ -141,6 +144,17 @@ const FloatingActionMenu: React.FC = () => {
         setShowAssistant(true);
       },
       badge: 'AI',
+    }] : []),
+    ...(showWhatsAppSupport ? [{
+      id: 'whatsapp-support',
+      icon: <MessageCircle className="w-5 h-5" />,
+      label: 'WhatsApp Support',
+      description: 'Chat with our support team',
+      color: 'from-green-500 to-emerald-500',
+      onClick: () => {
+        setIsOpen(false);
+        window.open('https://wa.me/254797568564', '_blank');
+      },
     }] : []),
     // Tutorial items - only show if logged in AND enabled in settings
     ...(user && showTutorials ? [
