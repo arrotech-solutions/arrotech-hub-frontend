@@ -22,6 +22,7 @@ const DashboardSettingsTab: React.FC<DashboardSettingsProps> = ({
     const [showTutorials, setShowTutorials] = useState(() => localStorage.getItem('showTutorials') !== 'false');
     const [showAIAssistant, setShowAIAssistant] = useState(() => localStorage.getItem('showAIAssistant') !== 'false');
     const [showTutorialGuide, setShowTutorialGuide] = useState(() => localStorage.getItem('showTutorialGuide') !== 'false');
+    const [showWhatsAppSupport, setShowWhatsAppSupport] = useState(() => localStorage.getItem('showWhatsAppSupport') !== 'false');
 
     const handleChange = (key: keyof DashboardSettings, value: any) => {
         const newSettings = { ...localSettings, [key]: value };
@@ -193,6 +194,22 @@ const DashboardSettingsTab: React.FC<DashboardSettingsProps> = ({
                                     onChange={(e) => {
                                         setShowAIAssistant(e.target.checked);
                                         localStorage.setItem('showAIAssistant', e.target.checked.toString());
+                                        window.dispatchEvent(new Event('storage'));
+                                    }}
+                                    className="w-4 h-4 text-green-600 dark:text-green-500 border-gray-300 dark:border-slate-700 rounded focus:ring-green-500 dark:bg-slate-900 transition-colors"
+                                />
+                            </label>
+                            <label className="flex items-center justify-between cursor-pointer">
+                                <div>
+                                    <span className="text-gray-700 dark:text-slate-300 font-medium transition-colors">Enable WhatsApp Support</span>
+                                    <p className="text-sm text-gray-500 dark:text-slate-500 transition-colors">Show the WhatsApp support option in the help menu</p>
+                                </div>
+                                <input
+                                    type="checkbox"
+                                    checked={showWhatsAppSupport}
+                                    onChange={(e) => {
+                                        setShowWhatsAppSupport(e.target.checked);
+                                        localStorage.setItem('showWhatsAppSupport', e.target.checked.toString());
                                         window.dispatchEvent(new Event('storage'));
                                     }}
                                     className="w-4 h-4 text-green-600 dark:text-green-500 border-gray-300 dark:border-slate-700 rounded focus:ring-green-500 dark:bg-slate-900 transition-colors"
