@@ -194,6 +194,16 @@ class ApiService {
     return response.data;
   }
 
+  async getSubscriptionPlans(): Promise<ApiResponse<any>> {
+    const response = await this.api.get('/subscription/plans');
+    return response.data;
+  }
+
+  async getSubscriptionStatus(): Promise<ApiResponse<any>> {
+    const response = await this.api.get('/subscription/status');
+    return response.data;
+  }
+
   async updateUser(data: Partial<User>): Promise<ApiResponse<User>> {
     const response = await this.api.put('/auth/me', data);
     return response.data;

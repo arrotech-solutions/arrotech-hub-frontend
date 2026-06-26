@@ -37,6 +37,8 @@ import {
     type WorkspacePlan,
     type PlanColumnKey,
 } from '../data/pricingData';
+import { getPlanPrice, yearlyDiscount } from '../data/subscriptionPlans';
+import { useSubscription } from '../hooks/useSubscription';
 
 const COLLAPSED_FEATURE_COUNT = 5;
 
@@ -53,7 +55,8 @@ const MOBILE_PLAN_LABELS: Record<string, string> = {
 };
 
 const Pricing: React.FC = () => {
-    const { user } = useAuth();
+    const { user, refreshUser } = useAuth();
+    const { refetch: refetchSubscription } = useSubscription();
     const navigate = useNavigate();
     const [paystackKey, setPaystackKey] = useState('');
     const [loading, setLoading] = useState(false);
@@ -82,11 +85,15 @@ const Pricing: React.FC = () => {
         setLoading(true);
         try {
             const response = await apiService.verifyPaystackPayment(reference.reference);
+            const payload = response.data || response;
             if (response.success) {
-                toast.success('Payment successful! Your plan has been upgraded.');
-                navigate('/unified');
+                await refreshUser();
+                await refetchSubscription();
+                const tier = payload.subscription?.tier || payload.plan || 'your plan';
+                toast.success(`Payment successful! ${tier} plan activated.`);
+                navigate('/payments');
             } else {
-                toast.error('Payment verification failed. Please contact support.');
+                toast.error(response.error || payload?.error || 'Payment verification failed. Please contact support.');
             }
         } catch {
             toast.error('Failed to verify payment. Please contact support.');
@@ -95,17 +102,19 @@ const Pricing: React.FC = () => {
         }
     };
 
+    const effectiveTier = user?.effective_tier ?? user?.subscription_tier;
+
     const getPaystackConfig = (plan: WorkspacePlan) => ({
         reference: `sub_${plan.id}_${Date.now()}`,
         email: user?.email || '',
-        amount: (plan.price || 0) * 100,
+        amount: getPlanPrice(plan.id, billingCycle) * 100,
         publicKey: paystackKey,
         currency: 'KES',
         metadata: {
             plan_id: plan.id,
+            billing_cycle: billingCycle,
             user_id: user?.id,
-            plan_name: plan.name,
-            custom_fields: [{ display_name: 'Plan', variable_name: 'plan', value: plan.name }],
+            custom_fields: [{ display_name: 'Plan', variable_name: 'plan_id', value: plan.id }],
         },
     });
 
@@ -128,7 +137,7 @@ const Pricing: React.FC = () => {
     };
 
     const renderPlanCta = (plan: WorkspacePlan) => {
-        if (user?.subscription_tier === plan.id) {
+        if (effectiveTier === plan.id) {
             return <div className="w-full py-3 px-4 bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 text-center rounded-xl font-semibold">Current Plan</div>;
         }
         if (plan.id === 'enterprise') {
@@ -162,8 +171,6 @@ const Pricing: React.FC = () => {
             </Link>
         );
     };
-
-    const yearlyDiscount = (monthly: number) => Math.round(monthly * 12 * 0.8);
 
     const toggleCategory = (id: string) => {
         setExpandedCategories((prev) => {
