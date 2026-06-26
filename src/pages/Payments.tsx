@@ -56,7 +56,7 @@ const Payments: React.FC = () => {
   const [paystackKey, setPaystackKey] = useState('');
 
   // Subscription management state
-  const { tier, user, refetch: refetchSubscription } = useSubscription();
+  const { tier, effectiveTier, user, refetch: refetchSubscription, billingCycle, daysRemaining, isTrial } = useSubscription();
   const navigate = useNavigate();
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [canceling, setCanceling] = useState(false);
@@ -95,10 +95,10 @@ const Payments: React.FC = () => {
     }
   ];
 
-  const currentPlan = plans.find(p => p.id === tier) || plans[0];
-  const isActive = user?.subscription_status === 'active';
+  const currentPlan = plans.find(p => p.id === effectiveTier || p.id === tier) || plans[0];
+  const isActive = user?.subscription_status === 'active' || user?.subscription_status === 'trial';
   const isCanceled = user?.subscription_status === 'canceled';
-  const isFree = tier === 'free';
+  const isFree = effectiveTier === 'free';
 
   // Mock stats for demonstration
   const [stats, setStats] = useState({
@@ -270,7 +270,10 @@ const Payments: React.FC = () => {
     try {
       const response = await apiService.verifyPaystackPayment(reference.reference);
       if (response.success) {
-        toast.success('Payment successful!');
+        await refetchSubscription();
+        const payload = response.data || response;
+        const planLabel = payload.subscription?.tier || payload.plan || 'plan';
+        toast.success(`Payment successful! ${planLabel} activated.`);
         setShowPaystackModal(false);
         setPaystackConfig(prev => ({ ...prev, amount: 0 }));
         fetchPaymentData();
@@ -731,6 +734,16 @@ const Payments: React.FC = () => {
                       <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-slate-500 mb-1">Cycle Transition</p>
                       <p className="text-sm font-black text-gray-900 dark:text-white tracking-tight">
                         {new Date(user.subscription_end_date).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
+                        {daysRemaining !== undefined && daysRemaining !== null && (
+                          <span className="text-gray-500 font-medium"> ({daysRemaining} days left)</span>
+                        )}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-slate-500 mb-1">Billing cycle</p>
+                      <p className="text-sm font-black text-gray-900 dark:text-white tracking-tight capitalize">
+                        {billingCycle || 'monthly'}
+                        {isTrial && <span className="text-violet-600 dark:text-violet-400"> · Trial</span>}
                       </p>
                     </div>
                     <div>
