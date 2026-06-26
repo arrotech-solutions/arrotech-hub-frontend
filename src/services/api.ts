@@ -3226,6 +3226,59 @@ class ApiService {
     return response.data;
   }
 
+  // ── Product Catalog Builder ──────────────────────────────────────────
+  async getCatalogStatus(): Promise<ApiResponse<{
+    google_workspace_connected: boolean;
+    vision_ready: boolean;
+    required_connections: string[];
+  }>> {
+    const response = await this.api.get('/api/catalog-builder/status');
+    return response.data;
+  }
+
+  async listCatalogSheets(): Promise<ApiResponse<{ id: string; name: string }[]>> {
+    const response = await this.api.get('/api/catalog-builder/sheets');
+    return response.data;
+  }
+
+  async extractProductFromImages(
+    files: File[],
+    currency: string = 'KES',
+    hint?: string
+  ): Promise<ApiResponse<any>> {
+    const formData = new FormData();
+    files.forEach((file) => formData.append('files', file));
+    formData.append('currency', currency);
+    if (hint) formData.append('hint', hint);
+    const response = await this.api.post('/api/catalog-builder/extract', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  }
+
+  async exportCatalog(
+    payload: {
+      products: any[];
+      mode: 'new' | 'append';
+      title?: string;
+      spreadsheet_id?: string;
+      want_csv?: boolean;
+    },
+    files: File[]
+  ): Promise<ApiResponse<any>> {
+    const formData = new FormData();
+    formData.append('products', JSON.stringify(payload.products));
+    formData.append('mode', payload.mode);
+    if (payload.title) formData.append('title', payload.title);
+    if (payload.spreadsheet_id) formData.append('spreadsheet_id', payload.spreadsheet_id);
+    formData.append('want_csv', String(Boolean(payload.want_csv)));
+    files.forEach((file) => formData.append('files', file));
+    const response = await this.api.post('/api/catalog-builder/export', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  }
+
 }
 
 export const apiService = new ApiService();

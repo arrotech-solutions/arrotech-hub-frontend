@@ -166,6 +166,21 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       ]
     },
     {
+      name: 'Commerce',
+      icon: ShoppingBag,
+      description: 'Sell and manage products',
+      badge: 'New',
+      children: [
+        {
+          name: 'Catalog Builder',
+          href: '/catalog-builder',
+          icon: Sparkles,
+          description: 'Turn product photos into a sellable catalog',
+          badge: 'New'
+        }
+      ]
+    },
+    {
       name: 'Marketplace',
       href: '/marketplace',
       icon: Store,
