@@ -39,6 +39,7 @@ const BlogPost = lazy(() => import('./pages/BlogPost'));
 const Settings = lazy(() => import('./pages/Settings'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const Workflows = lazy(() => import('./pages/Workflows'));
+const CatalogBuilder = lazy(() => import('./pages/CatalogBuilder'));
 const Pricing = lazy(() => import('./pages/Pricing'));
 const DeveloperPortal = lazy(() => import('./pages/DeveloperPortal'));
 
@@ -374,6 +375,19 @@ const AppRoutes: React.FC = () => {
             <RequireVerifiedEmail>
               <Layout>
                 <TikTokDashboard />
+              </Layout>
+            </RequireVerifiedEmail>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/catalog-builder"
+        element={
+          <ProtectedRoute>
+            <RequireVerifiedEmail>
+              <Layout>
+                <CatalogBuilder />
               </Layout>
             </RequireVerifiedEmail>
           </ProtectedRoute>

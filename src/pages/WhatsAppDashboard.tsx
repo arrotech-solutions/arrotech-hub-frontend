@@ -4,7 +4,8 @@ import {
     MessageCircle, Users, Search, Plus, Settings, Send,
     Phone, Clock, MoreVertical, Bot, Zap,
     CheckCheck, Check, X, Loader2, ArrowLeft,
-    Megaphone, Calendar, Play, Pause, Trash2, Key, AlertCircle
+    Megaphone, Calendar, Play, Pause, Trash2, Key, AlertCircle,
+    Sparkles, ArrowRight
 } from 'lucide-react';
 import apiService from '../services/api';
 import toast from 'react-hot-toast';
@@ -542,6 +543,28 @@ const WhatsAppDashboard: React.FC = () => {
 
             {/* Main Content */}
             <div className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
+                {/* Discovery: Catalog Builder */}
+                <Link
+                    to="/catalog-builder"
+                    className="group mb-5 flex items-center gap-4 rounded-2xl border border-purple-200 dark:border-purple-500/30 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/30 dark:to-blue-950/20 p-4 sm:p-5 hover:shadow-md transition-all"
+                >
+                    <div className="flex-shrink-0 w-11 h-11 rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center shadow-lg">
+                        <Sparkles className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <h3 className="font-bold text-slate-900 dark:text-white">
+                            Build your product catalog from photos
+                        </h3>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">
+                            Snap pictures of your products and we'll generate a Google Sheet your ordering agent can sell from.
+                        </p>
+                    </div>
+                    <div className="flex-shrink-0 flex items-center gap-1 text-purple-700 dark:text-purple-400 font-semibold text-sm">
+                        <span className="hidden sm:inline">Open Catalog Builder</span>
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </div>
+                </Link>
+
                 {activeTab === 'contacts' && (
                     <ConversationsTab
                         contacts={contacts}
