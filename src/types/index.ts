@@ -2,9 +2,15 @@ export interface User {
   id: number;
   email: string;
   name: string;
-  subscription_tier: 'free' | 'starter' | 'testing' | 'pro' | 'enterprise';
-  subscription_status?: 'active' | 'past_due' | 'canceled' | 'expired' | 'grace_period';
+  subscription_tier: 'free' | 'starter' | 'business' | 'pro' | 'enterprise';
+  effective_tier?: 'free' | 'starter' | 'business' | 'pro' | 'enterprise';
+  subscription_status?: 'active' | 'trial' | 'past_due' | 'canceled' | 'expired' | 'grace_period';
   subscription_end_date?: string;
+  billing_cycle?: 'monthly' | 'yearly';
+  cancel_at_period_end?: boolean;
+  auto_renew_enabled?: boolean;
+  days_remaining?: number;
+  is_trial?: boolean;
   api_key?: string;
   stripe_customer_id?: string;
   phone_number?: string;
