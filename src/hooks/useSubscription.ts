@@ -234,15 +234,13 @@ export const useSubscription = () => {
     const [tierName, setTierName] = useState<string>('');
     const [tierTagline, setTierTagline] = useState<string>('');
 
-    // Get tier from user, default to 'free'
+    // Effective tier drives feature limits (accounts for trial/expiry)
     const tier: SubscriptionTier = useMemo(() => {
-        const userTier = user?.subscription_tier as string | undefined;
-        // Handle legacy 'lite' tier -> starter
+        const userTier = (user?.effective_tier ?? user?.subscription_tier) as string | undefined;
         if (userTier === 'lite') return 'starter';
-        // Handle legacy 'business' tier if needed
         if (userTier === 'business') return 'business';
         return (userTier as SubscriptionTier) || 'free';
-    }, [user?.subscription_tier]);
+    }, [user?.effective_tier, user?.subscription_tier]);
 
     // Use server limits if available, otherwise fall back to local
     const limits = useMemo(() => {
@@ -350,6 +348,13 @@ export const useSubscription = () => {
 
     return {
         tier,
+        effectiveTier: tier,
+        rawTier: user?.subscription_tier,
+        subscriptionStatus: user?.subscription_status,
+        subscriptionEndDate: user?.subscription_end_date,
+        billingCycle: user?.billing_cycle,
+        daysRemaining: user?.days_remaining,
+        isTrial: user?.is_trial ?? user?.subscription_status === 'trial',
         tierName: tierName || TIER_INFO[tier]?.name || tier,
         tierTagline: tierTagline || TIER_INFO[tier]?.tagline || '',
         tierColor: TIER_INFO[tier]?.color || 'gray',

@@ -45,6 +45,7 @@ import { useAuth } from '../hooks/useAuth';
 import NotificationsDropdown from './NotificationsDropdown';
 import CookieConsent from './CookieConsent';
 import UsageWarningBanner from './UsageWarningBanner';
+import SubscriptionBanner from './SubscriptionBanner';
 import NoIndex from './NoIndex';
 import { ThemeToggle } from './ThemeToggle';
 import OrgSwitcher from './OrgSwitcher/OrgSwitcher';
@@ -675,6 +676,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             </div>
           </div>
         </div>
+
+        {/* Subscription lifecycle banner */}
+        <SubscriptionBanner />
 
         {/* Usage Warning Banner - shows when at 80%+ usage */}
         <UsageWarningBanner />
