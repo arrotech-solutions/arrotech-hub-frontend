@@ -12,6 +12,8 @@ import toast from 'react-hot-toast';
 import { Connection } from '../types';
 import { Link } from 'react-router-dom';
 import ConversationsTab from '../components/whatsapp/ConversationsTab';
+import CreateBroadcastModal from '../components/whatsapp/CreateBroadcastModal';
+import { useWebSocket } from '../hooks/useWebSocket';
 
 interface Contact {
     id: number;
@@ -67,6 +69,16 @@ interface Stats {
     active_auto_replies: number;
 }
 
+interface BroadcastStats {
+    total_campaigns: number;
+    total_sent: number;
+    total_delivered: number;
+    total_read: number;
+    total_failed: number;
+    delivery_rate: number;
+    read_rate: number;
+}
+
 interface Broadcast {
     id: number;
     name: string;
@@ -102,6 +114,8 @@ const WhatsAppDashboard: React.FC = () => {
     const [sendingMessage, setSendingMessage] = useState(false);
     const [showNewRuleModal, setShowNewRuleModal] = useState(false);
     const [broadcasts, setBroadcasts] = useState<Broadcast[]>([]);
+    const [broadcastStats, setBroadcastStats] = useState<BroadcastStats | null>(null);
+    const [showBroadcastModal, setShowBroadcastModal] = useState(false);
     const [waConnection, setWaConnection] = useState<Connection | null>(null);
     const [phoneNumbers, setPhoneNumbers] = useState<any[]>([]);
     const [isSyncingNumbers, setIsSyncingNumbers] = useState(false);
@@ -306,10 +320,29 @@ const WhatsAppDashboard: React.FC = () => {
             if (response.success) {
                 setBroadcasts(response.data.data || []);
             }
+            const statsResp = await apiService.getWhatsAppBroadcastStats();
+            if (statsResp.success && statsResp.data) {
+                setBroadcastStats(statsResp.data.data);
+            }
         } catch (error) {
             console.error('Error fetching broadcasts:', error);
         }
     }, []);
+
+    const { lastEvent } = useWebSocket();
+
+    useEffect(() => {
+        if (lastEvent?.type === 'broadcast_progress') {
+            const data = lastEvent.data;
+            setBroadcasts(prev => prev.map(b => b.id.toString() === data.broadcast_id ? {
+                ...b,
+                sent_count: data.sent,
+                failed_count: data.failed,
+                total_recipients: data.total,
+                status: (data.sent + data.failed) >= data.total ? 'completed' : 'sending'
+            } : b));
+        }
+    }, [lastEvent]);
 
     // Fetch connection details
     const fetchConnectionData = useCallback(async () => {
@@ -746,7 +779,7 @@ const WhatsAppDashboard: React.FC = () => {
                                 <p className="text-sm text-gray-500 dark:text-slate-400">Send bulk messages to your contacts</p>
                             </div>
                             <button
-                                onClick={() => toast('Create campaign coming soon!')}
+                                onClick={() => setShowBroadcastModal(true)}
                                 className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
                             >
                                 <Plus className="w-4 h-4" />
@@ -757,10 +790,10 @@ const WhatsAppDashboard: React.FC = () => {
                         {/* Broadcast Stats */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                             {[
-                                { label: 'Total Campaigns', value: broadcasts.length, icon: Megaphone, color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' },
-                                { label: 'Sent', value: broadcasts.filter(b => b.status === 'completed').length, icon: CheckCheck, color: 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' },
-                                { label: 'Scheduled', value: broadcasts.filter(b => b.status === 'scheduled').length, icon: Calendar, color: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400' },
-                                { label: 'Draft', value: broadcasts.filter(b => b.status === 'draft').length, icon: Clock, color: 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400' },
+                                { label: 'Total Campaigns', value: broadcastStats?.total_campaigns ?? broadcasts.length, icon: Megaphone, color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' },
+                                { label: 'Total Sent', value: broadcastStats?.total_sent ?? 0, icon: Send, color: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400' },
+                                { label: 'Delivered', value: broadcastStats?.total_delivered ?? 0, icon: CheckCheck, color: 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' },
+                                { label: 'Delivery Rate', value: `${broadcastStats?.delivery_rate ?? 0}%`, icon: Sparkles, color: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400' },
                             ].map((stat, idx) => (
                                 <div key={idx} className="bg-white dark:bg-slate-900 rounded-xl border dark:border-slate-800 p-4 transition-colors">
                                     <div className={`w-10 h-10 ${stat.color} rounded-lg flex items-center justify-center mb-2`}>
@@ -811,6 +844,21 @@ const WhatsAppDashboard: React.FC = () => {
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-2">
+                                                    <button
+                                                        onClick={async () => {
+                                                            try {
+                                                                await apiService.duplicateWhatsAppBroadcast(broadcast.id);
+                                                                toast.success('Broadcast duplicated');
+                                                                fetchBroadcasts();
+                                                            } catch (e) {
+                                                                toast.error('Failed to duplicate');
+                                                            }
+                                                        }}
+                                                        className="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                                                        title="Duplicate"
+                                                    >
+                                                        <Plus className="w-4 h-4" />
+                                                    </button>
                                                     {broadcast.status === 'draft' && (
                                                         <>
                                                             <button
@@ -869,6 +917,12 @@ const WhatsAppDashboard: React.FC = () => {
                                 )}
                             </div>
                         </div>
+                        
+                        <CreateBroadcastModal 
+                            isOpen={showBroadcastModal} 
+                            onClose={() => setShowBroadcastModal(false)} 
+                            onSuccess={fetchBroadcasts} 
+                        />
                     </div>
                 )}
 

@@ -2857,8 +2857,23 @@ class ApiService {
     return response.data;
   }
 
-  async getWhatsAppBroadcastRecipients(broadcastId: number, params?: { status?: string; limit?: number; offset?: number }): Promise<ApiResponse<any>> {
+  async getWhatsAppBroadcastRecipients(broadcastId: string | number, params?: { status?: string; limit?: number; offset?: number }): Promise<ApiResponse<any>> {
     const response = await this.api.get(`/api/whatsapp/broadcasts/${broadcastId}/recipients`, { params });
+    return response.data;
+  }
+
+  async duplicateWhatsAppBroadcast(broadcastId: string | number): Promise<ApiResponse<any>> {
+    const response = await this.api.post(`/api/whatsapp/broadcasts/${broadcastId}/duplicate`);
+    return response.data;
+  }
+
+  async getWhatsAppBroadcastStats(): Promise<ApiResponse<any>> {
+    const response = await this.api.get(`/api/whatsapp/broadcasts/dashboard/stats`);
+    return response.data;
+  }
+
+  async generateBroadcastCopy(data: { campaign_goal: string; audience_description?: string; tone?: string }): Promise<ApiResponse<any>> {
+    const response = await this.api.post(`/api/whatsapp/broadcasts/generate-copy`, data);
     return response.data;
   }
 
@@ -3246,8 +3261,14 @@ class ApiService {
     return response.data;
   }
 
-  async listCatalogSheets(): Promise<ApiResponse<{ id: string; name: string }[]>> {
-    const response = await this.api.get('/api/catalog-builder/sheets');
+  async listDriveFolders(): Promise<ApiResponse<{ id: string; name: string }[]>> {
+    const response = await this.api.get('/templates/helpers/drive-folders');
+    return response.data;
+  }
+
+  async listCatalogSheets(folderId?: string): Promise<ApiResponse<{ id: string; name: string }[]>> {
+    const params = folderId ? { folder_id: folderId } : {};
+    const response = await this.api.get('/api/catalog-builder/sheets', { params });
     return response.data;
   }
 
@@ -3272,6 +3293,7 @@ class ApiService {
       mode: 'new' | 'append';
       title?: string;
       spreadsheet_id?: string;
+      folder_id?: string;
       want_csv?: boolean;
     },
     files: File[]
@@ -3281,6 +3303,7 @@ class ApiService {
     formData.append('mode', payload.mode);
     if (payload.title) formData.append('title', payload.title);
     if (payload.spreadsheet_id) formData.append('spreadsheet_id', payload.spreadsheet_id);
+    if (payload.folder_id) formData.append('folder_id', payload.folder_id);
     formData.append('want_csv', String(Boolean(payload.want_csv)));
     files.forEach((file) => formData.append('files', file));
     const response = await this.api.post('/api/catalog-builder/export', formData, {
