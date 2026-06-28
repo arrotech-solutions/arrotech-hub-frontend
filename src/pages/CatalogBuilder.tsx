@@ -125,6 +125,8 @@ const CatalogBuilder: React.FC = () => {
     const [sheetTitle, setSheetTitle] = useState('Product Catalog');
     const [existingSheets, setExistingSheets] = useState<{ id: string; name: string }[]>([]);
     const [selectedSheetId, setSelectedSheetId] = useState('');
+    const [driveFolders, setDriveFolders] = useState<{ id: string; name: string }[]>([]);
+    const [selectedFolderId, setSelectedFolderId] = useState('');
     const [wantCsv, setWantCsv] = useState(false);
     const [exporting, setExporting] = useState(false);
     const [exportProgress, setExportProgress] = useState('');
@@ -374,21 +376,42 @@ const CatalogBuilder: React.FC = () => {
     };
 
     // ── Export ──
-    const loadSheets = useCallback(async () => {
+    const loadFolders = useCallback(async () => {
         try {
-            const res = await apiService.listCatalogSheets();
+            const res = await apiService.listDriveFolders();
             if (res.success && Array.isArray(res.data)) {
-                setExistingSheets(res.data);
-                if (res.data.length && !selectedSheetId) setSelectedSheetId(res.data[0].id);
+                setDriveFolders(res.data);
             }
         } catch {
             /* ignore */
         }
-    }, [selectedSheetId]);
+    }, []);
+
+    const loadSheets = useCallback(async () => {
+        try {
+            const res = await apiService.listCatalogSheets(selectedFolderId || undefined);
+            if (res.success && Array.isArray(res.data)) {
+                setExistingSheets(res.data);
+                if (res.data.length && !selectedSheetId) setSelectedSheetId(res.data[0].id);
+                // Clear selected sheet if it's no longer in the list (e.g., changed folder)
+                if (selectedSheetId && !res.data.find((s) => s.id === selectedSheetId)) {
+                    setSelectedSheetId(res.data.length ? res.data[0].id : '');
+                }
+            }
+        } catch {
+            /* ignore */
+        }
+    }, [selectedFolderId, selectedSheetId]);
+
+    useEffect(() => {
+        if (step === 3) {
+            loadFolders();
+        }
+    }, [step, loadFolders]);
 
     useEffect(() => {
         if (step === 3 && exportMode === 'append') loadSheets();
-    }, [step, exportMode, loadSheets]);
+    }, [step, exportMode, selectedFolderId, loadSheets]);
 
     const validProducts = products.filter((p) => p.name.trim());
 
@@ -437,6 +460,7 @@ const CatalogBuilder: React.FC = () => {
                     mode: exportMode,
                     title: sheetTitle,
                     spreadsheet_id: exportMode === 'append' ? selectedSheetId : undefined,
+                    folder_id: selectedFolderId || undefined,
                     want_csv: wantCsv,
                 },
                 files
@@ -1107,34 +1131,74 @@ const CatalogBuilder: React.FC = () => {
                             </div>
 
                             {exportMode === 'new' ? (
-                                <div className="mb-5">
-                                    <label className="text-xs font-semibold text-gray-500 dark:text-slate-400">Sheet title</label>
-                                    <input
-                                        value={sheetTitle}
-                                        onChange={(e) => setSheetTitle(e.target.value)}
-                                        className="w-full mt-1 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500"
-                                    />
+                                <div className="mb-5 space-y-4">
+                                    <div>
+                                        <label className="text-xs font-semibold text-gray-500 dark:text-slate-400">Sheet title</label>
+                                        <input
+                                            value={sheetTitle}
+                                            onChange={(e) => setSheetTitle(e.target.value)}
+                                            className="w-full mt-1 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs font-semibold text-gray-500 dark:text-slate-400">
+                                            Destination folder (Optional)
+                                        </label>
+                                        <select
+                                            value={selectedFolderId}
+                                            onChange={(e) => setSelectedFolderId(e.target.value)}
+                                            className="w-full mt-1 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500"
+                                        >
+                                            <option value="">Root Drive (Anywhere)</option>
+                                            {driveFolders.map((f) => (
+                                                <option key={f.id} value={f.id}>
+                                                    {f.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
                                 </div>
                             ) : (
-                                <div className="mb-5">
-                                    <label className="text-xs font-semibold text-gray-500 dark:text-slate-400">
-                                        Choose spreadsheet
-                                    </label>
-                                    <select
-                                        value={selectedSheetId}
-                                        onChange={(e) => setSelectedSheetId(e.target.value)}
-                                        className="w-full mt-1 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500"
-                                    >
-                                        <option value="">Select a spreadsheet…</option>
-                                        {existingSheets.map((s) => (
-                                            <option key={s.id} value={s.id}>
-                                                {s.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    {existingSheets.length === 0 && (
-                                        <p className="text-xs text-gray-400 mt-1">No spreadsheets found in your Drive.</p>
-                                    )}
+                                <div className="mb-5 space-y-4">
+                                    <div>
+                                        <label className="text-xs font-semibold text-gray-500 dark:text-slate-400">
+                                            Filter by folder (Optional)
+                                        </label>
+                                        <select
+                                            value={selectedFolderId}
+                                            onChange={(e) => setSelectedFolderId(e.target.value)}
+                                            className="w-full mt-1 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500"
+                                        >
+                                            <option value="">All Folders / Root</option>
+                                            {driveFolders.map((f) => (
+                                                <option key={f.id} value={f.id}>
+                                                    {f.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="text-xs font-semibold text-gray-500 dark:text-slate-400">
+                                            Choose spreadsheet
+                                        </label>
+                                        <select
+                                            value={selectedSheetId}
+                                            onChange={(e) => setSelectedSheetId(e.target.value)}
+                                            className="w-full mt-1 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500"
+                                        >
+                                            <option value="">Select a spreadsheet…</option>
+                                            {existingSheets.map((s) => (
+                                                <option key={s.id} value={s.id}>
+                                                    {s.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        {existingSheets.length === 0 && (
+                                            <p className="text-xs text-gray-400 mt-1">
+                                                {selectedFolderId ? 'No spreadsheets found in this folder.' : 'No spreadsheets found in your Drive.'}
+                                            </p>
+                                        )}
+                                    </div>
                                 </div>
                             )}
 
