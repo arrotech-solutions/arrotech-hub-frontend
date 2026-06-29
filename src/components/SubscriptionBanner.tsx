@@ -2,6 +2,11 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { AlertTriangle, Clock, XCircle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import {
+  getDisplayTier,
+  getDisplayTierName,
+  isSubscriptionExpired,
+} from '../hooks/useSubscription';
 
 /**
  * Surfaces trial countdown, expiry warnings, and canceled-but-active state.
@@ -11,7 +16,11 @@ const SubscriptionBanner: React.FC = () => {
 
   if (!user) return null;
 
-  const effectiveTier = (user as { effective_tier?: string }).effective_tier ?? user.subscription_tier;
+  const effectiveTier = getDisplayTier(user);
+  const subscriptionExpired = isSubscriptionExpired(user);
+  const previousTierName = user.subscription_tier && user.subscription_tier !== 'free'
+    ? getDisplayTierName(user.subscription_tier)
+    : null;
   const isTrial = user.subscription_status === 'trial' || (user as { is_trial?: boolean }).is_trial;
   const daysRemaining = (user as { days_remaining?: number }).days_remaining;
   const isCanceled = user.subscription_status === 'canceled';
@@ -22,6 +31,27 @@ const SubscriptionBanner: React.FC = () => {
         year: 'numeric',
       })
     : null;
+
+  if (subscriptionExpired) {
+    return (
+      <div className="bg-gray-600/15 border-b border-gray-500/30 text-gray-900 dark:text-gray-200 px-4 py-2.5 text-sm flex flex-wrap items-center justify-center gap-2">
+        <XCircle className="w-4 h-4 shrink-0" />
+        <span>
+          {previousTierName ? (
+            <>
+              Your <strong>{previousTierName}</strong> plan expired
+              {endDate ? <> on <strong>{endDate}</strong></> : ''}. You&apos;re on the Free plan with reduced limits.
+            </>
+          ) : (
+            <>Your subscription has expired. You&apos;re on the Free plan with reduced limits.</>
+          )}
+        </span>
+        <Link to="/pricing" className="underline font-semibold">
+          Renew
+        </Link>
+      </div>
+    );
+  }
 
   if (isTrial && daysRemaining !== undefined && daysRemaining !== null) {
     return (

@@ -22,12 +22,14 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../hooks/useAuth';
+import { getDisplayTier, getDisplayTierName } from '../hooks/useSubscription';
 import apiService from '../services/api';
 import { CreatorProfile as CreatorProfileType, CreatorWorkflow, TopCreator, Following, ActivityFeedItem } from '../types';
 import EarningsDashboard from '../components/EarningsDashboard';
 
 const CreatorProfile: React.FC = () => {
   const { user } = useAuth();
+  const displayTierName = getDisplayTierName(getDisplayTier(user));
   const [profile, setProfile] = useState<CreatorProfileType | null>(null);
   const [myWorkflows, setMyWorkflows] = useState<CreatorWorkflow[]>([]);
   const [topCreators, setTopCreators] = useState<TopCreator[]>([]);
@@ -444,7 +446,7 @@ const CreatorProfile: React.FC = () => {
                 { label: 'Reviews', value: profile?.total_reviews || 0, icon: Heart, color: 'rose' },
                 { label: 'Following', value: followingCount || 0, icon: Users, color: 'indigo' },
                 { label: 'Followers', value: followersCount || 0, icon: Award, color: 'purple' },
-                { label: 'Tier', value: user?.subscription_tier || 'Free', icon: Zap, color: 'emerald' },
+                { label: 'Tier', value: displayTierName, icon: Zap, color: 'emerald' },
               ].map((stat, idx) => {
                 const Icon = stat.icon;
                 return (
