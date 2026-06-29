@@ -657,17 +657,17 @@ class ApiService {
     return response.data;
   }
 
-  async updateWhatsAppAutoReply(ruleId: number, data: any): Promise<ApiResponse<any>> {
+  async updateWhatsAppAutoReply(ruleId: string, data: any): Promise<ApiResponse<any>> {
     const response = await this.api.put(`/api/whatsapp/auto-replies/${ruleId}`, data);
     return response.data;
   }
 
-  async deleteWhatsAppAutoReply(ruleId: number): Promise<ApiResponse<any>> {
+  async deleteWhatsAppAutoReply(ruleId: string): Promise<ApiResponse<any>> {
     const response = await this.api.delete(`/api/whatsapp/auto-replies/${ruleId}`);
     return response.data;
   }
 
-  async toggleWhatsAppAutoReply(ruleId: number): Promise<ApiResponse<any>> {
+  async toggleWhatsAppAutoReply(ruleId: string): Promise<ApiResponse<any>> {
     const response = await this.api.patch(`/api/whatsapp/auto-replies/${ruleId}/toggle`);
     return response.data;
   }
@@ -2825,44 +2825,45 @@ class ApiService {
     name: string;
     description?: string;
     message_type: 'template' | 'text';
-    template_id?: number;
+    template_id?: string;
     template_variables?: Record<string, any>;
     text_content?: string;
     target_type: 'all' | 'tag' | 'selected';
     target_tag?: string;
-    target_contact_ids?: number[];
+    target_contact_ids?: string[];
     scheduled_at?: string;
+    send_rate?: number;
   }): Promise<ApiResponse<any>> {
     const response = await this.api.post('/api/whatsapp/broadcasts', data);
     return response.data;
   }
 
-  async getWhatsAppBroadcast(broadcastId: number): Promise<ApiResponse<any>> {
+  async getWhatsAppBroadcast(broadcastId: string): Promise<ApiResponse<any>> {
     const response = await this.api.get(`/api/whatsapp/broadcasts/${broadcastId}`);
     return response.data;
   }
 
-  async sendWhatsAppBroadcast(broadcastId: number): Promise<ApiResponse<any>> {
+  async sendWhatsAppBroadcast(broadcastId: string): Promise<ApiResponse<any>> {
     const response = await this.api.post(`/api/whatsapp/broadcasts/${broadcastId}/send`);
     return response.data;
   }
 
-  async cancelWhatsAppBroadcast(broadcastId: number): Promise<ApiResponse<any>> {
+  async cancelWhatsAppBroadcast(broadcastId: string): Promise<ApiResponse<any>> {
     const response = await this.api.post(`/api/whatsapp/broadcasts/${broadcastId}/cancel`);
     return response.data;
   }
 
-  async deleteWhatsAppBroadcast(broadcastId: number): Promise<ApiResponse<any>> {
+  async deleteWhatsAppBroadcast(broadcastId: string): Promise<ApiResponse<any>> {
     const response = await this.api.delete(`/api/whatsapp/broadcasts/${broadcastId}`);
     return response.data;
   }
 
-  async getWhatsAppBroadcastRecipients(broadcastId: string | number, params?: { status?: string; limit?: number; offset?: number }): Promise<ApiResponse<any>> {
+  async getWhatsAppBroadcastRecipients(broadcastId: string, params?: { status?: string; limit?: number; offset?: number }): Promise<ApiResponse<any>> {
     const response = await this.api.get(`/api/whatsapp/broadcasts/${broadcastId}/recipients`, { params });
     return response.data;
   }
 
-  async duplicateWhatsAppBroadcast(broadcastId: string | number): Promise<ApiResponse<any>> {
+  async duplicateWhatsAppBroadcast(broadcastId: string): Promise<ApiResponse<any>> {
     const response = await this.api.post(`/api/whatsapp/broadcasts/${broadcastId}/duplicate`);
     return response.data;
   }
