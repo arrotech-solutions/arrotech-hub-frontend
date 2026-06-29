@@ -5,7 +5,7 @@ import {
     Phone, Clock, MoreVertical, Bot, Zap,
     CheckCheck, Check, X, Loader2, ArrowLeft,
     Megaphone, Calendar, Play, Pause, Trash2, Key, AlertCircle,
-    Sparkles, ArrowRight
+    Sparkles, ArrowRight, Pencil
 } from 'lucide-react';
 import apiService from '../services/api';
 import toast from 'react-hot-toast';
@@ -13,7 +13,77 @@ import { Connection } from '../types';
 import { Link } from 'react-router-dom';
 import ConversationsTab from '../components/whatsapp/ConversationsTab';
 import CreateBroadcastModal from '../components/whatsapp/CreateBroadcastModal';
+import BroadcastDetailModal from '../components/whatsapp/BroadcastDetailModal';
+import AutoReplyRuleModal, { AutoReplyRule, AutoReplyRuleDraft } from '../components/whatsapp/AutoReplyRuleModal';
 import { useWebSocket } from '../hooks/useWebSocket';
+
+const WEEKDAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const;
+
+type DayHours = { open: string; close: string; is_open: boolean };
+
+const createDefaultBusinessHours = (): Record<string, DayHours> => ({
+    monday: { open: '08:00', close: '18:00', is_open: true },
+    tuesday: { open: '08:00', close: '18:00', is_open: true },
+    wednesday: { open: '08:00', close: '18:00', is_open: true },
+    thursday: { open: '08:00', close: '18:00', is_open: true },
+    friday: { open: '08:00', close: '18:00', is_open: true },
+    saturday: { open: '09:00', close: '14:00', is_open: false },
+    sunday: { open: '09:00', close: '14:00', is_open: false },
+});
+
+const parseBusinessHoursFromApi = (
+    apiHours: Record<string, { open?: string; close?: string }> | null | undefined
+): Record<string, DayHours> => {
+    const defaults = createDefaultBusinessHours();
+    if (!apiHours) return defaults;
+    WEEKDAYS.forEach((day) => {
+        const h = apiHours[day];
+        if (h?.open && h?.close) {
+            defaults[day] = { open: h.open, close: h.close, is_open: true };
+        } else {
+            defaults[day] = { ...defaults[day], is_open: false };
+        }
+    });
+    return defaults;
+};
+
+const businessHoursToApi = (hours: Record<string, DayHours>) => {
+    const out: Record<string, { open: string; close: string }> = {};
+    WEEKDAYS.forEach((day) => {
+        if (hours[day]?.is_open) {
+            out[day] = { open: hours[day].open, close: hours[day].close };
+        }
+    });
+    return out;
+};
+
+const formatDayLabel = (day: string) => day.charAt(0).toUpperCase() + day.slice(1);
+
+const REAL_ESTATE_TEMPLATES: AutoReplyRuleDraft[] = [
+    {
+        name: 'Property Inquiry Bot',
+        trigger_type: 'first_message',
+        response_type: 'text',
+        response_content: '👋 Hello {{name}}! Welcome to {{business_name}} Real Estate. Are you looking to Buy or Rent?\n\n1️⃣ Rent\n2️⃣ Buy\n\nPlease reply with a number.',
+        priority: 10,
+    },
+    {
+        name: 'Viewing Confirmation',
+        trigger_type: 'keyword',
+        trigger_value: 'view|site visit|book',
+        response_type: 'text',
+        response_content: "Thanks! We've received your viewing request. A property manager will contact you shortly to confirm the time. 🏠",
+        priority: 5,
+    },
+    {
+        name: 'New Listing Alert',
+        trigger_type: 'keyword',
+        trigger_value: 'listing|new property|pics',
+        response_type: 'text',
+        response_content: '🚨 New Property Alert! 🚨\n\n📌 Location: [Area]\n💰 Price: [Amount]\n🛏️ Beds: [Count]\n\nReply "PICS" to see photos or "BOOK" to schedule a viewing.',
+        priority: 3,
+    },
+];
 
 interface Contact {
     id: number;
@@ -47,21 +117,6 @@ interface Message {
     read_at: string | null;
 }
 
-interface AutoReply {
-    id: number;
-    name: string;
-    description: string | null;
-    trigger_type: string;
-    trigger_value: string | null;
-    response_type: string;
-    response_content: string | null;
-    is_active: boolean;
-    priority: number;
-    times_triggered: number;
-    last_triggered_at: string | null;
-    created_at: string;
-}
-
 interface Stats {
     total_contacts: number;
     total_messages: number;
@@ -80,11 +135,11 @@ interface BroadcastStats {
 }
 
 interface Broadcast {
-    id: number;
+    id: string;
     name: string;
     description: string | null;
     message_type: string;
-    template_id: number | null;
+    template_id: string | null;
     target_type: string;
     target_tag: string | null;
     status: string;
@@ -106,24 +161,33 @@ const WhatsAppDashboard: React.FC = () => {
     const [contacts, setContacts] = useState<Contact[]>([]);
     const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
-    const [autoReplies, setAutoReplies] = useState<AutoReply[]>([]);
+    const [autoReplies, setAutoReplies] = useState<AutoReplyRule[]>([]);
     const [stats, setStats] = useState<Stats | null>(null);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [newMessage, setNewMessage] = useState('');
     const [sendingMessage, setSendingMessage] = useState(false);
-    const [showNewRuleModal, setShowNewRuleModal] = useState(false);
+    const [showRuleModal, setShowRuleModal] = useState(false);
+    const [editingRule, setEditingRule] = useState<AutoReplyRule | null>(null);
+    const [rulePrefill, setRulePrefill] = useState<Partial<AutoReplyRuleDraft> | null>(null);
     const [broadcasts, setBroadcasts] = useState<Broadcast[]>([]);
     const [broadcastStats, setBroadcastStats] = useState<BroadcastStats | null>(null);
     const [showBroadcastModal, setShowBroadcastModal] = useState(false);
+    const [broadcastStatusFilter, setBroadcastStatusFilter] = useState('');
+    const [detailBroadcastId, setDetailBroadcastId] = useState<string | null>(null);
     const [waConnection, setWaConnection] = useState<Connection | null>(null);
     const [phoneNumbers, setPhoneNumbers] = useState<any[]>([]);
     const [isSyncingNumbers, setIsSyncingNumbers] = useState(false);
     const [businessProfile, setBusinessProfile] = useState({
-        name: '',
+        business_name: '',
         description: '',
-        industry: ''
+        industry: '',
+        away_message: '',
+        timezone: 'Africa/Nairobi',
+        business_hours_ui: createDefaultBusinessHours(),
     });
+    const [isSavingProfile, setIsSavingProfile] = useState(false);
+    const [isSavingHours, setIsSavingHours] = useState(false);
 
     const [showRegistrationModal, setShowRegistrationModal] = useState(false);
     const [registrationPin, setRegistrationPin] = useState('');
@@ -316,18 +380,26 @@ const WhatsAppDashboard: React.FC = () => {
     // Fetch broadcasts
     const fetchBroadcasts = useCallback(async () => {
         try {
-            const response = await apiService.getWhatsAppBroadcasts();
+            const response = await apiService.getWhatsAppBroadcasts({
+                status: broadcastStatusFilter || undefined,
+            });
             if (response.success) {
-                setBroadcasts(response.data.data || []);
+                setBroadcasts(Array.isArray(response.data) ? response.data : []);
             }
             const statsResp = await apiService.getWhatsAppBroadcastStats();
             if (statsResp.success && statsResp.data) {
-                setBroadcastStats(statsResp.data.data);
+                setBroadcastStats(statsResp.data);
             }
         } catch (error) {
             console.error('Error fetching broadcasts:', error);
         }
-    }, []);
+    }, [broadcastStatusFilter]);
+
+    useEffect(() => {
+        if (activeTab === 'broadcast') {
+            fetchBroadcasts();
+        }
+    }, [activeTab, broadcastStatusFilter, fetchBroadcasts]);
 
     const { lastEvent } = useWebSocket();
 
@@ -358,10 +430,15 @@ const WhatsAppDashboard: React.FC = () => {
                 if (waConn) setWaConnection(waConn);
             }
             if (profileRes && profileRes.success && profileRes.data) {
-                setBusinessProfile((prev: any) => ({
-                    ...prev,
-                    ...profileRes.data
-                }));
+                const d = profileRes.data;
+                setBusinessProfile({
+                    business_name: d.business_name || '',
+                    description: d.description || '',
+                    industry: d.industry || '',
+                    away_message: d.away_message || '',
+                    timezone: d.timezone || 'Africa/Nairobi',
+                    business_hours_ui: parseBusinessHoursFromApi(d.business_hours),
+                });
             }
             if (numbersRes && numbersRes.success && numbersRes.data) {
                 setPhoneNumbers(numbersRes.data);
@@ -430,8 +507,32 @@ const WhatsAppDashboard: React.FC = () => {
         }
     };
 
+    const openNewRuleModal = () => {
+        setEditingRule(null);
+        setRulePrefill(null);
+        setShowRuleModal(true);
+    };
+
+    const openEditRuleModal = (rule: AutoReplyRule) => {
+        setEditingRule(rule);
+        setRulePrefill(null);
+        setShowRuleModal(true);
+    };
+
+    const openTemplateModal = (template: AutoReplyRuleDraft) => {
+        setEditingRule(null);
+        setRulePrefill(template);
+        setShowRuleModal(true);
+    };
+
+    const closeRuleModal = () => {
+        setShowRuleModal(false);
+        setEditingRule(null);
+        setRulePrefill(null);
+    };
+
     // Toggle auto-reply rule
-    const handleToggleRule = async (ruleId: number) => {
+    const handleToggleRule = async (ruleId: string) => {
         try {
             await apiService.toggleWhatsAppAutoReply(ruleId);
             await fetchAutoReplies();
@@ -442,7 +543,7 @@ const WhatsAppDashboard: React.FC = () => {
     };
 
     // Delete auto-reply rule
-    const handleDeleteRule = async (ruleId: number) => {
+    const handleDeleteRule = async (ruleId: string) => {
         if (!window.confirm('Delete this rule?')) return;
         try {
             await apiService.deleteWhatsAppAutoReply(ruleId);
@@ -612,6 +713,12 @@ const WhatsAppDashboard: React.FC = () => {
 
                 {activeTab === 'auto-reply' && (
                     <div className="space-y-6 whatsapp-auto-reply-tut">
+                        {!waConnection && (
+                            <div className="p-4 rounded-xl bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 text-sm text-orange-800 dark:text-orange-300">
+                                Connect your WhatsApp Business account in Settings to create and manage auto-reply rules.
+                            </div>
+                        )}
+
                         {/* Header */}
                         <div className="flex items-center justify-between">
                             <div>
@@ -619,8 +726,9 @@ const WhatsAppDashboard: React.FC = () => {
                                 <p className="text-sm text-gray-500 dark:text-slate-400">Automate responses to incoming messages</p>
                             </div>
                             <button
-                                onClick={() => setShowNewRuleModal(true)}
-                                className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                                onClick={openNewRuleModal}
+                                disabled={!waConnection}
+                                className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 <Plus className="w-4 h-4" />
                                 New Rule
@@ -637,8 +745,9 @@ const WhatsAppDashboard: React.FC = () => {
                                         Create rules to automatically respond to customer messages
                                     </p>
                                     <button
-                                        onClick={() => setShowNewRuleModal(true)}
-                                        className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                                        onClick={openNewRuleModal}
+                                        disabled={!waConnection}
+                                        className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         Create First Rule
                                     </button>
@@ -704,6 +813,13 @@ const WhatsAppDashboard: React.FC = () => {
 
                                             <div className="flex items-center gap-2 ml-4">
                                                 <button
+                                                    onClick={() => openEditRuleModal(rule)}
+                                                    className="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                                                    title="Edit rule"
+                                                >
+                                                    <Pencil className="w-4 h-4" />
+                                                </button>
+                                                <button
                                                     onClick={() => handleToggleRule(rule.id)}
                                                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${rule.is_active ? 'bg-green-500' : 'bg-gray-300 dark:bg-slate-700'
                                                         }`}
@@ -728,40 +844,22 @@ const WhatsAppDashboard: React.FC = () => {
 
                         {/* Quick Templates */}
                         <div className="bg-white dark:bg-slate-900 rounded-xl border dark:border-slate-800 p-6 transition-colors">
-                            <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Real Estate Templates</h3>
+                            <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Real Estate Templates</h3>
+                            <p className="text-sm text-gray-500 dark:text-slate-400 mb-4">Click a template to pre-fill a new rule — review and save before it goes live.</p>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                {[
-                                    {
-                                        name: 'Property Inquiry Bot',
-                                        trigger: 'first_message',
-                                        response: '👋 Hello {{name}}! Welcome to {{business_name}} Real Estate. Are you looking to Buy or Rent?\n\n1️⃣ Rent\n2️⃣ Buy\n\nPlease reply with a number.'
-                                    },
-                                    {
-                                        name: 'Viewing Confirmation',
-                                        trigger: 'keyword',
-                                        keywords: 'view|site visit|book',
-                                        response: "Thanks! We've received your viewing request. A property manager will contact you shortly to confirm the time. 🏠"
-                                    },
-                                    {
-                                        name: 'New Listing Alert',
-                                        trigger: 'broadcast',
-                                        response: '🚨 New Property Alert! 🚨\n\n📌 Location: [Area]\n💰 Price: [Amount]\n🛏️ Beds: [Count]\n\nReply "PICS" to see photos or "BOOK" to schedule a viewing.'
-                                    },
-                                ].map((template, i) => (
+                                {REAL_ESTATE_TEMPLATES.map((template, i) => (
                                     <button
                                         key={i}
-                                        onClick={() => {
-                                            // Would open modal with pre-filled values
-                                            toast.success(`Template "${template.name}" added to rules!`);
-                                        }}
-                                        className="p-4 border dark:border-slate-800 rounded-lg text-left hover:border-green-500 dark:hover:border-green-900/50 hover:bg-green-50 dark:hover:bg-green-900/10 transition-colors group"
+                                        onClick={() => openTemplateModal(template)}
+                                        disabled={!waConnection}
+                                        className="p-4 border dark:border-slate-800 rounded-lg text-left hover:border-green-500 dark:hover:border-green-900/50 hover:bg-green-50 dark:hover:bg-green-900/10 transition-colors group disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         <div className="font-medium text-gray-900 dark:text-white mb-1 group-hover:text-green-600 transition-colors">{template.name}</div>
                                         <div className="text-xs text-gray-500 dark:text-slate-400 mb-2">
-                                            Trigger: {template.trigger.replace('_', ' ')}
+                                            Trigger: {template.trigger_type.replace('_', ' ')}
                                         </div>
                                         <div className="text-sm text-gray-600 dark:text-slate-300 line-clamp-2">
-                                            {template.response}
+                                            {template.response_content}
                                         </div>
                                     </button>
                                 ))}
@@ -772,15 +870,21 @@ const WhatsAppDashboard: React.FC = () => {
 
                 {activeTab === 'broadcast' && (
                     <div className="space-y-6 whatsapp-broadcast-tut">
-                        {/* Create Broadcast Button */}
-                        <div className="flex justify-between items-center">
+                        {!waConnection && (
+                            <div className="p-4 rounded-xl bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 text-sm text-orange-800 dark:text-orange-300">
+                                Connect your WhatsApp Business account in Settings to create and send broadcast campaigns.
+                            </div>
+                        )}
+
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                             <div>
                                 <h2 className="text-xl font-bold text-gray-900 dark:text-white">Broadcast Campaigns</h2>
                                 <p className="text-sm text-gray-500 dark:text-slate-400">Send bulk messages to your contacts</p>
                             </div>
                             <button
                                 onClick={() => setShowBroadcastModal(true)}
-                                className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                                disabled={!waConnection}
+                                className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 <Plus className="w-4 h-4" />
                                 Create Campaign
@@ -807,8 +911,21 @@ const WhatsAppDashboard: React.FC = () => {
 
                         {/* Campaigns List */}
                         <div className="bg-white dark:bg-slate-900 rounded-xl border dark:border-slate-800 overflow-hidden transition-colors">
-                            <div className="p-4 border-b dark:border-slate-800">
+                            <div className="p-4 border-b dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                                 <h3 className="font-semibold text-slate-900 dark:text-white">All Campaigns</h3>
+                                <select
+                                    value={broadcastStatusFilter}
+                                    onChange={(e) => setBroadcastStatusFilter(e.target.value)}
+                                    className="text-sm px-3 py-1.5 rounded-lg border dark:border-slate-700 bg-white dark:bg-slate-800"
+                                >
+                                    <option value="">All statuses</option>
+                                    <option value="draft">Draft</option>
+                                    <option value="scheduled">Scheduled</option>
+                                    <option value="sending">Sending</option>
+                                    <option value="completed">Completed</option>
+                                    <option value="failed">Failed</option>
+                                    <option value="cancelled">Cancelled</option>
+                                </select>
                             </div>
                             <div className="divide-y dark:divide-slate-800">
                                 {broadcasts.length === 0 ? (
@@ -821,7 +938,7 @@ const WhatsAppDashboard: React.FC = () => {
                                     broadcasts.map((broadcast) => (
                                         <div key={broadcast.id} className="p-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
                                             <div className="flex items-center justify-between">
-                                                <div className="flex-1">
+                                                <div className="flex-1 cursor-pointer" onClick={() => setDetailBroadcastId(broadcast.id)}>
                                                     <div className="flex items-center gap-2">
                                                         <h4 className="font-medium text-slate-900 dark:text-white">{broadcast.name}</h4>
                                                         <span className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full ${broadcast.status === 'completed' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' :
@@ -867,8 +984,9 @@ const WhatsAppDashboard: React.FC = () => {
                                                                         await apiService.sendWhatsAppBroadcast(broadcast.id);
                                                                         toast.success('Broadcast sending started!');
                                                                         fetchBroadcasts();
-                                                                    } catch (e) {
-                                                                        toast.error('Failed to start broadcast');
+                                                                    } catch (e: any) {
+                                                                        const detail = e?.response?.data?.detail;
+                                                                        toast.error(typeof detail === 'string' ? detail : detail?.message || 'Failed to start broadcast');
                                                                     }
                                                                 }}
                                                                 className="p-2 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
@@ -918,10 +1036,15 @@ const WhatsAppDashboard: React.FC = () => {
                             </div>
                         </div>
                         
-                        <CreateBroadcastModal 
-                            isOpen={showBroadcastModal} 
-                            onClose={() => setShowBroadcastModal(false)} 
-                            onSuccess={fetchBroadcasts} 
+                        <CreateBroadcastModal
+                            isOpen={showBroadcastModal}
+                            onClose={() => setShowBroadcastModal(false)}
+                            onSuccess={fetchBroadcasts}
+                            whatsappConnected={!!waConnection}
+                        />
+                        <BroadcastDetailModal
+                            broadcastId={detailBroadcastId}
+                            onClose={() => setDetailBroadcastId(null)}
                         />
                     </div>
                 )}
@@ -1105,8 +1228,8 @@ const WhatsAppDashboard: React.FC = () => {
                                     </label>
                                     <input
                                         type="text"
-                                        value={businessProfile.name || ''}
-                                        onChange={(e) => setBusinessProfile({ ...businessProfile, name: e.target.value })}
+                                        value={businessProfile.business_name || ''}
+                                        onChange={(e) => setBusinessProfile({ ...businessProfile, business_name: e.target.value })}
                                         placeholder="Your Business Name"
                                         className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all dark:text-white dark:placeholder:text-slate-500 shadow-sm"
                                     />
@@ -1146,15 +1269,28 @@ const WhatsAppDashboard: React.FC = () => {
 
                                 <button
                                     onClick={async () => {
+                                        setIsSavingProfile(true);
                                         try {
-                                            await apiService.updateWhatsAppBusinessProfile(businessProfile);
-                                            toast.success('Profile saved successfully!');
-                                        } catch (e) {
-                                            toast.error('Failed to save profile');
+                                            const resp = await apiService.updateWhatsAppBusinessProfile({
+                                                business_name: businessProfile.business_name,
+                                                description: businessProfile.description,
+                                                industry: businessProfile.industry,
+                                            });
+                                            if (resp.success) {
+                                                toast.success('Profile saved successfully!');
+                                            } else {
+                                                toast.error(resp.message || 'Failed to save profile');
+                                            }
+                                        } catch (e: any) {
+                                            toast.error(e?.response?.data?.detail || 'Failed to save profile');
+                                        } finally {
+                                            setIsSavingProfile(false);
                                         }
                                     }}
-                                    className="px-6 py-2.5 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 shadow-lg shadow-green-500/20 active:scale-95 transition-all"
+                                    disabled={isSavingProfile}
+                                    className="px-6 py-2.5 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 shadow-lg shadow-green-500/20 active:scale-95 transition-all disabled:opacity-50 flex items-center gap-2"
                                 >
+                                    {isSavingProfile && <Loader2 className="w-4 h-4 animate-spin" />}
                                     Save Profile
                                 </button>
                             </div>
@@ -1168,35 +1304,117 @@ const WhatsAppDashboard: React.FC = () => {
                                 <h3 className="text-lg font-bold text-slate-900 dark:text-white">Business Hours</h3>
                             </div>
                             <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
-                                Set your operating hours to send away messages when you're closed.
+                                Set your operating hours and away message. Used by &quot;Outside Business Hours&quot; auto-reply rules.
                             </p>
 
+                            <div className="mb-5">
+                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                                    Timezone
+                                </label>
+                                <select
+                                    value={businessProfile.timezone}
+                                    onChange={(e) => setBusinessProfile({ ...businessProfile, timezone: e.target.value })}
+                                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all dark:text-white shadow-sm"
+                                >
+                                    <option value="Africa/Nairobi">Africa/Nairobi (EAT)</option>
+                                    <option value="Africa/Lagos">Africa/Lagos (WAT)</option>
+                                    <option value="Africa/Johannesburg">Africa/Johannesburg (SAST)</option>
+                                    <option value="UTC">UTC</option>
+                                </select>
+                            </div>
+
+                            <div className="mb-6">
+                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                                    Away Message
+                                </label>
+                                <textarea
+                                    rows={2}
+                                    value={businessProfile.away_message}
+                                    onChange={(e) => setBusinessProfile({ ...businessProfile, away_message: e.target.value })}
+                                    placeholder="Thanks for reaching out! We're currently closed and will reply during business hours."
+                                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all dark:text-white dark:placeholder:text-slate-500 shadow-sm"
+                                />
+                            </div>
+
                             <div className="space-y-4">
-                                {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => (
-                                    <div key={day} className="flex items-center gap-4 group">
-                                        <div className="w-24 font-semibold text-slate-700 dark:text-slate-300">{day}</div>
-                                        <div className="flex items-center gap-2">
+                                {WEEKDAYS.map((day) => {
+                                    const dayHours = businessProfile.business_hours_ui[day];
+                                    return (
+                                    <div key={day} className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 group">
+                                        <div className="w-28 font-semibold text-slate-700 dark:text-slate-300">{formatDayLabel(day)}</div>
+                                        <div className="flex items-center gap-2 flex-1">
                                             <input
                                                 type="time"
-                                                defaultValue="08:00"
-                                                className="px-3 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm dark:text-white outline-none focus:ring-2 focus:ring-green-500 transition-all"
+                                                value={dayHours.open}
+                                                disabled={!dayHours.is_open}
+                                                onChange={(e) => setBusinessProfile({
+                                                    ...businessProfile,
+                                                    business_hours_ui: {
+                                                        ...businessProfile.business_hours_ui,
+                                                        [day]: { ...dayHours, open: e.target.value },
+                                                    },
+                                                })}
+                                                className="px-3 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm dark:text-white outline-none focus:ring-2 focus:ring-green-500 transition-all disabled:opacity-40"
                                             />
                                             <span className="text-slate-400">to</span>
                                             <input
                                                 type="time"
-                                                defaultValue="18:00"
-                                                className="px-3 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm dark:text-white outline-none focus:ring-2 focus:ring-green-500 transition-all"
+                                                value={dayHours.close}
+                                                disabled={!dayHours.is_open}
+                                                onChange={(e) => setBusinessProfile({
+                                                    ...businessProfile,
+                                                    business_hours_ui: {
+                                                        ...businessProfile.business_hours_ui,
+                                                        [day]: { ...dayHours, close: e.target.value },
+                                                    },
+                                                })}
+                                                className="px-3 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm dark:text-white outline-none focus:ring-2 focus:ring-green-500 transition-all disabled:opacity-40"
                                             />
                                         </div>
                                         <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 cursor-pointer">
-                                            <input type="checkbox" defaultChecked className="rounded border-slate-300 dark:border-slate-700 text-green-600 focus:ring-green-500 dark:bg-slate-800" />
+                                            <input
+                                                type="checkbox"
+                                                checked={dayHours.is_open}
+                                                onChange={(e) => setBusinessProfile({
+                                                    ...businessProfile,
+                                                    business_hours_ui: {
+                                                        ...businessProfile.business_hours_ui,
+                                                        [day]: { ...dayHours, is_open: e.target.checked },
+                                                    },
+                                                })}
+                                                className="rounded border-slate-300 dark:border-slate-700 text-green-600 focus:ring-green-500 dark:bg-slate-800"
+                                            />
                                             <span className="font-medium">Open</span>
                                         </label>
                                     </div>
-                                ))}
+                                    );
+                                })}
                             </div>
 
-                            <button className="mt-8 px-6 py-2.5 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 shadow-lg shadow-green-500/20 active:scale-95 transition-all">
+                            <button
+                                onClick={async () => {
+                                    setIsSavingHours(true);
+                                    try {
+                                        const resp = await apiService.updateWhatsAppBusinessProfile({
+                                            business_hours: businessHoursToApi(businessProfile.business_hours_ui),
+                                            away_message: businessProfile.away_message,
+                                            timezone: businessProfile.timezone,
+                                        });
+                                        if (resp.success) {
+                                            toast.success('Business hours saved!');
+                                        } else {
+                                            toast.error(resp.message || 'Failed to save hours');
+                                        }
+                                    } catch (e: any) {
+                                        toast.error(e?.response?.data?.detail || 'Failed to save hours');
+                                    } finally {
+                                        setIsSavingHours(false);
+                                    }
+                                }}
+                                disabled={isSavingHours}
+                                className="mt-8 px-6 py-2.5 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 shadow-lg shadow-green-500/20 active:scale-95 transition-all disabled:opacity-50 flex items-center gap-2"
+                            >
+                                {isSavingHours && <Loader2 className="w-4 h-4 animate-spin" />}
                                 Save Hours
                             </button>
                         </div>
@@ -1204,97 +1422,14 @@ const WhatsAppDashboard: React.FC = () => {
                 )}
             </div>
 
-            {/* New Rule Modal */}
-            {showNewRuleModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowNewRuleModal(false)}></div>
-                    <div className="relative bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border dark:border-slate-800 transition-all">
-                        <div className="flex items-center justify-between mb-6">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                                    <Bot className="w-5 h-5 text-green-600 dark:text-green-400" />
-                                </div>
-                                <h3 className="text-xl font-bold text-slate-900 dark:text-white">Create Auto-Reply Rule</h3>
-                            </div>
-                            <button
-                                onClick={() => setShowNewRuleModal(false)}
-                                className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors text-slate-500"
-                            >
-                                <X className="w-5 h-5" />
-                            </button>
-                        </div>
-
-                        <div className="space-y-5">
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Rule Name</label>
-                                <input
-                                    type="text"
-                                    placeholder="e.g., Welcome Message"
-                                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all dark:text-white"
-                                />
-                            </div>
-
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Trigger Type</label>
-                                    <select className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all dark:text-white">
-                                        <option value="first_message">First Message</option>
-                                        <option value="keyword">Keyword Match</option>
-                                        <option value="business_hours">Outside Hours</option>
-                                        <option value="all">AI Mode</option>
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                                        Keywords
-                                    </label>
-                                    <input
-                                        type="text"
-                                        placeholder="hi|hello|hey"
-                                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all dark:text-white"
-                                    />
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Response</label>
-                                <textarea
-                                    rows={4}
-                                    placeholder="Your auto-reply message..."
-                                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all dark:text-white"
-                                />
-                                <div className="mt-2 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg flex flex-wrap gap-2 transition-colors">
-                                    {['{{name}}', '{{greeting}}', '{{business_name}}'].map(v => (
-                                        <code key={v} className="text-[10px] font-bold px-1.5 py-0.5 bg-white dark:bg-slate-800 border dark:border-slate-700 rounded text-green-600 dark:text-green-400 transition-colors">
-                                            {v}
-                                        </code>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div className="flex gap-3 pt-4">
-                                <button
-                                    onClick={() => setShowNewRuleModal(false)}
-                                    className="flex-1 py-3 px-4 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        toast.success('Rule created!');
-                                        setShowNewRuleModal(false);
-                                        fetchAutoReplies();
-                                    }}
-                                    className="flex-[2] py-3 px-4 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 shadow-lg shadow-green-500/20 active:scale-95 transition-all"
-                                >
-                                    Create Rule
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <AutoReplyRuleModal
+                isOpen={showRuleModal}
+                onClose={closeRuleModal}
+                onSuccess={fetchAutoReplies}
+                whatsappConnected={Boolean(waConnection)}
+                editingRule={editingRule}
+                prefilled={rulePrefill}
+            />
 
             {/* Registration Modal */}
             {showRegistrationModal && (
