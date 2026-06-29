@@ -292,11 +292,12 @@ const Integrations: React.FC = () => {
     }
   };
 
-  // Fallback: Connect WhatsApp via redirect OAuth (for users with existing WABAs)
+  // Fallback: Connect WhatsApp via redirect OAuth (required on mobile — popup flow cannot return to the app)
   const connectWhatsAppViaRedirect = async () => {
+    const configId = import.meta.env.VITE_FACEBOOK_CONFIG_ID;
     try {
       toast.loading('Redirecting to Meta...', { id: 'oauth-redirect' });
-      const { url } = await apiService.getWhatsAppAuthUrl();
+      const { url } = await apiService.getWhatsAppAuthUrl(configId || undefined);
       window.location.href = url;
     } catch (error: any) {
       toast.dismiss('oauth-redirect');
@@ -314,10 +315,21 @@ const Integrations: React.FC = () => {
     }
   };
 
-  // Launch WhatsApp Embedded Signup via Meta JS SDK
+  // Launch WhatsApp Embedded Signup via Meta JS SDK (desktop popup) or redirect OAuth (mobile)
   const launchWhatsAppEmbeddedSignup = () => {
     const appId = import.meta.env.VITE_FACEBOOK_APP_ID;
     const configId = import.meta.env.VITE_FACEBOOK_CONFIG_ID;
+
+    // Mobile browsers cannot complete FB.login popup embedded signup — Meta shows
+    // "close this tab" with no way to hand the auth code back to our app.
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (isMobile) {
+      console.warn(
+        'Mobile browser detected — using redirect OAuth instead of FB.login popup'
+      );
+      connectWhatsAppViaRedirect();
+      return;
+    }
 
     if (!appId) {
       // Embedded signup requires Meta App ID; fall back to redirect OAuth which works without it
