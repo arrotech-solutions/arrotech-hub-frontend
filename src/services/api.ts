@@ -623,8 +623,130 @@ class ApiService {
     return response.data;
   }
 
-  async deleteWhatsAppContact(contactId: number): Promise<ApiResponse<any>> {
+  async deleteWhatsAppContact(contactId: string): Promise<ApiResponse<any>> {
     const response = await this.api.delete(`/api/whatsapp/contacts/${contactId}`);
+    return response.data;
+  }
+
+  async bulkDeleteWhatsAppContacts(contactIds: string[]): Promise<ApiResponse<any>> {
+    const response = await this.api.post('/api/whatsapp/contacts/bulk-delete', {
+      contact_ids: contactIds,
+    });
+    return response.data;
+  }
+
+  async uploadWhatsAppContactAvatar(contactId: string, file: File): Promise<ApiResponse<any>> {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await this.api.post(
+      `/api/whatsapp/contacts/${contactId}/avatar`,
+      formData,
+      { headers: { 'Content-Type': 'multipart/form-data' } }
+    );
+    return response.data;
+  }
+
+  async deleteWhatsAppContactAvatar(contactId: string): Promise<ApiResponse<any>> {
+    const response = await this.api.delete(`/api/whatsapp/contacts/${contactId}/avatar`);
+    return response.data;
+  }
+
+  async fetchWhatsAppContactAvatarBlob(contactId: string | number): Promise<string> {
+    const response = await this.api.get(`/api/whatsapp/contacts/${contactId}/avatar`, {
+      responseType: 'blob',
+    });
+    return URL.createObjectURL(response.data);
+  }
+
+  async releaseWhatsAppAgent(contactId: string): Promise<ApiResponse<any>> {
+    const response = await this.api.post(`/api/whatsapp/contacts/${contactId}/release-agent`);
+    return response.data;
+  }
+
+  async getWhatsAppCommerceContext(contactId: string): Promise<ApiResponse<any>> {
+    const response = await this.api.get(`/api/whatsapp/contacts/${contactId}/commerce-context`);
+    return response.data;
+  }
+
+  async snoozeWhatsAppContact(contactId: string, until: string): Promise<ApiResponse<any>> {
+    const response = await this.api.post(`/api/whatsapp/contacts/${contactId}/snooze`, { until });
+    return response.data;
+  }
+
+  async unsnoozeWhatsAppContact(contactId: string): Promise<ApiResponse<any>> {
+    const response = await this.api.delete(`/api/whatsapp/contacts/${contactId}/snooze`);
+    return response.data;
+  }
+
+  async getWhatsAppInboxSettings(): Promise<ApiResponse<any>> {
+    try {
+      const response = await this.api.get('/api/whatsapp/inbox-settings');
+      return response.data;
+    } catch (error: any) {
+      if (error?.response?.status === 404) {
+        return {
+          success: true,
+          data: {
+            round_robin_enabled: false,
+            round_robin_agent_ids: [],
+            sla_first_response_minutes: 5,
+          },
+        };
+      }
+      throw error;
+    }
+  }
+
+  async updateWhatsAppInboxSettings(data: {
+    round_robin_enabled?: boolean;
+    round_robin_agent_ids?: string[];
+    sla_first_response_minutes?: number;
+  }): Promise<ApiResponse<any>> {
+    try {
+      const response = await this.api.put('/api/whatsapp/inbox-settings', data);
+      return response.data;
+    } catch (error: any) {
+      if (error?.response?.status === 404) {
+        return {
+          success: false,
+          message: 'Inbox settings are not available until the latest backend is deployed.',
+        };
+      }
+      throw error;
+    }
+  }
+
+  async exportWhatsAppContacts(): Promise<Blob> {
+    const response = await this.api.get('/api/whatsapp/contacts/export', { responseType: 'blob' });
+    return response.data;
+  }
+
+  async importWhatsAppContacts(file: File): Promise<ApiResponse<any>> {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await this.api.post('/api/whatsapp/contacts/import', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  }
+
+  async sendWhatsAppTemplateMessage(
+    contactId: string,
+    data: { template_name: string; language_code?: string; components?: unknown[] }
+  ): Promise<ApiResponse<any>> {
+    const response = await this.api.post(`/api/whatsapp/contacts/${contactId}/messages/template`, data);
+    return response.data;
+  }
+
+  async uploadWhatsAppChatMedia(contactId: string, file: File, caption?: string): Promise<ApiResponse<any>> {
+    const formData = new FormData();
+    formData.append('file', file);
+    if (caption) formData.append('caption', caption);
+    const response = await this.api.post(
+      `/api/whatsapp/contacts/${contactId}/media-upload`,
+      formData,
+      { headers: { 'Content-Type': 'multipart/form-data' } }
+    );
     return response.data;
   }
 

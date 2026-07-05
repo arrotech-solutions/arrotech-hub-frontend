@@ -9,6 +9,7 @@ interface CreateBroadcastModalProps {
     onClose: () => void;
     onSuccess: () => void;
     whatsappConnected: boolean;
+    contacts?: { id: string | number; name: string | null; profile_name: string | null; phone_number: string }[];
 }
 
 interface WaTemplate {
@@ -24,6 +25,7 @@ const CreateBroadcastModal: React.FC<CreateBroadcastModalProps> = ({
     onClose,
     onSuccess,
     whatsappConnected,
+    contacts = [],
 }) => {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
@@ -40,6 +42,8 @@ const CreateBroadcastModal: React.FC<CreateBroadcastModalProps> = ({
     const [isGenerating, setIsGenerating] = useState(false);
     const [variations, setVariations] = useState<string[]>([]);
     const [isSaving, setIsSaving] = useState(false);
+    const [selectedContactIds, setSelectedContactIds] = useState<string[]>([]);
+    const [templateVariablesJson, setTemplateVariablesJson] = useState('{}');
 
     const resetForm = () => {
         setName('');
@@ -52,6 +56,8 @@ const CreateBroadcastModal: React.FC<CreateBroadcastModalProps> = ({
         setSelectedTemplateId('');
         setVariations([]);
         setCampaignGoal('');
+        setSelectedContactIds([]);
+        setTemplateVariablesJson('{}');
     };
 
     useEffect(() => {
@@ -125,12 +131,24 @@ const CreateBroadcastModal: React.FC<CreateBroadcastModalProps> = ({
 
         setIsSaving(true);
         try {
+            let template_variables: Record<string, unknown> | undefined;
+            if (messageType === 'template' && templateVariablesJson.trim() !== '{}') {
+                try {
+                    template_variables = JSON.parse(templateVariablesJson);
+                } catch {
+                    toast.error('Template variables must be valid JSON');
+                    setIsSaving(false);
+                    return;
+                }
+            }
             const payload: Record<string, unknown> = {
                 name,
                 description: description || undefined,
                 message_type: messageType,
                 target_type: targetType,
                 target_tag: targetType === 'tag' ? targetTag : undefined,
+                target_contact_ids: targetType === 'selected' ? selectedContactIds : undefined,
+                template_variables,
                 scheduled_at: scheduledAt ? new Date(scheduledAt).toISOString() : undefined,
             };
             if (messageType === 'template') {
@@ -250,6 +268,14 @@ const CreateBroadcastModal: React.FC<CreateBroadcastModalProps> = ({
                                         No approved templates cached. Sync from Meta or create templates in WhatsApp Manager.
                                     </p>
                                 )}
+                                <label className="block text-xs font-semibold mt-3 mb-1 text-slate-500">Template variables (JSON)</label>
+                                <textarea
+                                    value={templateVariablesJson}
+                                    onChange={(e) => setTemplateVariablesJson(e.target.value)}
+                                    className="w-full text-xs font-mono px-3 py-2 rounded-xl border dark:border-slate-700 bg-white dark:bg-slate-800"
+                                    rows={3}
+                                    placeholder='{"1": "John", "2": "20% off"}'
+                                />
                             </div>
                         )}
 
@@ -262,6 +288,7 @@ const CreateBroadcastModal: React.FC<CreateBroadcastModalProps> = ({
                             >
                                 <option value="all">All Contacts</option>
                                 <option value="tag">Specific Tag</option>
+                                <option value="selected">Selected Contacts</option>
                             </select>
                             {targetType === 'tag' && (
                                 <input
@@ -271,6 +298,32 @@ const CreateBroadcastModal: React.FC<CreateBroadcastModalProps> = ({
                                     className="w-full mt-3 px-4 py-2.5 rounded-xl border dark:border-slate-700 bg-white dark:bg-slate-800"
                                     placeholder="e.g. vip, leads"
                                 />
+                            )}
+                            {targetType === 'selected' && (
+                                <div className="mt-3 max-h-48 overflow-y-auto border dark:border-slate-700 rounded-xl p-3 space-y-1">
+                                    {contacts.length === 0 ? (
+                                        <p className="text-xs text-slate-500">No contacts available</p>
+                                    ) : (
+                                        contacts.map((c) => {
+                                            const id = String(c.id);
+                                            const label = c.name || c.profile_name || c.phone_number;
+                                            return (
+                                                <label key={id} className="flex items-center gap-2 text-sm cursor-pointer">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={selectedContactIds.includes(id)}
+                                                        onChange={(e) => {
+                                                            setSelectedContactIds((prev) =>
+                                                                e.target.checked ? [...prev, id] : prev.filter((x) => x !== id)
+                                                            );
+                                                        }}
+                                                    />
+                                                    {label}
+                                                </label>
+                                            );
+                                        })
+                                    )}
+                                </div>
                             )}
                         </div>
 

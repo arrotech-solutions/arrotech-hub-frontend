@@ -5,16 +5,17 @@ import {
     Phone, Clock, MoreVertical, Bot, Zap,
     CheckCheck, Check, X, Loader2, ArrowLeft,
     Megaphone, Calendar, Play, Pause, Trash2, Key, AlertCircle,
-    Sparkles, ArrowRight, Pencil
+    Sparkles, ArrowRight, Pencil, BarChart3
 } from 'lucide-react';
 import apiService from '../services/api';
 import toast from 'react-hot-toast';
 import { Connection } from '../types';
 import { Link } from 'react-router-dom';
-import ConversationsTab from '../components/whatsapp/ConversationsTab';
+import ConversationsTab, { type TeamMember, type QuickReply } from '../components/whatsapp/ConversationsTab';
 import CreateBroadcastModal from '../components/whatsapp/CreateBroadcastModal';
 import BroadcastDetailModal from '../components/whatsapp/BroadcastDetailModal';
 import AutoReplyRuleModal, { AutoReplyRule, AutoReplyRuleDraft } from '../components/whatsapp/AutoReplyRuleModal';
+import WhatsAppAnalyticsTab from '../components/whatsapp/WhatsAppAnalyticsTab';
 import { useWebSocket } from '../hooks/useWebSocket';
 
 const WEEKDAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const;
@@ -90,12 +91,14 @@ interface Contact {
     phone_number: string;
     name: string | null;
     profile_name: string | null;
+    avatar_url?: string | null;
     tags: string[];
     notes: string | null;
     message_count: number;
     unread_count: number;
     first_message_at: string | null;
     last_message_at: string | null;
+    last_message_preview?: string | null;
     is_blocked: boolean;
     assigned_to_id?: string | null;
     status?: string;
@@ -111,6 +114,7 @@ interface Message {
     media_url: string | null;
     status: string;
     is_auto_reply: boolean;
+    is_agent?: boolean;
     is_internal_note?: boolean;
     created_at: string;
     delivered_at: string | null;
@@ -154,13 +158,14 @@ interface Broadcast {
     created_at: string;
 }
 
-type TabType = 'contacts' | 'auto-reply' | 'broadcast' | 'settings';
+type TabType = 'contacts' | 'auto-reply' | 'broadcast' | 'analytics' | 'settings';
 
 const WhatsAppDashboard: React.FC = () => {
     const [activeTab, setActiveTab] = useState<TabType>('contacts');
     const [contacts, setContacts] = useState<Contact[]>([]);
     const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
+    const [messagesLoading, setMessagesLoading] = useState(false);
     const [autoReplies, setAutoReplies] = useState<AutoReplyRule[]>([]);
     const [stats, setStats] = useState<Stats | null>(null);
     const [loading, setLoading] = useState(true);
@@ -186,6 +191,13 @@ const WhatsAppDashboard: React.FC = () => {
         timezone: 'Africa/Nairobi',
         business_hours_ui: createDefaultBusinessHours(),
     });
+    const [inboxSettings, setInboxSettings] = useState({
+        round_robin_enabled: false,
+        round_robin_agent_ids: [] as string[],
+        sla_first_response_minutes: 5,
+    });
+    const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+    const [quickReplies, setQuickReplies] = useState<QuickReply[]>([]);
     const [isSavingProfile, setIsSavingProfile] = useState(false);
     const [isSavingHours, setIsSavingHours] = useState(false);
 
@@ -366,6 +378,21 @@ const WhatsAppDashboard: React.FC = () => {
         }
     }, [searchQuery]);
 
+    // Fetch messages for selected contact
+    const fetchMessages = useCallback(async (contactId: number) => {
+        setMessagesLoading(true);
+        try {
+            const response = await apiService.getWhatsAppMessages(contactId);
+            if (response.success) {
+                setMessages(response.data);
+            }
+        } catch (error) {
+            console.error('Error fetching messages:', error);
+        } finally {
+            setMessagesLoading(false);
+        }
+    }, []);
+
     // Fetch stats
     const fetchStats = useCallback(async () => {
         try {
@@ -427,7 +454,16 @@ const WhatsAppDashboard: React.FC = () => {
                 status: (data.sent + data.failed) >= data.total ? 'completed' : 'sending'
             } : b));
         }
-    }, [lastEvent]);
+        if (
+            lastEvent?.type === 'whatsapp_new_message' ||
+            lastEvent?.type === 'whatsapp_contact_updated'
+        ) {
+            fetchContacts();
+            if (selectedContact && lastEvent.data?.contact_id === String(selectedContact.id)) {
+                fetchMessages(selectedContact.id);
+            }
+        }
+    }, [lastEvent, selectedContact, fetchContacts, fetchMessages]);
 
     // Fetch connection details
     const fetchConnectionData = useCallback(async () => {
@@ -456,20 +492,18 @@ const WhatsAppDashboard: React.FC = () => {
             if (numbersRes && numbersRes.success && numbersRes.data) {
                 setPhoneNumbers(numbersRes.data);
             }
-        } catch (error) {
-            console.error('Error fetching connection data:', error);
-        }
-    }, []);
-
-    // Fetch messages for selected contact
-    const fetchMessages = useCallback(async (contactId: number) => {
-        try {
-            const response = await apiService.getWhatsAppMessages(contactId);
-            if (response.success) {
-                setMessages(response.data);
+            const [inboxRes, teamRes, quickRepliesRes] = await Promise.all([
+                apiService.getWhatsAppInboxSettings().catch(() => null),
+                apiService.getWhatsAppTeamMembers().catch(() => null),
+                apiService.getWhatsAppQuickReplies().catch(() => null),
+            ]);
+            if (inboxRes?.success && inboxRes.data) setInboxSettings(inboxRes.data);
+            if (teamRes?.success && teamRes.data) setTeamMembers(teamRes.data);
+            if (quickRepliesRes?.success && quickRepliesRes.data) {
+                setQuickReplies(quickRepliesRes.data);
             }
         } catch (error) {
-            console.error('Error fetching messages:', error);
+            console.error('Error fetching connection data:', error);
         }
     }, []);
 
@@ -494,7 +528,10 @@ const WhatsAppDashboard: React.FC = () => {
     // Load messages when contact selected
     useEffect(() => {
         if (selectedContact) {
+            setMessages([]);
             fetchMessages(selectedContact.id);
+        } else {
+            setMessages([]);
         }
     }, [selectedContact, fetchMessages]);
 
@@ -610,27 +647,28 @@ const WhatsAppDashboard: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors">
+        <div className="h-dvh bg-slate-50 dark:bg-slate-950 transition-colors flex flex-col overflow-hidden">
             {/* Header */}
-            <div className="bg-white dark:bg-slate-900 border-b dark:border-slate-800 sticky top-0 z-10 transition-colors">
-                <div className="max-w-7xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
-                    <div className="flex items-center justify-between flex-wrap gap-3">
-                        <div className="flex items-center gap-3 whatsapp-header-tut">
-                            <div className="relative group">
+            <div className="bg-white dark:bg-slate-900 border-b dark:border-slate-800 sticky top-0 z-20 transition-colors shrink-0">
+                <div className="max-w-7xl 2xl:max-w-[1600px] mx-auto px-3 sm:px-4 py-3 sm:py-4">
+                    {/* Title row */}
+                    <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2 sm:gap-3 whatsapp-header-tut min-w-0">
+                            <div className="relative group shrink-0">
                                 <div className="absolute inset-0 bg-green-500 rounded-full blur-md opacity-20 group-hover:opacity-40 transition-opacity"></div>
-                                <div className="relative w-10 h-10 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
-                                    <MessageCircle className="w-5 h-5 text-white" />
+                                <div className="relative w-9 h-9 sm:w-10 sm:h-10 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
+                                    <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                                 </div>
                             </div>
-                            <div>
-                                <h1 className="text-xl font-bold text-slate-900 dark:text-white">WhatsApp Business</h1>
-                                <p className="text-sm text-slate-500 dark:text-slate-400">Manage conversations & automation</p>
+                            <div className="min-w-0">
+                                <h1 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white truncate">WhatsApp Business</h1>
+                                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 truncate hidden sm:block">Manage conversations & automation</p>
                             </div>
                         </div>
 
-                        {/* Stats */}
+                        {/* Desktop stats */}
                         {stats && (
-                            <div className="hidden md:flex items-center gap-6 whatsapp-stats-tut">
+                            <div className="hidden lg:flex items-center gap-6 whatsapp-stats-tut shrink-0">
                                 <div className="text-center">
                                     <div className="text-2xl font-bold text-slate-900 dark:text-white">{stats.total_contacts}</div>
                                     <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">Contacts</div>
@@ -645,55 +683,81 @@ const WhatsAppDashboard: React.FC = () => {
                                 </div>
                             </div>
                         )}
-                        {/* Mobile Stats */}
-                        {stats && (
-                            <div className="flex md:hidden items-center justify-around w-full border-t dark:border-slate-800 pt-3 mt-2">
-                                <div className="text-center">
-                                    <div className="text-lg font-bold text-slate-900 dark:text-white">{stats.total_contacts}</div>
-                                    <div className="text-xs text-slate-500 dark:text-slate-400">Contacts</div>
-                                </div>
-                                <div className="text-center">
-                                    <div className="text-lg font-bold text-slate-900 dark:text-white">{stats.messages_today}</div>
-                                    <div className="text-xs text-slate-500 dark:text-slate-400">Today</div>
-                                </div>
-                                <div className="text-center">
-                                    <div className="text-lg font-bold text-green-600 dark:text-green-400">{stats.active_auto_replies}</div>
-                                    <div className="text-xs text-slate-500 dark:text-slate-400">Auto-Replies</div>
-                                </div>
-                            </div>
-                        )}
+                    </div>
 
-                        {/* Tabs - Scrollable on mobile */}
-                        <div className="flex gap-2 mt-4 overflow-x-auto pb-2 -mx-3 px-3 sm:mx-0 sm:px-0 whatsapp-tabs-tut scrollbar-hide">
-                            {[
-                                { id: 'contacts', label: 'Conversations', icon: Users },
-                                { id: 'auto-reply', label: 'Auto-Reply', icon: Bot },
-                                { id: 'broadcast', label: 'Broadcast', icon: Megaphone },
-                                { id: 'settings', label: 'Settings', icon: Settings },
-                            ].map((tab) => (
-                                <button
-                                    key={tab.id}
-                                    onClick={() => setActiveTab(tab.id as TabType)}
-                                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium transition-all whitespace-nowrap whatsapp-tab-${tab.id}-tut ${activeTab === tab.id
-                                        ? 'bg-green-600 text-white shadow-lg shadow-green-500/20'
-                                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-                                        }`}
-                                >
-                                    <tab.icon className="w-4 h-4" />
-                                    <span>{tab.label}</span>
-                                </button>
-                            ))}
+                    {/* Tablet stats — hidden on inbox tab to maximize chat height */}
+                    {stats && activeTab !== 'contacts' && (
+                        <div className="hidden md:flex lg:hidden items-center justify-around w-full border-t dark:border-slate-800 pt-3 mt-3">
+                            <div className="text-center">
+                                <div className="text-lg font-bold text-slate-900 dark:text-white">{stats.total_contacts}</div>
+                                <div className="text-xs text-slate-500 dark:text-slate-400">Contacts</div>
+                            </div>
+                            <div className="text-center">
+                                <div className="text-lg font-bold text-slate-900 dark:text-white">{stats.messages_today}</div>
+                                <div className="text-xs text-slate-500 dark:text-slate-400">Today</div>
+                            </div>
+                            <div className="text-center">
+                                <div className="text-lg font-bold text-green-600 dark:text-green-400">{stats.active_auto_replies}</div>
+                                <div className="text-xs text-slate-500 dark:text-slate-400">Auto-Replies</div>
+                            </div>
                         </div>
+                    )}
+
+                    {/* Mobile stats — hidden on inbox tab to maximize chat height */}
+                    {stats && activeTab !== 'contacts' && (
+                        <div className="flex md:hidden items-center justify-around w-full border-t dark:border-slate-800 pt-3 mt-3">
+                            <div className="text-center">
+                                <div className="text-base font-bold text-slate-900 dark:text-white">{stats.total_contacts}</div>
+                                <div className="text-[10px] text-slate-500 dark:text-slate-400">Contacts</div>
+                            </div>
+                            <div className="text-center">
+                                <div className="text-base font-bold text-slate-900 dark:text-white">{stats.messages_today}</div>
+                                <div className="text-[10px] text-slate-500 dark:text-slate-400">Today</div>
+                            </div>
+                            <div className="text-center">
+                                <div className="text-base font-bold text-green-600 dark:text-green-400">{stats.active_auto_replies}</div>
+                                <div className="text-[10px] text-slate-500 dark:text-slate-400">Auto-Replies</div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Tabs */}
+                    <div className="flex gap-1.5 sm:gap-2 mt-3 sm:mt-4 overflow-x-auto pb-1 -mx-1 px-1 sm:mx-0 sm:px-0 whatsapp-tabs-tut scrollbar-hide">
+                        {[
+                            { id: 'contacts', label: 'Conversations', shortLabel: 'Inbox', icon: Users },
+                            { id: 'auto-reply', label: 'Auto-Reply', shortLabel: 'Auto', icon: Bot },
+                            { id: 'broadcast', label: 'Broadcast', shortLabel: 'Broadcast', icon: Megaphone },
+                            { id: 'analytics', label: 'Analytics', shortLabel: 'Stats', icon: BarChart3 },
+                            { id: 'settings', label: 'Settings', shortLabel: 'Settings', icon: Settings },
+                        ].map((tab) => (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id as TabType)}
+                                className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-sm sm:text-base font-medium transition-all whitespace-nowrap shrink-0 whatsapp-tab-${tab.id}-tut ${activeTab === tab.id
+                                    ? 'bg-green-600 text-white shadow-lg shadow-green-500/20'
+                                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                                    }`}
+                            >
+                                <tab.icon className="w-4 h-4 shrink-0" />
+                                <span className="sm:hidden">{tab.shortLabel}</span>
+                                <span className="hidden sm:inline">{tab.label}</span>
+                            </button>
+                        ))}
                     </div>
                 </div>
             </div>
 
             {/* Main Content */}
-            <div className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
-                {/* Discovery: Catalog Builder */}
+            <div
+                className={`flex-1 flex flex-col min-h-0 max-w-7xl 2xl:max-w-[1600px] w-full mx-auto px-3 sm:px-4 overflow-hidden ${
+                    activeTab === 'contacts' ? 'py-0 sm:py-3' : 'py-3 sm:py-6'
+                }`}
+            >
+                {/* Discovery: Catalog Builder — hidden on inbox tab (mobile) to maximize chat space */}
+                {activeTab !== 'contacts' && (
                 <Link
                     to="/catalog-builder"
-                    className="group mb-5 flex items-center gap-4 rounded-2xl border border-purple-200 dark:border-purple-500/30 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/30 dark:to-blue-950/20 p-4 sm:p-5 hover:shadow-md transition-all"
+                    className="group mb-4 sm:mb-5 flex items-center gap-3 sm:gap-4 rounded-2xl border border-purple-200 dark:border-purple-500/30 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/30 dark:to-blue-950/20 p-3 sm:p-5 hover:shadow-md transition-all"
                 >
                     <div className="flex-shrink-0 w-11 h-11 rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center shadow-lg">
                         <Sparkles className="w-5 h-5 text-white" />
@@ -711,17 +775,30 @@ const WhatsAppDashboard: React.FC = () => {
                         <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </div>
                 </Link>
+                )}
 
                 {activeTab === 'contacts' && (
+                    <div className="flex flex-col flex-1 min-h-0 overflow-hidden -mx-3 sm:mx-0">
                     <ConversationsTab
                         contacts={contacts}
                         selectedContact={selectedContact}
                         setSelectedContact={setSelectedContact}
                         messages={messages}
                         setMessages={setMessages}
+                        setContacts={setContacts}
                         fetchContacts={fetchContacts}
                         fetchMessages={fetchMessages}
+                        messagesLoading={messagesLoading}
+                        sharedTeamMembers={teamMembers}
+                        sharedInboxSettings={inboxSettings}
+                        sharedQuickReplies={quickReplies}
+                        onSharedQuickRepliesChange={setQuickReplies}
                     />
+                    </div>
+                )}
+
+                {activeTab === 'analytics' && (
+                    <WhatsAppAnalyticsTab />
                 )}
 
                 {activeTab === 'auto-reply' && (
@@ -733,7 +810,7 @@ const WhatsAppDashboard: React.FC = () => {
                         )}
 
                         {/* Header */}
-                        <div className="flex items-center justify-between">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
                             <div>
                                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Auto-Reply Rules</h2>
                                 <p className="text-sm text-gray-500 dark:text-slate-400">Automate responses to incoming messages</p>
@@ -741,7 +818,7 @@ const WhatsAppDashboard: React.FC = () => {
                             <button
                                 onClick={openNewRuleModal}
                                 disabled={!waConnection}
-                                className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto shrink-0"
                             >
                                 <Plus className="w-4 h-4" />
                                 New Rule
@@ -772,9 +849,9 @@ const WhatsAppDashboard: React.FC = () => {
                                         className={`bg-white dark:bg-slate-900 rounded-xl border dark:border-slate-800 p-6 transition-colors ${rule.is_active ? '' : 'opacity-60'
                                             }`}
                                     >
-                                        <div className="flex items-start justify-between">
-                                            <div className="flex-1">
-                                                <div className="flex items-center gap-3 mb-2">
+                                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
                                                     <h3 className="font-semibold text-gray-900 dark:text-white">{rule.name}</h3>
                                                     <span className={`px-2 py-1 text-xs rounded-full ${rule.trigger_type === 'keyword' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' :
                                                         rule.trigger_type === 'first_message' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' :
@@ -949,11 +1026,11 @@ const WhatsAppDashboard: React.FC = () => {
                                     </div>
                                 ) : (
                                     broadcasts.map((broadcast) => (
-                                        <div key={broadcast.id} className="p-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex-1 cursor-pointer" onClick={() => setDetailBroadcastId(broadcast.id)}>
-                                                    <div className="flex items-center gap-2">
-                                                        <h4 className="font-medium text-slate-900 dark:text-white">{broadcast.name}</h4>
+                                        <div key={broadcast.id} className="p-3 sm:p-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                                <div className="flex-1 min-w-0 cursor-pointer" onClick={() => setDetailBroadcastId(broadcast.id)}>
+                                                    <div className="flex flex-wrap items-center gap-2">
+                                                        <h4 className="font-medium text-slate-900 dark:text-white truncate">{broadcast.name}</h4>
                                                         <span className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full ${broadcast.status === 'completed' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' :
                                                             broadcast.status === 'sending' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400' :
                                                                 broadcast.status === 'scheduled' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400' :
@@ -1054,6 +1131,7 @@ const WhatsAppDashboard: React.FC = () => {
                             onClose={() => setShowBroadcastModal(false)}
                             onSuccess={fetchBroadcasts}
                             whatsappConnected={!!waConnection}
+                            contacts={contacts}
                         />
                         <BroadcastDetailModal
                             broadcastId={detailBroadcastId}
@@ -1063,7 +1141,7 @@ const WhatsAppDashboard: React.FC = () => {
                 )}
 
                 {activeTab === 'settings' && (
-                    <div className="max-w-2xl space-y-6">
+                    <div className="w-full max-w-2xl mx-auto space-y-4 sm:space-y-6">
 
                         {/* Connected Account Details */}
                         {waConnection ? (
@@ -1307,6 +1385,71 @@ const WhatsAppDashboard: React.FC = () => {
                                     Save Profile
                                 </button>
                             </div>
+                        </div>
+
+                        <div className="bg-white dark:bg-slate-900 rounded-2xl border dark:border-slate-800 p-6 sm:p-8 transition-colors shadow-sm">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                                    <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                                </div>
+                                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Team inbox</h3>
+                            </div>
+                            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
+                                Round-robin assignment and SLA targets for open conversations.
+                            </p>
+                            <label className="flex items-center gap-2 mb-4 cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    checked={inboxSettings.round_robin_enabled}
+                                    onChange={(e) => setInboxSettings({ ...inboxSettings, round_robin_enabled: e.target.checked })}
+                                    className="rounded border-slate-300 text-green-600"
+                                />
+                                <span className="text-sm text-slate-700 dark:text-slate-300">Auto-assign new conversations (round-robin)</span>
+                            </label>
+                            {inboxSettings.round_robin_enabled && (
+                                <div className="mb-4 max-h-40 overflow-y-auto border dark:border-slate-700 rounded-xl p-3 space-y-2">
+                                    {teamMembers.map((m) => (
+                                        <label key={m.id} className="flex items-center gap-2 text-sm cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={inboxSettings.round_robin_agent_ids.includes(m.id)}
+                                                onChange={(e) => {
+                                                    const ids = e.target.checked
+                                                        ? [...inboxSettings.round_robin_agent_ids, m.id]
+                                                        : inboxSettings.round_robin_agent_ids.filter((id) => id !== m.id);
+                                                    setInboxSettings({ ...inboxSettings, round_robin_agent_ids: ids });
+                                                }}
+                                            />
+                                            {m.name}
+                                        </label>
+                                    ))}
+                                </div>
+                            )}
+                            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                                First response SLA (minutes)
+                            </label>
+                            <input
+                                type="number"
+                                min={1}
+                                max={120}
+                                value={inboxSettings.sla_first_response_minutes}
+                                onChange={(e) => setInboxSettings({ ...inboxSettings, sla_first_response_minutes: Number(e.target.value) })}
+                                className="w-full max-w-xs px-4 py-2.5 rounded-xl border dark:border-slate-700 bg-white dark:bg-slate-800 mb-4"
+                            />
+                            <button
+                                type="button"
+                                onClick={async () => {
+                                    try {
+                                        const res = await apiService.updateWhatsAppInboxSettings(inboxSettings);
+                                        if (res.success) toast.success('Inbox settings saved');
+                                    } catch {
+                                        toast.error('Failed to save inbox settings');
+                                    }
+                                }}
+                                className="px-5 py-2.5 bg-green-600 text-white rounded-xl font-medium hover:bg-green-700"
+                            >
+                                Save inbox settings
+                            </button>
                         </div>
 
                         <div className="bg-white dark:bg-slate-900 rounded-2xl border dark:border-slate-800 p-6 sm:p-8 transition-colors shadow-sm">
