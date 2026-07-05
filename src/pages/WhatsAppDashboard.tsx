@@ -647,7 +647,13 @@ const WhatsAppDashboard: React.FC = () => {
     }
 
     return (
-        <div className="h-dvh bg-slate-50 dark:bg-slate-950 transition-colors flex flex-col overflow-hidden">
+        <div
+            className={`bg-slate-50 dark:bg-slate-950 transition-colors flex flex-col ${
+                activeTab === 'contacts'
+                    ? 'h-[calc(100dvh-4rem)] max-h-[calc(100dvh-4rem)] overflow-hidden lg:h-[calc(100dvh-3.5rem)] lg:max-h-[calc(100dvh-3.5rem)]'
+                    : 'min-h-0'
+            }`}
+        >
             {/* Header */}
             <div className="bg-white dark:bg-slate-900 border-b dark:border-slate-800 sticky top-0 z-20 transition-colors shrink-0">
                 <div className="max-w-7xl 2xl:max-w-[1600px] mx-auto px-3 sm:px-4 py-3 sm:py-4">
@@ -749,8 +755,10 @@ const WhatsAppDashboard: React.FC = () => {
 
             {/* Main Content */}
             <div
-                className={`flex-1 flex flex-col min-h-0 max-w-7xl 2xl:max-w-[1600px] w-full mx-auto px-3 sm:px-4 overflow-hidden ${
-                    activeTab === 'contacts' ? 'py-0 sm:py-3' : 'py-3 sm:py-6'
+                className={`flex-1 flex flex-col min-h-0 max-w-7xl 2xl:max-w-[1600px] w-full mx-auto px-3 sm:px-4 ${
+                    activeTab === 'contacts'
+                        ? 'overflow-hidden py-0 sm:py-3'
+                        : 'overflow-y-auto overflow-x-hidden py-3 sm:py-6 pb-10'
                 }`}
             >
                 {/* Discovery: Catalog Builder — hidden on inbox tab (mobile) to maximize chat space */}
