@@ -1,6 +1,7 @@
 import React from 'react';
 import { User, Mail, Award, Calendar } from 'lucide-react';
 import { User as UserType } from '../../types';
+import { getDisplayTier, getDisplayTierName, isSubscriptionExpired } from '../../hooks/useSubscription';
 
 interface ProfileSettingsProps {
     user: UserType | null;
@@ -8,6 +9,16 @@ interface ProfileSettingsProps {
 
 const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user }) => {
     if (!user) return null;
+
+    const displayTier = getDisplayTier(user);
+    const subscriptionExpired = isSubscriptionExpired(user);
+    const expiredEndDate = user.subscription_end_date
+        ? new Date(user.subscription_end_date).toLocaleDateString(undefined, {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+        })
+        : null;
 
     return (
         <div className="space-y-6">
@@ -45,8 +56,13 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user }) => {
                             <div className="flex flex-wrap gap-3 justify-center md:justify-start">
                                 <div className="px-3 py-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 rounded-full text-sm font-medium flex items-center gap-2 transition-colors">
                                     <Award className="w-4 h-4" />
-                                    <span className="capitalize transition-colors">{user.subscription_tier} Tier</span>
+                                    <span className="capitalize transition-colors">{getDisplayTierName(displayTier)} Tier</span>
                                 </div>
+                                {subscriptionExpired && (
+                                    <div className="px-3 py-1 bg-amber-50 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 rounded-full text-sm font-medium transition-colors">
+                                        Expired{expiredEndDate ? ` ${expiredEndDate}` : ''}
+                                    </div>
+                                )}
                                 <div className="px-3 py-1 bg-gray-100 dark:bg-slate-700/50 text-gray-600 dark:text-slate-400 rounded-full text-sm font-medium flex items-center gap-2 transition-colors">
                                     <Calendar className="w-4 h-4" />
                                     <span className="transition-colors">Joined {new Date().toLocaleDateString()}</span>

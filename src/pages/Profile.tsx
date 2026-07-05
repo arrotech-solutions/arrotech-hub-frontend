@@ -26,6 +26,7 @@ import {
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../hooks/useAuth';
+import { getDisplayTier, getDisplayTierName, isSubscriptionExpired } from '../hooks/useSubscription';
 import apiService from '../services/api';
 
 interface ProfileFormData {
@@ -166,12 +167,26 @@ const Profile: React.FC = () => {
     }
   };
 
+  const displayTier = getDisplayTier(user);
+  const subscriptionExpired = isSubscriptionExpired(user);
+  const expiredEndDate = user?.subscription_end_date
+    ? new Date(user.subscription_end_date).toLocaleDateString(undefined, {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      })
+    : null;
+
   const getSubscriptionColor = (tier: string) => {
     switch (tier) {
       case 'enterprise':
         return 'bg-gradient-to-r from-purple-500 to-pink-500';
       case 'pro':
         return 'bg-gradient-to-r from-blue-500 to-cyan-500';
+      case 'business':
+        return 'bg-gradient-to-r from-indigo-500 to-violet-500';
+      case 'starter':
+        return 'bg-gradient-to-r from-sky-500 to-blue-500';
       case 'testing':
         return 'bg-gradient-to-r from-yellow-500 to-orange-500';
       default:
@@ -185,6 +200,10 @@ const Profile: React.FC = () => {
         return <Crown className="w-4 h-4" />;
       case 'pro':
         return <Sparkles className="w-4 h-4" />;
+      case 'business':
+        return <Sparkles className="w-4 h-4" />;
+      case 'starter':
+        return <Zap className="w-4 h-4" />;
       case 'testing':
         return <Zap className="w-4 h-4" />;
       default:
@@ -192,18 +211,7 @@ const Profile: React.FC = () => {
     }
   };
 
-  const getSubscriptionName = (tier: string) => {
-    switch (tier) {
-      case 'enterprise':
-        return 'Enterprise';
-      case 'pro':
-        return 'Professional';
-      case 'testing':
-        return 'Testing';
-      default:
-        return 'Free';
-    }
-  };
+  const getSubscriptionName = (tier: string) => getDisplayTierName(tier);
 
   if (!user) {
     return (
@@ -479,9 +487,18 @@ const Profile: React.FC = () => {
 
                 <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-900/50 rounded-lg border border-transparent dark:border-slate-700/50 transition-colors">
                   <span className="text-sm font-medium text-gray-700 dark:text-slate-300 transition-colors">Subscription</span>
-                  <div className={`px-3 py-1 text-xs font-medium text-white rounded-full ${getSubscriptionColor(user.subscription_tier)} flex items-center space-x-1`}>
-                    {getSubscriptionIcon(user.subscription_tier)}
-                    <span>{getSubscriptionName(user.subscription_tier)}</span>
+                  <div className="flex flex-col items-end gap-1">
+                    <div className={`px-3 py-1 text-xs font-medium text-white rounded-full ${getSubscriptionColor(displayTier)} flex items-center space-x-1`}>
+                      {getSubscriptionIcon(displayTier)}
+                      <span>{getSubscriptionName(displayTier)}</span>
+                    </div>
+                    {subscriptionExpired && (
+                      <span className="text-xs text-amber-600 dark:text-amber-400">
+                        Your {getDisplayTierName(user.subscription_tier)} plan expired
+                        {expiredEndDate ? ` on ${expiredEndDate}` : ''}.{' '}
+                        <a href="/pricing" className="underline font-medium">Renew</a>
+                      </span>
+                    )}
                   </div>
                 </div>
 

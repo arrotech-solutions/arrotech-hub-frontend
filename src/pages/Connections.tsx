@@ -374,14 +374,27 @@ const Integrations: React.FC = () => {
       loginOptions.config_id = configId;
     }
 
+    let setupData: any = null;
+    const messageHandler = (event: MessageEvent) => {
+      if (event.origin !== "https://www.facebook.com" && event.origin !== "https://web.facebook.com") return;
+      try {
+        const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+        if (data && data.type === 'whatsapp_embedded_signup') {
+          setupData = data.data || {};
+        }
+      } catch (e) {}
+    };
+    window.addEventListener('message', messageHandler);
+
     FB.login((response: any) => {
+      window.removeEventListener('message', messageHandler);
       if (response.authResponse) {
         const { code } = response.authResponse;
-        // Meta's Embedded Signup with config_id may return these directly or inside setup
-        const extras = response.authResponse.setup || response.authResponse || {};
+        // Check our captured setupData first, then fallback to authResponse extras
+        const extras = setupData || response.authResponse.setup || response.authResponse || {};
         const wabaId = extras.waba_id || extras.whatsapp_business_account_id;
         const phoneNumberId = extras.phone_number_id;
-        console.log('[WhatsApp Embedded] authResponse:', response.authResponse, 'Extracted:', { code: !!code, wabaId, phoneNumberId });
+        console.log('[WhatsApp Embedded] authResponse:', response.authResponse, 'Captured setup:', setupData, 'Extracted:', { code: !!code, wabaId, phoneNumberId });
         handleWhatsAppEmbeddedCode(code, wabaId, phoneNumberId);
       } else {
         console.log('User cancelled WhatsApp signup or did not fully authorize.', response);
