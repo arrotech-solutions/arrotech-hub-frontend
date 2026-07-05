@@ -527,15 +527,15 @@ const Workflows: React.FC = () => {
           <PlayCircle className="w-5 h-5" />
         </div>
 
-        <div className="ml-4 flex-1 min-w-0 grid grid-cols-12 gap-4 items-center">
-          <div className="col-span-4 pr-2">
+        <div className="ml-4 flex-1 min-w-0 flex flex-col sm:grid sm:grid-cols-12 gap-3 sm:gap-4 sm:items-center">
+          <div className="sm:col-span-4 pr-2">
             <h3 className="text-sm font-bold text-gray-900 dark:text-white truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
               {workflow?.name || `Workflow ${execution.workflow_id}`}
             </h3>
             <p className="text-xs text-gray-500 dark:text-slate-400 truncate">Execution #{execution.id}</p>
           </div>
 
-          <div className="col-span-3 flex flex-col space-y-1">
+          <div className="sm:col-span-3 flex flex-col space-y-1">
             <div title={`Trigger: ${execution.trigger_type}`} className="flex items-center space-x-1.5 w-fit px-1.5 py-0.5 rounded bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-800 text-[10px] text-gray-600 dark:text-slate-400 font-medium">
               <Zap className="w-2.5 h-2.5 text-amber-500 shrink-0" />
               <span className="capitalize truncate">{execution.trigger_type}</span>
@@ -546,19 +546,19 @@ const Workflows: React.FC = () => {
             </div>
           </div>
 
-          <div className="col-span-2 flex items-center text-xs text-gray-500 dark:text-slate-400 font-medium">
+          <div className="sm:col-span-2 flex items-center text-xs text-gray-500 dark:text-slate-400 font-medium">
             <Target className="w-3.5 h-3.5 mr-1.5 shrink-0" />
             <span className="truncate">{duration !== null ? `${duration}s` : '-'}</span>
           </div>
 
-          <div className="col-span-2 min-w-0">
+          <div className="sm:col-span-2 min-w-0">
             <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border max-w-full ${getStatusColor(execution.status)}`}>
               <span className="mr-1 shrink-0">{getStatusIcon(execution.status)}</span>
               <span className="truncate">{execution.status}</span>
             </span>
           </div>
 
-          <div className="col-span-1 flex items-center justify-end space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="sm:col-span-1 flex items-center sm:justify-end space-x-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity mt-2 sm:mt-0">
             {execution.status === 'running' && (
               <button onClick={() => handleCancelExecution(execution.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Cancel">
                 <X className="w-4 h-4" />
@@ -749,13 +749,13 @@ const Workflows: React.FC = () => {
         </div>
 
         {/* Info */}
-        <div className="ml-4 flex-1 min-w-0 grid grid-cols-12 gap-4 items-center">
-          <div className="col-span-4">
+        <div className="ml-4 flex-1 min-w-0 flex flex-col sm:grid sm:grid-cols-12 gap-3 sm:gap-4 sm:items-center">
+          <div className="sm:col-span-4">
             <h3 className="text-sm font-bold text-gray-900 dark:text-white truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{workflow.name}</h3>
             <p className="text-xs text-gray-500 dark:text-slate-400 truncate">{workflow.description || 'No description'}</p>
           </div>
 
-          <div className="col-span-3 flex items-center space-x-2">
+          <div className="sm:col-span-3 flex items-center space-x-2">
             <div title={`Trigger: ${workflow.trigger_type}`} className="flex items-center space-x-1.5 px-2 py-1 rounded bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-800 text-xs text-gray-600 dark:text-slate-400">
               <Zap className="w-3 h-3 text-amber-500" />
               <span className="capitalize">{workflow.trigger_type}</span>
@@ -763,7 +763,7 @@ const Workflows: React.FC = () => {
             <div className="text-xs text-gray-400 dark:text-slate-500 font-medium">+ {steps.length} steps</div>
           </div>
 
-          <div className="col-span-2">
+          <div className="sm:col-span-2">
             <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${workflow.status === 'active' ? 'bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-400 border border-green-100 dark:border-green-500/20' : 'bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 border border-gray-200 dark:border-slate-700'
               }`}>
               {workflow.status === 'active' && <span className="w-1.5 h-1.5 rounded-full bg-green-500 mr-1.5 animate-pulse"></span>}
@@ -771,7 +771,7 @@ const Workflows: React.FC = () => {
             </span>
           </div>
 
-          <div className="col-span-3 flex items-center justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="sm:col-span-3 flex items-center sm:justify-end space-x-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity mt-2 sm:mt-0">
             <button
               onClick={() => {
                 setExecutingWorkflow(workflow);
@@ -1326,10 +1326,10 @@ const Workflows: React.FC = () => {
               </div>
 
               {/* Main Split Body */}
-              <div className="flex-1 flex overflow-hidden">
+              <div className="flex-1 flex flex-col md:flex-row overflow-y-auto md:overflow-hidden relative">
 
                 {/* Left Pane: Timeline Drawer */}
-                <div className="w-1/3 min-w-[300px] max-w-[400px] border-r border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-900/30 overflow-y-auto px-6 py-8">
+                <div className="w-full md:w-1/3 md:min-w-[300px] md:max-w-[400px] border-b md:border-b-0 md:border-r border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-900/30 shrink-0 md:overflow-y-auto px-6 py-6 md:py-8">
                   <h3 className="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-6 px-2">Execution Timeline</h3>
 
                   <div className="relative">
@@ -1377,8 +1377,8 @@ const Workflows: React.FC = () => {
                                 ? 'bg-white dark:bg-slate-800 border-blue-200 dark:border-blue-500/50 ring-4 ring-blue-500/10'
                                 : 'bg-white/80 dark:bg-slate-800/80 border-gray-100 dark:border-slate-700/50 hover:border-gray-300 dark:hover:border-slate-600'
                               }`}>
-                              <div className="flex items-start justify-between">
-                                <div className="flex items-start space-x-4">
+                              <div className="flex items-start justify-between w-full min-w-0">
+                                <div className="flex items-start space-x-4 flex-1 min-w-0">
                                   <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 border-4 border-gray-50 dark:border-slate-900 mt-0.5 ${stepExecution.status === 'completed' ? 'bg-green-500 text-white' :
                                       stepExecution.status === 'failed' ? 'bg-red-500 text-white' :
                                         stepExecution.status === 'running' ? 'bg-blue-500 text-white ring-4 ring-blue-500/20' :
@@ -1389,10 +1389,25 @@ const Workflows: React.FC = () => {
                                         stepExecution.status === 'running' ? <PlayCircle className="w-3 h-3" /> :
                                           <span className="text-[10px] font-bold">{index + 1}</span>}
                                   </div>
-                                  <div className="min-w-0 pr-2">
-                                    <h4 className={`text-sm font-bold truncate ${isSelected ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>
-                                      Step {stepExecution.step_id}
-                                    </h4>
+                                  <div className="min-w-0 pr-2 flex-1">
+                                    <div className="flex items-center space-x-2 w-full">
+                                      <h4 
+                                        className={`text-sm font-bold truncate flex-1 min-w-0 ${isSelected ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}
+                                        title={`Step ${stepExecution.step_id}`}
+                                      >
+                                        Step {stepExecution.step_id}
+                                      </h4>
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          navigator.clipboard.writeText(stepExecution.step_id.toString());
+                                        }}
+                                        className="p-1 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:text-gray-300 dark:hover:bg-slate-700 transition-colors shrink-0"
+                                        title="Copy Step ID"
+                                      >
+                                        <Copy className="w-3.5 h-3.5" />
+                                      </button>
+                                    </div>
                                     <p className="text-xs text-gray-500 dark:text-slate-400 mt-1 line-clamp-1">
                                       {stepExecution.status === 'failed' && stepExecution.error_message ? stepExecution.error_message : 'View details...'}
                                     </p>
@@ -1427,7 +1442,7 @@ const Workflows: React.FC = () => {
                 </div>
 
                 {/* Right Pane: Details Inspector */}
-                <div className="flex-1 overflow-y-auto bg-white dark:bg-[#0a0f1c] relative">
+                <div className="flex-1 md:overflow-y-auto bg-white dark:bg-[#0a0f1c] relative min-h-[50vh] md:min-h-0">
                   {(() => {
                     const viewData = selectedStepId
                       ? stepExecutions.find(s => s.id === selectedStepId)
