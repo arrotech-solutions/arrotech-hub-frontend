@@ -18,7 +18,8 @@ import {
     Link2,
     CheckCircle2,
     AlertCircle,
-    FolderOpen
+    FolderOpen,
+    Loader2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import apiService from '../services/api';
@@ -50,6 +51,14 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onWorkflowCreated
     const [driveFolders, setDriveFolders] = useState<DriveFolder[]>([]);
     const [loadingFolders, setLoadingFolders] = useState(false);
     const [connectionsLoaded, setConnectionsLoaded] = useState(false);
+
+    // Form state
+    const [configValues, setConfigValues] = useState<Record<string, any>>({});
+    const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
+    const [driveSpreadsheets, setDriveSpreadsheets] = useState<any[]>([]);
+    const [loadingSpreadsheets, setLoadingSpreadsheets] = useState(false);
+    const [dynamicOptions, setDynamicOptions] = useState<Record<string, { label: string, value: any }[]>>({});
+    const [loadingDynamic, setLoadingDynamic] = useState<Record<string, boolean>>({});
 
     useEffect(() => {
         loadTemplates();
@@ -83,9 +92,20 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onWorkflowCreated
         );
     }, [userConnections]);
 
-    // Load drive folders when a template with folder_picker is selected
+    // Initialize configValues with defaults when a template is selected
     useEffect(() => {
         if (!selectedTemplate) return;
+        const defaults: Record<string, any> = {};
+        Object.entries(selectedTemplate.variables).forEach(([key, varDef]) => {
+            if (varDef.default != null) {
+                defaults[key] = varDef.default;
+            }
+        });
+        setConfigValues(defaults);
+        setDynamicOptions({});
+        setLoadingDynamic({});
+
+        // Load drive folders if any variable uses folder_picker
         const hasFolderPicker = Object.values(selectedTemplate.variables).some(
             (v) => v.ui_hint === 'folder_picker'
         );
@@ -106,6 +126,63 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onWorkflowCreated
             console.error('Failed to load drive folders:', error);
         } finally {
             setLoadingFolders(false);
+        }
+    };
+
+    // Load spreadsheets when a folder is selected
+    useEffect(() => {
+        if (!selectedFolderId) {
+            setDriveSpreadsheets([]);
+            return;
+        }
+        loadDriveSpreadsheets(selectedFolderId);
+    }, [selectedFolderId]);
+
+    const loadDriveSpreadsheets = async (folderId: string) => {
+        try {
+            setLoadingSpreadsheets(true);
+            const res = await apiService.getDriveSpreadsheets(folderId);
+            if (res.success && Array.isArray(res.data)) {
+                setDriveSpreadsheets(res.data);
+            }
+        } catch (error) {
+            console.error('Failed to load drive spreadsheets:', error);
+        } finally {
+            setLoadingSpreadsheets(false);
+        }
+    };
+
+    const fetchDynamicOptions = async (fieldKey: string, toolOperation: string) => {
+        if (dynamicOptions[fieldKey] || loadingDynamic[fieldKey]) return;
+        try {
+            setLoadingDynamic(prev => ({ ...prev, [fieldKey]: true }));
+            const [toolName, operation] = toolOperation.split('.');
+            const response = await apiService.executeTool(toolName, { operation }) as any;
+
+            let options = null;
+            if (response.result?.options && Array.isArray(response.result.options)) {
+                options = response.result.options;
+            } else if (response.data?.options && Array.isArray(response.data.options)) {
+                options = response.data.options;
+            } else if (response.options && Array.isArray(response.options)) {
+                options = response.options;
+            } else if (Array.isArray(response.result)) {
+                options = response.result;
+            } else if (Array.isArray(response.data)) {
+                options = response.data;
+            } else if (Array.isArray(response)) {
+                options = response;
+            }
+
+            if (options) {
+                setDynamicOptions(prev => ({ ...prev, [fieldKey]: options }));
+            } else {
+                console.warn(`No options found for ${fieldKey}`, response);
+            }
+        } catch (err) {
+            console.error(`Error fetching dynamic options for ${fieldKey}:`, err);
+        } finally {
+            setLoadingDynamic(prev => ({ ...prev, [fieldKey]: false }));
         }
     };
 
@@ -143,7 +220,7 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onWorkflowCreated
     const handleUseTemplate = async (templateId: string) => {
         try {
             setUsingTemplate(true);
-            const response = await apiService.useTemplate(templateId);
+            const response = await apiService.useTemplate(templateId, configValues);
 
             if (response.success) {
                 toast.success(`Workflow created from template!`);
@@ -512,75 +589,166 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onWorkflowCreated
                                         </section>
                                     )}
 
-                                    {/* Variables / Inputs Needed — with prefilled defaults, folder picker, connection hints */}
+                                    {/* Configuration — interactive form matching EnhancedWorkflowCreator logic */}
                                     {Object.keys(selectedTemplate.variables).length > 0 && (
                                         <section className="bg-purple-50/30 dark:bg-purple-500/10 p-5 rounded-2xl border border-purple-100 dark:border-purple-500/20">
-                                            <h3 className="text-xs font-black text-purple-600 dark:text-purple-400 uppercase tracking-widest mb-4">Inputs Needed</h3>
-                                            <div className="space-y-3">
-                                                {Object.entries(selectedTemplate.variables).map(([key, config]) => {
-                                                    const connectionMissing = config.connection_for && !isConnected(config.connection_for);
-                                                    const isFolderPicker = config.ui_hint === 'folder_picker';
+                                            <h3 className="text-xs font-black text-purple-600 dark:text-purple-400 uppercase tracking-widest mb-4">Configuration</h3>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                {Object.entries(selectedTemplate.variables).map(([key, varSchema]) => {
+                                                    // show_if conditional visibility
+                                                    const showIf = varSchema.show_if;
+                                                    if (showIf && configValues[showIf.field] !== showIf.value) {
+                                                        return null;
+                                                    }
 
-                                                    return (
-                                                        <div key={key} className="p-4 bg-white dark:bg-slate-900 border border-purple-100 dark:border-purple-500/20 rounded-xl shadow-sm">
-                                                            <div className="flex items-center justify-between mb-2 gap-2">
-                                                                <code className="text-xs font-black text-gray-900 dark:text-white bg-gray-100 dark:bg-slate-800 px-2 py-0.5 rounded uppercase truncate">{key}</code>
-                                                                <div className="flex items-center space-x-1.5 flex-shrink-0">
-                                                                    {config.required && (
-                                                                        <span className="text-[10px] bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 px-2 py-0.5 rounded-full font-black uppercase">Required</span>
-                                                                    )}
-                                                                    {connectionMissing && (
-                                                                        <a
-                                                                            href="/connections"
-                                                                            target="_blank"
-                                                                            rel="noopener noreferrer"
-                                                                            onClick={(e) => e.stopPropagation()}
-                                                                            className="text-[10px] bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 px-2 py-0.5 rounded-full font-black flex items-center space-x-1 hover:bg-amber-200 dark:hover:bg-amber-500/30 transition-colors"
-                                                                        >
-                                                                            <Link2 className="w-2.5 h-2.5" />
-                                                                            <span>Connect</span>
-                                                                        </a>
-                                                                    )}
+                                                    const connectionMissing = varSchema.connection_for && !isConnected(varSchema.connection_for);
+                                                    const isRequired = varSchema.required;
+                                                    const hasEnum = varSchema.enum && Array.isArray(varSchema.enum);
+                                                    const dynamicSource = varSchema['x-dynamic-ui'] || varSchema['x-dynamic-options'];
+                                                    const inputClasses = "w-full px-3 py-2 text-sm rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500/40 focus:border-purple-500 outline-none transition-all";
+
+                                                    // x-dynamic-ui: fetch and render a dynamic dropdown
+                                                    if (dynamicSource) {
+                                                        const fieldKey = `tmpl_${key}`;
+                                                        if (!dynamicOptions[fieldKey] && !loadingDynamic[fieldKey]) {
+                                                            fetchDynamicOptions(fieldKey, dynamicSource);
+                                                        }
+                                                        return (
+                                                            <div key={key}>
+                                                                <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1.5 capitalize">
+                                                                    {varSchema.label || key.replace(/_/g, ' ')}
+                                                                    {isRequired && <span className="text-red-500 ml-1">*</span>}
+                                                                </label>
+                                                                <div className="relative">
+                                                                    <select
+                                                                        value={configValues[key] || ''}
+                                                                        onChange={(e) => setConfigValues({ ...configValues, [key]: e.target.value })}
+                                                                        className={`${inputClasses} appearance-none pr-10`}
+                                                                        disabled={loadingDynamic[fieldKey]}
+                                                                    >
+                                                                        <option value="">{loadingDynamic[fieldKey] ? 'Loading...' : `Select ${varSchema.label || key.replace(/_/g, ' ')}...`}</option>
+                                                                        {dynamicOptions[fieldKey]?.map((opt: any) => (
+                                                                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                                                        ))}
+                                                                    </select>
+                                                                    <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
+                                                                        {loadingDynamic[fieldKey] ? (
+                                                                            <Loader2 className="w-4 h-4 text-purple-500 animate-spin" />
+                                                                        ) : (
+                                                                            <ChevronDown className="w-4 h-4 text-gray-400" />
+                                                                        )}
+                                                                    </div>
                                                                 </div>
+                                                                {varSchema.description && (
+                                                                    <p className="text-[10px] text-gray-500 dark:text-slate-400 mt-1">{varSchema.description}</p>
+                                                                )}
+                                                                {connectionMissing && (
+                                                                    <a href="/connections" target="_blank" rel="noopener noreferrer" className="mt-1.5 inline-flex items-center space-x-1 text-[10px] bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 px-2 py-0.5 rounded-full font-bold hover:bg-amber-200 transition-colors">
+                                                                        <Link2 className="w-2.5 h-2.5" /><span>Connect</span>
+                                                                    </a>
+                                                                )}
                                                             </div>
-                                                            <p className="text-[11px] text-gray-500 dark:text-slate-400 font-bold leading-tight">
-                                                                {config.description}
-                                                            </p>
+                                                        );
+                                                    }
 
-                                                            {/* Show prefilled default or folder picker preview */}
-                                                            {isFolderPicker && isConnected('google_workspace') ? (
-                                                                <div className="mt-2.5 flex items-center space-x-2 text-[11px]">
-                                                                    <FolderOpen className="w-3.5 h-3.5 text-blue-500" />
-                                                                    <span className="text-blue-600 dark:text-blue-400 font-semibold">
-                                                                        {loadingFolders
-                                                                            ? 'Loading folders...'
-                                                                            : `${driveFolders.length} folder${driveFolders.length !== 1 ? 's' : ''} available`
-                                                                        }
-                                                                    </span>
-                                                                    <span className="text-gray-400 dark:text-slate-500">— dropdown in execution</span>
+                                                    // enum: select dropdown
+                                                    if (hasEnum) {
+                                                        return (
+                                                            <div key={key}>
+                                                                <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1.5 capitalize">
+                                                                    {varSchema.label || key.replace(/_/g, ' ')}
+                                                                    {isRequired && <span className="text-red-500 ml-1">*</span>}
+                                                                </label>
+                                                                <div className="relative">
+                                                                    <select
+                                                                        value={configValues[key] ?? varSchema.default ?? ''}
+                                                                        onChange={(e) => setConfigValues({ ...configValues, [key]: e.target.value })}
+                                                                        className={`${inputClasses} appearance-none pr-10`}
+                                                                    >
+                                                                        <option value="">Select...</option>
+                                                                        {varSchema.enum.map((opt: string) => (
+                                                                            <option key={opt} value={opt}>
+                                                                                {opt.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                                                                            </option>
+                                                                        ))}
+                                                                    </select>
+                                                                    <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
+                                                                        <ChevronDown className="w-4 h-4 text-gray-400" />
+                                                                    </div>
                                                                 </div>
-                                                            ) : config.default != null ? (
-                                                                <div className="mt-2.5 px-2.5 py-1.5 bg-gray-50 dark:bg-slate-800 rounded-lg border border-gray-100 dark:border-slate-700">
-                                                                    <span className="text-[10px] text-gray-400 dark:text-slate-500 font-bold uppercase mr-1.5">Default:</span>
-                                                                    <span className="text-[11px] text-gray-700 dark:text-slate-300 font-semibold">{String(config.default)}</span>
-                                                                </div>
-                                                            ) : config.placeholder ? (
-                                                                <div className="mt-2.5 px-2.5 py-1.5 bg-gray-50 dark:bg-slate-800 rounded-lg border border-gray-100 dark:border-slate-700">
-                                                                    <span className="text-[10px] text-gray-400 dark:text-slate-500 font-bold uppercase mr-1.5">Example:</span>
-                                                                    <span className="text-[11px] text-gray-500 dark:text-slate-400 font-medium italic">{config.placeholder}</span>
-                                                                </div>
-                                                            ) : config.enum ? (
-                                                                <div className="mt-2.5 flex flex-wrap gap-1">
-                                                                    {config.enum.map((opt) => (
-                                                                        <span
-                                                                            key={opt}
-                                                                            className="text-[10px] px-2 py-0.5 bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 rounded-md font-bold border border-purple-100 dark:border-purple-500/20"
-                                                                        >
-                                                                            {opt}
-                                                                        </span>
-                                                                    ))}
-                                                                </div>
-                                                            ) : null}
+                                                                {varSchema.description && (
+                                                                    <p className="text-[10px] text-gray-500 dark:text-slate-400 mt-1">{varSchema.description}</p>
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    }
+
+                                                    // boolean: toggle
+                                                    if (varSchema.type === 'boolean') {
+                                                        const checked = configValues[key] ?? varSchema.default ?? false;
+                                                        return (
+                                                            <div key={key}>
+                                                                <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1.5 capitalize">
+                                                                    {varSchema.label || key.replace(/_/g, ' ')}
+                                                                </label>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => setConfigValues({ ...configValues, [key]: !checked })}
+                                                                    className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ${checked ? 'bg-purple-600' : 'bg-gray-200 dark:bg-slate-700'}`}
+                                                                >
+                                                                    <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition duration-200 ${checked ? 'translate-x-5' : 'translate-x-0'}`} />
+                                                                </button>
+                                                                {varSchema.description && (
+                                                                    <p className="text-[10px] text-gray-500 dark:text-slate-400 mt-1">{varSchema.description}</p>
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    }
+
+                                                    // number input
+                                                    if (varSchema.type === 'number' || varSchema.type === 'integer') {
+                                                        return (
+                                                            <div key={key}>
+                                                                <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1.5 capitalize">
+                                                                    {varSchema.label || key.replace(/_/g, ' ')}
+                                                                    {isRequired && <span className="text-red-500 ml-1">*</span>}
+                                                                </label>
+                                                                <input
+                                                                    type="number"
+                                                                    value={configValues[key] ?? varSchema.default ?? ''}
+                                                                    onChange={(e) => setConfigValues({ ...configValues, [key]: e.target.value === '' ? '' : Number(e.target.value) })}
+                                                                    className={inputClasses}
+                                                                    placeholder={`Enter ${varSchema.label || key.replace(/_/g, ' ')}`}
+                                                                />
+                                                                {varSchema.description && (
+                                                                    <p className="text-[10px] text-gray-500 dark:text-slate-400 mt-1">{varSchema.description}</p>
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    }
+
+                                                    // Default: text input
+                                                    return (
+                                                        <div key={key}>
+                                                            <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1.5 capitalize">
+                                                                {varSchema.label || key.replace(/_/g, ' ')}
+                                                                {isRequired && <span className="text-red-500 ml-1">*</span>}
+                                                            </label>
+                                                            <input
+                                                                type="text"
+                                                                value={configValues[key] ?? varSchema.default ?? ''}
+                                                                onChange={(e) => setConfigValues({ ...configValues, [key]: e.target.value })}
+                                                                className={inputClasses}
+                                                                placeholder={varSchema.placeholder || `Enter ${varSchema.label || key.replace(/_/g, ' ')}`}
+                                                            />
+                                                            {varSchema.description && (
+                                                                <p className="text-[10px] text-gray-500 dark:text-slate-400 mt-1">{varSchema.description}</p>
+                                                            )}
+                                                            {connectionMissing && (
+                                                                <a href="/connections" target="_blank" rel="noopener noreferrer" className="mt-1.5 inline-flex items-center space-x-1 text-[10px] bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 px-2 py-0.5 rounded-full font-bold hover:bg-amber-200 transition-colors">
+                                                                    <Link2 className="w-2.5 h-2.5" /><span>Connect</span>
+                                                                </a>
+                                                            )}
                                                         </div>
                                                     );
                                                 })}

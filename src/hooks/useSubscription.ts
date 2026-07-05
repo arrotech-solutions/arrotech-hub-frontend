@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect, useCallback } from 'react';
 import { useAuth } from './useAuth';
 import apiService from '../services/api';
+import { User } from '../types';
 
 /**
  * Subscription tiers matching backend SubscriptionTier enum.
@@ -210,6 +211,44 @@ export const TIER_INFO: Record<SubscriptionTier, { name: string; tagline: string
 /**
  * Upgrade messages for gated features.
  */
+const PAID_TIERS = new Set(['starter', 'business', 'pro', 'enterprise', 'lite']);
+
+function normalizeTierSlug(tier: string | undefined): SubscriptionTier {
+    if (!tier) return 'free';
+    if (tier === 'lite') return 'starter';
+    return tier as SubscriptionTier;
+}
+
+/** Tier shown in UI — uses effective_tier when subscription has expired or lapsed. */
+export function getDisplayTier(user: User | null): SubscriptionTier {
+    const t = user?.effective_tier ?? user?.subscription_tier ?? 'free';
+    return normalizeTierSlug(t);
+}
+
+/** True when stored tier differs from enforced tier (e.g. DB still pro but access is free). */
+export function isTierDowngraded(user: User | null): boolean {
+    if (!user?.subscription_tier) return false;
+    const raw = normalizeTierSlug(user.subscription_tier);
+    const effective = getDisplayTier(user);
+    return raw !== effective;
+}
+
+/** True when user no longer has paid access but had a paid plan that ended. */
+export function isSubscriptionExpired(user: User | null): boolean {
+    if (!user || getDisplayTier(user) !== 'free') return false;
+    if (user.subscription_status === 'expired') return true;
+    const rawTier = user.subscription_tier;
+    if (!rawTier || rawTier === 'free') return false;
+    if (!PAID_TIERS.has(rawTier)) return false;
+    if (!user.subscription_end_date) return isTierDowngraded(user);
+    return new Date(user.subscription_end_date) < new Date();
+}
+
+export function getDisplayTierName(tier: SubscriptionTier | string): string {
+    const normalized = normalizeTierSlug(tier);
+    return TIER_INFO[normalized]?.name ?? String(tier);
+}
+
 export const UPGRADE_MESSAGES: Record<string, string> = {
     inbox_send: 'Upgrade to Starter to send and reply to messages',
     inbox_ai_reply: 'Upgrade to Business for AI-assisted replies',
@@ -235,12 +274,9 @@ export const useSubscription = () => {
     const [tierTagline, setTierTagline] = useState<string>('');
 
     // Effective tier drives feature limits (accounts for trial/expiry)
-    const tier: SubscriptionTier = useMemo(() => {
-        const userTier = (user?.effective_tier ?? user?.subscription_tier) as string | undefined;
-        if (userTier === 'lite') return 'starter';
-        if (userTier === 'business') return 'business';
-        return (userTier as SubscriptionTier) || 'free';
-    }, [user?.effective_tier, user?.subscription_tier]);
+    const tier: SubscriptionTier = useMemo(() => getDisplayTier(user), [user]);
+    const tierDowngraded = useMemo(() => isTierDowngraded(user), [user]);
+    const subscriptionExpired = useMemo(() => isSubscriptionExpired(user), [user]);
 
     // Use server limits if available, otherwise fall back to local
     const limits = useMemo(() => {
@@ -350,6 +386,8 @@ export const useSubscription = () => {
         tier,
         effectiveTier: tier,
         rawTier: user?.subscription_tier,
+        tierDowngraded,
+        subscriptionExpired,
         subscriptionStatus: user?.subscription_status,
         subscriptionEndDate: user?.subscription_end_date,
         billingCycle: user?.billing_cycle,

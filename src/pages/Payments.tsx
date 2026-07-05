@@ -23,7 +23,7 @@ import {
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../hooks/useAuth';
-import { useSubscription } from '../hooks/useSubscription';
+import { useSubscription, TIER_INFO, PLAN_LIMITS, SubscriptionTier, getDisplayTierName } from '../hooks/useSubscription';
 import apiService from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { usePaystackPayment } from 'react-paystack';
@@ -56,7 +56,20 @@ const Payments: React.FC = () => {
   const [paystackKey, setPaystackKey] = useState('');
 
   // Subscription management state
-  const { tier, effectiveTier, user, refetch: refetchSubscription, billingCycle, daysRemaining, isTrial } = useSubscription();
+  const {
+    tier,
+    effectiveTier,
+    user,
+    refetch: refetchSubscription,
+    billingCycle,
+    daysRemaining,
+    isTrial,
+    tierName,
+    tierTagline,
+    limits,
+    subscriptionExpired,
+    rawTier,
+  } = useSubscription();
   const navigate = useNavigate();
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [canceling, setCanceling] = useState(false);
@@ -64,41 +77,58 @@ const Payments: React.FC = () => {
   const [cancelReason, setCancelReason] = useState('');
   const [cancelFeedback, setCancelFeedback] = useState('');
 
-  const plans = [
-    {
-      id: 'free',
-      name: 'Free Tier',
-      price: 0,
-      features: ['3 Active Workflows', '10 AI Messages / day', 'M-Pesa, Slack & Context', 'Community Support'],
-      color: 'gray'
-    },
-    {
-      id: 'lite',
-      name: 'Biashara Lite',
-      price: 200,
-      features: ['10 Active Workflows', '50 AI Messages / day', 'Google Workspace', 'Email Support'],
-      color: 'blue'
-    },
-    {
-      id: 'pro',
-      name: 'Business Pro',
-      price: 2500,
-      features: ['50 Active Workflows', '500 AI Messages / day', '25+ Integrations', 'Priority Support'],
-      color: 'indigo'
-    },
-    {
-      id: 'enterprise',
-      name: 'Enterprise',
-      price: 10000,
-      features: ['Unlimited Workflows', 'Unlimited AI Messages', 'All Integrations', 'Dedicated Support'],
-      color: 'purple'
-    }
-  ];
+  const TIER_PRICE_KES: Record<SubscriptionTier, number> = {
+    free: 0,
+    starter: 1500,
+    business: 5000,
+    pro: 10000,
+    enterprise: 0,
+  };
 
-  const currentPlan = plans.find(p => p.id === effectiveTier || p.id === tier) || plans[0];
-  const isActive = user?.subscription_status === 'active' || user?.subscription_status === 'trial';
-  const isCanceled = user?.subscription_status === 'canceled';
+  const formatLimit = (value: number | undefined, label: string) => {
+    if (value === undefined) return label;
+    if (value >= 999999) return `Unlimited ${label}`;
+    return `${value.toLocaleString()} ${label}`;
+  };
+
+  const plans = (['free', 'starter', 'business', 'pro', 'enterprise'] as SubscriptionTier[]).map((id) => {
+    const planLimits = PLAN_LIMITS[id];
+    return {
+      id,
+      name: TIER_INFO[id].name,
+      tagline: TIER_INFO[id].tagline,
+      price: TIER_PRICE_KES[id],
+      features: [
+        formatLimit(planLimits.max_active_workflows, 'Active Workflows'),
+        formatLimit(planLimits.ai_actions_monthly, 'AI Actions / month'),
+        formatLimit(planLimits.automation_runs_monthly, 'Automation Runs / month'),
+        planLimits.support_level === 'community'
+          ? 'Community Support'
+          : `${String(planLimits.support_level).replace(/_/g, ' ')} support`,
+      ],
+      color: TIER_INFO[id].color,
+    };
+  });
+
+  const currentPlan = plans.find((p) => p.id === effectiveTier || p.id === tier) || plans[0];
   const isFree = effectiveTier === 'free';
+  const isActive = !isFree && (user?.subscription_status === 'active' || user?.subscription_status === 'trial');
+  const isCanceled = user?.subscription_status === 'canceled';
+  const expiredEndDate = user?.subscription_end_date
+    ? new Date(user.subscription_end_date).toLocaleDateString(undefined, {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+      })
+    : null;
+  const currentPlanFeatures = isFree && limits
+    ? [
+        formatLimit(limits.max_active_workflows, 'Active Workflows'),
+        formatLimit(limits.ai_actions_monthly, 'AI Actions / month'),
+        formatLimit(limits.automation_runs_monthly, 'Automation Runs / month'),
+        'Community Support',
+      ]
+    : currentPlan.features;
 
   // Mock stats for demonstration
   const [stats, setStats] = useState({
@@ -227,7 +257,12 @@ const Payments: React.FC = () => {
 
   const getSubscriptionStatusBadge = () => {
     if (isFree) {
-      return <span className="px-3 py-1 bg-gray-900/10 dark:bg-white/10 text-gray-900 dark:text-white rounded-lg text-[10px] font-black uppercase tracking-widest border border-black/5 dark:border-white/5">Lite Tier</span>;
+      const label = subscriptionExpired ? 'Expired' : 'Free';
+      return (
+        <span className="px-3 py-1 bg-gray-900/10 dark:bg-white/10 text-gray-900 dark:text-white rounded-lg text-[10px] font-black uppercase tracking-widest border border-black/5 dark:border-white/5">
+          {label}
+        </span>
+      );
     }
     const statusConfig: Record<string, { bg: string, text: string, label: string }> = {
       active: { bg: 'bg-emerald-500/10', text: 'text-emerald-500', label: 'Nodes Active' },
@@ -646,10 +681,19 @@ const Payments: React.FC = () => {
                     <div className="w-16 h-16 bg-white/10 dark:bg-slate-800/40 rounded-[20px] flex items-center justify-center mx-auto mb-6 shadow-xl border border-white/10 group-hover/card:scale-110 transition-transform duration-500">
                       <Star className="w-8 h-8 text-white fill-white/20" />
                     </div>
-                    <h3 className="text-3xl font-black mb-2 tracking-tighter uppercase">{currentPlan.name}</h3>
+                    <h3 className="text-3xl font-black mb-2 tracking-tighter uppercase">{tierName || currentPlan.name}</h3>
+                    {tierTagline && (
+                      <p className="text-gray-400 text-xs uppercase tracking-widest mb-2">{tierTagline}</p>
+                    )}
                     <p className="text-emerald-400 font-black text-sm uppercase tracking-widest mb-6">
                       {currentPlan.price > 0 ? `KES ${currentPlan.price.toLocaleString()} / mo` : 'Open Source'}
                     </p>
+                    {subscriptionExpired && (
+                      <p className="text-amber-300/90 text-xs mb-4 leading-relaxed">
+                        Your {rawTier ? getDisplayTierName(rawTier) : 'paid'} plan expired
+                        {expiredEndDate ? ` on ${expiredEndDate}` : ''}. Renew to restore full limits.
+                      </p>
+                    )}
                     <div className="inline-block">
                       {getSubscriptionStatusBadge()}
                     </div>
@@ -658,7 +702,7 @@ const Payments: React.FC = () => {
 
                 {/* Features List */}
                 <div className="space-y-5 mb-10">
-                  {currentPlan.features.slice(0, 4).map((f, i) => (
+                  {currentPlanFeatures.slice(0, 4).map((f, i) => (
                     <div key={i} className="flex items-center space-x-3">
                       <div className="p-1 bg-emerald-500/20 rounded-full">
                         <Check className="w-3 h-3 text-emerald-500" />
@@ -714,7 +758,7 @@ const Payments: React.FC = () => {
             </section>
 
             {/* Billing Timeline Mini-Card */}
-            {!isFree && user?.subscription_end_date && (
+            {(subscriptionExpired || (!isFree && user?.subscription_end_date)) && user?.subscription_end_date && (
               <section className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl rounded-[40px] border border-white dark:border-slate-700 p-8 group">
                 <div className="flex items-center space-x-3 mb-8">
                   <div className="p-1 bg-blue-100 dark:bg-blue-500/20 rounded-lg">

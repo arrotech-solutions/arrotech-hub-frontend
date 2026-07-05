@@ -2639,8 +2639,8 @@ class ApiService {
     return response.data;
   }
 
-  async useTemplate(templateId: string): Promise<ApiResponse<any>> {
-    const response = await this.api.post(`/templates/${templateId}/use`);
+  async useTemplate(templateId: string, config?: Record<string, any>): Promise<ApiResponse<any>> {
+    const response = await this.api.post(`/templates/${templateId}/use`, config);
     return response.data;
   }
 
@@ -2656,6 +2656,12 @@ class ApiService {
 
   async getDriveFolders(): Promise<ApiResponse<any>> {
     const response = await this.api.get('/templates/helpers/drive-folders');
+    return response.data;
+  }
+
+  async getDriveSpreadsheets(folderId?: string): Promise<ApiResponse<any>> {
+    const params = folderId ? { folder_id: folderId } : {};
+    const response = await this.api.get('/templates/helpers/drive-spreadsheets', { params });
     return response.data;
   }
 

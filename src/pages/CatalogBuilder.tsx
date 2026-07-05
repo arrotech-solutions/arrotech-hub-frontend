@@ -39,6 +39,7 @@ interface ProductDraft {
     category: string;
     sku: string;
     brand: string;
+    availability: '' | 'Available' | 'Out of Stock';
     images: ProductImage[];
     primaryImageIndex: number;
     status: 'pending' | 'extracting' | 'extracted' | 'error';
@@ -56,6 +57,7 @@ interface ExportResult {
 
 const STEPS = ['Prerequisites', 'Capture', 'Review & Edit', 'Export'];
 const CURRENCIES = ['KES', 'USD', 'NGN', 'UGX', 'TZS', 'GHS', 'ZAR', 'EUR', 'GBP'];
+const AVAILABILITY_OPTIONS: Array<'' | 'Available' | 'Out of Stock'> = ['', 'Available', 'Out of Stock'];
 const MAX_IMAGES_PER_PRODUCT = 6;
 const DRAFT_STORAGE_KEY = 'catalog_builder_drafts_v2';
 
@@ -70,6 +72,7 @@ const emptyProduct = (): ProductDraft => ({
     category: '',
     sku: '',
     brand: '',
+    availability: '',
     images: [],
     primaryImageIndex: 0,
     status: 'pending',
@@ -414,6 +417,7 @@ const CatalogBuilder: React.FC = () => {
     }, [step, exportMode, selectedFolderId, loadSheets]);
 
     const validProducts = products.filter((p) => p.name.trim());
+    const productsWithoutAvailability = validProducts.filter((p) => !p.availability);
 
     const handleExport = async () => {
         if (!googleConnected) {
@@ -422,6 +426,10 @@ const CatalogBuilder: React.FC = () => {
         }
         if (!validProducts.length) {
             toast.error('Add at least one product with a name');
+            return;
+        }
+        if (productsWithoutAvailability.length) {
+            toast.error(`Set availability for ${productsWithoutAvailability.length} product(s) before exporting`);
             return;
         }
         if (exportMode === 'append' && !selectedSheetId) {
@@ -449,6 +457,7 @@ const CatalogBuilder: React.FC = () => {
                 category: p.category,
                 sku: p.sku,
                 brand: p.brand,
+                availability: p.availability,
                 image_index: imageIndex,
             };
         });
@@ -1040,6 +1049,32 @@ const CatalogBuilder: React.FC = () => {
                                                         className="w-full mt-1 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500"
                                                     />
                                                 </div>
+                                                <div>
+                                                    <label className="text-xs font-semibold text-gray-500 dark:text-slate-400">
+                                                        Availability *
+                                                    </label>
+                                                    <select
+                                                        value={p.availability}
+                                                        onChange={(e) =>
+                                                            updateProduct(p.id, {
+                                                                availability: e.target.value as ProductDraft['availability'],
+                                                            })
+                                                        }
+                                                        className={`w-full mt-1 border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 ${
+                                                            !p.availability
+                                                                ? 'border-amber-400 dark:border-amber-500/60 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300'
+                                                                : p.availability === 'Available'
+                                                                ? 'border-green-300 dark:border-green-500/40 bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-400'
+                                                                : 'border-red-300 dark:border-red-500/40 bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400'
+                                                        } dark:bg-slate-800`}
+                                                    >
+                                                        {AVAILABILITY_OPTIONS.map((opt) => (
+                                                            <option key={opt || '__unset'} value={opt}>
+                                                                {opt || '— Select availability —'}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                </div>
                                                 <div className="sm:col-span-2">
                                                     <label className="text-xs font-semibold text-gray-500 dark:text-slate-400">
                                                         Description
@@ -1066,6 +1101,11 @@ const CatalogBuilder: React.FC = () => {
                                         {!p.name.trim() && (
                                             <p className="text-xs text-amber-600 dark:text-amber-400 mt-2 flex items-center gap-1">
                                                 <AlertCircle className="w-3 h-3" /> Name is required to export this product.
+                                            </p>
+                                        )}
+                                        {p.name.trim() && !p.availability && (
+                                            <p className="text-xs text-amber-600 dark:text-amber-400 mt-2 flex items-center gap-1">
+                                                <AlertCircle className="w-3 h-3" /> Availability must be set before export.
                                             </p>
                                         )}
                                     </div>
