@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import {
     Search, Phone, MoreVertical, Send, User, Shield, Info, Image as ImageIcon,
     Paperclip, CheckCheck, Check, Clock, Plus, Bot, Tag, Filter, UserCircle, Star, ArrowLeft, Loader2,
@@ -12,6 +13,15 @@ import ContactAvatar from './ContactAvatar';
 import { useWebSocket } from '../../hooks/useWebSocket';
 
 const SAVED_SEGMENTS_KEY = 'wa_inbox_segments';
+const FLOATING_MENU_WIDTH = 256;
+
+function computeFloatingMenuPosition(anchor: HTMLElement): { top: number; left: number } {
+    const rect = anchor.getBoundingClientRect();
+    const margin = 12;
+    let left = rect.right - FLOATING_MENU_WIDTH;
+    left = Math.max(margin, Math.min(left, window.innerWidth - FLOATING_MENU_WIDTH - margin));
+    return { top: rect.bottom + 8, left };
+}
 
 export interface Contact {
     id: number;
@@ -205,6 +215,12 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const messagesScrollRef = useRef<HTMLDivElement>(null);
     const prevContactIdRef = useRef<number | null>(null);
+    const filterBtnRef = useRef<HTMLButtonElement>(null);
+    const segmentsBtnRef = useRef<HTMLButtonElement>(null);
+    const filterPortalRef = useRef<HTMLDivElement>(null);
+    const segmentsPortalRef = useRef<HTMLDivElement>(null);
+    const [filterMenuPos, setFilterMenuPos] = useState<{ top: number; left: number } | null>(null);
+    const [segmentsMenuPos, setSegmentsMenuPos] = useState<{ top: number; left: number } | null>(null);
     const composerRef = useRef<HTMLTextAreaElement>(null);
     const skipInitialContactFetch = useRef(contacts.length > 0);
 
@@ -223,6 +239,94 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
             /* ignore */
         }
     }, [searchQuery, statusFilter, filterAgent, filterStarred, filterUnread, filterTag, setContacts]);
+
+    // Close filter/segment menus when clicking outside
+    useEffect(() => {
+        if (!showFilterMenu && !showSegmentsMenu) return;
+
+        const handleClickOutside = (event: MouseEvent) => {
+            const target = event.target as Node;
+            if (
+                showFilterMenu &&
+                !filterBtnRef.current?.contains(target) &&
+                !filterPortalRef.current?.contains(target)
+            ) {
+                setShowFilterMenu(false);
+                setFilterMenuPos(null);
+            }
+            if (
+                showSegmentsMenu &&
+                !segmentsBtnRef.current?.contains(target) &&
+                !segmentsPortalRef.current?.contains(target)
+            ) {
+                setShowSegmentsMenu(false);
+                setSegmentsMenuPos(null);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [showFilterMenu, showSegmentsMenu]);
+
+    useLayoutEffect(() => {
+        if (!showFilterMenu || !filterBtnRef.current) return;
+        const update = () => {
+            if (filterBtnRef.current) {
+                setFilterMenuPos(computeFloatingMenuPosition(filterBtnRef.current));
+            }
+        };
+        update();
+        window.addEventListener('resize', update);
+        window.addEventListener('scroll', update, true);
+        return () => {
+            window.removeEventListener('resize', update);
+            window.removeEventListener('scroll', update, true);
+        };
+    }, [showFilterMenu]);
+
+    useLayoutEffect(() => {
+        if (!showSegmentsMenu || !segmentsBtnRef.current) return;
+        const update = () => {
+            if (segmentsBtnRef.current) {
+                setSegmentsMenuPos(computeFloatingMenuPosition(segmentsBtnRef.current));
+            }
+        };
+        update();
+        window.addEventListener('resize', update);
+        window.addEventListener('scroll', update, true);
+        return () => {
+            window.removeEventListener('resize', update);
+            window.removeEventListener('scroll', update, true);
+        };
+    }, [showSegmentsMenu]);
+
+    const toggleFilterMenu = () => {
+        setShowSegmentsMenu(false);
+        setSegmentsMenuPos(null);
+        setShowFilterMenu((open) => {
+            const next = !open;
+            if (next && filterBtnRef.current) {
+                setFilterMenuPos(computeFloatingMenuPosition(filterBtnRef.current));
+            } else {
+                setFilterMenuPos(null);
+            }
+            return next;
+        });
+    };
+
+    const toggleSegmentsMenu = () => {
+        setShowFilterMenu(false);
+        setFilterMenuPos(null);
+        setShowSegmentsMenu((open) => {
+            const next = !open;
+            if (next && segmentsBtnRef.current) {
+                setSegmentsMenuPos(computeFloatingMenuPosition(segmentsBtnRef.current));
+            } else {
+                setSegmentsMenuPos(null);
+            }
+            return next;
+        });
+    };
 
     const scrollMessagesToBottom = useCallback((behavior: ScrollBehavior = 'auto') => {
         const container = messagesScrollRef.current;
@@ -700,7 +804,9 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
         setFilterTag(segment.tag || '');
         setActiveSegmentId(segment.id);
         setShowSegmentsMenu(false);
+        setSegmentsMenuPos(null);
         setShowFilterMenu(false);
+        setFilterMenuPos(null);
     };
 
     const clearSegmentFilters = () => {
@@ -900,101 +1006,36 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
     const currentStatusConfig = STATUS_CONFIG[contactStatus] || STATUS_CONFIG.open;
 
     return (
-        <div className="flex flex-1 min-h-0 bg-white dark:bg-slate-900 rounded-none sm:rounded-2xl border-y sm:border dark:border-slate-800 shadow-sm overflow-hidden text-slate-900 dark:text-slate-100">
+        <div className="flex flex-1 min-h-0 bg-white dark:bg-slate-900 rounded-none sm:rounded-2xl border-y sm:border dark:border-slate-800 shadow-sm text-slate-900 dark:text-slate-100">
             {/* Left Pane: Conversations List */}
             <div className={`w-full md:w-80 lg:w-96 xl:w-[22rem] flex-shrink-0 border-r dark:border-slate-800 flex flex-col min-h-0 transition-transform duration-300 ${selectedContact ? 'hidden md:flex' : 'flex'}`}>
                 {/* Header */}
                 <div className="p-3 sm:p-4 border-b dark:border-slate-800 space-y-2 sm:space-y-3 shrink-0">
-                    <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2 min-w-0">
-                            <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">Inbox</h2>
-                            <span
-                                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wide ${
-                                    isConnected
-                                        ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                                        : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-                                }`}
-                                title={isConnected ? 'Live updates via WebSocket' : 'Polling for updates (WebSocket disconnected)'}
+                    <div className="flex items-start justify-between gap-3">
+                        <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white shrink-0 pt-1">Inbox</h2>
+                        <div className="flex flex-wrap gap-1 sm:gap-1.5 justify-end">
+                            <button
+                                ref={filterBtnRef}
+                                type="button"
+                                onClick={toggleFilterMenu}
+                                className={`p-2 rounded-lg transition-colors ${(filterAgent || filterStarred || filterUnread || filterTag) ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
+                                title="Filters"
+                                aria-expanded={showFilterMenu}
+                                aria-haspopup="true"
                             >
-                                <span className={`w-1.5 h-1.5 rounded-full ${isConnected ? 'bg-green-500' : 'bg-amber-500 animate-pulse'}`} />
-                                {isConnected ? 'Live' : 'Polling'}
-                            </span>
-                        </div>
-                        <div className="flex gap-1 sm:gap-1.5 overflow-x-auto scrollbar-hide max-w-[calc(100%-4rem)] shrink-0">
-                            <div className="relative">
-                                <button
-                                    onClick={() => setShowFilterMenu(!showFilterMenu)}
-                                    className={`p-2 rounded-lg transition-colors ${(filterAgent || filterStarred || filterUnread || filterTag) ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
-                                    title="Filters"
-                                >
-                                    <SlidersHorizontal className="w-5 h-5" />
-                                </button>
-                                {/* Filter Dropdown */}
-                                {showFilterMenu && (
-                                    <div className="absolute right-0 sm:right-0 left-auto top-full mt-2 w-[min(16rem,calc(100vw-2rem))] sm:w-64 bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-xl shadow-xl z-50 p-4 space-y-4">
-                                        <div className="flex items-center justify-between">
-                                            <h4 className="font-semibold text-sm text-slate-900 dark:text-white">Filters</h4>
-                                            <button onClick={() => { clearSegmentFilters(); }} className="text-xs text-green-600 hover:text-green-700">Clear all</button>
-                                        </div>
-                                        <div>
-                                            <label className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1 block">Assigned Agent</label>
-                                            <select
-                                                value={filterAgent}
-                                                onChange={(e) => setFilterAgent(e.target.value)}
-                                                className="w-full text-sm bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-green-500"
-                                            >
-                                                <option value="">All Agents</option>
-                                                <option value="unassigned">Unassigned</option>
-                                                {teamMembers.map(m => (
-                                                    <option key={m.id} value={m.id}>{m.name}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                        <label className="flex items-center gap-2 cursor-pointer">
-                                            <input type="checkbox" checked={filterStarred} onChange={(e) => setFilterStarred(e.target.checked)} className="rounded border-slate-300 text-green-600 focus:ring-green-500" />
-                                            <Star className="w-4 h-4 text-amber-500" />
-                                            <span className="text-sm text-slate-700 dark:text-slate-300">Starred only</span>
-                                        </label>
-                                        <label className="flex items-center gap-2 cursor-pointer">
-                                            <input type="checkbox" checked={filterUnread} onChange={(e) => setFilterUnread(e.target.checked)} className="rounded border-slate-300 text-green-600 focus:ring-green-500" />
-                                            <MessageSquare className="w-4 h-4 text-green-500" />
-                                            <span className="text-sm text-slate-700 dark:text-slate-300">Has unread</span>
-                                        </label>
-                                        <button onClick={() => setShowFilterMenu(false)} className="w-full py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors">Apply</button>
-                                    </div>
-                                )}
-                            </div>
-                            <div className="relative">
-                                <button
-                                    onClick={() => setShowSegmentsMenu(!showSegmentsMenu)}
-                                    className={`p-2 rounded-lg transition-colors ${activeSegmentId ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
-                                    title="Saved segments"
-                                >
-                                    <Users className="w-5 h-5" />
-                                </button>
-                                {showSegmentsMenu && (
-                                    <div className="absolute right-0 top-full mt-2 w-[min(16rem,calc(100vw-2rem))] sm:w-64 bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-xl shadow-xl z-50 p-3 space-y-2 max-h-80 overflow-y-auto">
-                                        <div className="flex items-center justify-between px-1">
-                                            <h4 className="font-semibold text-sm text-slate-900 dark:text-white">Segments</h4>
-                                            <button onClick={saveCurrentAsSegment} className="text-xs text-green-600 hover:text-green-700">Save current</button>
-                                        </div>
-                                        {[...BUILTIN_SEGMENTS, ...savedSegments].map((seg) => (
-                                            <button
-                                                key={seg.id}
-                                                onClick={() => applySegment(seg)}
-                                                className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${activeSegmentId === seg.id ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300'}`}
-                                            >
-                                                {seg.name}
-                                            </button>
-                                        ))}
-                                        {activeSegmentId && (
-                                            <button onClick={() => { clearSegmentFilters(); setShowSegmentsMenu(false); }} className="w-full text-xs text-slate-500 hover:text-slate-700 pt-1">
-                                                Clear segment
-                                            </button>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
+                                <SlidersHorizontal className="w-5 h-5" />
+                            </button>
+                            <button
+                                ref={segmentsBtnRef}
+                                type="button"
+                                onClick={toggleSegmentsMenu}
+                                className={`p-2 rounded-lg transition-colors ${activeSegmentId ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
+                                title="Saved segments"
+                                aria-expanded={showSegmentsMenu}
+                                aria-haspopup="true"
+                            >
+                                <Users className="w-5 h-5" />
+                            </button>
                             <button
                                 onClick={() => {
                                     if (selectionMode) {
@@ -1031,6 +1072,7 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
                             </button>
                             <input ref={importInputRef} type="file" accept=".csv" className="hidden" onChange={handleImportContacts} />
                             <button
+                                type="button"
                                 onClick={() => setShowNewContactModal(true)}
                                 className="p-2 bg-green-600 text-white hover:bg-green-700 rounded-lg transition-colors"
                                 title="New Contact"
@@ -1039,6 +1081,14 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
                             </button>
                         </div>
                     </div>
+
+                    <p
+                        className="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400"
+                        title={isConnected ? 'Live updates via WebSocket' : 'Polling for updates (WebSocket disconnected)'}
+                    >
+                        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${isConnected ? 'bg-green-500' : 'bg-amber-500 animate-pulse'}`} />
+                        {isConnected ? 'Live updates' : 'Polling for updates'}
+                    </p>
 
                     {/* Status Filter Tabs */}
                     <div className="flex gap-1 overflow-x-auto scrollbar-hide -mx-1 px-1">
@@ -1179,7 +1229,7 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
 
             {/* Middle Pane: Chat Area */}
             {selectedContact ? (
-                <div className="flex-1 flex flex-col relative z-10 bg-slate-50 dark:bg-slate-900/50 min-h-0 min-w-0">
+                <div className="flex-1 flex flex-col relative z-10 bg-slate-50 dark:bg-slate-900/50 min-h-0 min-w-0 overflow-hidden">
                     {/* Chat Header */}
                     <div className="min-h-14 sm:h-16 border-b dark:border-slate-800 flex items-center justify-between px-3 sm:px-4 py-2 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md sticky top-0 z-20 shrink-0">
                         <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
@@ -1882,6 +1932,94 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
                         </div>
                     </div>
                 </div>
+            )}
+
+            {showFilterMenu && filterMenuPos && createPortal(
+                <div
+                    ref={filterPortalRef}
+                    style={{
+                        position: 'fixed',
+                        top: filterMenuPos.top,
+                        left: filterMenuPos.left,
+                        width: FLOATING_MENU_WIDTH,
+                    }}
+                    className="z-[200] bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-xl shadow-2xl p-4 space-y-4"
+                >
+                    <div className="flex items-center justify-between">
+                        <h4 className="font-semibold text-sm text-slate-900 dark:text-white">Filters</h4>
+                        <button type="button" onClick={() => { clearSegmentFilters(); }} className="text-xs text-green-600 hover:text-green-700">Clear all</button>
+                    </div>
+                    <div>
+                        <label className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1 block">Assigned Agent</label>
+                        <select
+                            value={filterAgent}
+                            onChange={(e) => setFilterAgent(e.target.value)}
+                            className="w-full text-sm bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-green-500"
+                        >
+                            <option value="">All Agents</option>
+                            <option value="unassigned">Unassigned</option>
+                            {teamMembers.map(m => (
+                                <option key={m.id} value={m.id}>{m.name}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" checked={filterStarred} onChange={(e) => setFilterStarred(e.target.checked)} className="rounded border-slate-300 text-green-600 focus:ring-green-500" />
+                        <Star className="w-4 h-4 text-amber-500" />
+                        <span className="text-sm text-slate-700 dark:text-slate-300">Starred only</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" checked={filterUnread} onChange={(e) => setFilterUnread(e.target.checked)} className="rounded border-slate-300 text-green-600 focus:ring-green-500" />
+                        <MessageSquare className="w-4 h-4 text-green-500" />
+                        <span className="text-sm text-slate-700 dark:text-slate-300">Has unread</span>
+                    </label>
+                    <button
+                        type="button"
+                        onClick={() => { setShowFilterMenu(false); setFilterMenuPos(null); }}
+                        className="w-full py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
+                    >
+                        Apply
+                    </button>
+                </div>,
+                document.body
+            )}
+
+            {showSegmentsMenu && segmentsMenuPos && createPortal(
+                <div
+                    ref={segmentsPortalRef}
+                    style={{
+                        position: 'fixed',
+                        top: segmentsMenuPos.top,
+                        left: segmentsMenuPos.left,
+                        width: FLOATING_MENU_WIDTH,
+                    }}
+                    className="z-[200] bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-xl shadow-2xl p-3 space-y-2 max-h-80 overflow-y-auto"
+                >
+                    <div className="flex items-center justify-between px-1">
+                        <h4 className="font-semibold text-sm text-slate-900 dark:text-white">Segments</h4>
+                        <button type="button" onClick={saveCurrentAsSegment} className="text-xs text-green-600 hover:text-green-700">Save current</button>
+                    </div>
+                    {[...BUILTIN_SEGMENTS, ...savedSegments].map((seg) => (
+                        <button
+                            key={seg.id}
+                            type="button"
+                            onClick={() => applySegment(seg)}
+                            className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${activeSegmentId === seg.id ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300'}`}
+                        >
+                            {seg.name}
+                        </button>
+                    ))}
+                    {activeSegmentId && (
+                        <button
+                            type="button"
+                            onClick={() => { clearSegmentFilters(); setShowSegmentsMenu(false); setSegmentsMenuPos(null); }}
+                            className="w-full text-xs text-slate-500 hover:text-slate-700 pt-1"
+                        >
+                            Clear segment
+                        </button>
+                    )}
+                </div>,
+                document.body
             )}
         </div>
     );
