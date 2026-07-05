@@ -41,6 +41,7 @@ import logo from '../assets/Logo/icononly_transparent_nobuffer.png';
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { getDisplayTier, getDisplayTierName } from '../hooks/useSubscription';
 
 import NotificationsDropdown from './NotificationsDropdown';
 import CookieConsent from './CookieConsent';
@@ -278,12 +279,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     };
   }, [userDropdownOpen]);
 
+  const displayTier = getDisplayTier(user);
+
   const getSubscriptionColor = (tier: string) => {
     switch (tier) {
       case 'enterprise':
         return 'bg-gradient-to-r from-purple-500 to-pink-500';
       case 'pro':
         return 'bg-gradient-to-r from-blue-500 to-cyan-500';
+      case 'business':
+        return 'bg-gradient-to-r from-indigo-500 to-violet-500';
+      case 'starter':
+        return 'bg-gradient-to-r from-sky-500 to-blue-500';
       default:
         return 'bg-gradient-to-r from-green-500 to-emerald-500';
     }
@@ -447,10 +454,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               </div>
             </div>
             <div className="mt-3 flex items-center space-x-2">
-              <div className={`px-3 py-1 rounded-full text-xs font-medium text-white ${getSubscriptionColor(user.subscription_tier)}`}>
+              <div className={`px-3 py-1 rounded-full text-xs font-medium text-white ${getSubscriptionColor(displayTier)}`}>
                 <div className="flex items-center space-x-1">
-                  {getSubscriptionIcon(user.subscription_tier)}
-                  <span className="capitalize">{user.subscription_tier}</span>
+                  {getSubscriptionIcon(displayTier)}
+                  <span className="capitalize">{getDisplayTierName(displayTier)}</span>
                 </div>
               </div>
             </div>
@@ -524,10 +531,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </div>
               </div>
               <div className="mt-3 flex items-center space-x-2">
-                <div className={`px-3 py-1 rounded-full text-xs font-medium text-white ${getSubscriptionColor(user.subscription_tier)}`}>
+                <div className={`px-3 py-1 rounded-full text-xs font-medium text-white ${getSubscriptionColor(displayTier)}`}>
                   <div className="flex items-center space-x-1">
-                    {getSubscriptionIcon(user.subscription_tier)}
-                    <span className="capitalize">{user.subscription_tier}</span>
+                    {getSubscriptionIcon(displayTier)}
+                    <span className="capitalize">{getDisplayTierName(displayTier)}</span>
                   </div>
                 </div>
               </div>
@@ -613,10 +620,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                       <p className="text-sm font-medium text-gray-900 dark:text-white">{user.name}</p>
                       <p className="text-xs text-gray-500 dark:text-slate-400">{user.email}</p>
                       <div className="mt-2">
-                        <div className={`px-2 py-1 rounded-full text-xs font-medium text-white inline-block ${getSubscriptionColor(user.subscription_tier)}`}>
+                        <div className={`px-2 py-1 rounded-full text-xs font-medium text-white inline-block ${getSubscriptionColor(displayTier)}`}>
                           <div className="flex items-center space-x-1">
-                            {getSubscriptionIcon(user.subscription_tier)}
-                            <span className="capitalize">{user.subscription_tier}</span>
+                            {getSubscriptionIcon(displayTier)}
+                            <span className="capitalize">{getDisplayTierName(displayTier)}</span>
                           </div>
                         </div>
                       </div>
