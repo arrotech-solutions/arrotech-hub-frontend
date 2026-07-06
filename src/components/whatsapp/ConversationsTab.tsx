@@ -1,16 +1,19 @@
-import React, { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import {
     Search, Phone, MoreVertical, Send, User, Shield, Info, Image as ImageIcon,
     Paperclip, CheckCheck, Check, Clock, Plus, Bot, Tag, Filter, UserCircle, Star, ArrowLeft, Loader2,
     X, MessageSquare, CircleDot, Archive, SlidersHorizontal, Zap, FileText, Ban, StarOff, Edit3, Save, Trash2,
     CheckSquare, Square, Camera, Download, Upload, BarChart2, Moon, AlertTriangle,
-    ShoppingCart, CreditCard, UserCheck, LayoutTemplate, Users
+    ShoppingCart, CreditCard, UserCheck, LayoutTemplate, Users, Sparkles, Wrench, BellOff, Bell
 } from 'lucide-react';
 import apiService from '../../services/api';
 import toast from 'react-hot-toast';
 import ContactAvatar from './ContactAvatar';
+import WhatsAppMessageMedia from './WhatsAppMessageMedia';
 import { useWebSocket } from '../../hooks/useWebSocket';
+import { useWhatsAppInboxShortcuts } from '../../hooks/useWhatsAppInboxShortcuts';
+import { useAuth } from '../../hooks/useAuth';
 
 const SAVED_SEGMENTS_KEY = 'wa_inbox_segments';
 const FLOATING_MENU_WIDTH = 256;
@@ -78,7 +81,14 @@ export interface TeamMember {
 
 export interface InboxSettingsSla {
     sla_first_response_minutes: number;
+    notify_new_message_browser?: boolean;
+    notify_new_message_sound?: boolean;
+    notify_new_message_email?: boolean;
+    notify_sla_breach?: boolean;
+    csat_enabled?: boolean;
 }
+
+const DEMO_BOT_PHONE = '254796391205';
 
 interface ConversationsTabProps {
     contacts: Contact[];
@@ -112,11 +122,13 @@ interface SavedSegment {
     filterAgent?: string;
     filterStarred?: boolean;
     filterUnread?: boolean;
+    filterSlaBreached?: boolean;
     tag?: string;
 }
 
 const BUILTIN_SEGMENTS: SavedSegment[] = [
     { id: 'unread-open', name: 'Unread + Open', status: 'open', filterUnread: true },
+    { id: 'sla-breached', name: 'SLA breached', filterSlaBreached: true },
     { id: 'vip', name: 'VIP tag', tag: 'vip' },
     { id: 'failed-payment', name: 'Failed payment', tag: 'failed_payment' },
 ];
@@ -149,6 +161,7 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
     sharedQuickReplies,
     onSharedQuickRepliesChange,
 }) => {
+    const { user } = useAuth();
     const { lastEvent, sendPresence, isConnected } = useWebSocket();
     const [searchQuery, setSearchQuery] = useState('');
     const [newMessage, setNewMessage] = useState('');
@@ -177,6 +190,11 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
     const [filterAgent, setFilterAgent] = useState<string>('');
     const [filterStarred, setFilterStarred] = useState(false);
     const [filterUnread, setFilterUnread] = useState(false);
+    const [filterSlaBreached, setFilterSlaBreached] = useState(false);
+    const [showTeamQueue, setShowTeamQueue] = useState(false);
+    const [teamQueue, setTeamQueue] = useState<{ workload: { agent_id: string; name: string; open_count: number }[]; unassigned: Contact[] } | null>(null);
+    const [mcpRunning, setMcpRunning] = useState(false);
+    const [aiDraftLoading, setAiDraftLoading] = useState(false);
     const [showNewContactModal, setShowNewContactModal] = useState(false);
     const [newContactPhone, setNewContactPhone] = useState('');
     const [newContactName, setNewContactName] = useState('');
@@ -222,6 +240,7 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
     const [filterMenuPos, setFilterMenuPos] = useState<{ top: number; left: number } | null>(null);
     const [segmentsMenuPos, setSegmentsMenuPos] = useState<{ top: number; left: number } | null>(null);
     const composerRef = useRef<HTMLTextAreaElement>(null);
+    const searchInputRef = useRef<HTMLInputElement>(null);
     const skipInitialContactFetch = useRef(contacts.length > 0);
 
     const loadContactsFromServer = useCallback(async () => {
@@ -233,12 +252,14 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
                 is_starred: filterStarred || undefined,
                 has_unread: filterUnread || undefined,
                 tag: filterTag || undefined,
+                sla_breached: filterSlaBreached || undefined,
+                include_snoozed: filterSlaBreached ? undefined : false,
             });
             if (response.success) setContacts(response.data);
         } catch {
             /* ignore */
         }
-    }, [searchQuery, statusFilter, filterAgent, filterStarred, filterUnread, filterTag, setContacts]);
+    }, [searchQuery, statusFilter, filterAgent, filterStarred, filterUnread, filterTag, filterSlaBreached, setContacts]);
 
     // Close filter/segment menus when clicking outside
     useEffect(() => {
@@ -393,12 +414,52 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
             }
         }
         if (lastEvent.type === 'whatsapp_inbox_presence' && selectedContact) {
+            const selfId = user?.id ? String(user.id) : '';
             const viewers = (lastEvent.data?.viewers || []).filter(
-                (v: { user_id: string }) => v.user_id !== String(localStorage.getItem('user_id'))
+                (v: { user_id: string }) => v.user_id !== selfId
             );
             setPresenceViewers(viewers);
         }
-    }, [lastEvent, selectedContact, fetchMessages, loadContactsFromServer]);
+    }, [lastEvent, selectedContact, fetchMessages, loadContactsFromServer, user?.id]);
+
+    useEffect(() => {
+        if (!lastEvent || lastEvent.type !== 'whatsapp_new_message') return;
+        if (lastEvent.data?.direction !== 'incoming') return;
+        if (document.hasFocus() && selectedContact && lastEvent.data?.contact_id === String(selectedContact.id)) {
+            return;
+        }
+
+        const notifyBrowser = inboxSettings.notify_new_message_browser !== false;
+        const notifySound = inboxSettings.notify_new_message_sound !== false;
+
+        if (notifyBrowser && typeof Notification !== 'undefined') {
+            if (Notification.permission === 'default') {
+                Notification.requestPermission();
+            }
+            if (Notification.permission === 'granted') {
+                new Notification('New WhatsApp message', {
+                    body: 'You have a new customer message in your inbox.',
+                    tag: 'wa-inbox',
+                });
+            }
+        }
+
+        if (notifySound) {
+            try {
+                const ctx = new AudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.frequency.value = 880;
+                gain.gain.value = 0.05;
+                osc.start();
+                osc.stop(ctx.currentTime + 0.12);
+            } catch {
+                /* ignore */
+            }
+        }
+    }, [lastEvent, selectedContact, inboxSettings.notify_new_message_browser, inboxSettings.notify_new_message_sound]);
 
     useEffect(() => {
         // Safety net: slower when WebSocket is live, faster when polling is the only path
@@ -422,6 +483,7 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
             filterStarred ||
             filterUnread ||
             !!filterTag ||
+            filterSlaBreached ||
             !!searchQuery;
 
         if (skipInitialContactFetch.current && !hasInboxFilters) {
@@ -431,7 +493,37 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
 
         const debounce = setTimeout(() => loadContactsFromServer(), 300);
         return () => clearTimeout(debounce);
-    }, [searchQuery, statusFilter, filterAgent, filterStarred, filterUnread, filterTag, loadContactsFromServer]);
+    }, [searchQuery, statusFilter, filterAgent, filterStarred, filterUnread, filterTag, filterSlaBreached, loadContactsFromServer]);
+
+    useEffect(() => {
+        if (!showTeamQueue) return;
+        apiService.getWhatsAppTeamQueue().then((r) => {
+            if (r.success) setTeamQueue(r.data);
+        });
+    }, [showTeamQueue, contacts.length]);
+
+    const inboxContactList = useMemo(
+        () =>
+            contacts.filter((c) => {
+                const searchTarget = `${c.name || ''} ${c.profile_name || ''} ${c.phone_number || ''}`.toLowerCase();
+                return searchTarget.includes(searchQuery.toLowerCase());
+            }),
+        [contacts, searchQuery]
+    );
+
+    useWhatsAppInboxShortcuts({
+        contacts: inboxContactList,
+        selectedContactId: selectedContact?.id ?? null,
+        onSelectContact: (id) => {
+            const found = contacts.find((c) => c.id === id);
+            if (found) setSelectedContact(found);
+        },
+        onFocusSearch: () => searchInputRef.current?.focus(),
+        onFocusComposer: () => composerRef.current?.focus(),
+        onClearSelection: () => setSelectedContact(null),
+        searchRef: searchInputRef,
+        composerRef,
+    });
 
     useEffect(() => {
         if (!selectedContact) {
@@ -508,17 +600,99 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
 
     const handleAssignAgent = async (agentId: string) => {
         if (!selectedContact) return;
+        const note = window.prompt('Internal note for reassignment (optional):');
+        if (note === null) return;
         try {
-            const response = await apiService.updateWhatsAppContact(selectedContact.id, {
-                assigned_to_id: agentId || null
+            const response = await apiService.reassignWhatsAppContact(String(selectedContact.id), {
+                assigned_to_id: agentId || null,
+                note: note.trim() || undefined,
             });
             if (response.success) {
-                toast.success('Agent assigned');
+                toast.success('Agent reassigned');
                 fetchContacts();
+                loadContactsFromServer();
                 setSelectedContact({ ...selectedContact, assigned_to_id: agentId || null });
+                if (note.trim()) fetchMessages(selectedContact.id);
             }
-        } catch (error) {
+        } catch {
             toast.error('Failed to assign agent');
+        }
+    };
+
+    const handleToggleOptOut = async () => {
+        if (!selectedContact) return;
+        const next = !selectedContact.opted_out;
+        try {
+            const response = await apiService.updateWhatsAppContact(selectedContact.id, { opted_out: next });
+            if (response.success) {
+                toast.success(next ? 'Contact opted out of broadcasts' : 'Contact opted back in');
+                fetchContacts();
+                loadContactsFromServer();
+                setSelectedContact({ ...selectedContact, opted_out: next });
+            }
+        } catch {
+            toast.error('Failed to update opt-out');
+        }
+    };
+
+    const handleUnsnooze = async () => {
+        if (!selectedContact) return;
+        try {
+            await apiService.unsnoozeWhatsAppContact(String(selectedContact.id));
+            toast.success('Conversation unsnoozed');
+            loadContactsFromServer();
+            fetchContacts();
+            setSelectedContact({ ...selectedContact, snoozed_until: null });
+        } catch {
+            toast.error('Failed to unsnooze');
+        }
+    };
+
+    const handleAiDraft = async () => {
+        if (!selectedContact || messages.length === 0) {
+            toast.error('Open a conversation with messages first');
+            return;
+        }
+        setAiDraftLoading(true);
+        try {
+            const recent = messages.slice(-8).map((m) => ({
+                id: String(m.id),
+                source: 'whatsapp',
+                sender: selectedContact.phone_number,
+                subject: '',
+                preview: m.content || '',
+                full_content: m.content || '',
+            }));
+            const result = await apiService.analyzeMessages(recent);
+            const enriched = Object.values(result.enriched || {})[0] as { quick_replies?: string[]; summary?: string } | undefined;
+            const draft = enriched?.quick_replies?.[0] || enriched?.summary;
+            if (draft) {
+                setNewMessage(draft);
+                composerRef.current?.focus();
+                toast.success('AI draft inserted');
+            } else {
+                toast.error('No draft suggestion available');
+            }
+        } catch {
+            toast.error('AI draft failed');
+        } finally {
+            setAiDraftLoading(false);
+        }
+    };
+
+    const runMcpAction = async (operation: string) => {
+        if (!selectedContact) return;
+        setMcpRunning(true);
+        try {
+            const result = await apiService.executeTool('whatsapp_messaging', {
+                operation,
+                phone_number: selectedContact.phone_number,
+            });
+            toast.success(typeof result === 'object' && result?.message ? result.message : 'Agent action completed');
+        } catch {
+            toast.error('Agent action failed');
+        } finally {
+            setMcpRunning(false);
         }
     };
 
@@ -801,6 +975,7 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
         setFilterAgent(segment.filterAgent || '');
         setFilterStarred(Boolean(segment.filterStarred));
         setFilterUnread(Boolean(segment.filterUnread));
+        setFilterSlaBreached(Boolean(segment.filterSlaBreached));
         setFilterTag(segment.tag || '');
         setActiveSegmentId(segment.id);
         setShowSegmentsMenu(false);
@@ -813,6 +988,7 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
         setFilterAgent('');
         setFilterStarred(false);
         setFilterUnread(false);
+        setFilterSlaBreached(false);
         setFilterTag('');
         setActiveSegmentId(null);
     };
@@ -827,6 +1003,7 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
             filterAgent: filterAgent || undefined,
             filterStarred: filterStarred || undefined,
             filterUnread: filterUnread || undefined,
+            filterSlaBreached: filterSlaBreached || undefined,
             tag: filterTag || undefined,
         };
         const next = [...savedSegments, segment];
@@ -984,15 +1161,7 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
         }
     };
 
-    const filteredContacts = contacts.filter(c => {
-        const searchTarget = `${c.name || ''} ${c.profile_name || ''} ${c.phone_number || ''}`.toLowerCase();
-        const matchesSearch = searchTarget.includes(searchQuery.toLowerCase());
-        const matchesStatus = statusFilter === 'all' || (c.status || 'open') === statusFilter;
-        const matchesAgent = !filterAgent || c.assigned_to_id === filterAgent;
-        const matchesStarred = !filterStarred || c.is_starred;
-        const matchesUnread = !filterUnread || (c.unread_count > 0);
-        return matchesSearch && matchesStatus && matchesAgent && matchesStarred && matchesUnread;
-    });
+    const filteredContacts = inboxContactList;
 
     const statusCounts = {
         all: contacts.length,
@@ -1015,10 +1184,18 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
                         <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white shrink-0 pt-1">Inbox</h2>
                         <div className="flex flex-wrap gap-1 sm:gap-1.5 justify-end">
                             <button
+                                type="button"
+                                onClick={() => setShowTeamQueue((v) => !v)}
+                                className={`p-2 rounded-lg transition-colors ${showTeamQueue ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
+                                title="Team queue"
+                            >
+                                <Users className="w-5 h-5" />
+                            </button>
+                            <button
                                 ref={filterBtnRef}
                                 type="button"
                                 onClick={toggleFilterMenu}
-                                className={`p-2 rounded-lg transition-colors ${(filterAgent || filterStarred || filterUnread || filterTag) ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
+                                className={`p-2 rounded-lg transition-colors ${(filterAgent || filterStarred || filterUnread || filterTag || filterSlaBreached) ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
                                 title="Filters"
                                 aria-expanded={showFilterMenu}
                                 aria-haspopup="true"
@@ -1034,7 +1211,7 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
                                 aria-expanded={showSegmentsMenu}
                                 aria-haspopup="true"
                             >
-                                <Users className="w-5 h-5" />
+                                <Filter className="w-5 h-5" />
                             </button>
                             <button
                                 onClick={() => {
@@ -1113,8 +1290,9 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                         <input
+                            ref={searchInputRef}
                             type="text"
-                            placeholder="Search conversations..."
+                            placeholder="Search conversations... (press /)"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all text-sm"
@@ -1122,12 +1300,41 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
                     </div>
                 </div>
 
+                {showTeamQueue && teamQueue && (
+                    <div className="mx-3 mb-2 p-3 rounded-xl bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/40 text-xs space-y-2 shrink-0">
+                        <p className="font-semibold text-blue-900 dark:text-blue-200">Team workload</p>
+                        <div className="flex flex-wrap gap-2">
+                            {teamQueue.workload.map((w) => (
+                                <span key={w.agent_id} className="px-2 py-1 rounded-lg bg-white/80 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                                    {w.name}: {w.open_count}
+                                </span>
+                            ))}
+                        </div>
+                        {teamQueue.unassigned.length > 0 && (
+                            <p className="text-slate-600 dark:text-slate-400">{teamQueue.unassigned.length} unassigned in queue</p>
+                        )}
+                    </div>
+                )}
+
                 {/* Contacts List */}
                 <div className="flex-1 overflow-y-auto scrollbar-hide">
                     {filteredContacts.length === 0 ? (
-                        <div className="p-8 text-center text-slate-500">
-                            <Bot className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                            <p>No conversations found</p>
+                        <div className="p-8 text-center text-slate-500 space-y-4">
+                            <Bot className="w-12 h-12 mx-auto opacity-50" />
+                            <div>
+                                <p className="font-medium text-slate-700 dark:text-slate-300">No conversations yet</p>
+                                <p className="text-sm mt-1">Messages from customers will appear here in real time.</p>
+                            </div>
+                            <a
+                                href={`https://wa.me/${DEMO_BOT_PHONE}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-green-600 text-white text-sm font-medium hover:bg-green-700"
+                            >
+                                <MessageSquare className="w-4 h-4" />
+                                Try the demo bot
+                            </a>
+                            <p className="text-[11px] text-slate-400">Tip: j/k to move · / to search · Esc to close chat</p>
                         </div>
                     ) : (
                         <div className="divide-y dark:divide-slate-800/50">
@@ -1357,16 +1564,11 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
                                                     </div>
                                                 )}
                                                 {msg.media_url && (
-                                                    <div className="mb-2">
-                                                        {msg.message_type === 'image' ? (
-                                                            <img src={msg.media_url} alt="Media" className="rounded-lg max-w-full max-h-64 object-cover" />
-                                                        ) : (
-                                                            <a href={msg.media_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-3 py-2 bg-white/20 dark:bg-slate-700/50 rounded-lg hover:bg-white/30 transition-colors">
-                                                                <FileText className="w-5 h-5" />
-                                                                <span className="text-sm underline">View attachment</span>
-                                                            </a>
-                                                        )}
-                                                    </div>
+                                                    <WhatsAppMessageMedia
+                                                        messageId={msg.id}
+                                                        messageType={msg.message_type}
+                                                        mediaUrl={msg.media_url}
+                                                    />
                                                 )}
                                                 {msg.content && <div className="text-[15px] leading-relaxed whitespace-pre-wrap">{msg.content}</div>}
                                                 <div className={`flex items-center justify-end gap-1 mt-1 text-[11px] ${msg.direction === 'outgoing' ? (isInternal ? 'opacity-60' : isAgent ? 'text-teal-100' : 'text-green-100') : 'text-slate-400'}`}>
@@ -1460,6 +1662,15 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
                                 <div className="flex items-center gap-1 flex-shrink-0 mb-1 mr-1">
                                     <button
                                         type="button"
+                                        onClick={handleAiDraft}
+                                        disabled={aiDraftLoading}
+                                        className="p-2 rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-purple-600"
+                                        title="AI draft reply"
+                                    >
+                                        {aiDraftLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                                    </button>
+                                    <button
+                                        type="button"
                                         onClick={openTemplatePicker}
                                         className="p-2 rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-green-600"
                                         title="Send template"
@@ -1484,7 +1695,7 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
                             </div>
                         </div>
                         <div className="text-center mt-2 hidden sm:block">
-                            <p className="text-[10px] text-slate-400">Press <span className="font-bold">Enter</span> to send · <span className="font-bold">Shift + Enter</span> for new line · Type <span className="font-bold">/</span> for quick replies</p>
+                            <p className="text-[10px] text-slate-400">Enter to send · j/k inbox · / search · Esc close</p>
                         </div>
                     </div>
                 </div>
@@ -1607,6 +1818,17 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
                                             {commerceContext.payment_amount != null && ` · KES ${commerceContext.payment_amount}`}
                                         </p>
                                     )}
+                                    {commerceContext.order_timeline?.length > 0 && (
+                                        <div className="pt-1 space-y-1 border-t border-slate-200 dark:border-slate-700">
+                                            <p className="text-[10px] font-bold uppercase text-slate-400">Timeline</p>
+                                            {commerceContext.order_timeline.slice(0, 5).map((ev: { type: string; label: string; at?: string; status?: string }, idx: number) => (
+                                                <p key={idx} className="text-xs text-slate-500 flex justify-between gap-2">
+                                                    <span>{ev.label}{ev.status ? ` · ${ev.status}` : ''}</span>
+                                                    {ev.at && <span className="text-slate-400 shrink-0">{formatTime(ev.at)}</span>}
+                                                </p>
+                                            ))}
+                                        </div>
+                                    )}
                                     <div className="flex flex-wrap gap-2 pt-1">
                                         {commerceContext.order_id && (
                                             <button
@@ -1632,6 +1854,31 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
                             </div>
                         )}
 
+                        {/* Agent actions (MCP) */}
+                        <div>
+                            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1">
+                                <Wrench className="w-3.5 h-3.5" /> Agent actions
+                            </h4>
+                            <div className="grid grid-cols-1 gap-2">
+                                <button
+                                    type="button"
+                                    disabled={mcpRunning}
+                                    onClick={() => runMcpAction('get_account_info')}
+                                    className="text-xs px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-50"
+                                >
+                                    Check WhatsApp account
+                                </button>
+                                <button
+                                    type="button"
+                                    disabled={mcpRunning}
+                                    onClick={() => runMcpAction('send_message')}
+                                    className="text-xs px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-50"
+                                >
+                                    Run send test (MCP)
+                                </button>
+                            </div>
+                        </div>
+
                         {/* Quick Actions */}
                         <div>
                             <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Quick Actions</h4>
@@ -1648,6 +1895,21 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
                                     className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
                                 >
                                     <Moon className="w-3.5 h-3.5" /> Snooze 4h
+                                </button>
+                                {selectedContact.snoozed_until && new Date(selectedContact.snoozed_until) > new Date() && (
+                                    <button
+                                        onClick={handleUnsnooze}
+                                        className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
+                                    >
+                                        <Bell className="w-3.5 h-3.5" /> Unsnooze
+                                    </button>
+                                )}
+                                <button
+                                    onClick={handleToggleOptOut}
+                                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${selectedContact.opted_out ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'}`}
+                                >
+                                    <BellOff className="w-3.5 h-3.5" />
+                                    {selectedContact.opted_out ? 'Opted out' : 'Opt out'}
                                 </button>
                                 <button
                                     onClick={handleToggleBlock}
@@ -1972,6 +2234,11 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
                         <input type="checkbox" checked={filterUnread} onChange={(e) => setFilterUnread(e.target.checked)} className="rounded border-slate-300 text-green-600 focus:ring-green-500" />
                         <MessageSquare className="w-4 h-4 text-green-500" />
                         <span className="text-sm text-slate-700 dark:text-slate-300">Has unread</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" checked={filterSlaBreached} onChange={(e) => setFilterSlaBreached(e.target.checked)} className="rounded border-slate-300 text-green-600 focus:ring-green-500" />
+                        <AlertTriangle className="w-4 h-4 text-orange-500" />
+                        <span className="text-sm text-slate-700 dark:text-slate-300">SLA breached</span>
                     </label>
                     <button
                         type="button"

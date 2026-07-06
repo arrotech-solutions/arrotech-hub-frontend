@@ -206,7 +206,7 @@ const Pricing: React.FC = () => {
                 <div className="absolute inset-0 -z-10">
                     <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-indigo-400/15 rounded-full blur-3xl" />
                     <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-emerald-400/10 rounded-full blur-3xl" />
-                </div>
+                    </div>
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                     <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] font-bold text-slate-900 dark:text-white mb-4 sm:mb-5 tracking-tight leading-[1.08] px-1">
                         One workspace.
@@ -219,7 +219,7 @@ const Pricing: React.FC = () => {
 
                     <div className="inline-flex items-center gap-3 p-1.5 bg-gray-100/80 dark:bg-slate-800/80 rounded-2xl backdrop-blur-sm">
                         {(['monthly', 'yearly'] as BillingCycle[]).map((cycle) => (
-                            <button
+                        <button
                                 key={cycle}
                                 onClick={() => setBillingCycle(cycle)}
                                 className={`px-5 py-2.5 rounded-xl font-semibold text-sm transition-all capitalize flex items-center gap-2 ${
@@ -232,9 +232,9 @@ const Pricing: React.FC = () => {
                                 {cycle === 'yearly' && (
                                     <span className="px-1.5 py-0.5 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold rounded-full uppercase tracking-wide">
                                         −20%
-                                    </span>
+                            </span>
                                 )}
-                            </button>
+                        </button>
                         ))}
                     </div>
                 </div>
@@ -275,7 +275,7 @@ const Pricing: React.FC = () => {
                                             <span className="inline-flex items-center gap-1 px-3 py-1 bg-violet-600 text-white text-xs font-bold rounded-full shadow">
                                                 <Clock className="w-3 h-3" /> 7 days free
                                             </span>
-                                        </div>
+                                            </div>
                                     )}
                                     {plan.popular && !plan.isTrial && (
                                         <div className="absolute -top-3 left-1/2 -translate-x-1/2">
@@ -302,9 +302,9 @@ const Pricing: React.FC = () => {
                                         <div className={`mb-3 ${CARD_PRICE_MIN_H}`}>
                                             {plan.isTrial ? (
                                                 <>
-                                                    <div className="flex items-baseline gap-1">
+                                                <div className="flex items-baseline gap-1">
                                                         <span className="text-3xl font-black text-gray-900 dark:text-white leading-none">Free</span>
-                                                    </div>
+                                                </div>
                                                     <p className="text-xs font-semibold text-violet-600 dark:text-violet-400 mt-1 leading-snug">
                                                         7-day Business preview · then KES 1,500/mo
                                                     </p>
@@ -401,7 +401,7 @@ const Pricing: React.FC = () => {
                         <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm md:text-base max-w-lg mx-auto">
                             No bolt-on products. Upgrade once, unlock more WhatsApp power inside the same workspace.
                         </p>
-                    </div>
+                            </div>
 
                     <div className="relative">
                         <div className="hidden md:block absolute top-8 left-[12%] right-[12%] h-0.5 bg-gradient-to-r from-slate-200 via-emerald-300 to-indigo-400 dark:from-slate-700 dark:via-emerald-700 dark:to-indigo-600" />
@@ -429,7 +429,7 @@ const Pricing: React.FC = () => {
                                                 {idx + 1}
                                             </span>
                                             <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">{step.label}</span>
-                                        </div>
+                                                        </div>
                                         <p className="text-sm font-semibold text-gray-900 dark:text-white mb-2">{step.title}</p>
                                         <ul className="space-y-1">
                                             {step.capabilities.map((cap, i) => (
@@ -443,9 +443,9 @@ const Pricing: React.FC = () => {
                                 );
                             })}
                         </div>
+                        </div>
                     </div>
-                </div>
-            </section>
+                </section>
 
             {/* Feature explorer — lens tabs + accordion categories */}
             <section id="feature-explorer" className="py-16 md:py-20">
@@ -568,9 +568,9 @@ const Pricing: React.FC = () => {
                                                     </div>
                                                 </div>
                                             ))}
-                                        </div>
+                        </div>
                                     )}
-                                </div>
+                        </div>
                             );
                         })}
                     </div>

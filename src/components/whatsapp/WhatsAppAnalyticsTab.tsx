@@ -11,6 +11,11 @@ interface AnalyticsData {
     auto_replies_sent: number;
     new_contacts: number;
     busiest_hours: { hour: number; count: number }[];
+    csat?: {
+        total_responses: number;
+        average_score: number | null;
+        breakdown: Record<number, number>;
+    };
 }
 
 const WhatsAppAnalyticsTab: React.FC = () => {
@@ -152,6 +157,35 @@ const WhatsAppAnalyticsTab: React.FC = () => {
                     <p className="text-sm text-slate-500 mt-1">Auto-replies triggered (all time)</p>
                 </div>
             </div>
+
+            {data.csat && (
+                <div className="bg-white dark:bg-slate-900 rounded-xl border dark:border-slate-800 p-6">
+                    <h3 className="font-semibold text-slate-900 dark:text-white mb-3">Customer satisfaction (CSAT)</h3>
+                    {data.csat.total_responses === 0 ? (
+                        <p className="text-sm text-slate-500">No CSAT responses yet — surveys send when conversations are marked resolved.</p>
+                    ) : (
+                        <div className="flex flex-wrap items-end gap-6">
+                            <div>
+                                <p className="text-3xl font-bold text-slate-900 dark:text-white">{data.csat.average_score ?? '—'}</p>
+                                <p className="text-sm text-slate-500">Average / 5 ({data.csat.total_responses} responses)</p>
+                            </div>
+                            <div className="flex gap-2 items-end flex-1 min-w-[200px]">
+                                {[1, 2, 3, 4, 5].map((score) => (
+                                    <div key={score} className="flex-1 text-center">
+                                        <div
+                                            className="mx-auto w-full max-w-[2rem] bg-green-500 rounded-t"
+                                            style={{
+                                                height: `${Math.max(8, ((data.csat?.breakdown[score] || 0) / data.csat!.total_responses) * 64)}px`,
+                                            }}
+                                        />
+                                        <span className="text-xs text-slate-500">{score}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 };
