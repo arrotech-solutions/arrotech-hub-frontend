@@ -592,7 +592,7 @@ class ApiService {
   }
 
   // WhatsApp Business API endpoints
-  async getWhatsAppContacts(params?: { search?: string; tag?: string; status?: string; assigned_to?: string; is_starred?: boolean; has_unread?: boolean; limit?: number; offset?: number }): Promise<ApiResponse<any>> {
+  async getWhatsAppContacts(params?: { search?: string; tag?: string; status?: string; assigned_to?: string; is_starred?: boolean; has_unread?: boolean; sla_breached?: boolean; include_snoozed?: boolean; limit?: number; offset?: number }): Promise<ApiResponse<any>> {
     const response = await this.api.get('/api/whatsapp/contacts', { params });
     return response.data;
   }
@@ -618,7 +618,7 @@ class ApiService {
     return response.data;
   }
 
-  async updateWhatsAppContact(contactId: number, data: { name?: string; tags?: string[]; notes?: string; is_blocked?: boolean; assigned_to_id?: string | null; status?: string; is_starred?: boolean }): Promise<ApiResponse<any>> {
+  async updateWhatsAppContact(contactId: number, data: { name?: string; tags?: string[]; notes?: string; is_blocked?: boolean; assigned_to_id?: string | null; status?: string; is_starred?: boolean; opted_out?: boolean }): Promise<ApiResponse<any>> {
     const response = await this.api.put(`/api/whatsapp/contacts/${contactId}`, data);
     return response.data;
   }
@@ -658,6 +658,28 @@ class ApiService {
     return URL.createObjectURL(response.data);
   }
 
+  async fetchWhatsAppMessageMediaBlob(messageId: string | number): Promise<string> {
+    const response = await this.api.get(`/api/whatsapp/messages/${messageId}/media`, {
+      responseType: 'blob',
+    });
+    return URL.createObjectURL(response.data);
+  }
+
+  async getWhatsAppHealth(): Promise<ApiResponse<any>> {
+    const response = await this.api.get('/api/whatsapp/health');
+    return response.data;
+  }
+
+  async reassignWhatsAppContact(contactId: string, data: { assigned_to_id?: string | null; note?: string }): Promise<ApiResponse<any>> {
+    const response = await this.api.post(`/api/whatsapp/contacts/${contactId}/reassign`, data);
+    return response.data;
+  }
+
+  async getWhatsAppTeamQueue(): Promise<ApiResponse<any>> {
+    const response = await this.api.get('/api/whatsapp/team-queue');
+    return response.data;
+  }
+
   async releaseWhatsAppAgent(contactId: string): Promise<ApiResponse<any>> {
     const response = await this.api.post(`/api/whatsapp/contacts/${contactId}/release-agent`);
     return response.data;
@@ -690,6 +712,11 @@ class ApiService {
             round_robin_enabled: false,
             round_robin_agent_ids: [],
             sla_first_response_minutes: 5,
+            notify_new_message_browser: true,
+            notify_new_message_sound: true,
+            notify_new_message_email: false,
+            notify_sla_breach: true,
+            csat_enabled: true,
           },
         };
       }
@@ -701,6 +728,11 @@ class ApiService {
     round_robin_enabled?: boolean;
     round_robin_agent_ids?: string[];
     sla_first_response_minutes?: number;
+    notify_new_message_browser?: boolean;
+    notify_new_message_sound?: boolean;
+    notify_new_message_email?: boolean;
+    notify_sla_breach?: boolean;
+    csat_enabled?: boolean;
   }): Promise<ApiResponse<any>> {
     try {
       const response = await this.api.put('/api/whatsapp/inbox-settings', data);

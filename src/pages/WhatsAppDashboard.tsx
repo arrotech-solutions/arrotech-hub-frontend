@@ -169,7 +169,6 @@ const WhatsAppDashboard: React.FC = () => {
     const [autoReplies, setAutoReplies] = useState<AutoReplyRule[]>([]);
     const [stats, setStats] = useState<Stats | null>(null);
     const [loading, setLoading] = useState(true);
-    const [searchQuery, setSearchQuery] = useState('');
     const [newMessage, setNewMessage] = useState('');
     const [sendingMessage, setSendingMessage] = useState(false);
     const [showRuleModal, setShowRuleModal] = useState(false);
@@ -195,6 +194,11 @@ const WhatsAppDashboard: React.FC = () => {
         round_robin_enabled: false,
         round_robin_agent_ids: [] as string[],
         sla_first_response_minutes: 5,
+        notify_new_message_browser: true,
+        notify_new_message_sound: true,
+        notify_new_message_email: false,
+        notify_sla_breach: true,
+        csat_enabled: true,
     });
     const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
     const [quickReplies, setQuickReplies] = useState<QuickReply[]>([]);
@@ -369,14 +373,14 @@ const WhatsAppDashboard: React.FC = () => {
     // Fetch contacts
     const fetchContacts = useCallback(async () => {
         try {
-            const response = await apiService.getWhatsAppContacts({ search: searchQuery || undefined });
+            const response = await apiService.getWhatsAppContacts();
             if (response.success) {
                 setContacts(response.data);
             }
         } catch (error) {
             console.error('Error fetching contacts:', error);
         }
-    }, [searchQuery]);
+    }, []);
 
     // Fetch messages for selected contact
     const fetchMessages = useCallback(async (contactId: number) => {
@@ -516,14 +520,6 @@ const WhatsAppDashboard: React.FC = () => {
         };
         loadData();
     }, [fetchContacts, fetchStats, fetchAutoReplies, fetchBroadcasts, fetchConnectionData]);
-
-    // Refresh contacts when search changes
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            fetchContacts();
-        }, 300);
-        return () => clearTimeout(timer);
-    }, [searchQuery, fetchContacts]);
 
     // Load messages when contact selected
     useEffect(() => {
@@ -1444,6 +1440,26 @@ const WhatsAppDashboard: React.FC = () => {
                                 onChange={(e) => setInboxSettings({ ...inboxSettings, sla_first_response_minutes: Number(e.target.value) })}
                                 className="w-full max-w-xs px-4 py-2.5 rounded-xl border dark:border-slate-700 bg-white dark:bg-slate-800 mb-4"
                             />
+                            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Notification preferences</p>
+                            <div className="space-y-2 mb-4">
+                                {([
+                                    ['notify_new_message_browser', 'Browser notifications for new messages'],
+                                    ['notify_new_message_sound', 'Sound alert for new messages'],
+                                    ['notify_new_message_email', 'Email when SLA is breached (coming soon)'],
+                                    ['notify_sla_breach', 'Highlight SLA breaches in inbox'],
+                                    ['csat_enabled', 'Send CSAT survey when marking resolved'],
+                                ] as const).map(([key, label]) => (
+                                    <label key={key} className="flex items-center gap-2 text-sm cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={Boolean((inboxSettings as Record<string, unknown>)[key])}
+                                            onChange={(e) => setInboxSettings({ ...inboxSettings, [key]: e.target.checked })}
+                                            className="rounded border-slate-300 text-green-600"
+                                        />
+                                        <span className="text-slate-700 dark:text-slate-300">{label}</span>
+                                    </label>
+                                ))}
+                            </div>
                             <button
                                 type="button"
                                 onClick={async () => {
