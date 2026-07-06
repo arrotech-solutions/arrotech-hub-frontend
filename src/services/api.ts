@@ -2913,6 +2913,11 @@ class ApiService {
     return response.data;
   }
 
+  async registerMpesaUrls(): Promise<ApiResponse<{ ResponseCode?: string; ResponseDescription?: string }>> {
+    const response = await this.api.post('/api/agents/daraja/register-urls');
+    return response.data;
+  }
+
   async getMpesaPaymentSummary(days: number = 1): Promise<ApiResponse<MpesaPaymentSummary>> {
     const response = await this.api.get('/api/agents/daraja/summary', { params: { days } });
     return response.data;
@@ -3419,6 +3424,32 @@ class ApiService {
     required_connections: string[];
   }>> {
     const response = await this.api.get('/api/catalog-builder/status');
+    return response.data;
+  }
+
+  // ── Rent Collection ──────────────────────────────────────────────────
+  async bootstrapRentSheets(title: string = 'Rent Collection', includeSample: boolean = true): Promise<ApiResponse<{
+    spreadsheet_id: string;
+    spreadsheet_url: string;
+  }>> {
+    const response = await this.api.post('/api/rent-collection/bootstrap-sheets', {
+      title,
+      include_sample: includeSample,
+    });
+    return response.data;
+  }
+
+  async getRentReadiness(spreadsheetId?: string): Promise<ApiResponse<{
+    ready: boolean;
+    whatsapp_connected: boolean;
+    rent_workflow_active: boolean;
+    sheets_readable: boolean;
+    tenant_count: number;
+    mpesa_mode: 'stk' | 'paybill';
+    sample_tenant_lookup_ok: boolean;
+  }>> {
+    const params = spreadsheetId ? { spreadsheet_id: spreadsheetId } : {};
+    const response = await this.api.get('/api/rent-collection/readiness', { params });
     return response.data;
   }
 

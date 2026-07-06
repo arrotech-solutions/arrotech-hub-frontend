@@ -100,7 +100,7 @@ export default function MpesaSettingsTab() {
 
     try {
       setRegistering(true);
-      const res = await apiService.registerMpesaUrls() as any;
+      const res = await apiService.registerMpesaUrls();
       
       if (res.success) {
         toast.success(res.message || 'Webhook URLs registered successfully with Safaricom!');
@@ -191,6 +191,9 @@ export default function MpesaSettingsTab() {
             </div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Daraja App Credentials</h3>
           </div>
+          <p className="text-sm text-gray-600 dark:text-slate-400 mb-6 -mt-2">
+            Live Daraja credentials enable one-tap M-Pesa STK for rent collection agents.
+          </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
