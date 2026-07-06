@@ -59,6 +59,8 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onWorkflowCreated
     const [loadingSpreadsheets, setLoadingSpreadsheets] = useState(false);
     const [dynamicOptions, setDynamicOptions] = useState<Record<string, { label: string, value: any }[]>>({});
     const [loadingDynamic, setLoadingDynamic] = useState<Record<string, boolean>>({});
+    const [showRentChecklist, setShowRentChecklist] = useState(false);
+    const [deployedSpreadsheetId, setDeployedSpreadsheetId] = useState('');
 
     useEffect(() => {
         loadTemplates();
@@ -196,7 +198,16 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onWorkflowCreated
             });
 
             if (response.success) {
-                setTemplates(response.data?.templates || []);
+                let loaded = response.data?.templates || [];
+                const pinRent = !selectedCategory || selectedCategory.toLowerCase() === 'real estate';
+                if (pinRent) {
+                    loaded = [...loaded].sort((a, b) => {
+                        if (a.id === 'whatsapp_rent_collection_agent') return -1;
+                        if (b.id === 'whatsapp_rent_collection_agent') return 1;
+                        return 0;
+                    });
+                }
+                setTemplates(loaded);
             }
         } catch (error) {
             console.error('Failed to load templates:', error);
@@ -225,6 +236,10 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onWorkflowCreated
             if (response.success) {
                 toast.success(`Workflow created from template!`);
                 setSelectedTemplate(null);
+                if (templateId === 'whatsapp_rent_collection_agent') {
+                    setDeployedSpreadsheetId(configValues.storage_spreadsheet_id || '');
+                    setShowRentChecklist(true);
+                }
                 if (onWorkflowCreated) {
                     onWorkflowCreated();
                 }
@@ -810,6 +825,49 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onWorkflowCreated
                                     </button>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {showRentChecklist && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+                    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl max-w-lg w-full p-6 border border-purple-100 dark:border-purple-500/20">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Rent Agent — Go Live Checklist</h3>
+                            <button
+                                onClick={() => setShowRentChecklist(false)}
+                                className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+                        <ol className="space-y-3 text-sm text-gray-700 dark:text-slate-300">
+                            <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" /> Workflow deployed — activate it in Workflows if needed.</li>
+                            <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" /> Connect WhatsApp under Connections (if not already).</li>
+                            <li className="flex gap-2">
+                                <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                                <span>
+                                    Link Google Sheets — add tenants to the <strong>Tenants</strong> tab
+                                    {deployedSpreadsheetId ? ` (ID: ${deployedSpreadsheetId})` : ''}.
+                                </span>
+                            </li>
+                            <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" /> Optional: Settings → M-Pesa with live Daraja credentials enables STK push.</li>
+                            <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" /> Send a test WhatsApp: &quot;What&apos;s my balance?&quot;</li>
+                        </ol>
+                        <div className="mt-6 flex gap-3">
+                            <a
+                                href="/connections"
+                                className="flex-1 text-center px-4 py-2.5 rounded-xl border border-purple-200 dark:border-purple-500/30 text-purple-700 dark:text-purple-300 text-sm font-semibold hover:bg-purple-50 dark:hover:bg-purple-500/10"
+                            >
+                                Connections
+                            </a>
+                            <button
+                                onClick={() => setShowRentChecklist(false)}
+                                className="flex-1 px-4 py-2.5 rounded-xl bg-purple-600 text-white text-sm font-semibold hover:bg-purple-700"
+                            >
+                                Got it
+                            </button>
                         </div>
                     </div>
                 </div>
