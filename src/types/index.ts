@@ -1896,6 +1896,15 @@ export interface MpesaAgentConfig {
   daraja_environment?: string;  // "sandbox" or "live"
   webhook_secret?: string;
   callback_url_override?: string;
+  // Manual payment fallback (no STK) — used until live Daraja credentials are approved
+  manual_payment_enabled?: boolean;
+  manual_paybill_number?: string;
+  manual_paybill_account?: string;
+  manual_till_number?: string;
+  manual_pochi_number?: string;
+  manual_send_money_number?: string;
+  manual_recipient_name?: string;
+  manual_payment_note?: string;
 }
 
 export interface MpesaPayment {
