@@ -721,7 +721,9 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onWorkflowCreated
                                                     }
 
                                                     // array multi-select (e.g. delivery_methods)
-                                                    const arrayOptions: string[] = varSchema.items?.enum || [];
+                                                    const arrayOptions: string[] = (varSchema.items?.enum || []).filter(
+                                                        (opt: string) => opt !== 'dine_in' || configValues.order_type === 'food'
+                                                    );
                                                     if (varSchema.type === 'array' && arrayOptions.length > 0) {
                                                         const selected: string[] = Array.isArray(configValues[key])
                                                             ? configValues[key]

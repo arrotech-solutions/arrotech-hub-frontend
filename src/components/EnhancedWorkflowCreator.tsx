@@ -1164,7 +1164,9 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                                                 );
                                             }
 
-                                            const arrayOptions: string[] = schema.items?.enum || [];
+                                            const arrayOptions: string[] = (schema.items?.enum || []).filter(
+                                                (opt: string) => opt !== 'dine_in' || workflowVariableValues.order_type === 'food'
+                                            );
                                             const isMultiSelectArray = schema.type === 'array' && Array.isArray(arrayOptions) && arrayOptions.length > 0;
 
                                             if (schema.type === 'boolean') {
