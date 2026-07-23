@@ -80,6 +80,88 @@ interface WorkflowStep {
 
 type TriggerType = 'manual' | 'scheduled' | 'webhook' | 'event';
 
+/** Infer Library template id when editing a deployed agent workflow. */
+function inferAgentTemplateId(workflow: any): string | null {
+    const steps = workflow?.steps || [];
+    const hasAgent = steps.some((s: any) => s.tool_name === 'conversational_agent');
+    if (!hasAgent) return null;
+
+    const trigger = workflow.trigger_config || {};
+    const name = (workflow.name || '').toLowerCase();
+    const tags: string[] = workflow.tags || workflow.workflow_metadata?.tags || [];
+
+    if (trigger.platform === 'whatsapp' && trigger.event_type === 'whatsapp_message_received') {
+        if (tags.includes('rent') || name.includes('rent collection')) {
+            return 'whatsapp_rent_collection_agent';
+        }
+        return 'whatsapp_ordering_agent';
+    }
+    if (trigger.platform === 'telegram' && trigger.event_type === 'telegram_message_received') {
+        return 'telegram_ordering_agent';
+    }
+    return null;
+}
+
+/** Merge saved workflow.variables with the latest Library template schema (shows new fields on edit). */
+async function buildWorkflowVariableState(workflow: any): Promise<{
+    schema: Record<string, any>;
+    values: Record<string, any>;
+}> {
+    const vars = workflow.variables || {};
+    const schema: Record<string, any> = {};
+    const values: Record<string, any> = {};
+
+    Object.entries(vars).forEach(([key, val]) => {
+        if (
+            typeof val === 'object'
+            && val !== null
+            && !Array.isArray(val)
+            && ('type' in (val as object) || 'description' in (val as object) || 'enum' in (val as object) || 'default' in (val as object))
+        ) {
+            schema[key] = val;
+            values[key] = (val as any).default ?? '';
+        } else {
+            values[key] = val;
+        }
+    });
+
+    const templateId = inferAgentTemplateId(workflow);
+    if (templateId) {
+        try {
+            const response = await apiService.getTemplate(templateId);
+            const templateVars = response?.data?.variables;
+            if (response?.success && templateVars && typeof templateVars === 'object') {
+                Object.entries(templateVars).forEach(([key, varSchema]) => {
+                    schema[key] = varSchema;
+                    if (!(key in values) && (varSchema as any).default != null) {
+                        values[key] = (varSchema as any).default;
+                    }
+                });
+            }
+        } catch (err) {
+            console.warn('[WorkflowCreator] Could not merge template schema on edit:', err);
+        }
+    }
+
+    Object.keys(values).forEach((key) => {
+        if (!schema[key]) {
+            const val = values[key];
+            schema[key] = {
+                type: typeof val === 'boolean'
+                    ? 'boolean'
+                    : typeof val === 'number'
+                        ? 'number'
+                        : Array.isArray(val)
+                            ? 'array'
+                            : 'string',
+                description: key.replace(/_/g, ' '),
+            };
+        }
+    });
+
+    return { schema, values };
+}
+
 const TOOL_CATEGORIES = {
     'Fintech': {
         icon: CreditCard,
@@ -249,23 +331,11 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                 setCategory(initialData.workflow_metadata?.category || '');
                 setTags(initialData.workflow_metadata?.tags?.join(', ') || '');
 
-                // Extract variables (schema and values)
-                const vars = initialData.variables || {};
-                const schema: Record<string, any> = {};
-                const values: Record<string, any> = {};
-                
-                Object.entries(vars).forEach(([key, val]) => {
-                    if (typeof val === 'object' && val !== null && !Array.isArray(val) && ('type' in val || 'description' in val || 'enum' in val || 'default' in val)) {
-                        schema[key] = val;
-                        values[key] = (val as any).default || '';
-                    } else {
-                        values[key] = val;
-                        schema[key] = { type: typeof val === 'number' ? 'number' : 'string', description: key.replace(/_/g, ' ') };
-                    }
+                // Load variables: merge saved values with latest Library template schema
+                buildWorkflowVariableState(initialData).then(({ schema, values }) => {
+                    setWorkflowVariablesSchema(schema);
+                    setWorkflowVariableValues(values);
                 });
-                
-                setWorkflowVariablesSchema(schema);
-                setWorkflowVariableValues(values);
 
                 // Map steps
                 if (initialData.steps) {
@@ -1094,6 +1164,67 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                                                 );
                                             }
 
+                                            const arrayOptions: string[] = schema.items?.enum || [];
+                                            const isMultiSelectArray = schema.type === 'array' && Array.isArray(arrayOptions) && arrayOptions.length > 0;
+
+                                            if (schema.type === 'boolean') {
+                                                const checked = workflowVariableValues[key] ?? schema.default ?? false;
+                                                return (
+                                                    <div key={key}>
+                                                        <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                                                            {key.replace(/_/g, ' ')}
+                                                        </label>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setWorkflowVariableValues({ ...workflowVariableValues, [key]: !checked })}
+                                                            className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ${checked ? 'bg-purple-600' : 'bg-gray-200 dark:bg-slate-700'}`}
+                                                        >
+                                                            <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition duration-200 ${checked ? 'translate-x-5' : 'translate-x-0'}`} />
+                                                        </button>
+                                                        {schema.description && (
+                                                            <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">{schema.description}</p>
+                                                        )}
+                                                    </div>
+                                                );
+                                            }
+
+                                            if (isMultiSelectArray) {
+                                                const selected: string[] = Array.isArray(workflowVariableValues[key])
+                                                    ? workflowVariableValues[key]
+                                                    : (schema.default || []);
+                                                return (
+                                                    <div key={key} className="md:col-span-2">
+                                                        <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+                                                            {key.replace(/_/g, ' ')}
+                                                            {isRequired && <span className="text-red-500 ml-1">*</span>}
+                                                        </label>
+                                                        <div className="flex flex-wrap gap-3">
+                                                            {arrayOptions.map((opt: string) => {
+                                                                const active = selected.includes(opt);
+                                                                return (
+                                                                    <button
+                                                                        key={opt}
+                                                                        type="button"
+                                                                        onClick={() => {
+                                                                            const next = active
+                                                                                ? selected.filter((v) => v !== opt)
+                                                                                : [...selected, opt];
+                                                                            setWorkflowVariableValues({ ...workflowVariableValues, [key]: next });
+                                                                        }}
+                                                                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${active ? 'bg-purple-600 text-white border-purple-600' : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-300 border-gray-200 dark:border-slate-600'}`}
+                                                                    >
+                                                                        {opt.replace(/_/g, ' ')}
+                                                                    </button>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                        {schema.description && (
+                                                            <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">{schema.description}</p>
+                                                        )}
+                                                    </div>
+                                                );
+                                            }
+
                                             return (
                                                 <div key={key}>
                                                     <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
@@ -1115,7 +1246,9 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                                                     ) : (
                                                         <input
                                                             type={schema.type === 'number' ? 'number' : 'text'}
-                                                            value={workflowVariableValues[key] || ''}
+                                                            value={Array.isArray(workflowVariableValues[key])
+                                                                ? workflowVariableValues[key].join(', ')
+                                                                : (workflowVariableValues[key] ?? '')}
                                                             onChange={(e) => setWorkflowVariableValues({ ...workflowVariableValues, [key]: e.target.value })}
                                                             className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
                                                             placeholder={`Enter ${key.replace(/_/g, ' ')}`}

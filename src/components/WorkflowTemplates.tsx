@@ -720,6 +720,45 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onWorkflowCreated
                                                         );
                                                     }
 
+                                                    // array multi-select (e.g. delivery_methods)
+                                                    const arrayOptions: string[] = varSchema.items?.enum || [];
+                                                    if (varSchema.type === 'array' && arrayOptions.length > 0) {
+                                                        const selected: string[] = Array.isArray(configValues[key])
+                                                            ? configValues[key]
+                                                            : (varSchema.default || []);
+                                                        return (
+                                                            <div key={key} className="md:col-span-2">
+                                                                <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-2 capitalize">
+                                                                    {varSchema.label || key.replace(/_/g, ' ')}
+                                                                    {isRequired && <span className="text-red-500 ml-1">*</span>}
+                                                                </label>
+                                                                <div className="flex flex-wrap gap-2">
+                                                                    {arrayOptions.map((opt: string) => {
+                                                                        const active = selected.includes(opt);
+                                                                        return (
+                                                                            <button
+                                                                                key={opt}
+                                                                                type="button"
+                                                                                onClick={() => {
+                                                                                    const next = active
+                                                                                        ? selected.filter((v) => v !== opt)
+                                                                                        : [...selected, opt];
+                                                                                    setConfigValues({ ...configValues, [key]: next });
+                                                                                }}
+                                                                                className={`px-3 py-1.5 rounded-lg text-[10px] font-bold border transition-colors ${active ? 'bg-purple-600 text-white border-purple-600' : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-300 border-gray-200 dark:border-slate-600'}`}
+                                                                            >
+                                                                                {opt.replace(/_/g, ' ')}
+                                                                            </button>
+                                                                        );
+                                                                    })}
+                                                                </div>
+                                                                {varSchema.description && (
+                                                                    <p className="text-[10px] text-gray-500 dark:text-slate-400 mt-1">{varSchema.description}</p>
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    }
+
                                                     // number input
                                                     if (varSchema.type === 'number' || varSchema.type === 'integer') {
                                                         return (
