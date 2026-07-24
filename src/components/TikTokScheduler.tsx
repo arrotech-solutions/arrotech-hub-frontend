@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Calendar as CalendarIcon, Upload, Sparkles, Clock, Check } from 'lucide-react';
-import toast from 'react-hot-toast';
+import toast from '../lib/notify';
 import apiService from '../services/api';
 
 const TikTokScheduler: React.FC = () => {

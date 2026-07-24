@@ -85,7 +85,7 @@ const RequestAccess: React.FC = () => {
                     {/* Header */}
                     <div className="text-center">
                         <div className="flex items-center justify-center mb-6">
-                            <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl">
+                            <div className="p-3 bg-gradient-to-br from-primary-500 to-secondary-900 rounded-2xl">
                                 <Globe className="w-8 h-8 text-white" />
                             </div>
                         </div>
@@ -113,7 +113,7 @@ const RequestAccess: React.FC = () => {
                                 <div className="space-y-3 pt-4">
                                     <button
                                         onClick={() => navigate('/login')}
-                                        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-xl font-semibold hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200 flex items-center justify-center gap-2 group"
+                                        className="w-full bg-gradient-to-r from-primary-500 to-secondary-900 text-white py-3 px-6 rounded-xl font-semibold hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200 flex items-center justify-center gap-2 group"
                                     >
                                         Login <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                                     </button>
@@ -167,7 +167,7 @@ const RequestAccess: React.FC = () => {
                                 <button
                                     type="submit"
                                     disabled={status === 'loading'}
-                                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-xl font-semibold hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 group"
+                                    className="w-full bg-gradient-to-r from-primary-500 to-secondary-900 text-white py-3 px-6 rounded-xl font-semibold hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 group"
                                 >
                                     {status === 'loading' ? (
                                         <>
@@ -219,7 +219,7 @@ const RequestAccess: React.FC = () => {
 
                     <div className="space-y-6">
                         <div className="flex items-start space-x-4">
-                            <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl">
+                            <div className="p-3 bg-gradient-to-br from-primary-500 to-secondary-900 rounded-xl">
                                 <Zap className="w-6 h-6 text-white" />
                             </div>
                             <div>
@@ -229,7 +229,7 @@ const RequestAccess: React.FC = () => {
                         </div>
 
                         <div className="flex items-start space-x-4">
-                            <div className="p-3 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl">
+                            <div className="p-3 bg-gradient-to-br from-primary-500 to-secondary-900 rounded-xl">
                                 <Shield className="w-6 h-6 text-white" />
                             </div>
                             <div>
@@ -239,7 +239,7 @@ const RequestAccess: React.FC = () => {
                         </div>
 
                         <div className="flex items-start space-x-4">
-                            <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl">
+                            <div className="p-3 bg-gradient-to-br from-secondary-700 to-primary-500 rounded-xl">
                                 <Sparkles className="w-6 h-6 text-white" />
                             </div>
                             <div>

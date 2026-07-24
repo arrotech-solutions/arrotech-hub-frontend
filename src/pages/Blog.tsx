@@ -4,6 +4,8 @@ import { Search, ArrowRight, Clock, Eye, TrendingUp, Sparkles, ChevronRight } fr
 import { BLOG_POSTS, BLOG_CATEGORIES, BlogPost } from '../data/blogData';
 import { apiService } from '../services/api';
 import { Helmet } from 'react-helmet-async';
+import { EmptyState } from '../components/states';
+import { chart } from '../theme';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://prod.api.arrotechsolutions.com';
 
@@ -87,8 +89,8 @@ const Blog: React.FC = () => {
                         {/* Background pattern */}
                         <div className="absolute inset-0 opacity-10 dark:opacity-20 pointer-events-none">
                             <div className="absolute inset-0" style={{
-                                backgroundImage: `radial-gradient(circle at 25% 50%, rgba(124, 58, 237, 0.3) 0%, transparent 50%),
-                                                  radial-gradient(circle at 75% 50%, rgba(99, 102, 241, 0.2) 0%, transparent 50%)`,
+                                backgroundImage: `radial-gradient(circle at 25% 50%, rgba(255, 70, 150, 0.3) 0%, transparent 50%),
+                                                  radial-gradient(circle at 75% 50%, rgba(255, 200, 87, 0.2) 0%, transparent 50%)`,
                             }} />
                             <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
                                 <defs>
@@ -143,7 +145,7 @@ const Blog: React.FC = () => {
                                 <div className="mt-10 lg:mt-0 lg:block">
                                     {featuredPost.cover_image ? (
                                         <div className="relative group">
-                                            <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl blur-lg opacity-40 group-hover:opacity-60 transition-opacity" />
+                                            <div className="absolute -inset-1 bg-gradient-to-r from-secondary-800 to-primary-500 rounded-2xl blur-lg opacity-40 group-hover:opacity-60 transition-opacity" />
                                             <img
                                                 src={featuredPost.cover_image}
                                                 alt={featuredPost.title}
@@ -216,23 +218,19 @@ const Blog: React.FC = () => {
 
                     {/* Empty state */}
                     {!isLoading && filteredPosts.length === 0 && (
-                        <div className="text-center py-24">
-                            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gray-100 dark:bg-slate-800 mb-6 transition-colors">
-                                <Search size={32} className="text-gray-400 dark:text-slate-500" />
-                            </div>
-                            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2 transition-colors">No articles found</h3>
-                            <p className="text-gray-500 dark:text-slate-400 max-w-md mx-auto transition-colors">
-                                {searchQuery
-                                    ? `No results for "${searchQuery}". Try a different search term.`
-                                    : 'No articles in this category yet. Check back soon!'}
-                            </p>
-                            <button
-                                onClick={() => { setSearchQuery(''); setActiveCategory('all'); }}
-                                className="mt-6 px-5 py-2.5 bg-purple-600 text-white rounded-xl text-sm font-medium hover:bg-purple-700 transition-colors"
-                            >
-                                View all articles
-                            </button>
-                        </div>
+                        <EmptyState
+                            query={searchQuery || undefined}
+                            title={searchQuery ? undefined : 'No articles found'}
+                            description={
+                                searchQuery
+                                    ? undefined
+                                    : 'No articles in this category yet. Check back soon!'
+                            }
+                            action={{
+                                label: 'View all articles',
+                                onClick: () => { setSearchQuery(''); setActiveCategory('all'); },
+                            }}
+                        />
                     )}
 
                     {/* Posts grid */}
@@ -260,7 +258,7 @@ const Blog: React.FC = () => {
                                             {post.category && (
                                                 <span
                                                     className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold text-white backdrop-blur-sm"
-                                                    style={{ backgroundColor: `${post.category_color || '#7C3AED'}cc` }}
+                                                    style={{ backgroundColor: `${post.category_color || chart.secondary}cc` }}
                                                 >
                                                     {post.category}
                                                 </span>
@@ -291,7 +289,7 @@ const Blog: React.FC = () => {
                                         {/* Footer */}
                                         <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-slate-800 transition-colors">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center text-white text-xs font-bold">
+                                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-secondary-700 to-primary-500 flex items-center justify-center text-white text-xs font-bold">
                                                     {post.author.charAt(0)}
                                                 </div>
                                                 <div>

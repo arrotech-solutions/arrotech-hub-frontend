@@ -39,7 +39,8 @@ import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { useSubscription } from '../hooks/useSubscription';
 import { useWebSocket } from '../hooks/useWebSocket';
-import toast from 'react-hot-toast';
+import toast from '../lib/notify';
+import { Spinner } from '../components/ui';
 import EnhancedWorkflowCreator from '../components/EnhancedWorkflowCreator';
 import ExecuteWorkflowModal from '../components/ExecuteWorkflowModal';
 import WorkflowTemplates from '../components/WorkflowTemplates';
@@ -580,7 +581,7 @@ const Workflows: React.FC = () => {
     const hasMoreSteps = steps.length > 4;
 
     return (
-      <div key={workflow.id} className="group relative bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl rounded-2xl border border-white/20 dark:border-slate-700/50 shadow-lg hover:shadow-2xl hover:shadow-blue-500/10 dark:hover:shadow-blue-500/20 transition-all duration-300 hover:-translate-y-1 overflow-hidden flex flex-col h-full">
+      <div key={workflow.id} className="group relative bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl rounded-2xl border border-white/20 dark:border-slate-700/50 shadow-lg hover:shadow-2xl hover:shadow-primary-500/10 dark:hover:shadow-primary-500/25 transition-all duration-300 hover:-translate-y-1 overflow-hidden flex flex-col h-full">
         {/* Gradient Border Top */}
         <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${workflow.status === 'active' ? 'from-blue-500 via-purple-500 to-blue-500 animate-gradient-x' : 'from-gray-200 to-gray-300 dark:from-slate-700 dark:to-slate-600'}`}></div>
 
@@ -821,7 +822,7 @@ const Workflows: React.FC = () => {
                   <span className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Workspace Management</span>
                 </div>
                 <h1 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mb-2 tracking-tight workflows-header-tut">
-                  Welcome back, <span className="bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">{user?.name?.split(' ')[0] || 'Builder'}</span>!
+                  Welcome back, <span className="bg-gradient-to-r from-primary-500 to-secondary-900 dark:from-primary-400 dark:to-primary-300 bg-clip-text text-transparent">{user?.name?.split(' ')[0] || 'Builder'}</span>!
                 </h1>
                 <p className="text-gray-500 dark:text-slate-400 max-w-md font-medium">
                   Supercharge your productivity with intelligent automated workflows.
@@ -851,7 +852,7 @@ const Workflows: React.FC = () => {
                       setFormToCanvasState(null);
                       setShowCanvas(true);
                     }}
-                    className="flex-1 sm:flex-none flex items-center justify-center space-x-2 px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl hover:shadow-[0_0_20px_rgba(37,99,235,0.4)] transform hover:-translate-y-1 transition-all duration-300 font-bold workflow-builder"
+                    className="flex-1 sm:flex-none flex items-center justify-center space-x-2 px-6 py-4 bg-gradient-to-r from-primary-500 to-secondary-900 text-white rounded-2xl hover:shadow-[0_0_20px_rgba(255,70,150,0.4)] transform hover:-translate-y-1 transition-all duration-300 font-bold workflow-builder"
                     title="Visual canvas builder"
                   >
                     <Plus className="w-5 h-5" />
@@ -1008,7 +1009,7 @@ const Workflows: React.FC = () => {
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <Spinner size="xl" className="mx-auto mb-4" />
               <p className="text-gray-600">Loading {activeTab}...</p>
             </div>
           </div>
@@ -1040,7 +1041,7 @@ const Workflows: React.FC = () => {
                 }}
                 className="group relative inline-flex items-center justify-center space-x-3 px-10 py-5 bg-gray-900 text-white rounded-[2rem] hover:shadow-[0_20px_40px_rgba(0,0,0,0.2)] transition-all duration-300 transform hover:-translate-y-1 overflow-hidden"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-500 dark:to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-primary-500 to-secondary-900 dark:from-primary-500 dark:to-secondary-700 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 <Plus className="relative w-5 h-5 transition-transform group-hover:rotate-90" />
                 <span className="relative font-bold">Launch First Workflow</span>
               </button>
@@ -1067,7 +1068,7 @@ const Workflows: React.FC = () => {
                 onClick={() => setActiveTab('workflows')}
                 className="group relative inline-flex items-center justify-center space-x-3 px-10 py-5 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-[2rem] hover:bg-gray-50 dark:hover:bg-slate-700 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden"
               >
-                <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-500 dark:to-purple-500"></div>
+                <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-primary-500 to-secondary-900 dark:from-primary-500 dark:to-secondary-700"></div>
                 <Workflow className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 <span className="font-bold">View My Workflows</span>
               </button>
@@ -1199,7 +1200,7 @@ const Workflows: React.FC = () => {
         {selectedWorkflow && (
           <div className="fixed inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-colors duration-300">
             <div className="bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col border border-gray-100 dark:border-slate-800 transition-colors duration-300">
-              <div className="flex items-center justify-between px-6 sm:px-8 py-5 sm:py-6 bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-700 dark:to-purple-700">
+              <div className="flex items-center justify-between px-6 sm:px-8 py-5 sm:py-6 bg-gradient-to-r from-primary-500 to-secondary-900 dark:from-primary-700 dark:to-secondary-900">
                 <div className="flex items-center space-x-3 sm:space-x-4">
                   <div className="p-2 sm:p-3 bg-white/20 rounded-xl sm:rounded-2xl backdrop-blur-md">
                     <Workflow className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
@@ -1442,7 +1443,7 @@ const Workflows: React.FC = () => {
                 </div>
 
                 {/* Right Pane: Details Inspector */}
-                <div className="flex-1 md:overflow-y-auto bg-white dark:bg-[#0a0f1c] relative min-h-[50vh] md:min-h-0">
+                <div className="flex-1 md:overflow-y-auto bg-white dark:bg-secondary-950 relative min-h-[50vh] md:min-h-0">
                   {(() => {
                     const viewData = selectedStepId
                       ? stepExecutions.find(s => s.id === selectedStepId)
@@ -1551,7 +1552,7 @@ const Workflows: React.FC = () => {
             <div className="absolute inset-0 bg-black/50 dark:bg-black/60 backdrop-blur-sm" onClick={() => setShowShareModal(false)} />
             <div className="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg max-h-[95vh] sm:max-h-[90vh] overflow-hidden border border-transparent dark:border-slate-800 transition-colors duration-300">
               {/* Header */}
-              <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-slate-800 bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-700 dark:to-pink-700">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-slate-800 bg-gradient-to-r from-secondary-800 to-primary-500 dark:from-secondary-800 dark:to-primary-600">
                 <div className="flex items-center space-x-3">
                   <div className="p-2 sm:p-2.5 rounded-xl bg-white/20 flex items-center justify-center">
                     <Share2 className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
@@ -1713,7 +1714,7 @@ const Workflows: React.FC = () => {
                 <button
                   onClick={handleUpdateVisibility}
                   disabled={sharingLoading}
-                  className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all disabled:opacity-50"
+                  className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-secondary-800 to-primary-500 text-white rounded-lg hover:from-secondary-900 hover:to-primary-600 transition-all disabled:opacity-50"
                 >
                   {sharingLoading ? (
                     <RefreshCw className="w-4 h-4 animate-spin" />

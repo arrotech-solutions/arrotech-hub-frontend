@@ -3,7 +3,7 @@ import { Video, BarChart2, Calendar, Share2, User, Loader, Sparkles, Wallet, Lin
 import apiService from '../services/api';
 import TikTokScheduler from '../components/TikTokScheduler';
 import { useNavigate } from 'react-router-dom';
-import toast from 'react-hot-toast';
+import toast from '../lib/notify';
 import * as BrandIcons from '../components/BrandIcons';
 
 type TabType = 'overview' | 'money' | 'mediakit' | 'tips' | 'analytics' | 'fans';

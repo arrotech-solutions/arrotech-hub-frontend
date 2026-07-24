@@ -181,7 +181,7 @@ const MessageList: React.FC<MessageListProps> = ({
 
                 <h1 className={`text-3xl md:text-4xl font-black mb-4 tracking-tight
                     ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                    How can I help you <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-600">transform</span> work?
+                    How can I help you <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-secondary-900">transform</span> work?
                 </h1>
 
                 <p className={`text-lg mb-8 max-w-xl mx-auto leading-relaxed
@@ -243,7 +243,7 @@ const MessageList: React.FC<MessageListProps> = ({
                             className={`group flex items-start p-4 border rounded-2xl text-left transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]
                                 ${isDarkMode
                                     ? 'bg-gray-800/50 border-gray-700 hover:border-indigo-500/50 hover:bg-gray-800'
-                                    : 'bg-white border-gray-100 hover:border-indigo-100 hover:shadow-xl hover:shadow-indigo-500/5'}`}
+                                    : 'bg-white border-gray-100 hover:border-indigo-100 hover:shadow-xl hover:shadow-primary-500/5'}`}
                         >
                             <div className={`p-2.5 rounded-xl mr-4 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
                                 {item.icon}
@@ -330,7 +330,7 @@ const MessageList: React.FC<MessageListProps> = ({
                         {isLoading && !isStreaming && (
                             <div className="flex flex-col items-start mb-8 animate-in fade-in slide-in-from-bottom-2">
                                 <div className="flex items-center space-x-3">
-                                    <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg animate-pulse">
+                                    <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-secondary-900 rounded-lg flex items-center justify-center shadow-lg animate-pulse">
                                         <Bot size={16} className="text-white" />
                                     </div>
                                     <div className={`px-5 py-3 rounded-2xl border

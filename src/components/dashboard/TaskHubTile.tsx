@@ -3,6 +3,7 @@ import { CheckSquare, Plus, RefreshCw } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import apiService from '../../services/api';
 import { ClickUpLogo, TrelloLogo, JiraLogo, AsanaLogo } from '../BrandIcons';
+import { chart } from '../../theme';
 
 interface Task {
     id: string;
@@ -186,10 +187,10 @@ const TaskHubTile: React.FC<TaskHubTileProps> = ({ onCreateTask }) => {
 
     // ... (Chart data logic remains similar)
     const statusData = [
-        { name: 'To Do', value: tasks.filter(t => t.status === 'todo').length, color: '#6366f1' }, // Indigo
-        { name: 'In Progress', value: tasks.filter(t => t.status === 'in_progress').length, color: '#a855f7' }, // Purple
-        { name: 'Review', value: tasks.filter(t => t.status === 'review').length, color: '#ec4899' }, // Pink
-        { name: 'Done', value: tasks.filter(t => t.status === 'done').length, color: '#10b981' }, // Emerald
+        { name: 'To Do', value: tasks.filter(t => t.status === 'todo').length, color: chart.primary },
+        { name: 'In Progress', value: tasks.filter(t => t.status === 'in_progress').length, color: chart.primary400 },
+        { name: 'Review', value: tasks.filter(t => t.status === 'review').length, color: chart.accent },
+        { name: 'Done', value: tasks.filter(t => t.status === 'done').length, color: chart.primary600 },
     ];
 
     const getIcon = (platform: string) => {
@@ -335,7 +336,7 @@ const TaskHubTile: React.FC<TaskHubTileProps> = ({ onCreateTask }) => {
                                 </Pie>
                                 <Tooltip
                                     contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', background: 'rgba(255, 255, 255, 0.95)' }}
-                                    itemStyle={{ fontSize: '11px', fontWeight: 'bold', color: '#374151' }}
+                                    itemStyle={{ fontSize: '11px', fontWeight: 'bold', color: chart.secondary600 }}
                                 />
                             </PieChart>
                         </ResponsiveContainer>

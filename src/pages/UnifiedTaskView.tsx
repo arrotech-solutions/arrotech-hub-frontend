@@ -7,8 +7,9 @@ import {
 import apiService from '../services/api';
 import { ClickUpLogo, TrelloLogo, JiraLogo, AsanaLogo } from '../components/BrandIcons';
 import { PieChart, Pie, Cell } from 'recharts';
-import toast from 'react-hot-toast';
+import toast from '../lib/notify';
 import { useWebSocket } from '../hooks/useWebSocket';
+import { chart } from '../theme';
 
 interface Task {
     id: string;
@@ -380,10 +381,10 @@ const UnifiedTaskView: React.FC = () => {
     ];
 
     const chartData = [
-        { name: 'To Do', value: tasks.filter(t => t.status === 'todo').length, color: '#9ca3af' },
-        { name: 'In Progress', value: tasks.filter(t => t.status === 'in_progress').length, color: '#3b82f6' },
-        { name: 'Review', value: tasks.filter(t => t.status === 'review').length, color: '#a855f7' },
-        { name: 'Done', value: tasks.filter(t => t.status === 'done').length, color: '#22c55e' },
+        { name: 'To Do', value: tasks.filter(t => t.status === 'todo').length, color: chart.muted },
+        { name: 'In Progress', value: tasks.filter(t => t.status === 'in_progress').length, color: chart.primary },
+        { name: 'Review', value: tasks.filter(t => t.status === 'review').length, color: chart.accent },
+        { name: 'Done', value: tasks.filter(t => t.status === 'done').length, color: chart.primary600 },
     ];
 
 
@@ -1496,7 +1497,7 @@ const UnifiedTaskView: React.FC = () => {
                                                                 {selected.avatarUrl ? (
                                                                     <img src={selected.avatarUrl} alt={selected.name} className="w-6 h-6 rounded-full object-cover" />
                                                                 ) : (
-                                                                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold">
+                                                                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary-500 to-secondary-900 flex items-center justify-center text-white text-xs font-bold">
                                                                         {selected.initials || selected.name?.slice(0, 2).toUpperCase()}
                                                                     </div>
                                                                 )}
@@ -1550,7 +1551,7 @@ const UnifiedTaskView: React.FC = () => {
                                                         {u.avatarUrl ? (
                                                             <img src={u.avatarUrl} alt={u.name} className="w-6 h-6 rounded-full object-cover" />
                                                         ) : (
-                                                            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold">
+                                                            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary-500 to-secondary-900 flex items-center justify-center text-white text-xs font-bold">
                                                                 {u.initials || u.name?.slice(0, 2).toUpperCase()}
                                                             </div>
                                                         )}
@@ -1603,7 +1604,7 @@ const UnifiedTaskView: React.FC = () => {
                             <button
                                 onClick={handleCreateTask}
                                 disabled={creating || !newTask.title || !newTask.targetId}
-                                className="px-6 py-2 bg-gray-900 dark:bg-indigo-600 hover:bg-black dark:hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow-lg hover:shadow-xl dark:shadow-indigo-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                className="px-6 py-2 bg-gray-900 dark:bg-indigo-600 hover:bg-black dark:hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow-lg hover:shadow-xl dark:shadow-primary-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                             >
                                 {creating && <Loader2 className="w-4 h-4 animate-spin" />}
                                 {creating ? 'Creating...' : 'Create Task'}
@@ -1688,7 +1689,7 @@ const UnifiedTaskView: React.FC = () => {
                                                                 {selected.avatarUrl ? (
                                                                     <img src={selected.avatarUrl} alt={selected.name} className="w-6 h-6 rounded-full object-cover" />
                                                                 ) : (
-                                                                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold">
+                                                                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary-500 to-secondary-900 flex items-center justify-center text-white text-xs font-bold">
                                                                         {selected.initials || selected.name?.slice(0, 2).toUpperCase()}
                                                                     </div>
                                                                 )}
@@ -1742,7 +1743,7 @@ const UnifiedTaskView: React.FC = () => {
                                                         {u.avatarUrl ? (
                                                             <img src={u.avatarUrl} alt={u.name} className="w-6 h-6 rounded-full object-cover" />
                                                         ) : (
-                                                            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold">
+                                                            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary-500 to-secondary-900 flex items-center justify-center text-white text-xs font-bold">
                                                                 {u.initials || u.name?.slice(0, 2).toUpperCase()}
                                                             </div>
                                                         )}
@@ -1810,7 +1811,7 @@ const UnifiedTaskView: React.FC = () => {
                                 <button
                                     onClick={handleUpdateTask}
                                     disabled={updating || !editForm.description}
-                                    className="px-6 py-2 bg-gray-900 dark:bg-indigo-600 hover:bg-black dark:hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow-lg hover:shadow-xl dark:shadow-indigo-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                    className="px-6 py-2 bg-gray-900 dark:bg-indigo-600 hover:bg-black dark:hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow-lg hover:shadow-xl dark:shadow-primary-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                 >
                                     {updating && <Loader2 className="w-4 h-4 animate-spin" />}
                                     {updating ? 'Updating...' : 'Save Changes'}
@@ -1849,10 +1850,10 @@ const UnifiedTaskView: React.FC = () => {
                     <button
                         onClick={() => setIsCreateModalOpen(true)}
                         className="relative isolate overflow-hidden rounded-xl px-4 py-2 font-semibold text-white transition-all duration-300
-                        bg-gradient-to-br from-indigo-600 via-violet-600 to-indigo-700
+                        bg-gradient-to-br from-primary-500 via-primary-600 to-secondary-900
                         before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/20 before:to-transparent before:opacity-100
                         after:absolute after:inset-0 after:shadow-[inset_0_-2px_4px_rgba(0,0,0,0.3)]
-                        shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]
+                        shadow-lg shadow-primary-500/30 hover:shadow-primary-500/50 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]
                         flex items-center gap-2 shrink-0 whitespace-nowrap text-sm group create-task-btn">
                         <Plus className="w-4 h-4 relative z-10" />
                         <span className="relative z-10">New Task</span>
@@ -1876,7 +1877,7 @@ const UnifiedTaskView: React.FC = () => {
                         <div className="tasks-stats-tut flex overflow-x-auto pb-2 gap-4 mb-6 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:pb-0 sm:overflow-visible custom-scrollbar snap-x snap-mandatory">
                             {/* Summary Cards */}
                             {stats.map((stat, i) => (
-                                <div key={i} className="min-w-[240px] sm:min-w-0 bg-white/70 dark:bg-slate-900/50 backdrop-blur-lg p-5 rounded-2xl border border-white/60 dark:border-slate-800/50 shadow-sm flex items-center justify-between hover:shadow-md dark:hover:shadow-indigo-500/10 hover:scale-[1.02] transition-all snap-start">
+                                <div key={i} className="min-w-[240px] sm:min-w-0 bg-white/70 dark:bg-slate-900/50 backdrop-blur-lg p-5 rounded-2xl border border-white/60 dark:border-slate-800/50 shadow-sm flex items-center justify-between hover:shadow-md dark:hover:shadow-primary-500/10 hover:scale-[1.02] transition-all snap-start">
                                     <div>
                                         <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide">{stat.label}</p>
                                         <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{stat.value}</p>
@@ -1974,7 +1975,7 @@ const UnifiedTaskView: React.FC = () => {
                                                                 draggable
                                                                 onDragStart={(e) => handleDragStart(e, task.id)}
                                                                 onClick={() => openEditModal(task)}
-                                                                className="bg-white/90 dark:bg-slate-800/90 p-4 rounded-2xl border border-white/60 dark:border-white/5 shadow-sm hover:shadow-lg dark:hover:shadow-indigo-500/10 transition-all cursor-pointer group hover:-translate-y-1 relative overflow-hidden backdrop-blur-sm"
+                                                                className="bg-white/90 dark:bg-slate-800/90 p-4 rounded-2xl border border-white/60 dark:border-white/5 shadow-sm hover:shadow-lg dark:hover:shadow-primary-500/10 transition-all cursor-pointer group hover:-translate-y-1 relative overflow-hidden backdrop-blur-sm"
                                                             >
                                                                 <div className={`absolute left-0 top-0 bottom-0 w-1 ${col.dot}`} />
 

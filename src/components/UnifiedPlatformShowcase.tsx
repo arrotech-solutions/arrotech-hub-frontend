@@ -60,7 +60,7 @@ const UnifiedPlatformShowcase: React.FC = () => {
                             onClick={() => setActiveTab(tab.id)}
                             className={`flex items-center gap-3 md:gap-4 px-4 md:px-6 py-3 md:py-4 rounded-xl md:rounded-2xl text-xs md:text-sm font-bold transition-all duration-300 min-w-[160px] md:min-w-0 border-2 relative overflow-hidden ${
                                 activeTab === tab.id 
-                                ? 'bg-white dark:bg-slate-900 border-blue-500 text-blue-600 dark:text-blue-400 shadow-xl shadow-blue-500/10' 
+                                ? 'bg-white dark:bg-slate-900 border-blue-500 text-blue-600 dark:text-blue-400 shadow-xl shadow-primary-500/10' 
                                 : 'bg-transparent border-transparent text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50'
                             }`}
                         >
@@ -218,7 +218,7 @@ const UnifiedPlatformShowcase: React.FC = () => {
                                             <div key={i} className={`bg-white dark:bg-slate-950 p-2 md:p-4 min-h-[100px] md:min-h-[140px] relative ${i >= 8 ? 'hidden md:block' : ''}`}>
                                                 <span className="text-[10px] md:text-xs font-bold text-slate-400">{i + 1}</span>
                                                 {i === 3 && (
-                                                    <div className={`mt-1 md:mt-2 p-1.5 md:p-2 bg-blue-500 text-white rounded-md md:rounded-lg text-[8px] md:text-[10px] font-bold shadow-lg transition-all ${step === 0 ? 'scale-110 shadow-blue-500/30' : ''}`}>
+                                                    <div className={`mt-1 md:mt-2 p-1.5 md:p-2 bg-blue-500 text-white rounded-md md:rounded-lg text-[8px] md:text-[10px] font-bold shadow-lg transition-all ${step === 0 ? 'scale-110 shadow-primary-500/30' : ''}`}>
                                                         <div className="flex items-center gap-1 mb-0.5 md:mb-1">
                                                             <Globe size={8} className="md:w-[10px]" /> <span className="hidden sm:inline">Google</span>
                                                         </div>
@@ -226,7 +226,7 @@ const UnifiedPlatformShowcase: React.FC = () => {
                                                     </div>
                                                 )}
                                                 {i === 3 && (
-                                                    <div className={`mt-1 p-1.5 md:p-2 bg-blue-500 text-white rounded-md md:rounded-lg text-[8px] md:text-[10px] font-bold shadow-lg transition-all ${step === 1 ? 'scale-110 shadow-blue-500/30' : ''}`}>
+                                                    <div className={`mt-1 p-1.5 md:p-2 bg-blue-500 text-white rounded-md md:rounded-lg text-[8px] md:text-[10px] font-bold shadow-lg transition-all ${step === 1 ? 'scale-110 shadow-primary-500/30' : ''}`}>
                                                         <div className="flex items-center gap-1 mb-0.5 md:mb-1">
                                                             <Globe size={8} className="md:w-[10px]" /> <span className="hidden sm:inline">Outlook</span>
                                                         </div>
@@ -261,14 +261,14 @@ const UnifiedPlatformShowcase: React.FC = () => {
                                 <div className="flex flex-col h-full animate-in fade-in duration-500 bg-slate-50 dark:bg-slate-950">
                                     <div className="p-8 flex items-center justify-between">
                                         <h3 className="text-xl font-black text-slate-800 dark:text-white">Active Automations</h3>
-                                        <button className="px-6 py-2.5 bg-blue-600 text-white rounded-2xl text-sm font-black shadow-lg shadow-blue-500/20 hover:scale-105 transition-transform flex items-center gap-2">
+                                        <button className="px-6 py-2.5 bg-blue-600 text-white rounded-2xl text-sm font-black shadow-lg shadow-primary-500/25 hover:scale-105 transition-transform flex items-center gap-2">
                                             <Plus size={18} /> New Workflow
                                         </button>
                                     </div>
                                     <div className="flex-1 px-8 space-y-4">
                                         {[
                                             { name: 'Lead Enrichment', status: 'Running', health: 98, triggers: ['Salesforce', 'Slack'], color: 'from-blue-500 to-blue-600' },
-                                            { name: 'Onboarding Sequence', status: 'Paused', health: 100, triggers: ['Gmail', 'Stripe'], color: 'from-emerald-500 to-teal-600' },
+                                            { name: 'Onboarding Sequence', status: 'Paused', health: 100, triggers: ['Gmail', 'Stripe'], color: 'from-primary-500 to-secondary-900' },
                                             { name: 'Bug Triage AI', status: 'Running', health: 94, triggers: ['Github', 'Discord'], color: 'from-blue-600 to-blue-700' },
                                         ].map((wf, i) => (
                                             <div key={i} className={`p-6 bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm flex items-center gap-8 transition-all ${step === i ? 'border-blue-500 shadow-xl -translate-y-1' : ''}`}>
@@ -336,7 +336,7 @@ const UnifiedPlatformShowcase: React.FC = () => {
                                                 <div className="w-10 h-10 rounded-2xl bg-slate-900 dark:bg-slate-800 flex items-center justify-center text-white shrink-0">
                                                     <User size={20} />
                                                 </div>
-                                                <div className="bg-blue-600 text-white p-4 md:p-6 rounded-3xl shadow-xl shadow-blue-500/10 text-xs md:text-sm font-medium leading-relaxed max-w-[85%] md:max-w-[80%]">
+                                                <div className="bg-blue-600 text-white p-4 md:p-6 rounded-3xl shadow-xl shadow-primary-500/10 text-xs md:text-sm font-medium leading-relaxed max-w-[85%] md:max-w-[80%]">
                                                     "Summarize my recent meetings from Google Calendar and draft follow-up tasks in Jira for the action items."
                                                 </div>
                                             </div>
@@ -375,7 +375,7 @@ const UnifiedPlatformShowcase: React.FC = () => {
                                                 <Plus size={18} className="md:w-5" />
                                             </div>
                                             <div className="flex-1 text-xs md:text-sm text-slate-400 font-medium italic">Type your command...</div>
-                                            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-lg shadow-blue-500/20">
+                                            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-lg shadow-primary-500/25">
                                                 <ArrowRight size={18} className="md:w-5" />
                                             </div>
                                         </div>
@@ -385,11 +385,11 @@ const UnifiedPlatformShowcase: React.FC = () => {
 
                             {/* Agents (Coding Agent) Page View */}
                             {activeTab === 'agents' && (
-                                <div className="flex h-full animate-in fade-in duration-500 bg-[#0f172a] text-slate-300 font-mono text-[13px]">
+                                <div className="flex h-full animate-in fade-in duration-500 bg-[#12091F] text-slate-300 font-mono text-[13px]">
                                     {/* Sidebar */}
                                     <div className="hidden sm:flex w-48 md:w-64 border-r border-slate-800 p-4 md:p-6 flex-col gap-4 md:gap-6">
                                         <div className="flex items-center gap-3 mb-2 md:mb-4">
-                                            <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
+                                            <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-primary-500/25">
                                                 <Code2 size={16} className="md:w-5" />
                                             </div>
                                             <span className="font-bold text-white text-xs md:text-sm">Coding Agent</span>

@@ -601,7 +601,7 @@ const EnhancedBriefing: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                                                         </div>
                                                         <div className="h-2.5 bg-white/10 rounded-full overflow-hidden p-0.5 border border-white/5 shadow-inner">
                                                             <div
-                                                                className="h-full bg-gradient-to-r from-green-500 via-indigo-500 to-purple-500 rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(99,102,241,0.5)]"
+                                                                className="h-full bg-gradient-to-r from-green-500 via-indigo-500 to-purple-500 rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(255,70,150,0.45)]"
                                                                 style={{ width: `${Math.min(data.weekly_pulse.score, 100)}%` }}
                                                             />
                                                         </div>
@@ -729,7 +729,7 @@ const EnhancedBriefing: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                                 <button
                                     onClick={handleAskAI}
                                     disabled={askingAI || !aiQuestion.trim()}
-                                    className="px-5 py-3 bg-indigo-600 dark:bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 dark:hover:bg-indigo-500 transition-all disabled:opacity-50 shadow-lg shadow-indigo-600/20 flex items-center gap-2 active:scale-95"
+                                    className="px-5 py-3 bg-indigo-600 dark:bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 dark:hover:bg-indigo-500 transition-all disabled:opacity-50 shadow-lg shadow-primary-600/20 flex items-center gap-2 active:scale-95"
                                 >
                                     {askingAI ? (
                                         <RefreshCw className="w-4 h-4 animate-spin" />

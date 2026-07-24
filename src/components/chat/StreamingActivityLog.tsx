@@ -346,7 +346,7 @@ const StreamingActivityLog: React.FC<StreamingActivityLogProps> = ({
       {/* Streaming Content */}
       {content && !hideContent && (
         <div className="flex items-start space-x-3 mt-2">
-          <div className="w-8 h-8 mt-1 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg relative">
+          <div className="w-8 h-8 mt-1 bg-gradient-to-br from-primary-500 to-secondary-900 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg relative">
             <Zap size={14} className="text-white relative z-10" />
             {phase === 'streaming' && (
               <div className="absolute inset-0 bg-white/20 rounded-lg animate-pulse" />

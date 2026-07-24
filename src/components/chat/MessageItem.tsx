@@ -159,8 +159,8 @@ const MessageItem: React.FC<MessageItemProps> = ({
                 {/* Avatar */}
                 <div className={`shrink-0 w-8 h-8 rounded-lg flex items-center justify-center shadow-lg transition-transform group-hover:scale-110
           ${isUser
-                        ? 'ml-3 bg-gradient-to-br from-indigo-500 to-purple-600'
-                        : 'mr-3 bg-gradient-to-br from-emerald-400 to-teal-500'}`}
+                        ? 'ml-3 bg-gradient-to-br from-primary-500 to-secondary-900'
+                        : 'mr-3 bg-gradient-to-br from-primary-400 to-accent-400'}`}
                 >
                     {isUser ? <User size={16} className="text-white" /> : <Bot size={16} className="text-white" />}
                 </div>
@@ -169,7 +169,7 @@ const MessageItem: React.FC<MessageItemProps> = ({
                 <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'}`}>
                     <div className={`relative px-5 py-3.5 rounded-2xl transition-all duration-300
             ${isUser
-                            ? (isDarkMode ? 'bg-indigo-600/20 text-indigo-100 border border-indigo-500/20 shadow-[0_4px_20px_rgba(79,70,229,0.1)]' : 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20')
+                            ? (isDarkMode ? 'bg-indigo-600/20 text-indigo-100 border border-indigo-500/20 shadow-[0_4px_20px_rgba(79,70,229,0.1)]' : 'bg-indigo-600 text-white shadow-lg shadow-primary-600/20')
                             : (isDarkMode ? 'bg-gray-800/80 text-gray-200 border border-gray-700/50' : 'bg-white text-gray-800 border border-gray-100 shadow-sm')}
             ${isEditing ? 'ring-2 ring-indigo-400 ring-offset-2' : ''}`}
                     >

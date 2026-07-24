@@ -61,17 +61,21 @@ class ApiService {
 
     this.api = axios.create({
       baseURL: getBaseURL(),
+      // Sane default so a hung request can't spin forever. Individual calls
+      // (uploads, long jobs) can override per-request.
+      timeout: 45000,
       headers: {
         'Content-Type': 'application/json',
       },
     });
 
-    // Add request interceptor for auth token
+    // Add request interceptor for auth token + timing (slow-network signal)
     this.api.interceptors.request.use((config) => {
       const token = localStorage.getItem('auth_token');
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
+      (config as any).metadata = { startTime: Date.now() };
       return config;
     });
 
@@ -90,20 +94,40 @@ class ApiService {
       failedQueue = [];
     };
 
+    // Emit a slow-network signal when a request takes noticeably long, so the
+    // SlowNetworkBanner can surface it (covers browsers lacking the Network
+    // Information API). Normalizes back once a request is quick again.
+    const SLOW_THRESHOLD_MS = 4000;
+    const reportTiming = (config: any) => {
+      const startTime = config?.metadata?.startTime;
+      if (!startTime) return;
+      const duration = Date.now() - startTime;
+      const evt = duration > SLOW_THRESHOLD_MS ? 'network:slow' : 'network:normal';
+      window.dispatchEvent(new CustomEvent(evt, { detail: { duration } }));
+    };
+
     this.api.interceptors.response.use(
-      (response) => response,
+      (response) => {
+        reportTiming(response.config);
+        return response;
+      },
       async (error) => {
         const originalRequest = error.config;
+        reportTiming(originalRequest);
+
+        // 403 Forbidden → broadcast so guards/UI can react.
+        if (error.response?.status === 403) {
+          window.dispatchEvent(new CustomEvent('auth:forbidden'));
+        }
 
         // If 401 and we haven't already retried this request
         if (error.response?.status === 401 && !originalRequest._retry) {
           const refreshToken = localStorage.getItem('refresh_token');
 
-          // No refresh token → go to login
+          // No refresh token → session is gone. Prompt via modal instead of a
+          // silent hard redirect.
           if (!refreshToken) {
-            localStorage.removeItem('auth_token');
-            localStorage.removeItem('refresh_token');
-            window.location.href = '/login';
+            window.dispatchEvent(new CustomEvent('auth:session-expired'));
             return Promise.reject(error);
           }
 
@@ -134,9 +158,10 @@ class ApiService {
             return this.api(originalRequest);
           } catch (refreshError) {
             processQueue(refreshError, null);
-            localStorage.removeItem('auth_token');
-            localStorage.removeItem('refresh_token');
-            window.location.href = '/login';
+            // Refresh failed → session expired. Surface the modal (which clears
+            // tokens and routes to /login on user action) instead of an abrupt
+            // navigation.
+            window.dispatchEvent(new CustomEvent('auth:session-expired'));
             return Promise.reject(refreshError);
           } finally {
             isRefreshing = false;

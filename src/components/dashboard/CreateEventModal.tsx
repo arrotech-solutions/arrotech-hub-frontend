@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, Check, Loader2, Calendar, MapPin, AlignLeft, Clock } from 'lucide-react';
 import apiService from '../../services/api';
-import toast from 'react-hot-toast';
+import toast from '../../lib/notify';
 
 interface CreateEventModalProps {
     isOpen: boolean;
@@ -198,10 +198,10 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose, on
                         onClick={handleSubmit}
                         disabled={loading || !title}
                         className="relative isolate overflow-hidden rounded-xl px-4 py-2 font-semibold text-white transition-all duration-300
-                        bg-gradient-to-br from-indigo-600 via-violet-600 to-indigo-700
+                        bg-gradient-to-br from-primary-500 via-primary-600 to-secondary-900
                         before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/20 before:to-transparent before:opacity-100
                         after:absolute after:inset-0 after:shadow-[inset_0_-2px_4px_rgba(0,0,0,0.3)]
-                        shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]
+                        shadow-lg shadow-primary-500/30 hover:shadow-primary-500/50 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]
                         flex items-center disabled:opacity-50 disabled:cursor-not-allowed group"
                     >
                         <span className="relative z-10 flex items-center">

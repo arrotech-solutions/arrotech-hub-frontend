@@ -73,7 +73,7 @@ const SearchSourceCards: React.FC<SearchSourceCardsProps> = ({ sources, isDarkMo
               ${idx === 0 ? 'left-0 translate-x-0' : idx === sources.length - 1 ? 'right-0 translate-x-0' : 'left-1/2 -translate-x-1/2'}
               ${isDarkMode 
                 ? 'bg-slate-900/95 backdrop-blur-xl border-slate-800/50 text-slate-200 shadow-black' 
-                : 'bg-white/95 backdrop-blur-xl border-gray-100 text-gray-800 shadow-indigo-500/10'
+                : 'bg-white/95 backdrop-blur-xl border-gray-100 text-gray-800 shadow-primary-500/10'
             }`}>
                 {/* Modal Header: Favicon & Domain */}
                 <div className="flex items-center space-x-2 mb-3">

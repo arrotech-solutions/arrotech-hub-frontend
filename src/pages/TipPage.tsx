@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Heart, Loader, Shield, Sparkles } from 'lucide-react';
 import apiService from '../services/api';
-import toast from 'react-hot-toast';
+import toast from '../lib/notify';
 import { useParams } from 'react-router-dom';
 import SEO from '../components/SEO';
 

@@ -7,7 +7,7 @@ import {
     Brain, Coffee, Check, X, ArrowRight
 } from 'lucide-react';
 import apiService from '../../services/api';
-import toast from 'react-hot-toast';
+import toast from '../../lib/notify';
 
 interface TimeSlot {
     start: string;
@@ -171,7 +171,7 @@ export default function SmartScheduler({ onEventCreated, onClose }: SmartSchedul
     return (
         <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 overflow-hidden max-w-lg w-full max-h-[85vh] flex flex-col mx-4 md:mx-0">
             {/* Header */}
-            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4 flex items-center justify-between shrink-0">
+            <div className="bg-gradient-to-r from-secondary-700 to-primary-500 px-6 py-4 flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
                         <Sparkles className="w-5 h-5 text-white" />

@@ -41,7 +41,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                 {/* Left: Greeting & Time */}
                 <div className="flex flex-col space-y-1">
                     <h1 className="text-3xl md:text-4xl font-bold text-gray-800 dark:text-white tracking-tight transition-colors">
-                        {getGreeting()}, <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400">{userName}</span>
+                        {getGreeting()}, <span className="bg-clip-text text-transparent bg-gradient-to-r from-secondary-700 to-primary-500 dark:from-indigo-400 dark:to-purple-400">{userName}</span>
                     </h1>
                     <p className="text-lg text-gray-500 dark:text-slate-400 font-medium ml-1 flex items-center gap-2 transition-colors">
                         <span>{formattedTime}</span>
@@ -52,7 +52,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 
                 {/* Right: Focus Toggle */}
                 <div className="flex items-center gap-4 z-10">
-                    <div onClick={onToggleFocusMode} className={`cursor-pointer group/toggle flex items-center gap-4 px-5 py-3 rounded-2xl border transition-all duration-300 ${isFocusMode ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'bg-white/60 dark:bg-slate-800/60 border-white/60 dark:border-slate-700/50 text-gray-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 hover:shadow-md hover:border-indigo-100 dark:hover:border-indigo-500/30'}`}>
+                    <div onClick={onToggleFocusMode} className={`cursor-pointer group/toggle flex items-center gap-4 px-5 py-3 rounded-2xl border transition-all duration-300 ${isFocusMode ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-primary-500/20' : 'bg-white/60 dark:bg-slate-800/60 border-white/60 dark:border-slate-700/50 text-gray-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 hover:shadow-md hover:border-indigo-100 dark:hover:border-indigo-500/30'}`}>
                         <div className={`p-2 rounded-xl transition-all ${isFocusMode ? 'bg-white/20 text-white' : 'bg-gray-100 dark:bg-slate-900 text-gray-400 dark:text-slate-600 group-hover/toggle:text-indigo-500 group-hover/toggle:bg-indigo-50 dark:group-hover/toggle:bg-indigo-500/10'}`}>
                             <Zap className={`w-4 h-4 ${isFocusMode ? 'fill-current' : ''}`} />
                         </div>

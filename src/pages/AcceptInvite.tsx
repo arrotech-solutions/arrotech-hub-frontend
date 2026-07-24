@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import organizationService from '../services/organizationService';
-import toast from 'react-hot-toast';
+import toast from '../lib/notify';
 import {
     Building2, Check, Clock, AlertTriangle, Loader2, ArrowRight, LogIn,
 } from 'lucide-react';
@@ -79,7 +79,7 @@ const AcceptInvite = () => {
             <div className="w-full max-w-md">
                 <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-gray-200 dark:border-slate-700 overflow-hidden">
                     {/* Header */}
-                    <div className="bg-gradient-to-r from-emerald-500 to-teal-600 px-8 py-6 text-center">
+                    <div className="bg-gradient-to-r from-primary-500 to-secondary-900 px-8 py-6 text-center">
                         <div className="w-16 h-16 mx-auto rounded-2xl bg-white/20 flex items-center justify-center mb-3">
                             {info?.org_logo ? (
                                 <img src={info.org_logo} alt="" className="w-10 h-10 rounded-lg" />
@@ -94,7 +94,7 @@ const AcceptInvite = () => {
                     <div className="p-8">
                         {loading ? (
                             <div className="flex flex-col items-center py-8 gap-3">
-                                <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
+                                <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
                                 <p className="text-sm text-gray-500 dark:text-slate-400">Loading invitation…</p>
                             </div>
                         ) : error && !info ? (
@@ -173,7 +173,7 @@ const AcceptInvite = () => {
                                             <LogIn className="w-4 h-4" /> Sign In to Accept
                                         </Link>
                                         <p className="text-xs text-center text-gray-400 dark:text-slate-500">
-                                            Don't have an account? <Link to={`/register?redirect=/invite/${token}`} className="text-emerald-600 dark:text-emerald-400 font-medium">Sign up</Link>
+                                            Don't have an account? <Link to={`/register?redirect=/invite/${token}`} className="text-primary-600 dark:text-primary-400 font-medium">Sign up</Link>
                                         </p>
                                     </div>
                                 ) : (
@@ -188,7 +188,7 @@ const AcceptInvite = () => {
                                         <button
                                             onClick={handleAccept}
                                             disabled={accepting || user.email !== info.email}
-                                            className="w-full flex items-center justify-center gap-2 px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                            className="w-full flex items-center justify-center gap-2 px-5 py-3 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-semibold text-sm transition-colors shadow-brand disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                             {accepting ? (
                                                 <><Loader2 className="w-4 h-4 animate-spin" /> Accepting…</>

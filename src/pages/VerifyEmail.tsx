@@ -144,7 +144,7 @@ const VerifyEmail: React.FC = () => {
 
   if (isVerified) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900 transition-colors">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-secondary-900 transition-colors">
         <div className="text-center animate-in fade-in zoom-in duration-500">
           <div className="relative mx-auto w-24 h-24 mb-6">
             <div className="absolute inset-0 bg-emerald-500/20 rounded-full animate-ping" />
@@ -167,7 +167,7 @@ const VerifyEmail: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex relative bg-slate-50 dark:bg-slate-900 transition-colors">
+    <div className="min-h-screen flex relative bg-slate-50 dark:bg-secondary-900 transition-colors">
       <SEO
         title="Verify Your Email"
         description="Enter the verification code sent to your email to complete your Arrotech Hub registration."
@@ -183,7 +183,7 @@ const VerifyEmail: React.FC = () => {
           <div className="text-center mb-6">
             <div className="inline-flex items-center gap-2 group hover:scale-[1.02] transition-transform mb-4">
               <img src={logoIcon} alt="Arrotech Hub" className="h-6 w-auto object-contain" />
-              <span className="text-[15px] font-black bg-gradient-to-r from-slate-900 to-blue-600 dark:from-white dark:to-blue-400 bg-clip-text text-transparent tracking-tighter">ARROTECH</span>
+              <span className="text-[15px] font-black bg-gradient-to-r from-secondary-900 to-primary-500 dark:from-white dark:to-primary-400 bg-clip-text text-transparent tracking-tighter">ARROTECH</span>
             </div>
             <div className="relative mx-auto w-20 h-20 mb-5">
               <div className="absolute inset-0 bg-violet-500/10 dark:bg-violet-500/20 rounded-full animate-pulse" />
@@ -204,7 +204,7 @@ const VerifyEmail: React.FC = () => {
           </div>
 
           {/* OTP Input Card */}
-          <div className="bg-white/80 dark:bg-slate-900/50 backdrop-blur-md rounded-xl p-6 shadow-xl border border-gray-100 dark:border-slate-800/50 transition-colors">
+          <div className="bg-white/80 dark:bg-secondary-900/50 backdrop-blur-md rounded-xl p-6 shadow-xl border border-gray-100 dark:border-secondary-800/50 transition-colors">
             {/* Error Message */}
             {error && (
               <div className="mb-4 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/50 text-red-600 dark:text-red-400 px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition-colors">
@@ -229,11 +229,11 @@ const VerifyEmail: React.FC = () => {
                   className={`
                     w-12 h-14 text-center text-xl font-bold rounded-lg border-2 outline-none
                     transition-all duration-200
-                    bg-white dark:bg-slate-800
+                    bg-white dark:bg-secondary-800
                     text-slate-900 dark:text-white
                     ${digit
                       ? 'border-violet-500 dark:border-violet-400 shadow-sm shadow-violet-500/20'
-                      : 'border-slate-200 dark:border-slate-700'
+                      : 'border-slate-200 dark:border-secondary-700'
                     }
                     focus:border-violet-500 dark:focus:border-violet-400
                     focus:ring-2 focus:ring-violet-500/20 dark:focus:ring-violet-400/20
