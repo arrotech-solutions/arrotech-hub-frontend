@@ -112,7 +112,7 @@ const CalendarWidget: React.FC = () => {
                 className="group relative bg-white dark:bg-slate-800/50 border border-gray-100 dark:border-slate-800 rounded-2xl p-4 hover:shadow-lg hover:border-blue-100 dark:hover:border-blue-500/30 transition-all duration-300"
               >
                 {/* Left accent bar */}
-                <div className="absolute left-0 top-4 bottom-4 w-1 bg-blue-500 dark:bg-blue-400 rounded-r-full shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
+                <div className="absolute left-0 top-4 bottom-4 w-1 bg-blue-500 dark:bg-blue-400 rounded-r-full shadow-[0_0_10px_rgba(255,70,150,0.45)]"></div>
 
                 <div className="pl-3 flex flex-col space-y-3">
                   <div className="flex justify-between items-start">

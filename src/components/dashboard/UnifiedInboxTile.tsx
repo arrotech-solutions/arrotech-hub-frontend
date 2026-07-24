@@ -143,7 +143,7 @@ const UnifiedInboxTile: React.FC<UnifiedInboxTileProps> = ({ onCompose }) => {
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
-                    <button onClick={onCompose} className="p-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-lg hover:shadow-indigo-200 transition-all" title="Compose">
+                    <button onClick={onCompose} className="p-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-lg hover:shadow-primary-200 transition-all" title="Compose">
                         <PenSquare className="w-5 h-5" />
                     </button>
                     <div
@@ -201,7 +201,7 @@ const UnifiedInboxTile: React.FC<UnifiedInboxTileProps> = ({ onCompose }) => {
 
                         {/* Unread Indicator */}
                         {!msg.read && (
-                            <div className="absolute top-4 right-4 w-2 h-2 bg-indigo-500 rounded-full shadow-lg shadow-indigo-500/50" />
+                            <div className="absolute top-4 right-4 w-2 h-2 bg-indigo-500 rounded-full shadow-lg shadow-primary-500/50" />
                         )}
                     </div>
                 ))}

@@ -129,7 +129,7 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({ isOpen, onClose, 
                                             className={`
                                                 w-full pl-10 pr-3 py-2.5 rounded-xl border text-sm font-bold transition-all outline-none
                                                 ${focusMode
-                                                    ? 'bg-slate-900/50 border-slate-700 text-white focus:border-indigo-500 focus:bg-slate-900 focus:shadow-[0_0_15px_rgba(99,102,241,0.3)]'
+                                                    ? 'bg-slate-900/50 border-slate-700 text-white focus:border-indigo-500 focus:bg-slate-900 focus:shadow-[0_0_15px_rgba(255,70,150,0.3)]'
                                                     : 'bg-white dark:bg-slate-800 border-indigo-100 dark:border-slate-700 text-slate-700 dark:text-white focus:border-indigo-500 dark:focus:border-indigo-500 focus:shadow-md dark:shadow-none'
                                                 }
                                             `}
@@ -150,7 +150,7 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({ isOpen, onClose, 
                                             className={`
                                                 w-full pl-10 pr-3 py-2.5 rounded-xl border text-sm font-bold transition-all outline-none
                                                 ${focusMode
-                                                    ? 'bg-slate-900/50 border-slate-700 text-white focus:border-indigo-500 focus:bg-slate-900 focus:shadow-[0_0_15px_rgba(99,102,241,0.3)]'
+                                                    ? 'bg-slate-900/50 border-slate-700 text-white focus:border-indigo-500 focus:bg-slate-900 focus:shadow-[0_0_15px_rgba(255,70,150,0.3)]'
                                                     : 'bg-white dark:bg-slate-800 border-indigo-100 dark:border-slate-700 text-slate-700 dark:text-white focus:border-indigo-500 dark:focus:border-indigo-500 focus:shadow-md dark:shadow-none'
                                                 }
                                             `}
@@ -241,7 +241,7 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({ isOpen, onClose, 
                                 <button
                                     onClick={handleSaveReschedule}
                                     disabled={isLoading}
-                                    className="px-6 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold shadow-lg shadow-indigo-500/20 disabled:opacity-50 transition-all active:scale-[0.98]"
+                                    className="px-6 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold shadow-lg shadow-primary-500/20 disabled:opacity-50 transition-all active:scale-[0.98]"
                                 >
                                     {isLoading ? 'Saving...' : 'Confirm Change'}
                                 </button>

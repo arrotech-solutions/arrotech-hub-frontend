@@ -180,7 +180,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
                             className={`p-2.5 rounded-xl transition-all chat-send-btn
                 ${!inputMessage.trim() || isLoading
                                     ? (isDarkMode ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-gray-50 text-gray-200 cursor-not-allowed')
-                                    : 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/20 hover:scale-105 hover:shadow-indigo-500/40'}`}
+                                    : 'bg-gradient-to-br from-primary-500 to-secondary-900 text-white shadow-lg shadow-primary-500/20 hover:scale-105 hover:shadow-primary-500/40'}`}
                         >
                             {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
                         </button>

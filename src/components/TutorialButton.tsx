@@ -11,6 +11,7 @@ const TutorialButton: React.FC = () => {
     isCompleted,
     currentPage,
     hasCompletedPage,
+    hasPageTutorial,
     availablePages,
     isActive
   } = useTutorial();
@@ -51,30 +52,35 @@ const TutorialButton: React.FC = () => {
   if (!user || isActive || !showTutorialGuide) return null;
 
   const pageLabels: Record<string, string> = {
-    dashboard: 'Dashboard',
     workspace: 'Workspace',
+    unifiedInbox: 'Unified Inbox',
+    unifiedTasks: 'Unified Tasks',
+    unifiedCalendar: 'Unified Calendar',
     chat: 'Chat',
     workflows: 'Workflows',
     agents: 'Agents',
+    codingAgent: 'Coding Agent',
+    whatsapp: 'WhatsApp',
     connections: 'Connections',
+    mcptools: 'MCP Tools',
+    marketplace: 'Marketplace',
+    favorites: 'Favorites',
+    productivity: 'Productivity',
     payments: 'Payments',
     activity: 'Activity',
     settings: 'Settings',
     profile: 'Profile',
-    marketplace: 'Marketplace',
-    favorites: 'Favorites',
     creator: 'Creator Profile',
-    mcptools: 'MCP Tools',
     pricing: 'Pricing',
-    unifiedInbox: 'Unified Inbox',
-    unifiedTasks: 'Unified Tasks',
-    unifiedCalendar: 'Unified Calendar',
+    kra: 'KRA / GavaConnect',
+    tiktok: 'TikTok Hub',
   };
 
   // Get the label for the current page with proper capitalization
+  const pageHasTutorial = hasPageTutorial(currentPage);
   const currentPageLabel = pageLabels[currentPage] ||
     (currentPage ? currentPage.charAt(0).toUpperCase() + currentPage.slice(1) : 'This Page');
-  const hasCompletedCurrentPage = hasCompletedPage(currentPage);
+  const hasCompletedCurrentPage = pageHasTutorial && hasCompletedPage(currentPage);
 
   return (
     <div className="fixed bottom-6 right-6 z-40" ref={menuRef}>
@@ -82,7 +88,7 @@ const TutorialButton: React.FC = () => {
       {isMenuOpen && (
         <div className="absolute bottom-16 right-0 w-72 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden animate-in slide-in-from-bottom-2 duration-200">
           {/* Header */}
-          <div className="px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+          <div className="px-4 py-3 bg-gradient-to-r from-primary-500 to-secondary-900 text-white">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <BookOpen className="w-5 h-5" />
@@ -97,7 +103,8 @@ const TutorialButton: React.FC = () => {
             </div>
           </div>
 
-          {/* Current Page Tutorial */}
+          {/* Current Page Tutorial — only when this route has guided steps */}
+          {pageHasTutorial && (
           <div className="p-3 border-b border-gray-100">
             <button
               onClick={() => {
@@ -124,6 +131,7 @@ const TutorialButton: React.FC = () => {
               )}
             </button>
           </div>
+          )}
 
           {/* Full Tutorial Option */}
           <div className="p-3 border-b border-gray-100">
@@ -192,7 +200,7 @@ const TutorialButton: React.FC = () => {
         onClick={() => setIsMenuOpen(!isMenuOpen)}
         className={`p-4 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 ${isMenuOpen
           ? 'bg-gray-100 text-gray-700'
-          : 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
+          : 'bg-gradient-to-r from-primary-500 to-secondary-900 text-white'
           }`}
         title="Tutorial Guide"
       >
@@ -204,7 +212,7 @@ const TutorialButton: React.FC = () => {
       </button>
 
       {/* Pulse indicator for uncompleted current page */}
-      {!hasCompletedCurrentPage && !isMenuOpen && (
+      {pageHasTutorial && !hasCompletedCurrentPage && !isMenuOpen && (
         <span className="absolute top-0 right-0 flex h-3 w-3">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
           <span className="relative inline-flex rounded-full h-3 w-3 bg-orange-500"></span>

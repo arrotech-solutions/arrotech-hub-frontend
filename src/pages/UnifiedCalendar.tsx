@@ -10,6 +10,7 @@ import { ClickUpLogo, TrelloLogo, JiraLogo, AsanaLogo } from '../components/Bran
 import CreateEventModal from '../components/dashboard/CreateEventModal';
 import EventDetailsModal from '../components/dashboard/EventDetailsModal';
 import SmartScheduler from '../components/calendar/SmartScheduler';
+import { useTutorial } from '../hooks/useTutorial';
 
 interface CalendarEvent {
     id: string;
@@ -37,6 +38,7 @@ interface Task {
 
 
 const UnifiedCalendar: React.FC = () => {
+    const { currentStep, isActive: isTutorialActive } = useTutorial();
     const [viewDate, setViewDate] = useState(new Date());
     const [viewMode, setViewMode] = useState<'month' | 'week' | 'day'>('month');
     const [events, setEvents] = useState<CalendarEvent[]>([]);
@@ -64,6 +66,7 @@ const UnifiedCalendar: React.FC = () => {
 
     useEffect(() => {
         const handleResize = () => {
+            if (isTutorialActive) return; // don't collapse panels mid-tour
             if (window.innerWidth < 1024) {
                 setShowSidebar(false);
                 setShowTaskTray(false);
@@ -76,6 +79,34 @@ const UnifiedCalendar: React.FC = () => {
         handleResize();
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
+    }, [isTutorialActive]);
+
+    useEffect(() => {
+        if (!isTutorialActive || !currentStep) return;
+        if (currentStep.id === 'calendar-sidebar' || currentStep.id === 'calendar-intro') {
+            setShowSidebar(true);
+        }
+        if (currentStep.id === 'calendar-tasks') {
+            setShowTaskTray(true);
+        }
+        if (currentStep.id === 'calendar-smart') {
+            setShowSidebar(true);
+        }
+    }, [isTutorialActive, currentStep]);
+
+    useEffect(() => {
+        const onReveal = (event: Event) => {
+            const detail = (event as CustomEvent).detail || {};
+            if (detail.page && detail.page !== 'unifiedCalendar') return;
+            if (String(detail.target || '').includes('sidebar') || detail.stepId === 'calendar-sidebar') {
+                setShowSidebar(true);
+            }
+            if (String(detail.target || '').includes('task-tray') || detail.stepId === 'calendar-tasks') {
+                setShowTaskTray(true);
+            }
+        };
+        window.addEventListener('tutorial:reveal-target', onReveal);
+        return () => window.removeEventListener('tutorial:reveal-target', onReveal);
     }, []);
 
     // --- FETCHING LOGIC (Preserved) ---
@@ -499,7 +530,7 @@ const UnifiedCalendar: React.FC = () => {
                         <div className={`hidden md:block absolute inset-0 bg-gradient-to-r from-indigo-400 to-purple-500 rounded-2xl blur-md opacity-30 group-hover:opacity-50 transition-all duration-500 ${focusMode ? 'opacity-10' : 'dark:opacity-20'}`} />
                         <button
                             onClick={() => setShowSmartScheduler(true)}
-                            className={`calendar-smart-scheduler-tut hidden md:flex relative items-center w-full h-12 px-5 rounded-2xl transition-all duration-300 border text-left group-hover:-translate-y-0.5 ${focusMode ? 'bg-slate-900/80 border-slate-700 text-white placeholder-slate-500 shadow-xl shadow-black/20' : 'bg-white/90 dark:bg-slate-900/90 border-indigo-100/80 dark:border-slate-700/80 text-slate-700 dark:text-slate-200 placeholder-indigo-300 dark:placeholder-slate-500 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:shadow-[0_8px_30px_rgb(79,70,229,0.1)] hover:border-indigo-300 dark:hover:border-indigo-500 backdrop-blur-md'}`}
+                            className={`calendar-smart-scheduler-tut flex relative items-center w-full h-12 px-5 rounded-2xl transition-all duration-300 border text-left group-hover:-translate-y-0.5 ${focusMode ? 'bg-slate-900/80 border-slate-700 text-white placeholder-slate-500 shadow-xl shadow-black/20' : 'bg-white/90 dark:bg-slate-900/90 border-indigo-100/80 dark:border-slate-700/80 text-slate-700 dark:text-slate-200 placeholder-indigo-300 dark:placeholder-slate-500 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:shadow-[0_8px_30px_rgb(79,70,229,0.1)] hover:border-indigo-300 dark:hover:border-indigo-500 backdrop-blur-md'}`}
                         >
                             <Sparkles className={`w-5 h-5 mr-3 shrink-0 transition-transform group-hover:scale-110 ${focusMode ? 'text-indigo-400' : 'text-indigo-500'}`} />
                             <span className={`text-[15px] font-medium truncate tracking-tight ${focusMode ? 'text-slate-400' : 'text-indigo-900/60 dark:text-indigo-200/60'}`}>
@@ -533,7 +564,7 @@ const UnifiedCalendar: React.FC = () => {
 
                         <button
                             onClick={() => setFocusMode(!focusMode)}
-                            className={`flex p-2 md:p-2.5 rounded-xl border transition-all ${focusMode ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-100 dark:hover:border-indigo-500/50'}`}
+                            className={`flex p-2 md:p-2.5 rounded-xl border transition-all ${focusMode ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-primary-500/20' : 'bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-100 dark:hover:border-indigo-500/50'}`}
                             title="Toggle Focus Mode"
                         >
                             <Zap className={`w-4 h-4 ${focusMode ? 'fill-current' : ''}`} />
@@ -548,7 +579,7 @@ const UnifiedCalendar: React.FC = () => {
 
                         <button
                             onClick={() => setIsEventModalOpen(true)}
-                            className="calendar-create-btn-tut bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-2 md:px-4 md:py-2.5 rounded-xl text-xs md:text-sm font-semibold shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center gap-1.5 md:gap-2"
+                            className="calendar-create-btn-tut bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-2 md:px-4 md:py-2.5 rounded-xl text-xs md:text-sm font-semibold shadow-lg shadow-primary-500/30 hover:shadow-primary-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center gap-1.5 md:gap-2"
                         >
                             <Plus className="w-4 h-4" />
                             <span className="hidden md:inline">Create</span>
@@ -580,7 +611,7 @@ const UnifiedCalendar: React.FC = () => {
                                         className={`
                                             w-7 h-7 flex items-center justify-center rounded-full mx-auto transition-all
                                             ${!d ? '' : 'cursor-pointer'}
-                                            ${d && isToday(d) ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20' : ''}
+                                            ${d && isToday(d) ? 'bg-indigo-600 text-white shadow-md shadow-primary-500/20' : ''}
                                             ${d && !isToday(d) && (focusMode ? 'text-slate-300 hover:bg-slate-800' : 'text-slate-700 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-slate-800')}
                                         `}
                                     >
@@ -637,7 +668,7 @@ const UnifiedCalendar: React.FC = () => {
                                                 <div className={`
                                                     w-7 h-7 mb-2 flex items-center justify-center rounded-full text-[13px] font-bold transition-all duration-300
                                                     ${isToday(date)
-                                                        ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/40 scale-110'
+                                                        ? 'bg-indigo-600 text-white shadow-md shadow-primary-500/40 scale-110'
                                                         : (focusMode ? 'text-slate-500 group-hover:text-slate-200' : 'text-slate-500 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 group-hover:bg-indigo-50 dark:group-hover:bg-slate-800')}
                                                 `}>
                                                     {date.getDate()}
@@ -674,7 +705,7 @@ const UnifiedCalendar: React.FC = () => {
                                             onClick={() => setViewDate(d)}
                                             className={`py-3 text-center border-r cursor-pointer transition-colors ${focusMode ? 'border-slate-800 hover:bg-slate-800' : 'border-indigo-50 dark:border-slate-800 hover:bg-indigo-50 dark:hover:bg-slate-800'} ${i === 6 ? 'border-r-0' : ''}`}>
                                             <div className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${focusMode ? 'text-slate-500' : 'text-indigo-400 dark:text-indigo-400'}`}>{['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getDay()]}</div>
-                                            <div className={`w-8 h-8 mx-auto flex items-center justify-center rounded-full text-sm font-bold transition-all ${isToday(d) ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30' : (focusMode ? 'text-slate-200' : 'text-slate-800 dark:text-slate-200')}`}>{d.getDate()}</div>
+                                            <div className={`w-8 h-8 mx-auto flex items-center justify-center rounded-full text-sm font-bold transition-all ${isToday(d) ? 'bg-indigo-600 text-white shadow-lg shadow-primary-500/30' : (focusMode ? 'text-slate-200' : 'text-slate-800 dark:text-slate-200')}`}>{d.getDate()}</div>
                                         </div>
                                     ))}
                                 </div>
@@ -784,7 +815,7 @@ const UnifiedCalendar: React.FC = () => {
                                                             className={`
                                                                  absolute p-4 rounded-[20px] border z-10 backdrop-blur-md cursor-pointer
                                                                  transition-all duration-300 hover:scale-[1.01] hover:-translate-y-1 hover:shadow-2xl hover:z-20
-                                                                 ${focusMode ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-100 shadow-indigo-900/20 hover:bg-indigo-500/20' : 'bg-indigo-50/90 dark:bg-indigo-900/40 border-indigo-200/50 dark:border-indigo-700/50 text-indigo-900 dark:text-indigo-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none hover:bg-indigo-100/90 dark:hover:bg-indigo-800/60 hover:border-indigo-300'}
+                                                                 ${focusMode ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-100 shadow-primary-900/20 hover:bg-indigo-500/20' : 'bg-indigo-50/90 dark:bg-indigo-900/40 border-indigo-200/50 dark:border-indigo-700/50 text-indigo-900 dark:text-indigo-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none hover:bg-indigo-100/90 dark:hover:bg-indigo-800/60 hover:border-indigo-300'}
                                                              `}
                                                             style={{
                                                                 top: `${top}px`,

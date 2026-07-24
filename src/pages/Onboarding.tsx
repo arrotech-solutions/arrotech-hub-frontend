@@ -13,117 +13,69 @@ const Onboarding = () => {
     const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 
     return (
-        <div style={{
-            minHeight: '100vh',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: 'linear-gradient(135deg, #0f0f23 0%, #1a1a3e 50%, #0f0f23 100%)',
-            padding: '2rem',
-        }}>
-            <div style={{ maxWidth: '800px', width: '100%', textAlign: 'center' }}>
-                {/* Header */}
-                <div style={{ marginBottom: '3rem' }}>
-                    <div style={{
-                        display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-                        background: 'rgba(99, 102, 241, 0.15)', border: '1px solid rgba(99, 102, 241, 0.3)',
-                        borderRadius: '999px', padding: '0.4rem 1rem', marginBottom: '1.5rem',
-                        fontSize: '0.85rem', color: '#a5b4fc',
-                    }}>
-                        <Sparkles size={14} /> Welcome to Arrotech Hub
+        <div className="min-h-screen flex items-center justify-center bg-surface-gradient-dark px-6 py-10">
+            <div className="max-w-3xl w-full text-center">
+                <div className="mb-12">
+                    <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-6 text-sm text-primary-300 bg-primary-500/15 border border-primary-500/30">
+                        <Sparkles size={14} className="text-accent-400" /> Welcome to Arrotech Hub
                     </div>
-                    <h1 style={{
-                        fontSize: '2.5rem', fontWeight: 700, color: '#fff',
-                        marginBottom: '0.75rem', lineHeight: 1.2,
-                    }}>
+                    <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3 leading-tight tracking-tight">
                         Hey {user?.name?.split(' ')[0] || 'there'}, how will you use Hub?
                     </h1>
-                    <p style={{ color: '#94a3b8', fontSize: '1.1rem', maxWidth: '500px', margin: '0 auto' }}>
+                    <p className="text-secondary-400 text-lg max-w-lg mx-auto">
                         You can always change this later. Choose what fits best right now.
                     </p>
                 </div>
 
-                {/* Cards */}
-                <div style={{
-                    display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem',
-                    marginBottom: '2rem',
-                }}>
-                    {/* Personal Card */}
-                    <div
-                        onClick={() => navigate('/dashboard')}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+                    <button
+                        type="button"
+                        onClick={() => navigate('/unified')}
                         onMouseEnter={() => setHoveredCard('personal')}
                         onMouseLeave={() => setHoveredCard(null)}
-                        style={{
-                            background: hoveredCard === 'personal'
-                                ? 'rgba(99, 102, 241, 0.12)' : 'rgba(255,255,255,0.04)',
-                            border: hoveredCard === 'personal'
-                                ? '2px solid rgba(99, 102, 241, 0.5)' : '2px solid rgba(255,255,255,0.08)',
-                            borderRadius: '1rem', padding: '2.5rem 2rem',
-                            cursor: 'pointer', transition: 'all 0.25s ease',
-                            textAlign: 'left',
-                        }}
+                        className={`text-left rounded-2xl p-8 transition-all duration-250 border-2 ${
+                            hoveredCard === 'personal'
+                                ? 'bg-primary-500/15 border-primary-500/50 shadow-brand'
+                                : 'bg-white/5 border-white/10 hover:border-primary-500/30'
+                        }`}
                     >
-                        <div style={{
-                            width: '56px', height: '56px', borderRadius: '14px',
-                            background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            marginBottom: '1.5rem',
-                        }}>
-                            <User size={28} color="#fff" />
+                        <div className="w-14 h-14 rounded-[14px] bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center mb-6 shadow-brand">
+                            <User size={28} className="text-white" />
                         </div>
-                        <h3 style={{ color: '#fff', fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.5rem' }}>
-                            Personal Use
-                        </h3>
-                        <p style={{ color: '#94a3b8', fontSize: '0.9rem', lineHeight: 1.5 }}>
+                        <h3 className="text-white text-xl font-semibold mb-2">Personal Use</h3>
+                        <p className="text-secondary-400 text-sm leading-relaxed">
                             Use Hub for your own projects, automations, and integrations. Perfect for freelancers and solopreneurs.
                         </p>
-                        <div style={{
-                            display: 'flex', alignItems: 'center', gap: '0.5rem',
-                            color: '#a5b4fc', marginTop: '1.5rem', fontSize: '0.9rem', fontWeight: 500,
-                        }}>
+                        <div className="flex items-center gap-2 text-primary-300 mt-6 text-sm font-medium">
                             Go to Dashboard <ArrowRight size={16} />
                         </div>
-                    </div>
+                    </button>
 
-                    {/* Organization Card */}
-                    <div
+                    <button
+                        type="button"
                         onClick={() => navigate('/create-organization')}
                         onMouseEnter={() => setHoveredCard('org')}
                         onMouseLeave={() => setHoveredCard(null)}
-                        style={{
-                            background: hoveredCard === 'org'
-                                ? 'rgba(16, 185, 129, 0.12)' : 'rgba(255,255,255,0.04)',
-                            border: hoveredCard === 'org'
-                                ? '2px solid rgba(16, 185, 129, 0.5)' : '2px solid rgba(255,255,255,0.08)',
-                            borderRadius: '1rem', padding: '2.5rem 2rem',
-                            cursor: 'pointer', transition: 'all 0.25s ease',
-                            textAlign: 'left',
-                        }}
+                        className={`text-left rounded-2xl p-8 transition-all duration-250 border-2 ${
+                            hoveredCard === 'org'
+                                ? 'bg-accent-500/15 border-accent-500/50 shadow-accent'
+                                : 'bg-white/5 border-white/10 hover:border-accent-500/30'
+                        }`}
                     >
-                        <div style={{
-                            width: '56px', height: '56px', borderRadius: '14px',
-                            background: 'linear-gradient(135deg, #10b981, #059669)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            marginBottom: '1.5rem',
-                        }}>
-                            <Building2 size={28} color="#fff" />
+                        <div className="w-14 h-14 rounded-[14px] bg-gradient-to-br from-accent-400 to-primary-500 flex items-center justify-center mb-6 shadow-accent">
+                            <Building2 size={28} className="text-secondary-950" />
                         </div>
-                        <h3 style={{ color: '#fff', fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.5rem' }}>
-                            Create an Organization
-                        </h3>
-                        <p style={{ color: '#94a3b8', fontSize: '0.9rem', lineHeight: 1.5 }}>
+                        <h3 className="text-white text-xl font-semibold mb-2">Create an Organization</h3>
+                        <p className="text-secondary-400 text-sm leading-relaxed">
                             Set up a shared workspace for your team or company. Invite members, manage roles, and collaborate.
                         </p>
-                        <div style={{
-                            display: 'flex', alignItems: 'center', gap: '0.5rem',
-                            color: '#6ee7b7', marginTop: '1.5rem', fontSize: '0.9rem', fontWeight: 500,
-                        }}>
+                        <div className="flex items-center gap-2 text-accent-300 mt-6 text-sm font-medium">
                             Create Organization <ArrowRight size={16} />
                         </div>
-                    </div>
+                    </button>
                 </div>
 
-                <p style={{ color: '#64748b', fontSize: '0.8rem' }}>
+                <p className="text-secondary-500 text-sm">
                     You can create or join organizations anytime from your dashboard settings.
                 </p>
             </div>

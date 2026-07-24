@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Loader, MessageCircle, ShoppingBag, Video, ExternalLink, Lock } from 'lucide-react';
 import apiService from '../services/api';
-import toast from 'react-hot-toast';
+import toast from '../lib/notify';
 
 const PublicProfile: React.FC = () => {
     const { username } = useParams<{ username: string }>();

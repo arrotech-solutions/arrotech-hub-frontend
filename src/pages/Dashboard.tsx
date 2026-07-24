@@ -90,28 +90,28 @@ const Dashboard: React.FC = () => {
             title: 'Create Workflow',
             description: 'Build automated workflows',
             icon: Zap,
-            color: 'bg-gradient-to-r from-blue-500 to-purple-600',
+            color: 'bg-gradient-to-r from-primary-500 to-secondary-900',
             onClick: () => navigate('/workflows')
         },
         {
             title: 'Add Connection',
             description: 'Connect new services',
             icon: Link,
-            color: 'bg-gradient-to-r from-green-500 to-emerald-600',
+            color: 'bg-gradient-to-r from-primary-500 to-secondary-900',
             onClick: () => navigate('/connections')
         },
         {
             title: 'Browse MCP Tools',
             description: 'Run tools from your connections',
             icon: Zap,
-            color: 'bg-gradient-to-r from-emerald-500 to-teal-600',
+            color: 'bg-gradient-to-r from-primary-500 to-secondary-900',
             onClick: () => navigate('/mcp-tools')
         },
         {
             title: 'Manage Agents',
             description: 'View and control your agents',
             icon: Bot,
-            color: 'bg-gradient-to-r from-purple-500 to-pink-600',
+            color: 'bg-gradient-to-r from-secondary-700 to-primary-500',
             onClick: () => navigate('/agents')
         }
     ];
@@ -192,7 +192,7 @@ const Dashboard: React.FC = () => {
                                     <span className="text-xs font-black text-blue-600 uppercase tracking-[0.2em]">Operational Nexus</span>
                                 </div>
                                 <h1 className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-4 tracking-tight leading-tight transition-colors">
-                                    Welcome back, <span className="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">{user?.name || 'Commander'}</span> 👋
+                                    Welcome back, <span className="bg-gradient-to-r from-primary-500 to-secondary-800 dark:from-primary-400 dark:to-primary-300 bg-clip-text text-transparent">{user?.name || 'Commander'}</span> 👋
                                 </h1>
                                 <p className="text-gray-500 dark:text-slate-400 max-w-xl font-medium text-lg leading-relaxed">
                                     Your autonomous infrastructure is performing optimally. Here is your real-time telemetry and command center.

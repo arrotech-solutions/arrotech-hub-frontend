@@ -22,9 +22,10 @@ import {
   X,
   Zap,
 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import toast from '../lib/notify';
 import { useAuth } from '../hooks/useAuth';
 import apiService from '../services/api';
+import { EmptyState } from '../components/states';
 import { MarketplaceWorkflow, WorkflowExportData, WorkflowReview } from '../types';
 
 const Marketplace: React.FC = () => {
@@ -291,7 +292,7 @@ const Marketplace: React.FC = () => {
       <div className="marketplace-header flex flex-col md:flex-row items-center justify-between gap-6 mb-10">
         <div className="text-center md:text-left">
           <h1 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white flex flex-col sm:flex-row items-center sm:space-x-3 gap-3">
-            <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl shadow-lg shadow-purple-500/20">
+            <div className="p-3 bg-gradient-to-br from-secondary-700 to-primary-500 rounded-2xl shadow-lg shadow-primary-500/25">
               <ShoppingBag className="w-8 h-8 text-white" />
             </div>
             <span>Workflow Marketplace</span>
@@ -481,12 +482,12 @@ const Marketplace: React.FC = () => {
               </div>
             </div>
           ) : workflows.length === 0 ? (
-            <div className="text-center py-24 bg-white dark:bg-slate-800/50 rounded-2xl border border-gray-200 dark:border-slate-700/50 marketplace-list-empty shadow-inner">
-              <Package className="w-16 h-16 text-gray-300 dark:text-slate-600 mx-auto mb-4 opacity-50" />
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white">No workflows found</h3>
-              <p className="text-gray-600 dark:text-slate-400 mt-2 font-medium">
-                Be the first to share a workflow with the community!
-              </p>
+            <div className="marketplace-list-empty rounded-2xl border border-gray-200 dark:border-slate-700/50 bg-white dark:bg-slate-800/50 shadow-inner">
+              <EmptyState
+                icon={<Package className="h-7 w-7" />}
+                title="No workflows found"
+                description="Be the first to share a workflow with the community!"
+              />
             </div>
           ) : (
             <div className={`marketplace-list ${viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-4'}`}>
@@ -562,7 +563,7 @@ const Marketplace: React.FC = () => {
                     <div className="flex items-center space-x-2">
                       <button
                         onClick={() => handleImportWorkflow(workflow)}
-                        className="flex-1 flex items-center justify-center space-x-2 px-4 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-500 dark:to-pink-500 text-white rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all font-bold text-sm shadow-md shadow-purple-500/20"
+                        className="flex-1 flex items-center justify-center space-x-2 px-4 py-2.5 bg-gradient-to-r from-secondary-800 to-primary-500 dark:from-secondary-600 dark:to-primary-500 text-white rounded-xl hover:from-secondary-900 hover:to-primary-600 transition-all font-bold text-sm shadow-md shadow-primary-500/25"
                       >
                         <Download className="w-3.5 h-3.5" />
                         <span>Import</span>
@@ -808,7 +809,7 @@ const Marketplace: React.FC = () => {
           />
           <div className="relative bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col border border-gray-100 dark:border-slate-800">
             {/* Header */}
-            <div className="p-6 sm:p-8 border-b border-gray-100 bg-gradient-to-r from-purple-600 to-pink-600">
+            <div className="p-6 sm:p-8 border-b border-gray-100 bg-gradient-to-r from-secondary-800 to-primary-500">
               <div className="flex items-start justify-between">
                 <div className="flex items-center space-x-4">
                   <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-md border border-white/20">
@@ -972,7 +973,7 @@ const Marketplace: React.FC = () => {
                       <div key={review.id} className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700/50 rounded-2xl p-6 hover:shadow-lg dark:hover:shadow-2xl transition-all group">
                         <div className="flex items-start justify-between mb-4">
                           <div className="flex items-center space-x-3">
-                            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white text-sm font-black shadow-lg shadow-purple-500/20 group-hover:scale-110 transition-transform">
+                            <div className="w-10 h-10 bg-gradient-to-br from-secondary-700 to-primary-500 rounded-xl flex items-center justify-center text-white text-sm font-black shadow-lg shadow-primary-500/25 group-hover:scale-110 transition-transform">
                               {review.user_name?.charAt(0) || 'U'}
                             </div>
                             <div>

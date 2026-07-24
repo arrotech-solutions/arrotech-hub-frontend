@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Check, Loader2 } from 'lucide-react';
 import apiService from '../../services/api';
-import toast from 'react-hot-toast';
+import toast from '../../lib/notify';
 
 interface CreateTaskModalProps {
     isOpen: boolean;
@@ -258,7 +258,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ isOpen, onClose, conn
                     <button
                         onClick={handleSubmit}
                         disabled={loading || !title || !selectedList}
-                        className="px-8 py-3 text-xs font-bold uppercase tracking-widest text-white bg-indigo-600 hover:bg-indigo-700 rounded-2xl shadow-lg shadow-indigo-500/20 hover:shadow-xl hover:scale-[1.02] transition-all duration-200 flex items-center disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
+                        className="px-8 py-3 text-xs font-bold uppercase tracking-widest text-white bg-indigo-600 hover:bg-indigo-700 rounded-2xl shadow-lg shadow-primary-500/20 hover:shadow-xl hover:scale-[1.02] transition-all duration-200 flex items-center disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
                     >
                         {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Check className="w-4 h-4 mr-2" />}
                         Create Task

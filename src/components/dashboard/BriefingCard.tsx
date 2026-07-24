@@ -165,7 +165,7 @@ const BriefingCard: React.FC<BriefingCardProps> = ({
                                                         className={`
                                                             px-2.5 py-1 text-[10px] rounded font-bold transition-all
                                                             ${action.variant === 'primary'
-                                                                ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm shadow-indigo-500/20'
+                                                                ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm shadow-primary-500/20'
                                                                 : action.variant === 'danger'
                                                                     ? 'bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 hover:bg-red-200'
                                                                     : 'bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-300 hover:border-indigo-300 dark:hover:border-indigo-500/50 hover:text-indigo-600 dark:hover:text-indigo-400'

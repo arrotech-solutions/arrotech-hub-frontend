@@ -20,7 +20,7 @@ import {
   Twitter,
   Users
 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import toast from '../lib/notify';
 import { useAuth } from '../hooks/useAuth';
 import { getDisplayTier, getDisplayTierName } from '../hooks/useSubscription';
 import apiService from '../services/api';
@@ -225,7 +225,7 @@ const CreatorProfile: React.FC = () => {
                   <span className="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider">Creator Hub</span>
                 </div>
                 <h1 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mb-2 tracking-tight">
-                  {profile?.display_name?.split(' ')[0] || 'Creator'} <span className="bg-gradient-to-r from-purple-600 to-indigo-600 dark:from-purple-400 dark:to-indigo-400 bg-clip-text text-transparent">Profile</span>
+                  {profile?.display_name?.split(' ')[0] || 'Creator'} <span className="bg-gradient-to-r from-secondary-800 to-primary-500 dark:from-purple-400 dark:to-indigo-400 bg-clip-text text-transparent">Profile</span>
                 </h1>
                 <p className="text-gray-500 dark:text-slate-400 max-w-md font-medium mx-auto sm:mx-0">
                   Manage your identity, track your metrics, and showcase your digital reach.
@@ -243,7 +243,7 @@ const CreatorProfile: React.FC = () => {
                 {!isEditing ? (
                   <button
                     onClick={() => setIsEditing(true)}
-                    className="flex items-center space-x-2 px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-2xl hover:shadow-[0_0_20px_rgba(147,51,234,0.4)] transform hover:-translate-y-1 transition-all duration-300 font-bold"
+                    className="flex items-center space-x-2 px-8 py-4 bg-gradient-to-r from-secondary-800 to-primary-500 text-white rounded-2xl hover:shadow-[0_0_20px_rgba(147,51,234,0.4)] transform hover:-translate-y-1 transition-all duration-300 font-bold"
                   >
                     <Edit2 className="w-5 h-5" />
                     <span>{profile ? 'Edit Profile' : 'Create Profile'}</span>
@@ -536,7 +536,7 @@ const CreatorProfile: React.FC = () => {
                 <div className="space-y-4 creator-activity-list">
                   {activityFeed.map((item) => (
                     <div key={item.id} className="flex items-start space-x-4 p-4 bg-white/40 dark:bg-slate-800/20 rounded-2xl border border-transparent hover:border-blue-100 dark:hover:border-blue-500/30 transition-all cursor-default">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-400 to-purple-400 flex items-center justify-center text-white font-black shrink-0">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-400 to-accent-400 flex items-center justify-center text-white font-black shrink-0">
                         {item.actor_name?.charAt(0).toUpperCase() || '?'}
                       </div>
                       <div className="flex-1">

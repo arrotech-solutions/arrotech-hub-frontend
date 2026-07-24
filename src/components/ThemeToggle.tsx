@@ -25,7 +25,7 @@ export const ThemeToggle: React.FC = () => {
     return (
         <button
             onClick={() => setIsDark(!isDark)}
-            className="p-2.5 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 rounded-full transition-all shadow-sm"
+            className="p-2.5 text-secondary-500 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 bg-white/50 dark:bg-secondary-800/50 backdrop-blur-sm border border-secondary-200 dark:border-secondary-700 hover:bg-primary-50 dark:hover:bg-primary-500/10 hover:border-primary-200 dark:hover:border-primary-500/30 rounded-full transition-all shadow-sm"
             aria-label="Toggle Dark Mode"
         >
             {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}

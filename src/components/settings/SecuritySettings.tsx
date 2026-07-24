@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Shield, Clock, Globe, ChevronDown, ChevronRight, Lock, Key, Copy, Check, Smartphone, Mail, Eye, EyeOff, Pencil, Loader2 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import toast from '../../lib/notify';
 import { SecuritySettings } from '../../types';
 import apiService from '../../services/api';
 

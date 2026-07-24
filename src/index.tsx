@@ -1,9 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { Toaster } from 'react-hot-toast';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
+import { Toaster } from './components/ui/Toaster';
 import './index.css';
 
 const queryClient = new QueryClient({
@@ -24,7 +24,7 @@ root.render(
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <App />
-        <Toaster position="top-right" />
+        <Toaster />
       </BrowserRouter>
     </QueryClientProvider>
   </React.StrictMode>

@@ -458,12 +458,12 @@ const CodingAgent: React.FC = () => {
           <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 dark:opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-500/10 dark:bg-indigo-500/20 blur-[120px] rounded-full pointer-events-none" />
           
-          <div className="max-w-xl w-full text-center space-y-10 relative z-10 animate-in fade-in zoom-in-95 duration-700">
+          <div className="max-w-xl w-full text-center space-y-10 relative z-10 animate-in fade-in zoom-in-95 duration-700 coding-agent-hero-tut">
             {/* Hero */}
             <div className="space-y-6">
               <div className="relative inline-block">
                 <div className="absolute inset-0 bg-indigo-500 blur-2xl opacity-20 dark:opacity-40 animate-pulse" />
-                <div className="relative w-24 h-24 mx-auto bg-gradient-to-br from-indigo-500 to-purple-600 rounded-[2rem] flex items-center justify-center shadow-2xl shadow-indigo-500/20 rotate-3">
+                <div className="relative w-24 h-24 mx-auto bg-gradient-to-br from-primary-500 to-secondary-900 rounded-[2rem] flex items-center justify-center shadow-2xl shadow-primary-500/20 rotate-3">
                   <Sparkles className="w-12 h-12 text-white" />
                 </div>
               </div>
@@ -479,7 +479,7 @@ const CodingAgent: React.FC = () => {
 
             {/* Quick Start Card */}
             <div className="bg-white/60 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800/80 rounded-3xl p-8 backdrop-blur-xl shadow-xl dark:shadow-2xl space-y-6">
-              <div className="space-y-2 text-left">
+              <div className="space-y-2 text-left coding-agent-repo-tut">
                 <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Target Repository (Optional)</label>
                 <div className="relative">
                   <GitBranch className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 dark:text-slate-500" />
@@ -495,7 +495,7 @@ const CodingAgent: React.FC = () => {
               <button
                 onClick={handleCreateSession}
                 disabled={loading}
-                className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-950 rounded-xl font-bold hover:bg-slate-800 dark:hover:bg-slate-200 transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 shadow-md dark:shadow-xl dark:shadow-white/10"
+                className="coding-agent-start-tut w-full flex items-center justify-center gap-3 px-6 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-950 rounded-xl font-bold hover:bg-slate-800 dark:hover:bg-slate-200 transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 shadow-md dark:shadow-xl dark:shadow-white/10"
               >
                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Play className="w-5 h-5 fill-current" />}
                 {loading ? 'Provisioning Sandbox...' : 'Initialize Workspace'}
@@ -519,7 +519,7 @@ const CodingAgent: React.FC = () => {
   return (
     <>
       <Helmet><title>Workspace | Coding Agent</title></Helmet>
-      <div className="h-[calc(100vh-64px)] flex flex-col bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-300 font-sans overflow-hidden transition-colors">
+      <div className="coding-agent-workspace-tut h-[calc(100vh-64px)] flex flex-col bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-300 font-sans overflow-hidden transition-colors">
 
         {/* Global Toolbar */}
         <div className="flex items-center justify-between px-3 py-2 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 shrink-0 select-none z-20 shadow-sm">
@@ -529,7 +529,7 @@ const CodingAgent: React.FC = () => {
             </button>
             <div className="w-px h-4 bg-slate-200 dark:bg-slate-800 mx-1" />
             <div className="flex items-center gap-2 px-2 py-1 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 rounded-md text-xs">
-              <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse dark:shadow-[0_0_8px_rgba(99,102,241,0.6)]" />
+              <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse dark:shadow-[0_0_8px_rgba(255,70,150,0.55)]" />
               <span className="text-indigo-700 dark:text-indigo-400 font-semibold tracking-wide">SANDBOX ACTIVE</span>
             </div>
             {gitInfo?.branch && (
@@ -647,7 +647,7 @@ const CodingAgent: React.FC = () => {
               
               <div className="flex-1 overflow-hidden">
                 {activeTab === 'terminal' && (
-                  <div ref={terminalRef} className="h-full overflow-y-auto p-4 space-y-3 font-mono text-[12px] custom-scrollbar bg-white dark:bg-[#0D0D0D]">
+                  <div ref={terminalRef} className="h-full overflow-y-auto p-4 space-y-3 font-mono text-[12px] custom-scrollbar bg-white dark:bg-secondary-950">
                     {toolCalls.length === 0 ? (
                       <div className="text-slate-400 dark:text-slate-600 text-center py-10 opacity-70 dark:opacity-50 select-none">
                         Terminal ready. Execute commands via chat.
@@ -676,7 +676,7 @@ const CodingAgent: React.FC = () => {
                   </div>
                 )}
                 {activeTab === 'diff' && (
-                  <div className="h-full overflow-y-auto p-4 bg-white dark:bg-[#0D0D0D] custom-scrollbar">
+                  <div className="h-full overflow-y-auto p-4 bg-white dark:bg-secondary-950 custom-scrollbar">
                     <button
                       onClick={() => runTool('coding_git_diff', {})}
                       className="flex items-center gap-2 px-3 py-1.5 border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-xs text-slate-700 dark:text-slate-300 transition-colors"

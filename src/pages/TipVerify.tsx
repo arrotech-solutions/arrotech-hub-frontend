@@ -67,8 +67,8 @@ const TipVerify: React.FC = () => {
                     <div className="space-y-6">
                         {/* Success icon with scale animation */}
                         <div className="relative inline-block animate-in zoom-in-50 duration-500">
-                            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-green-600 rounded-full blur-xl opacity-60 animate-pulse"></div>
-                            <div className="relative w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-emerald-500 to-green-600 rounded-full flex items-center justify-center shadow-2xl">
+                            <div className="absolute inset-0 bg-gradient-to-br from-primary-500 to-secondary-900 rounded-full blur-xl opacity-60 animate-pulse"></div>
+                            <div className="relative w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-primary-500 to-secondary-900 rounded-full flex items-center justify-center shadow-2xl">
                                 <CheckCircle className="w-12 h-12 sm:w-14 sm:h-14 text-white" strokeWidth={3} />
                             </div>
                         </div>
@@ -88,7 +88,7 @@ const TipVerify: React.FC = () => {
                             <div className="relative overflow-hidden bg-gradient-to-br from-emerald-50 to-green-50 border-2 border-emerald-200 rounded-2xl p-6 shadow-lg">
                                 <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 bg-emerald-400/20 rounded-full blur-2xl"></div>
                                 <div className="relative z-10">
-                                    <p className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent mb-2">
+                                    <p className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-primary-600 to-secondary-800 bg-clip-text text-transparent mb-2">
                                         KES {amount.toLocaleString()}
                                     </p>
                                     <div className="flex items-center justify-center gap-2 text-sm text-emerald-700">

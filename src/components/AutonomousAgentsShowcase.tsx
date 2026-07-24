@@ -127,15 +127,15 @@ const AutonomousAgentsShowcase: React.FC = () => {
                 {/* Showstopper UI */}
                 <div className="relative group">
                     {/* Glowing Aura */}
-                    <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/20 via-cyan-500/20 to-emerald-500/20 rounded-[2.5rem] blur-2xl opacity-50 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+                    <div className="absolute -inset-1 bg-gradient-to-r from-primary-500/20 via-accent-400/20 to-secondary-800/20 rounded-[2.5rem] blur-2xl opacity-50 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
                     
-                    <div className="relative bg-slate-50 dark:bg-[#0B1120] rounded-[2rem] border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col xl:flex-row min-h-[600px]">
+                    <div className="relative bg-slate-50 dark:bg-secondary-950 rounded-[2rem] border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col xl:flex-row min-h-[600px]">
                         
                         {/* Left Column: Agent Builder Panel */}
-                        <div className="w-full xl:w-1/3 bg-white dark:bg-[#0f172a] border-b xl:border-b-0 xl:border-r border-slate-200 dark:border-slate-800 flex flex-col relative z-20">
+                        <div className="w-full xl:w-1/3 bg-white dark:bg-secondary-950 border-b xl:border-b-0 xl:border-r border-slate-200 dark:border-slate-800 flex flex-col relative z-20">
                             <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                                 <div className="flex items-center gap-2">
-                                    <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
+                                    <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-primary-500/30">
                                         <Bot className="w-4 h-4" />
                                     </div>
                                     <span className="font-bold text-slate-900 dark:text-white tracking-tight">Agent Studio</span>
@@ -168,7 +168,7 @@ const AutonomousAgentsShowcase: React.FC = () => {
                                         System Instruction
                                         <span className="bg-slate-200 dark:bg-slate-800 text-slate-500 px-2 py-0.5 rounded text-[9px]">Editable</span>
                                     </h4>
-                                    <div className="p-4 bg-slate-50 dark:bg-[#0B1120] border border-slate-200 dark:border-slate-800 rounded-xl font-mono text-xs text-slate-600 dark:text-slate-400 leading-relaxed relative">
+                                    <div className="p-4 bg-slate-50 dark:bg-secondary-950 border border-slate-200 dark:border-slate-800 rounded-xl font-mono text-xs text-slate-600 dark:text-slate-400 leading-relaxed relative">
                                         <div className="absolute top-2 right-2 flex gap-1">
                                             <div className="w-1.5 h-1.5 rounded-full bg-red-400"></div>
                                             <div className="w-1.5 h-1.5 rounded-full bg-yellow-400"></div>
@@ -206,9 +206,9 @@ const AutonomousAgentsShowcase: React.FC = () => {
                         </div>
 
                         {/* Right Column: Execution Engine */}
-                        <div className="w-full xl:w-2/3 bg-slate-50 dark:bg-[#0B1120] relative flex flex-col">
+                        <div className="w-full xl:w-2/3 bg-slate-50 dark:bg-secondary-950 relative flex flex-col">
                             {/* Execution Header */}
-                            <div className="h-16 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-6 bg-white/50 dark:bg-[#0f172a]/50 backdrop-blur-md sticky top-0 z-10">
+                            <div className="h-16 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-6 bg-white/50 dark:bg-secondary-950/50 backdrop-blur-md sticky top-0 z-10">
                                 <div className="flex items-center gap-4">
                                     <div className="flex items-center gap-2">
                                         <Activity className={`w-4 h-4 ${isRunning ? currentData.color : 'text-slate-400'}`} />
@@ -241,7 +241,7 @@ const AutonomousAgentsShowcase: React.FC = () => {
                                             <div key={index} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active py-4">
                                                 
                                                 {/* Status Node */}
-                                                <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-slate-50 dark:border-[#0B1120] bg-white dark:bg-slate-900 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 transition-colors duration-500">
+                                                <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-slate-50 dark:border-secondary-950 bg-white dark:bg-slate-900 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 transition-colors duration-500">
                                                     {index < currentStep ? (
                                                         <Check className="w-4 h-4 text-green-500" />
                                                     ) : index === currentStep ? (

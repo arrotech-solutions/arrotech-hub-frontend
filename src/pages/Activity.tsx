@@ -26,7 +26,8 @@ import {
   Sparkles
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
+import toast from '../lib/notify';
+import { Spinner } from '../components/ui';
 import apiService from '../services/api';
 
 interface ActivityItem {
@@ -285,7 +286,7 @@ const Activity: React.FC = () => {
         {/* Header */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center space-x-3">
-            <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg shadow-sm">
+            <div className="p-2 bg-gradient-to-br from-primary-500 to-secondary-900 rounded-lg shadow-sm">
               {getCategoryIcon(activity.category)}
             </div>
             <div className="flex-1">
@@ -363,7 +364,7 @@ const Activity: React.FC = () => {
         <div className="max-w-7xl mx-auto p-6">
           <div className="flex items-center justify-center py-16">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400 mx-auto mb-4"></div>
+              <Spinner size="xl" className="mx-auto mb-4" />
               <p className="text-gray-600 dark:text-slate-400 transition-colors">Loading activity data...</p>
             </div>
           </div>
@@ -390,7 +391,7 @@ const Activity: React.FC = () => {
                   <span className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider transition-colors">System Telemetry</span>
                 </div>
                 <h1 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mb-2 tracking-tight transition-colors">
-                  Activity <span className="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">Monitor</span>
+                  Activity <span className="bg-gradient-to-r from-primary-500 to-secondary-800 dark:from-primary-400 dark:to-primary-300 bg-clip-text text-transparent">Monitor</span>
                 </h1>
                 <p className="text-gray-500 dark:text-slate-400 max-w-md font-medium mx-auto sm:mx-0 transition-colors">
                   Track system performance, audit logs, and workflow executions in real-time.
