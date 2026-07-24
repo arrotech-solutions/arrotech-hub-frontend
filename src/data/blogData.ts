@@ -1,3 +1,5 @@
+import { chart } from '../theme';
+
 export interface BlogPost {
     id?: number;
     slug: string;
@@ -18,13 +20,13 @@ export interface BlogPost {
 }
 
 export const BLOG_CATEGORIES = [
-    { name: 'All', slug: 'all', color: '#6B7280' },
-    { name: 'Automation', slug: 'automation', color: '#7C3AED' },
-    { name: 'Productivity', slug: 'productivity', color: '#2563EB' },
-    { name: 'Product Updates', slug: 'product-updates', color: '#059669' },
-    { name: 'Engineering', slug: 'engineering', color: '#DC2626' },
-    { name: 'Business', slug: 'business', color: '#D97706' },
-    { name: 'Industry Trends', slug: 'industry-trends', color: '#8B5CF6' },
+    { name: 'All', slug: 'all', color: chart.secondary500 },
+    { name: 'Automation', slug: 'automation', color: chart.secondary },
+    { name: 'Productivity', slug: 'productivity', color: chart.primary },
+    { name: 'Product Updates', slug: 'product-updates', color: chart.accent },
+    { name: 'Engineering', slug: 'engineering', color: chart.primary600 },
+    { name: 'Business', slug: 'business', color: chart.accent700 },
+    { name: 'Industry Trends', slug: 'industry-trends', color: chart.primary400 },
 ];
 
 // Seed blog posts for SEO
@@ -56,7 +58,7 @@ Stop doing manual work. Start automating with Arrotech Hub today.
         readTime: '5 min read',
         tags: ['ChatGPT', 'AI API', 'Workflow Automation'],
         category: 'Automation',
-        category_color: '#7C3AED',
+        category_color: chart.secondary,
         is_featured: true,
         views_count: 1240
     },
@@ -90,7 +92,7 @@ Choose Arrotech Hub for the ultimate AI business automation experience.
         readTime: '4 min read',
         tags: ['Zapier Alternative', 'Make.com', 'AI Tools'],
         category: 'Productivity',
-        category_color: '#2563EB',
+        category_color: chart.primary,
         is_featured: false,
         views_count: 890
     },
@@ -122,7 +124,7 @@ Start building your AI marketing engine with Arrotech Hub today.
         readTime: '6 min read',
         tags: ['Lead Generation', 'AI Marketing', 'HubSpot'],
         category: 'Business',
-        category_color: '#D97706',
+        category_color: chart.accent,
         is_featured: false,
         views_count: 560
     }

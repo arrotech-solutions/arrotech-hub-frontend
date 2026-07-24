@@ -31,7 +31,7 @@ const USE_CASES: Record<string, any> = {
     'ai-sales-agent': {
         title: 'AI Sales Agent',
         icon: Bot,
-        color: 'from-indigo-500 to-purple-600',
+        color: 'from-primary-500 to-secondary-900',
         description: 'Deploy a custom AI worker to qualify leads, answer customer questions on WhatsApp, and book meetings 24/7.',
         benefits: [
             'Qualify leads automatically over WhatsApp or Slack',

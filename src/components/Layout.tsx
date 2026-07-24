@@ -50,6 +50,8 @@ import SubscriptionBanner from './SubscriptionBanner';
 import NoIndex from './NoIndex';
 import { ThemeToggle } from './ThemeToggle';
 import OrgSwitcher from './OrgSwitcher/OrgSwitcher';
+import { OfflineBanner } from './states/OfflineBanner';
+import { SlowNetworkBanner } from './states/SlowNetworkBanner';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -130,6 +132,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       badge: 'New',
       children: [
         {
+          name: 'Agent Hub',
+          href: '/agents',
+          icon: Bot,
+          description: 'Discover and manage AI agents',
+          badge: 'New'
+        },
+        {
           name: 'Coding Agent',
           href: '/coding-agent',
           icon: Code,
@@ -189,13 +198,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       description: 'Share and discover workflows',
       badge: 'New'
     },
-    // {
-    //   name: 'KRA GavaConnect',
-    //   href: '/apps/kra',
-    //   icon: Landmark,
-    //   description: 'Tax services portal',
-    //   badge: 'Beta'
-    // },
+    {
+      name: 'KRA GavaConnect',
+      href: '/apps/kra',
+      icon: Landmark,
+      description: 'Tax services portal',
+      badge: 'Beta'
+    },
     {
       name: 'Favorites',
       href: '/favorites',
@@ -224,20 +233,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       description: 'Billing and subscriptions',
       badge: null
     },
-    // {
-    //   name: 'Developer Portal',
-    //   href: '/developer',
-    //   icon: Code,
-    //   description: 'Manage API applications',
-    //   badge: 'New'
-    // },
-    // {
-    //   name: 'Activity',
-    //   href: '/activity',
-    //   icon: Activity,
-    //   description: 'System monitoring',
-    //   badge: null
-    // },
+    {
+      name: 'Activity',
+      href: '/activity',
+      icon: Activity,
+      description: 'System monitoring',
+      badge: null
+    },
     {
       name: 'Settings',
       href: '/settings',
@@ -284,15 +286,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const getSubscriptionColor = (tier: string) => {
     switch (tier) {
       case 'enterprise':
-        return 'bg-gradient-to-r from-purple-500 to-pink-500';
+        return 'bg-gradient-to-r from-secondary-700 to-primary-500';
       case 'pro':
-        return 'bg-gradient-to-r from-blue-500 to-cyan-500';
+        return 'bg-gradient-to-r from-primary-500 to-cyan-500';
       case 'business':
         return 'bg-gradient-to-r from-indigo-500 to-violet-500';
       case 'starter':
-        return 'bg-gradient-to-r from-sky-500 to-blue-500';
+        return 'bg-gradient-to-r from-sky-500 to-primary-500';
       default:
-        return 'bg-gradient-to-r from-green-500 to-emerald-500';
+        return 'bg-gradient-to-r from-primary-500 to-accent-400';
     }
   };
 
@@ -323,7 +325,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <button
             onClick={() => toggleMenu(item.name)}
             className={`w-full group flex items-center ${collapsed && !isMobile ? 'px-2 justify-center' : 'px-4'} py-3 rounded-xl transition-all duration-200 ${isActive && !isExpanded
-              ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
+              ? 'bg-gradient-to-r from-primary-500 to-secondary-900 text-white shadow-lg'
               : 'text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800/50 hover:text-gray-900 dark:hover:text-white'
               }`}
             title={collapsed && !isMobile ? item.name : undefined}
@@ -331,7 +333,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <div className="relative">
               <Icon className={`w-5 h-5 ${collapsed && !isMobile ? 'mx-auto' : 'mr-3'} ${isActive && !isExpanded ? 'text-white' : 'text-gray-500 dark:text-slate-400 group-hover:text-gray-700 dark:group-hover:text-slate-300'}`} />
               {collapsed && !isMobile && item.badge && (
-                <span className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full border-2 border-white"></span>
+                <span className="absolute -top-1 -right-1 w-3 h-3 bg-accent-500 rounded-full border-2 border-white dark:border-secondary-900"></span>
               )}
             </div>
             {(!collapsed || isMobile) && (
@@ -340,12 +342,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   <div className="flex items-center">
                     <span className="font-medium">{item.name}</span>
                     {item.badge && (
-                      <span className="ml-2 px-2 py-1 text-xs font-medium bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-500 rounded-full">
+                      <span className="ml-2 px-2 py-1 text-xs font-medium bg-accent-100 dark:bg-accent-500/20 text-secondary-900 dark:text-accent-300 rounded-full">
                         {item.badge}
                       </span>
                     )}
                   </div>
-                  <p className={`text-xs mt-1 ${isActive && !isExpanded ? 'text-blue-100' : 'text-gray-500 dark:text-slate-400'}`}>
+                  <p className={`text-xs mt-1 ${isActive && !isExpanded ? 'text-primary-100' : 'text-gray-500 dark:text-slate-400'}`}>
                     {item.description}
                   </p>
                 </div>
@@ -356,7 +358,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
           {/* Children */}
           {isExpanded && (!collapsed || isMobile) && (
-            <div className="ml-4 pl-4 border-l border-gray-200 dark:border-slate-700 space-y-1 mt-1">
+            <div className="ml-4 pl-4 border-l border-gray-200 dark:border-secondary-700 space-y-1 mt-1">
               {item.children.map((child: any) => {
                 const ChildIcon = child.icon;
                 const isChildActive = location.pathname === child.href;
@@ -365,12 +367,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     key={child.name}
                     to={child.href}
                     className={`group flex items-center px-4 py-2 rounded-lg transition-all duration-200 ${isChildActive
-                      ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400'
+                      ? 'bg-primary-50 dark:bg-primary-500/10 text-primary-700 dark:text-primary-400'
                       : 'text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800/50 hover:text-gray-900 dark:hover:text-slate-200'
                       }`}
                     onClick={() => isMobile && setSidebarOpen(false)}
                   >
-                    <ChildIcon className={`w-4 h-4 mr-3 ${isChildActive ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-slate-500 group-hover:text-gray-600 dark:group-hover:text-slate-400'}`} />
+                    <ChildIcon className={`w-4 h-4 mr-3 ${isChildActive ? 'text-primary-600 dark:text-primary-400' : 'text-gray-400 dark:text-slate-500 group-hover:text-gray-600 dark:group-hover:text-slate-400'}`} />
                     <span className="text-sm font-medium">{child.name}</span>
                   </Link>
                 )
@@ -386,7 +388,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         key={item.name}
         to={item.href}
         className={`group flex items-center ${collapsed && !isMobile ? 'px-2 justify-center' : 'px-4'} py-3 rounded-xl transition-all duration-200 ${isActive
-          ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
+          ? 'bg-gradient-to-r from-primary-500 to-secondary-900 text-white shadow-lg'
           : 'text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800/50 hover:text-gray-900 dark:hover:text-white'
           }`}
         title={collapsed && !isMobile ? item.name : undefined}
@@ -408,7 +410,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </span>
               )}
             </div>
-            <p className={`text-xs mt-1 ${isActive ? 'text-blue-100' : 'text-gray-500 dark:text-slate-400'}`}>
+            <p className={`text-xs mt-1 ${isActive ? 'text-primary-100' : 'text-gray-500 dark:text-slate-400'}`}>
               {item.description}
             </p>
           </div>
@@ -418,17 +420,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 text-slate-900 dark:text-white transition-colors duration-300">
+    <div className="min-h-screen bg-surface-gradient dark:bg-surface-gradient-dark text-secondary-900 dark:text-white transition-colors duration-300">
       <NoIndex />
       {/* Mobile sidebar */}
       <div className={`fixed inset-0 z-50 lg:hidden ${sidebarOpen ? 'block' : 'hidden'}`}>
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
-        <div className="fixed inset-y-0 left-0 w-80 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl shadow-2xl border-r border-gray-200/50 dark:border-slate-800/50 flex flex-col transition-colors duration-300">
-          <div className="flex-shrink-0 flex items-center justify-between p-6 border-b border-gray-200/50 dark:border-slate-800/50">
+        <div className="fixed inset-y-0 left-0 w-80 bg-white/95 dark:bg-secondary-900/95 backdrop-blur-xl shadow-2xl border-r border-gray-200/50 dark:border-secondary-800/50 flex flex-col transition-colors duration-300">
+          <div className="flex-shrink-0 flex items-center justify-between p-6 border-b border-gray-200/50 dark:border-secondary-800/50">
             <div className="flex items-center space-x-2.5">
               <img src={logo} alt="Arrotech Hub" className="w-[30px] h-[30px] object-contain" />
               <div>
-                <h1 className="text-[16px] font-black bg-gradient-to-r from-gray-900 to-blue-600 dark:from-white dark:to-blue-400 bg-clip-text text-transparent tracking-tight leading-none">
+                <h1 className="text-[16px] font-black bg-gradient-to-r from-secondary-900 to-primary-500 dark:from-white dark:to-primary-400 bg-clip-text text-transparent tracking-tight leading-none">
                   ARROTECH
                 </h1>
                 <p className="text-[7px] uppercase tracking-widest font-bold text-gray-400 dark:text-slate-500 mt-0.5">AI Platform</p>
@@ -443,9 +445,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </div>
 
           {/* User Profile Section */}
-          <div className="flex-shrink-0 p-6 border-b border-gray-200/50 dark:border-slate-800/50">
+          <div className="flex-shrink-0 p-6 border-b border-gray-200/50 dark:border-secondary-800/50">
             <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+              <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-secondary-900 rounded-xl flex items-center justify-center">
                 <User className="w-6 h-6 text-white" />
               </div>
               <div className="flex-1">
@@ -464,7 +466,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </div>
 
           {/* Org Switcher – Mobile */}
-          <div className="flex-shrink-0 px-6 py-3 border-b border-gray-200/50 dark:border-slate-800/50">
+          <div className="flex-shrink-0 px-6 py-3 border-b border-gray-200/50 dark:border-secondary-800/50">
             <OrgSwitcher />
           </div>
 
@@ -473,7 +475,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </nav>
 
           {/* Logout Section */}
-          <div className="flex-shrink-0 p-6 border-t border-gray-200/50 dark:border-slate-800/50">
+          <div className="flex-shrink-0 p-6 border-t border-gray-200/50 dark:border-secondary-800/50">
             <button
               onClick={handleLogout}
               className="flex items-center space-x-3 w-full px-4 py-3 text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white rounded-xl transition-colors"
@@ -488,14 +490,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {/* Desktop sidebar */}
       <div className={`sidebar hidden lg:fixed lg:inset-y-0 lg:flex lg:flex-col transition-all duration-300 z-40 ${collapsed ? 'lg:w-24' : 'lg:w-80'
         }`}>
-        <div className="flex flex-col h-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl shadow-xl border-r border-gray-200/50 dark:border-slate-800/50 transition-colors duration-300">
+        <div className="flex flex-col h-full bg-white/95 dark:bg-secondary-900/95 backdrop-blur-xl shadow-xl border-r border-gray-200/50 dark:border-secondary-800/50 transition-colors duration-300">
           {/* Header */}
-          <div className="flex-shrink-0 flex items-center justify-between p-6 border-b border-gray-200/50 dark:border-slate-800/50">
+          <div className="flex-shrink-0 flex items-center justify-between p-6 border-b border-gray-200/50 dark:border-secondary-800/50">
             {!collapsed && (
               <div className="flex items-center space-x-2.5">
                 <img src={logo} alt="Arrotech Hub" className="w-[30px] h-[30px] object-contain" />
                 <div>
-                  <h1 className="text-[16px] font-black bg-gradient-to-r from-gray-900 to-blue-600 dark:from-white dark:to-blue-400 bg-clip-text text-transparent tracking-tight leading-none">
+                  <h1 className="text-[16px] font-black bg-gradient-to-r from-secondary-900 to-primary-500 dark:from-white dark:to-primary-400 bg-clip-text text-transparent tracking-tight leading-none">
                     ARROTECH
                   </h1>
                   <p className="text-[7px] uppercase tracking-widest font-bold text-gray-400 dark:text-slate-500 mt-0.5">AI Platform</p>
@@ -509,20 +511,20 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             )}
             <button
               onClick={() => setCollapsed(!collapsed)}
-              className={`p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-all duration-200 ${collapsed ? 'bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 dark:hover:bg-blue-500/20' : 'hover:bg-gray-100 dark:hover:bg-slate-800'
+              className={`p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-all duration-200 ${collapsed ? 'bg-primary-50 dark:bg-primary-500/10 hover:bg-primary-100 dark:hover:bg-primary-500/20' : 'hover:bg-gray-100 dark:hover:bg-slate-800'
                 }`}
               title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             >
-              <ChevronRight className={`w-5 h-5 text-gray-600 dark:text-slate-400 transition-transform duration-200 ${collapsed ? 'rotate-180 text-blue-600 dark:text-blue-400' : ''
+              <ChevronRight className={`w-5 h-5 text-gray-600 dark:text-slate-400 transition-transform duration-200 ${collapsed ? 'rotate-180 text-primary-600 dark:text-primary-400' : ''
                 }`} />
             </button>
           </div>
 
           {/* User Profile Section */}
           {!collapsed && (
-            <div className="flex-shrink-0 p-6 border-b border-gray-200/50 dark:border-slate-800/50">
+            <div className="flex-shrink-0 p-6 border-b border-gray-200/50 dark:border-secondary-800/50">
               <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-secondary-900 rounded-xl flex items-center justify-center">
                   <User className="w-6 h-6 text-white" />
                 </div>
                 <div className="flex-1">
@@ -543,7 +545,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
           {/* Org Switcher – Desktop */}
           {!collapsed && (
-            <div className="flex-shrink-0 px-6 py-3 border-b border-gray-200/50 dark:border-slate-800/50">
+            <div className="flex-shrink-0 px-6 py-3 border-b border-gray-200/50 dark:border-secondary-800/50">
               <OrgSwitcher />
             </div>
           )}
@@ -554,7 +556,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </nav>
 
           {/* Logout Section */}
-          <div className="flex-shrink-0 p-6 border-t border-gray-200/50 dark:border-slate-800/50">
+          <div className="flex-shrink-0 p-6 border-t border-gray-200/50 dark:border-secondary-800/50">
             <button
               onClick={handleLogout}
               className={`flex items-center space-x-3 w-full px-4 py-3 text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white rounded-xl transition-colors ${collapsed ? 'justify-center' : ''
@@ -571,7 +573,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {/* Main content */}
       <div className={`transition-all duration-300 ${collapsed ? 'lg:pl-24' : 'lg:pl-80'} flex flex-col min-h-screen`}>
         {/* Top bar */}
-        <div className="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm shadow-sm border-b border-gray-200/50 dark:border-slate-800/50 transition-colors duration-300">
+        <div className="sticky top-0 z-40 bg-white/80 dark:bg-secondary-900/80 backdrop-blur-sm shadow-sm border-b border-gray-200/50 dark:border-secondary-800/50 transition-colors duration-300">
           <div className="flex items-center justify-between px-6 py-4">
             <div className="flex items-center space-x-4">
               <button
@@ -587,7 +589,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   <input
                     type="text"
                     placeholder="Search..."
-                    className="pl-10 pr-4 py-2 w-64 border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-400 dark:placeholder:text-slate-500 transition-colors"
+                    className="pl-10 pr-4 py-2 w-64 border border-gray-200 dark:border-secondary-700 bg-white dark:bg-secondary-800 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent placeholder:text-gray-400 dark:placeholder:text-slate-500 transition-colors"
                   />
                 </div>
               </div>
@@ -603,7 +605,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
                   className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
                 >
-                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                  <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-secondary-900 rounded-lg flex items-center justify-center">
                     <User className="w-4 h-4 text-white" />
                   </div>
                   <div className="hidden md:block">
@@ -615,8 +617,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
                 {/* Dropdown Menu */}
                 {userDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-gray-200 dark:border-slate-700 py-2 z-50">
-                    <div className="px-4 py-3 border-b border-gray-100 dark:border-slate-700">
+                  <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-secondary-800 rounded-lg shadow-lg border border-gray-200 dark:border-secondary-700 py-2 z-50">
+                    <div className="px-4 py-3 border-b border-gray-100 dark:border-secondary-700">
                       <p className="text-sm font-medium text-gray-900 dark:text-white">{user.name}</p>
                       <p className="text-xs text-gray-500 dark:text-slate-400">{user.email}</p>
                       <div className="mt-2">
@@ -665,7 +667,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                       Help & Support
                     </Link>
 
-                    <div className="border-t border-gray-100 dark:border-slate-700 my-1"></div>
+                    <div className="border-t border-gray-100 dark:border-secondary-700 my-1"></div>
 
                     <button
                       onClick={() => {
@@ -683,6 +685,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             </div>
           </div>
         </div>
+
+        {/* Network condition banners */}
+        <OfflineBanner />
+        <SlowNetworkBanner />
 
         {/* Subscription lifecycle banner */}
         <SubscriptionBanner />

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { Activity, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import apiService from '../../services/api';
+import { chart } from '../../theme';
 
 interface TrendDay {
     date: string;
@@ -99,26 +100,26 @@ const ProductivityPulse: React.FC = () => {
                     <AreaChart data={data}>
                         <defs>
                             <linearGradient id="colorActivity" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
-                                <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                                <stop offset="5%" stopColor={chart.primary} stopOpacity={0.4} />
+                                <stop offset="95%" stopColor={chart.primary} stopOpacity={0} />
                             </linearGradient>
                         </defs>
                         <Tooltip
                             contentStyle={{
-                                backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                                backgroundColor: 'rgba(30, 16, 51, 0.95)',
                                 borderRadius: '16px',
-                                border: '1px solid rgba(255, 255, 255, 0.1)',
-                                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.3)',
+                                border: '1px solid rgba(255, 70, 150, 0.2)',
+                                boxShadow: '0 10px 15px -3px rgba(30, 16, 51, 0.45)',
                                 backdropFilter: 'blur(8px)'
                             }}
-                            itemStyle={{ color: '#10b981', fontWeight: 800, fontSize: '12px' }}
-                            labelStyle={{ color: '#94a3b8', marginBottom: '4px', fontWeight: 600 }}
-                            cursor={{ stroke: '#10b981', strokeWidth: 1.5, strokeDasharray: '4 4' }}
+                            itemStyle={{ color: chart.primary, fontWeight: 800, fontSize: '12px' }}
+                            labelStyle={{ color: chart.muted, marginBottom: '4px', fontWeight: 600 }}
+                            cursor={{ stroke: chart.primary, strokeWidth: 1.5, strokeDasharray: '4 4' }}
                         />
                         <Area
                             type="monotone"
                             dataKey="activity"
-                            stroke="#10b981"
+                            stroke={chart.primary}
                             strokeWidth={4}
                             fillOpacity={1}
                             fill="url(#colorActivity)"

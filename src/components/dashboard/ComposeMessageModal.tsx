@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { X, Send, Paperclip, Mail, MessageCircle, MessageSquare } from 'lucide-react';
 import { OutlookLogo } from '../BrandIcons';
 import apiService from '../../services/api';
-import toast from 'react-hot-toast';
+import toast from '../../lib/notify';
 
 interface ComposeMessageModalProps {
     isOpen: boolean;
@@ -214,7 +214,7 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({ isOpen, onClo
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium shadow-lg hover:shadow-indigo-200 transition-all flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                                    className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium shadow-lg hover:shadow-primary-200 transition-all flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                                 >
                                     {loading ? 'Sending...' : (
                                         <>

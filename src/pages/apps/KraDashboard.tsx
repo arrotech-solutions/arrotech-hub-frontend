@@ -539,7 +539,7 @@ const KraDashboard: React.FC = () => {
                         </div>
 
                         {/* Help / Support box */}
-                        <div className="mt-8 p-6 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl text-white shadow-xl hidden md:block kra-help-tut">
+                        <div className="mt-8 p-6 bg-gradient-to-br from-secondary-700 to-primary-500 rounded-2xl text-white shadow-xl hidden md:block kra-help-tut">
                             <h4 className="font-bold text-lg mb-2">Need Help?</h4>
                             <p className="text-indigo-100 text-sm mb-4 leading-relaxed">
                                 Not sure which obligation to file? Consult the digital tax assistant.

@@ -6,7 +6,8 @@ import {
   Sparkles
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
+import toast from '../lib/notify';
+import { Spinner } from '../components/ui';
 import { useNavigate } from 'react-router-dom';
 import SettingsSidebar from '../components/settings/SettingsSidebar';
 import APISettingsTab from '../components/settings/APISettings';
@@ -185,7 +186,7 @@ const Settings: React.FC = () => {
         <div className="max-w-7xl mx-auto p-6">
           <div className="flex items-center justify-center py-16">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-500 mx-auto mb-4"></div>
+              <Spinner size="xl" className="mx-auto mb-4" />
               <p className="text-gray-600 dark:text-slate-400 transition-colors">Loading settings...</p>
             </div>
           </div>
@@ -259,7 +260,7 @@ const Settings: React.FC = () => {
         {/* Settings Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Navigation Sidebar */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 settings-categories">
             <div className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl rounded-[32px] border border-white/50 dark:border-slate-700/50 p-6 space-y-2 sticky top-24 transition-colors">
               <h3 className="px-4 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-slate-500 mb-6 transition-colors">Configuration Domains</h3>
               <SettingsSidebar activeTab={activeTab} setActiveTab={setActiveTab} />

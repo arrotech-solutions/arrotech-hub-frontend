@@ -34,6 +34,7 @@ const TutorialOverlay: React.FC = () => {
   const [targetElement, setTargetElement] = useState<HTMLElement | null>(null);
   const [overlayPosition, setOverlayPosition] = useState<OverlayPosition>({ top: 0, left: 0, width: 0, height: 0 });
   const [tooltipPosition, setTooltipPosition] = useState({ top: '50%', left: '50%' });
+  const [showLocatingHint, setShowLocatingHint] = useState(false);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const animationFrameRef = useRef<number | null>(null);
 
@@ -128,92 +129,198 @@ const TutorialOverlay: React.FC = () => {
     setTooltipPosition({ top: `${top}px`, left: `${left}px` });
   }, [targetElement, currentStep?.position]);
 
-  // Find and scroll to target element when step changes
+  // Find and scroll/reveal target element when step changes
   useEffect(() => {
-    if (isActive && currentStep) {
-      let retryCount = 0;
-      const maxRetries = 10;
+    if (!isActive || !currentStep) {
+      setTargetElement(null);
+      setOverlayPosition({ top: 0, left: 0, width: 0, height: 0 });
+      setShowLocatingHint(false);
+      return;
+    }
 
-      // Small delay to let the page render
-      const findElement = () => {
-        // Try primary target first, then fallback
-        let element = document.querySelector(currentStep.target) as HTMLElement;
+    let cancelled = false;
+    let retryCount = 0;
+    const maxRetries = 40;
+    let timers: ReturnType<typeof setTimeout>[] = [];
+    let observer: MutationObserver | null = null;
+    let hintTimer: ReturnType<typeof setTimeout> | null = null;
 
-        // If primary target not found, try fallback
-        if (!element && (currentStep as any).fallbackTarget) {
-          element = document.querySelector((currentStep as any).fallbackTarget) as HTMLElement;
-        }
+    // Clear previous highlight immediately; delay the yellow "locating" hint so
+    // route / Suspense transitions don't flash a false error for 1–2s.
+    setTargetElement(null);
+    setOverlayPosition({ top: 0, left: 0, width: 0, height: 0 });
+    setShowLocatingHint(false);
+    hintTimer = setTimeout(() => {
+      if (!cancelled) setShowLocatingHint(true);
+    }, 1400);
 
-        if (element) {
-          setTargetElement(element);
+    const measure = (element: HTMLElement) => {
+      const rect = element.getBoundingClientRect();
+      setOverlayPosition({
+        top: rect.top,
+        left: rect.left,
+        width: rect.width,
+        height: rect.height,
+      });
+      return rect;
+    };
 
-          // Check if element is in viewport
-          const rect = element.getBoundingClientRect();
-          const isInViewport = (
-            rect.top >= 0 &&
-            rect.left >= 0 &&
-            rect.bottom <= window.innerHeight &&
-            rect.right <= window.innerWidth
-          );
+    const isUsableRect = (rect: DOMRect) =>
+      rect.width > 2 &&
+      rect.height > 2 &&
+      rect.bottom > 0 &&
+      rect.right > 0 &&
+      rect.top < window.innerHeight &&
+      rect.left < window.innerWidth;
 
-          // Only scroll if element is not in viewport
-          if (!isInViewport) {
-            element.scrollIntoView({
-              behavior: 'smooth',
-              block: 'center',
-              inline: 'center'
-            });
-          }
+    const markFound = (element: HTMLElement) => {
+      setTargetElement(element);
+      setShowLocatingHint(false);
+      if (hintTimer) {
+        clearTimeout(hintTimer);
+        hintTimer = null;
+      }
+      measure(element);
+    };
 
-          // Update positions after scroll completes
-          setTimeout(updatePositions, 300);
-        } else if (retryCount < maxRetries) {
-          // Element not found, retry after a short delay
+    const findElement = () => {
+      if (cancelled) return;
+
+      let element = document.querySelector(currentStep.target) as HTMLElement | null;
+      if (!element && currentStep.fallbackTarget) {
+        element = document.querySelector(currentStep.fallbackTarget) as HTMLElement | null;
+      }
+
+      if (!element) {
+        // Ask the page to reveal / prep UI (select message, open sidebar, switch tab)
+        window.dispatchEvent(
+          new CustomEvent('tutorial:reveal-target', {
+            detail: { stepId: currentStep.id, page: currentPage, target: currentStep.target },
+          })
+        );
+        if (retryCount < maxRetries) {
           retryCount++;
-          setTimeout(findElement, 200);
+          timers.push(setTimeout(findElement, 150));
         } else {
-          // Max retries reached, show tutorial without highlight
           setTargetElement(null);
+          setOverlayPosition({ top: 0, left: 0, width: 0, height: 0 });
+          setShowLocatingHint(true);
           console.warn(`Tutorial target not found: ${currentStep.target}`);
         }
-      };
+        return;
+      }
 
-      findElement();
-    } else {
-      setTargetElement(null);
-    }
-  }, [isActive, currentStep, updatePositions]);
+      markFound(element);
 
-  // Set up event listeners for scroll and resize
+      // Ask the page to reveal tutorial targets (sidebars/drawers) if needed
+      window.dispatchEvent(
+        new CustomEvent('tutorial:reveal-target', {
+          detail: { stepId: currentStep.id, page: currentPage, target: currentStep.target },
+        })
+      );
+
+      let rect = element.getBoundingClientRect();
+
+      // Off-screen or zero-size — scroll and retry measure after layout settles
+      if (!isUsableRect(rect)) {
+        try {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+        } catch {
+          /* ignore */
+        }
+        timers.push(
+          setTimeout(() => {
+            if (cancelled) return;
+            rect = measure(element!);
+            if (!isUsableRect(rect) && retryCount < maxRetries) {
+              retryCount++;
+              timers.push(setTimeout(findElement, 250));
+            }
+          }, 350)
+        );
+      } else {
+        // Re-measure after paint in case layout shifts
+        timers.push(
+          setTimeout(() => {
+            if (!cancelled) measure(element!);
+          }, 100)
+        );
+      }
+    };
+
+    // Brief delay so route transitions / tab switches can mount targets
+    timers.push(setTimeout(findElement, 80));
+
+    // Re-find when pages mount targets after selecting a row / expanding a panel
+    let observerTimer: ReturnType<typeof setTimeout> | null = null;
+    observer = new MutationObserver(() => {
+      if (cancelled) return;
+      if (observerTimer) clearTimeout(observerTimer);
+      observerTimer = setTimeout(() => {
+        if (cancelled) return;
+        const preferred = document.querySelector(currentStep.target) as HTMLElement | null;
+        if (!preferred) return;
+        setTargetElement((prev) => {
+          if (prev === preferred) return prev;
+          setShowLocatingHint(false);
+          if (hintTimer) {
+            clearTimeout(hintTimer);
+            hintTimer = null;
+          }
+          measure(preferred);
+          try {
+            preferred.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+          } catch {
+            /* ignore */
+          }
+          return preferred;
+        });
+      }, 120);
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    return () => {
+      cancelled = true;
+      timers.forEach(clearTimeout);
+      if (observerTimer) clearTimeout(observerTimer);
+      if (hintTimer) clearTimeout(hintTimer);
+      observer?.disconnect();
+    };
+  }, [isActive, currentStep, currentPage]);
+
+  // Keep highlight synced on scroll/resize while a target is active
   useEffect(() => {
     if (!isActive || !targetElement) return;
 
     const handleUpdate = () => {
-      // Cancel any pending animation frame
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
-
-      // Use requestAnimationFrame for smooth updates
-      animationFrameRef.current = requestAnimationFrame(updatePositions);
+      animationFrameRef.current = requestAnimationFrame(() => {
+        const rect = targetElement.getBoundingClientRect();
+        setOverlayPosition({
+          top: rect.top,
+          left: rect.left,
+          width: rect.width,
+          height: rect.height,
+        });
+        // Still update tooltip via shared helper when possible
+        updatePositions();
+      });
     };
 
-    // Listen to scroll on window and all scrollable containers
     window.addEventListener('scroll', handleUpdate, true);
     window.addEventListener('resize', handleUpdate);
 
-    // Also use ResizeObserver to detect element size changes
     const resizeObserver = new ResizeObserver(handleUpdate);
     resizeObserver.observe(targetElement);
 
-    // Initial position update
-    updatePositions();
+    handleUpdate();
 
     return () => {
       window.removeEventListener('scroll', handleUpdate, true);
       window.removeEventListener('resize', handleUpdate);
       resizeObserver.disconnect();
-
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
@@ -223,8 +330,16 @@ const TutorialOverlay: React.FC = () => {
   // Don't show overlay when not logged in, tutorial is not active, or user disabled it
   if (!user || !isActive || !currentStep || !showTutorialGuide) return null;
 
-  // Check if target element is visible in viewport
-  const isTargetVisible = targetElement && overlayPosition.width > 0 && overlayPosition.height > 0;
+  // Visible = found, has size, and intersects the viewport (not just off-canvas)
+  const isTargetVisible = Boolean(
+    targetElement &&
+      overlayPosition.width > 2 &&
+      overlayPosition.height > 2 &&
+      overlayPosition.top + overlayPosition.height > 0 &&
+      overlayPosition.left + overlayPosition.width > 0 &&
+      overlayPosition.top < (typeof window !== 'undefined' ? window.innerHeight : 0) &&
+      overlayPosition.left < (typeof window !== 'undefined' ? window.innerWidth : 0)
+  );
 
   return (
     <>
@@ -274,7 +389,7 @@ const TutorialOverlay: React.FC = () => {
           {/* Header */}
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl">
+              <div className="p-2 bg-gradient-to-br from-primary-500 to-secondary-900 rounded-xl">
                 <Sparkles className="w-5 h-5 text-white" />
               </div>
               <div>
@@ -311,12 +426,16 @@ const TutorialOverlay: React.FC = () => {
             </button>
           </div>
 
-          {/* Element not found warning */}
-          {!isTargetVisible && (
+          {!isTargetVisible && showLocatingHint && (
             <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
               <p className="text-sm text-yellow-800">
-                The highlighted element is not visible. Try scrolling or navigate to see it.
+                Locating this control… If it stays hidden, open the left menu or scroll, then click Next.
               </p>
+            </div>
+          )}
+          {!isTargetVisible && !showLocatingHint && (
+            <div className="mb-4 p-3 bg-slate-50 border border-slate-200 rounded-lg">
+              <p className="text-sm text-slate-600">Loading this page…</p>
             </div>
           )}
 
@@ -359,7 +478,7 @@ const TutorialOverlay: React.FC = () => {
                     nextStep();
                   }
                 }}
-                className="flex items-center space-x-2 px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                className="flex items-center space-x-2 px-6 py-2 bg-gradient-to-r from-primary-500 to-secondary-900 text-white rounded-xl hover:shadow-lg transform hover:scale-105 transition-all duration-200"
               >
                 <span>
                   {currentStepIndex === totalSteps - 1

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { X, Loader2, Users } from 'lucide-react';
 import apiService from '../../services/api';
-import toast from 'react-hot-toast';
+import toast from '../../lib/notify';
 
 interface BroadcastDetailModalProps {
     broadcastId: string | null;

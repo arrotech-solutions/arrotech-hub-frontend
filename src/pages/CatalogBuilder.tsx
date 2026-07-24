@@ -20,7 +20,7 @@ import {
     Download,
     Star,
 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import toast from '../lib/notify';
 import apiService from '../services/api';
 
 type WizardStep = 0 | 1 | 2 | 3;
@@ -543,7 +543,7 @@ const CatalogBuilder: React.FC = () => {
             <div className="max-w-5xl mx-auto px-4 py-6 sm:py-8">
                 {/* Header */}
                 <div className="flex items-center gap-3 mb-6">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center shadow-lg">
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-secondary-800 to-primary-500 flex items-center justify-center shadow-lg">
                         <Camera className="w-6 h-6 text-white" />
                     </div>
                     <div>
@@ -714,7 +714,7 @@ const CatalogBuilder: React.FC = () => {
                                             uploadTargetRef.current = activeProductId;
                                             fileInputRef.current?.click();
                                         }}
-                                        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold text-sm"
+                                        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-secondary-800 to-primary-500 text-white font-semibold text-sm"
                                     >
                                         <Upload className="w-4 h-4" /> Upload angles
                                     </button>
@@ -1275,7 +1275,7 @@ const CatalogBuilder: React.FC = () => {
                                     href={exportResult.spreadsheet_url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold text-sm"
+                                    className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-secondary-800 to-primary-500 text-white font-semibold text-sm"
                                 >
                                     <FileSpreadsheet className="w-4 h-4" /> Open Google Sheet
                                 </a>
@@ -1327,7 +1327,7 @@ const CatalogBuilder: React.FC = () => {
                             <button
                                 onClick={goToNextStep}
                                 disabled={!canProceedFromStep() || extractingCount > 0 || advancing}
-                                className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold text-sm disabled:opacity-40"
+                                className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-secondary-800 to-primary-500 text-white font-semibold text-sm disabled:opacity-40"
                             >
                                 {advancing ? (
                                     <>
@@ -1344,7 +1344,7 @@ const CatalogBuilder: React.FC = () => {
                             <button
                                 onClick={handleExport}
                                 disabled={exporting || !canProceedFromStep() || !googleConnected}
-                                className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold text-sm disabled:opacity-40"
+                                className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-secondary-800 to-primary-500 text-white font-semibold text-sm disabled:opacity-40"
                             >
                                 {exporting ? (
                                     <>

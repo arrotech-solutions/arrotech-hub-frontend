@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import organizationService from '../services/organizationService';
-import toast from 'react-hot-toast';
+import toast from '../lib/notify';
 import {
-    Building2, Globe, Users, Briefcase, ArrowLeft, Loader2, Check,
+    Building2, ArrowLeft, Loader2, Check,
 } from 'lucide-react';
 
 const INDUSTRIES = [
@@ -13,6 +13,11 @@ const INDUSTRIES = [
 ];
 
 const COMPANY_SIZES = ['1-10', '11-50', '51-200', '201-500', '500+'];
+
+const fieldClass =
+    'w-full px-4 py-3 rounded-lg border border-white/15 bg-white/5 text-white text-[0.95rem] outline-none transition-colors placeholder:text-secondary-500 focus:border-primary-500/60 focus:ring-2 focus:ring-primary-500/25';
+
+const labelClass = 'block text-secondary-300 text-sm font-medium mb-1.5';
 
 const CreateOrganization = () => {
     const navigate = useNavigate();
@@ -56,7 +61,6 @@ const CreateOrganization = () => {
         try {
             const response = await organizationService.create(form);
             await refreshOrganizations();
-            // Switch to the new org
             await switchOrg(response.data.id);
             toast.success('Organization created successfully!');
             navigate('/dashboard');
@@ -67,77 +71,46 @@ const CreateOrganization = () => {
         }
     };
 
-    const inputStyle: React.CSSProperties = {
-        width: '100%', padding: '0.75rem 1rem', borderRadius: '0.5rem',
-        border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.05)',
-        color: '#fff', fontSize: '0.95rem', outline: 'none',
-        transition: 'border-color 0.2s',
-    };
-
-    const labelStyle: React.CSSProperties = {
-        display: 'block', color: '#cbd5e1', fontSize: '0.85rem',
-        fontWeight: 500, marginBottom: '0.4rem',
-    };
-
     return (
-        <div style={{
-            minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: 'linear-gradient(135deg, #0f0f23 0%, #1a1a3e 50%, #0f0f23 100%)',
-            padding: '2rem',
-        }}>
-            <div style={{ maxWidth: '560px', width: '100%' }}>
-                {/* Back button */}
+        <div className="min-h-screen flex items-center justify-center bg-surface-gradient-dark p-8">
+            <div className="max-w-xl w-full">
                 <button
+                    type="button"
                     onClick={() => navigate(-1)}
-                    style={{
-                        display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#94a3b8',
-                        background: 'none', border: 'none', cursor: 'pointer', marginBottom: '1.5rem',
-                        fontSize: '0.9rem',
-                    }}
+                    className="flex items-center gap-2 text-secondary-400 hover:text-primary-300 bg-transparent border-0 cursor-pointer mb-6 text-sm transition-colors"
                 >
                     <ArrowLeft size={16} /> Back
                 </button>
 
-                {/* Card */}
-                <div style={{
-                    background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
-                    borderRadius: '1rem', padding: '2.5rem',
-                }}>
-                    <div style={{
-                        width: '56px', height: '56px', borderRadius: '14px',
-                        background: 'linear-gradient(135deg, #10b981, #059669)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        marginBottom: '1.5rem',
-                    }}>
-                        <Building2 size={28} color="#fff" />
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-10 shadow-surface">
+                    <div className="w-14 h-14 rounded-[14px] bg-gradient-to-br from-primary-500 to-secondary-900 flex items-center justify-center mb-6 shadow-brand">
+                        <Building2 size={28} className="text-white" />
                     </div>
 
-                    <h2 style={{ color: '#fff', fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>
+                    <h2 className="text-white text-2xl font-bold mb-2 tracking-tight">
                         Create your organization
                     </h2>
-                    <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '2rem' }}>
+                    <p className="text-secondary-400 text-sm mb-8">
                         Set up a shared workspace for your team or company.
                     </p>
 
-                    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                        {/* Name */}
+                    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
                         <div>
-                            <label style={labelStyle}>Organization Name *</label>
+                            <label className={labelClass}>Organization Name *</label>
                             <input
                                 type="text"
                                 placeholder="Acme Corporation"
                                 value={form.name}
                                 onChange={(e) => handleNameChange(e.target.value)}
-                                style={inputStyle}
+                                className={fieldClass}
                                 required
                             />
                         </div>
 
-                        {/* Slug */}
                         <div>
-                            <label style={labelStyle}>URL Slug</label>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <span style={{ color: '#64748b', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
+                            <label className={labelClass}>URL Slug</label>
+                            <div className="flex items-center gap-2">
+                                <span className="text-secondary-500 text-sm whitespace-nowrap">
                                     hub.arrotech.com/
                                 </span>
                                 <input
@@ -145,85 +118,77 @@ const CreateOrganization = () => {
                                     placeholder="acme-corp"
                                     value={form.slug}
                                     onChange={(e) => handleSlugChange(e.target.value)}
-                                    style={inputStyle}
+                                    className={fieldClass}
                                 />
                             </div>
                         </div>
 
-                        {/* Description */}
                         <div>
-                            <label style={labelStyle}>Description</label>
+                            <label className={labelClass}>Description</label>
                             <textarea
                                 placeholder="What does your organization do?"
                                 value={form.description}
                                 onChange={(e) => setForm(prev => ({ ...prev, description: e.target.value }))}
                                 rows={3}
-                                style={{ ...inputStyle, resize: 'vertical' }}
+                                className={`${fieldClass} resize-y`}
                             />
                         </div>
 
-                        {/* Industry & Size */}
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label style={labelStyle}>Industry</label>
+                                <label className={labelClass}>Industry</label>
                                 <select
                                     value={form.industry}
                                     onChange={(e) => setForm(prev => ({ ...prev, industry: e.target.value }))}
-                                    style={{ ...inputStyle, cursor: 'pointer' }}
+                                    className={`${fieldClass} cursor-pointer`}
                                 >
-                                    <option value="">Select...</option>
-                                    {INDUSTRIES.map(i => <option key={i} value={i}>{i}</option>)}
+                                    <option value="" className="bg-secondary-900">Select...</option>
+                                    {INDUSTRIES.map(i => (
+                                        <option key={i} value={i} className="bg-secondary-900">{i}</option>
+                                    ))}
                                 </select>
                             </div>
                             <div>
-                                <label style={labelStyle}>Company Size</label>
+                                <label className={labelClass}>Company Size</label>
                                 <select
                                     value={form.company_size}
                                     onChange={(e) => setForm(prev => ({ ...prev, company_size: e.target.value }))}
-                                    style={{ ...inputStyle, cursor: 'pointer' }}
+                                    className={`${fieldClass} cursor-pointer`}
                                 >
-                                    <option value="">Select...</option>
-                                    {COMPANY_SIZES.map(s => <option key={s} value={s}>{s} people</option>)}
+                                    <option value="" className="bg-secondary-900">Select...</option>
+                                    {COMPANY_SIZES.map(s => (
+                                        <option key={s} value={s} className="bg-secondary-900">{s} people</option>
+                                    ))}
                                 </select>
                             </div>
                         </div>
 
-                        {/* Website */}
                         <div>
-                            <label style={labelStyle}>Website</label>
+                            <label className={labelClass}>Website</label>
                             <input
                                 type="url"
                                 placeholder="https://example.com"
                                 value={form.website}
                                 onChange={(e) => setForm(prev => ({ ...prev, website: e.target.value }))}
-                                style={inputStyle}
+                                className={fieldClass}
                             />
                         </div>
 
-                        {/* Billing Email */}
                         <div>
-                            <label style={labelStyle}>Billing Email</label>
+                            <label className={labelClass}>Billing Email</label>
                             <input
                                 type="email"
                                 placeholder="billing@example.com"
                                 value={form.billing_email}
                                 onChange={(e) => setForm(prev => ({ ...prev, billing_email: e.target.value }))}
-                                style={inputStyle}
+                                className={fieldClass}
                             />
                         </div>
 
-                        {/* Submit */}
                         <button
                             type="submit"
                             disabled={submitting || !form.name.trim()}
-                            style={{
-                                width: '100%', padding: '0.85rem', borderRadius: '0.5rem',
-                                background: submitting ? 'rgba(16,185,129,0.5)' : 'linear-gradient(135deg, #10b981, #059669)',
-                                color: '#fff', border: 'none', fontSize: '1rem', fontWeight: 600,
-                                cursor: submitting ? 'not-allowed' : 'pointer', display: 'flex',
-                                alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
-                                marginTop: '0.5rem', transition: 'opacity 0.2s',
-                            }}
+                            className="w-full mt-2 py-3.5 rounded-lg bg-gradient-to-br from-primary-500 to-primary-600 text-white border-0 text-base font-semibold flex items-center justify-center gap-2 shadow-brand hover:from-primary-600 hover:to-primary-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {submitting ? (
                                 <><Loader2 size={18} className="animate-spin" /> Creating...</>

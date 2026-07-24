@@ -110,90 +110,138 @@
 }
 
 @layer base {
+  /*
+   * CSS vars must mirror src/theme/tokens.ts (cssVars + brand hex).
+   * Edit tokens.ts first, then update these values to match.
+   */
+  :root {
+    /* 60% Night Violet */
+    --color-surface: #FAF8FC;
+    --color-surface-2: #F3EEF8;
+    --color-ink: #1E1033;
+    /* 30% Dragon Fruit */
+    --color-brand: #FF4696;
+    /* 10% Solar Amber */
+    --color-accent: #FFC857;
+
+    --brand-dragon-fruit: #FF4696;
+    --brand-night-violet: #1E1033;
+    --brand-solar-amber: #FFC857;
+    --brand-gradient: linear-gradient(135deg, #FF4696 0%, #1E1033 100%);
+    --accent-gradient: linear-gradient(135deg, #FFC857 0%, #FF4696 100%);
+  }
+
+  .dark {
+    --color-surface: #12091F;
+    --color-surface-2: #1E1033;
+    --color-ink: #FAF8FC;
+  }
+
   html {
     font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  body {
+    background-color: var(--color-surface);
+    color: var(--color-ink);
+  }
+
+  /* Soft brand selection — dragon fruit wash on night violet ink */
+  ::selection {
+    background-color: rgba(255, 70, 150, 0.28);
+    color: #1E1033;
+  }
+
+  .dark ::selection {
+    background-color: rgba(255, 200, 87, 0.35);
+    color: #12091F;
   }
 
   /* ── Global Dark Mode: Form Elements ── */
   .dark input,
   .dark textarea,
   .dark select {
-    color: #f1f5f9;
+    color: #faf8fc;
     background-color: transparent;
-    border-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 70, 150, 0.2);
   }
 
   .dark input::placeholder,
   .dark textarea::placeholder {
-    color: #94a3b8;
+    color: #9a86b0;
   }
 
   .dark input:focus,
   .dark textarea:focus,
   .dark select:focus {
-    border-color: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 70, 150, 0.6);
     outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 70, 150, 0.18);
   }
 
   /* Fix autofill (Chrome/Edge) */
   .dark input:-webkit-autofill,
   .dark input:-webkit-autofill:hover,
   .dark input:-webkit-autofill:focus {
-    -webkit-text-fill-color: #f1f5f9;
+    -webkit-text-fill-color: #faf8fc;
     -webkit-box-shadow: 0 0 0 1000px transparent inset;
     transition: background-color 5000s ease-in-out 0s;
   }
 
   .dark label {
-    color: #e2e8f0;
+    color: #f3eef8;
   }
 
   .dark option {
-    background-color: #1e293b;
-    color: #f1f5f9;
+    background-color: #1E1033;
+    color: #faf8fc;
   }
 
   /* ── Global Dark Mode: Override bg-white containers ── */
   /* Modals, dialogs, dropdowns, popups, cards, panels */
   .dark .bg-white {
-    background-color: #1e293b !important;
-    color: #f1f5f9;
+    background-color: #1E1033 !important;
+    color: #faf8fc;
   }
 
   .dark .bg-white .text-gray-900,
   .dark .bg-white .text-gray-800,
   .dark .bg-white .text-gray-700 {
-    color: #f1f5f9;
+    color: #faf8fc;
   }
 
   .dark .bg-white .text-gray-600,
   .dark .bg-white .text-gray-500 {
-    color: #94a3b8;
+    color: #9a86b0;
   }
 
   .dark .bg-white .text-gray-400,
   .dark .bg-white .text-gray-300 {
-    color: #64748b;
+    color: #6f5a88;
   }
 
   .dark .bg-white .border-gray-200,
   .dark .bg-white .border-gray-100 {
-    border-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 70, 150, 0.12);
   }
 
   /* Fix bg-gray-50 sections inside dark containers */
   .dark .bg-gray-50 {
-    background-color: #0f172a !important;
+    background-color: #12091F !important;
   }
 
   .dark .bg-gray-100 {
-    background-color: #1a2332 !important;
+    background-color: #281A3D !important;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+    @apply bg-primary-500 hover:bg-primary-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 shadow-brand;
+  }
+
+  .btn-accent {
+    @apply bg-accent-500 hover:bg-accent-600 text-secondary-950 font-medium py-2 px-4 rounded-lg transition-colors duration-200 shadow-accent;
   }
 
   .btn-secondary {
@@ -303,6 +351,38 @@
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Branded scrollbars — Night Violet track, Dragon Fruit thumb */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #FF4696 #F3EEF8;
+}
+
+.dark * {
+  scrollbar-color: #FF4696 #1E1033;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #F3EEF8;
+}
+
+.dark *::-webkit-scrollbar-track {
+  background: #1E1033;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #FF4696, #E62E7D);
+  border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #FFC857;
 }
 
 @keyframes fade-in {
@@ -564,13 +644,13 @@
 }
 
 .mesh-gradient {
-  background: linear-gradient(-45deg, #0f172a, #1e293b, #0ea5e9, #6366f1);
+  background: linear-gradient(-45deg, #12091F, #1E1033, #FF4696, #FFC857);
   background-size: 400% 400%;
   animation: mesh-gradient 15s ease infinite;
 }
 
 .mesh-gradient-subtle {
-  background: linear-gradient(-45deg, rgba(14, 165, 233, 0.05), rgba(99, 102, 241, 0.05), rgba(15, 23, 42, 0.1));
+  background: linear-gradient(-45deg, rgba(255, 70, 150, 0.08), rgba(255, 200, 87, 0.06), rgba(30, 16, 51, 0.1));
   background-size: 400% 400%;
   animation: mesh-gradient 20s ease infinite;
 }
@@ -598,4 +678,4 @@
   height: 4px;
   background: currentColor;
   border-radius: 50%;
-}
+}

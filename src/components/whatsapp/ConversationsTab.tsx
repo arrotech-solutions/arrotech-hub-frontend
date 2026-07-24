@@ -8,7 +8,7 @@ import {
     ShoppingCart, CreditCard, UserCheck, LayoutTemplate, Users, Sparkles, Wrench, BellOff, Bell
 } from 'lucide-react';
 import apiService from '../../services/api';
-import toast from 'react-hot-toast';
+import toast from '../../lib/notify';
 import ContactAvatar from './ContactAvatar';
 import WhatsAppMessageMedia from './WhatsAppMessageMedia';
 import { useWebSocket } from '../../hooks/useWebSocket';
@@ -1177,7 +1177,7 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
     return (
         <div className="flex flex-1 min-h-0 bg-white dark:bg-slate-900 rounded-none sm:rounded-2xl border-y sm:border dark:border-slate-800 shadow-sm text-slate-900 dark:text-slate-100">
             {/* Left Pane: Conversations List */}
-            <div className={`w-full md:w-80 lg:w-96 xl:w-[22rem] flex-shrink-0 border-r dark:border-slate-800 flex flex-col min-h-0 transition-transform duration-300 ${selectedContact ? 'hidden md:flex' : 'flex'}`}>
+            <div className={`whatsapp-contacts-tut w-full md:w-80 lg:w-96 xl:w-[22rem] flex-shrink-0 border-r dark:border-slate-800 flex flex-col min-h-0 transition-transform duration-300 ${selectedContact ? 'hidden md:flex' : 'flex'}`}>
                 {/* Header */}
                 <div className="p-3 sm:p-4 border-b dark:border-slate-800 space-y-2 sm:space-y-3 shrink-0">
                     <div className="flex items-start justify-between gap-3">
@@ -1436,7 +1436,7 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
 
             {/* Middle Pane: Chat Area */}
             {selectedContact ? (
-                <div className="flex-1 flex flex-col relative z-10 bg-slate-50 dark:bg-slate-900/50 min-h-0 min-w-0 overflow-hidden">
+                <div className="whatsapp-chat-tut flex-1 flex flex-col relative z-10 bg-slate-50 dark:bg-slate-900/50 min-h-0 min-w-0 overflow-hidden">
                     {/* Chat Header */}
                     <div className="min-h-14 sm:h-16 border-b dark:border-slate-800 flex items-center justify-between px-3 sm:px-4 py-2 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md sticky top-0 z-20 shrink-0">
                         <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">

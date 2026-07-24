@@ -12,6 +12,11 @@ import { TutorialProvider } from './hooks/useTutorial';
 import { CommandProvider } from './contexts/CommandContext';
 import { useCommand } from './hooks/useCommand';
 import GlobalCommandPalette from './components/GlobalCommandPalette';
+import { ErrorBoundary } from './components/states/ErrorBoundary';
+import { NotFound } from './components/states/NotFound';
+import { SessionExpiredModal } from './components/states/SessionExpiredModal';
+import { PermissionDenied } from './components/states/PermissionDenied';
+import { PageLoader } from './components/states/LoadingState';
 import {
   LayoutDashboard, Mail, CheckSquare, Calendar, Settings as SettingsIcon, LogOut,
   GitBranch, Bot, MessageCircle, Video, ShoppingBag, Link, Activity as ActivityIcon, User
@@ -27,6 +32,7 @@ const Marketplace = lazy(() => import('./pages/Marketplace'));
 const CreatorProfile = lazy(() => import('./pages/CreatorProfile'));
 const Favorites = lazy(() => import('./pages/Favorites'));
 const Payments = lazy(() => import('./pages/Payments'));
+const Activity = lazy(() => import('./pages/Activity'));
 const Profile = lazy(() => import('./pages/Profile'));
 const Register = lazy(() => import('./pages/Register'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
@@ -63,6 +69,7 @@ const OrganizationSettings = lazy(() => import('./pages/OrganizationSettings'));
 const AcceptInvite = lazy(() => import('./pages/AcceptInvite'));
 const VerifyEmail = lazy(() => import('./pages/VerifyEmail'));
 const CodingAgent = lazy(() => import('./pages/CodingAgent'));
+const StatesShowcase = lazy(() => import('./pages/dev/StatesShowcase'));
 
 
 
@@ -71,11 +78,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   const { user, loading } = useAuth();
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-      </div>
-    );
+    return <PageLoader />;
   }
 
   if (!user) {
@@ -91,11 +94,7 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // const accessApproved = localStorage.getItem('access_approved_email');
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-      </div>
-    );
+    return <PageLoader />;
   }
 
   if (user) {
@@ -118,16 +117,30 @@ const RequireVerifiedEmail: React.FC<{ children: React.ReactNode }> = ({ childre
   const { user, loading } = useAuth();
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-      </div>
-    );
+    return <PageLoader />;
   }
 
   // If user is logged in but email is not verified, redirect to verification
   if (user && user.email_verified === false) {
     return <Navigate to="/verify-email" replace />;
+  }
+
+  return <>{children}</>;
+};
+
+// Permission Guard — renders PermissionDenied (403) when the user lacks a permission
+const RequirePermission: React.FC<{ permission: string; children: React.ReactNode }> = ({
+  permission,
+  children,
+}) => {
+  const { hasPermission, loading } = useAuth();
+
+  if (loading) {
+    return <PageLoader />;
+  }
+
+  if (!hasPermission(permission)) {
+    return <PermissionDenied />;
   }
 
   return <>{children}</>;
@@ -318,16 +331,18 @@ const AppRoutes: React.FC = () => {
         }
       />
 
-      {/* <Route
+      <Route
         path="/agents"
         element={
           <ProtectedRoute>
-            <Layout>
-              <Agents />
-            </Layout>
+            <RequireVerifiedEmail>
+              <Layout>
+                <Agents />
+              </Layout>
+            </RequireVerifiedEmail>
           </ProtectedRoute>
         }
-      /> */}
+      />
 
       <Route
         path="/coding-agent"
@@ -407,16 +422,18 @@ const AppRoutes: React.FC = () => {
         }
       />
 
-      {/* <Route
+      <Route
         path="/apps/kra"
         element={
           <ProtectedRoute>
-            <Layout>
-              <KraDashboard />
-            </Layout>
+            <RequireVerifiedEmail>
+              <Layout>
+                <KraDashboard />
+              </Layout>
+            </RequireVerifiedEmail>
           </ProtectedRoute>
         }
-      /> */}
+      />
 
       <Route
         path="/templates"
@@ -463,18 +480,18 @@ const AppRoutes: React.FC = () => {
       />
 
 
-      {/* <Route
+      <Route
         path="/activity"
         element={
           <ProtectedRoute>
-            <Layout>
-              <Activity />
-            </Layout>
+            <RequireVerifiedEmail>
+              <Layout>
+                <Activity />
+              </Layout>
+            </RequireVerifiedEmail>
           </ProtectedRoute>
         }
-      /> */}
-
-
+      />
 
       <Route
         path="/settings"
@@ -532,8 +549,13 @@ const AppRoutes: React.FC = () => {
         element={<PremiumContentUnlock />}
       />
 
+      {/* Dev-only UI states showcase */}
+      {import.meta.env.DEV && (
+        <Route path="/dev/states" element={<StatesShowcase />} />
+      )}
+
       {/* Catch all route */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 };
@@ -566,11 +588,7 @@ const DefaultGlobalCommands: React.FC = () => {
   return null;
 };
 
-const FallbackLoader = () => (
-  <div className="min-h-screen flex items-center justify-center">
-    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
-  </div>
-);
+const FallbackLoader = () => <PageLoader />;
 
 const App: React.FC = () => {
   return (
@@ -578,9 +596,12 @@ const App: React.FC = () => {
       <AuthProvider>
         <CommandProvider>
           <TutorialProvider>
-            <Suspense fallback={<FallbackLoader />}>
-              <AppRoutes />
-            </Suspense>
+            <ErrorBoundary>
+              <Suspense fallback={<FallbackLoader />}>
+                <AppRoutes />
+              </Suspense>
+            </ErrorBoundary>
+            <SessionExpiredModal />
             <GlobalCommandPalette />
             <DefaultGlobalCommands />
             <TutorialButton />

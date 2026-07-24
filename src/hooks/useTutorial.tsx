@@ -33,9 +33,11 @@ interface TutorialContextType {
   currentPage: string;
   setCurrentPage: (page: string) => void;
   hasCompletedPage: (page: string) => boolean;
+  hasPageTutorial: (page?: string) => boolean;
   tutorialMode: 'full' | 'page' | 'none';
   availablePages: string[];
   goToPage: (page: string) => void;
+  isPageTransitioning: boolean;
 }
 
 const TutorialContext = createContext<TutorialContextType | undefined>(undefined);
@@ -50,36 +52,66 @@ export const useTutorial = () => {
 
 // Page configuration with routes
 const pageConfig: Record<string, string> = {
-  // dashboard removed - workspace (/unified) is now the primary landing
-  workspace: '/unified',  // UnifiedDashboard
+  // workspace (/unified) is the primary landing after login
+  workspace: '/unified',
+  unifiedInbox: '/unified/inbox',
+  unifiedTasks: '/unified/tasks',
+  unifiedCalendar: '/unified/calendar',
   chat: '/chat',
   workflows: '/workflows',
   agents: '/agents',
+  codingAgent: '/coding-agent',
   connections: '/connections',
+  // MCP tools merged into Workflows — keep key for labels, skip in full tour
+  marketplace: '/marketplace',
+  favorites: '/favorites',
+  productivity: '/usage',
   payments: '/payments',
   activity: '/activity',
   settings: '/settings',
   profile: '/profile',
-  marketplace: '/marketplace',
-  favorites: '/favorites',
   creator: '/creator-profile',
-  mcptools: '/mcp-tools',
   pricing: '/pricing',
-  unifiedInbox: '/unified/inbox',
-  unifiedTasks: '/unified/tasks',
-  unifiedCalendar: '/unified/calendar',
   whatsapp: '/whatsapp',
   kra: '/apps/kra',
   tiktok: '/tiktok',
-  productivity: '/productivity',
 };
+
+/**
+ * Full-tour page sequence (new-user guided path).
+ * Numeric `order` within a page still controls step order;
+ * cross-page navigation uses this list so tours aren't mixed by stale order numbers.
+ */
+const fullTourPageOrder: string[] = [
+  'workspace',
+  'unifiedInbox',
+  'unifiedTasks',
+  'unifiedCalendar',
+  'chat',
+  'workflows',
+  'agents',
+  'codingAgent',
+  'whatsapp',
+  'connections',
+  'marketplace',
+  'favorites',
+  'productivity',
+  'payments',
+  'activity',
+  'settings',
+  'profile',
+  'creator',
+  'pricing',
+  'kra',
+  'tiktok',
+];
 
 // Tutorial steps configuration - using more reliable CSS selectors
 const tutorialSteps: TutorialStep[] = [
   // Dashboard steps removed - workspace (UnifiedDashboard) is now the landing page
   // See workspace-* steps below for the new primary tutorial flow
 
-  // Productivity Analytics steps (8 steps)
+  // Productivity Analytics steps (8 steps) — page route: /usage
   {
     id: 'productivity-intro',
     title: 'Productivity Analytics',
@@ -594,24 +626,14 @@ const tutorialSteps: TutorialStep[] = [
     order: 59
   },
   {
-    id: 'favorites-list',
-    title: 'Your Favorites',
-    description: 'Manage your saved collection. You can view details or remove items easily.',
+    id: 'favorites-collection',
+    title: 'Your Collection',
+    description: 'Browse saved workflows here, or jump to the marketplace if your list is empty.',
     target: '.favorites-list',
     fallbackTarget: '.favorites-empty-state',
     position: 'top',
     page: 'favorites',
     order: 60
-  },
-  {
-    id: 'favorites-empty',
-    title: 'Find New Workflows',
-    description: 'If you haven\'t saved any yet, head over to the marketplace to explore!',
-    target: '.favorites-empty-state',
-    fallbackTarget: 'button',
-    position: 'top',
-    page: 'favorites',
-    order: 61
   },
 
   // Creator Profile steps (6 steps)
@@ -681,18 +703,18 @@ const tutorialSteps: TutorialStep[] = [
     id: 'pricing-intro',
     title: 'Subscription Plans',
     description: 'Choose the plan that fits your business needs - from Free Lite to Business Pro.',
-    target: '.text-center.mb-16',
-    fallbackTarget: 'main',
+    target: '.pricing-hero-tut',
+    fallbackTarget: 'main h1',
     position: 'bottom',
     page: 'pricing',
     order: 68
   },
   {
     id: 'pricing-payment-toggle',
-    title: 'Payment Method',
-    description: 'Switch between M-Pesa mobile money and Card payment methods.',
-    target: '.bg-white.dark\\:bg-gray-800.p-1.rounded-lg',
-    fallbackTarget: 'button',
+    title: 'Billing Cycle',
+    description: 'Switch between monthly and yearly billing. Yearly plans include a discount.',
+    target: '.pricing-billing-tut',
+    fallbackTarget: '.pricing-hero-tut',
     position: 'bottom',
     page: 'pricing',
     order: 69
@@ -700,22 +722,22 @@ const tutorialSteps: TutorialStep[] = [
   {
     id: 'pricing-tiers',
     title: 'Plan Comparison',
-    description: 'Compare features, API limits, and pricing across all tiers. The Starter plan is most popular for growing businesses.',
-    target: '.grid.grid-cols-1.md\\:grid-cols-3',
-    fallbackTarget: '.relative.bg-white',
+    description: 'Compare features, API limits, and pricing across all tiers. Expand a card to see the full feature list.',
+    target: '.pricing-plans-tut',
+    fallbackTarget: 'main',
     position: 'top',
     page: 'pricing',
     order: 70
   },
   {
     id: 'pricing-features',
-    title: 'Local Business Features',
-    description: 'M-Pesa integration, Kenyan market optimization, automated tax reporting, and enterprise security.',
-    target: '.grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-4',
-    fallbackTarget: '.mt-20',
+    title: 'Feature Matrix',
+    description: 'Dive deeper into capability-by-plan comparisons, WhatsApp limits, and what each tier unlocks.',
+    target: '.pricing-features-tut',
+    fallbackTarget: '.pricing-plans-tut',
     position: 'top',
     page: 'pricing',
-    order: 71
+    order: 70.5
   },
 
   // Workspace / UnifiedDashboard steps (4 steps)
@@ -757,7 +779,7 @@ const tutorialSteps: TutorialStep[] = [
     fallbackTarget: '.lg\\:col-span-5',
     position: 'left',
     page: 'workspace',
-    order: 75
+    order: 74
   },
 
   // Unified Inbox steps
@@ -767,7 +789,7 @@ const tutorialSteps: TutorialStep[] = [
     title: 'New Message',
     description: 'Quickly compose a new message. You can choose which provider to send through (Gmail, Slack, etc.) from within the compose window.',
     target: '.unified-inbox-compose-tut',
-    fallbackTarget: 'button[class*="gradient"]',
+    fallbackTarget: '.unified-inbox-header-tut',
     position: 'right',
     page: 'unifiedInbox',
     order: 77
@@ -814,10 +836,10 @@ const tutorialSteps: TutorialStep[] = [
   },
   {
     id: 'inbox-ai',
-    title: 'AI Quick Replies',
-    description: 'Save time with AI-generated quick replies tailored to the conversation context. Just click to draft!',
+    title: 'AI Reply Assistant',
+    description: 'When a message is open, use this area for AI-assisted replies and quick suggestions tailored to the conversation.',
     target: '.unified-inbox-ai-tut',
-    fallbackTarget: '.sparkles',
+    fallbackTarget: '.unified-inbox-detail-tut',
     position: 'top',
     page: 'unifiedInbox',
     order: 82
@@ -1194,6 +1216,48 @@ const tutorialSteps: TutorialStep[] = [
     page: 'tiktok',
     order: 116
   },
+
+  // Coding Agent steps (4 steps)
+  {
+    id: 'coding-intro',
+    title: 'Coding Agent Workspace',
+    description: 'Provision a secure AI coding sandbox to build, edit, and test code with an autonomous software engineer.',
+    target: '.coding-agent-hero-tut',
+    fallbackTarget: 'main h1',
+    position: 'bottom',
+    page: 'codingAgent',
+    order: 117
+  },
+  {
+    id: 'coding-repo',
+    title: 'Target Repository',
+    description: 'Optionally paste a Git repository URL so the agent can clone and work in your project context.',
+    target: '.coding-agent-repo-tut',
+    fallbackTarget: '.coding-agent-hero-tut',
+    position: 'top',
+    page: 'codingAgent',
+    order: 118
+  },
+  {
+    id: 'coding-start',
+    title: 'Start a Session',
+    description: 'Launch a sandbox session to open the file tree, terminal, and chat with the coding agent.',
+    target: '.coding-agent-start-tut',
+    fallbackTarget: 'button',
+    position: 'top',
+    page: 'codingAgent',
+    order: 119
+  },
+  {
+    id: 'coding-workspace',
+    title: 'Agent Workspace',
+    description: 'Once a session is running, use the file explorer, editor, terminal, and chat panels together to ship changes.',
+    target: '.coding-agent-workspace-tut',
+    fallbackTarget: '.coding-agent-hero-tut',
+    position: 'bottom',
+    page: 'codingAgent',
+    order: 120
+  },
 ];
 
 export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -1203,12 +1267,29 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [isActive, setIsActive] = useState(false);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);
-  const [currentPage, setCurrentPage] = useState('dashboard');
+  const [currentPage, setCurrentPage] = useState('');
+  const [pendingPage, setPendingPage] = useState<string | null>(null);
   const [tutorialMode, setTutorialMode] = useState<'full' | 'page' | 'none'>('none');
   const [pageCompletionStatus, setPageCompletionStatus] = useState<PageTutorialStatus>({});
 
-  // Available pages for tutorial
-  const availablePages = Object.keys(pageConfig);
+  const pagesWithSteps = React.useMemo(
+    () => new Set(tutorialSteps.map((s) => s.page)),
+    []
+  );
+  const availablePages = fullTourPageOrder.filter((p) => pagesWithSteps.has(p) && pageConfig[p]);
+
+  const resolvePageFromPath = useCallback((pathname: string): string => {
+    const exact = Object.entries(pageConfig).find(([, route]) => pathname === route);
+    if (exact) return exact[0];
+
+    const prefixMatches = Object.entries(pageConfig)
+      .filter(([, route]) => route !== '/' && pathname.startsWith(`${route}/`))
+      .sort((a, b) => b[1].length - a[1].length);
+
+    if (prefixMatches.length) return prefixMatches[0][0];
+    // Unknown routes (e.g. /help) — do not pretend this is the workspace tour
+    return '';
+  }, []);
 
   // Load completion status from localStorage
   useEffect(() => {
@@ -1235,59 +1316,58 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   // Update current page based on location
   useEffect(() => {
-    const pathname = location.pathname;
-    let page = 'dashboard';
+    const page = resolvePageFromPath(location.pathname);
 
-    // Check for exact matches first
-    for (const [pageName, route] of Object.entries(pageConfig)) {
-      if (pathname === route) {
-        page = pageName;
-        break;
-      }
+    if (pendingPage && page === pendingPage) {
+      setPendingPage(null);
     }
 
-    // If no exact match, check for starts-with (for routes with params)
-    if (page === 'dashboard' && pathname !== '/') {
-      for (const [pageName, route] of Object.entries(pageConfig)) {
-        if (route !== '/' && pathname.startsWith(route)) {
-          page = pageName;
-          break;
-        }
-      }
-    }
-
-    // Reset step index when page changes
     if (page !== currentPage) {
-      setCurrentStepIndex(0);
+      // Avoid resetting to step 0 of the *old* page while navigate() is in flight —
+      // pendingPage already holds the destination step index at 0.
+      if (!pendingPage || page === pendingPage) {
+        setCurrentStepIndex(0);
+      }
     }
 
     setCurrentPage(page);
-  }, [location.pathname, currentPage]);
+  }, [location.pathname, currentPage, resolvePageFromPath, pendingPage]);
 
   // Check if tutorial should be shown for new users
   useEffect(() => {
     if (user && !isCompleted && !isActive) {
       const hasSeenTutorial = localStorage.getItem('tutorial_completed');
       if (!hasSeenTutorial) {
-        // Show tutorial for new users after a short delay
         const timer = setTimeout(() => {
-          setIsActive(true);
-          setTutorialMode('page');
+          const page = resolvePageFromPath(location.pathname);
+          if (tutorialSteps.some((s) => s.page === page)) {
+            setIsActive(true);
+            setTutorialMode('page');
+          }
         }, 2000);
         return () => clearTimeout(timer);
       }
     }
-  }, [user, isCompleted, isActive]);
+  }, [user, isCompleted, isActive, location.pathname, resolvePageFromPath]);
 
-  // Filter steps for current page
-  const currentPageSteps = tutorialSteps.filter(step => step.page === currentPage);
+  // Filter steps for current page (prefer pending destination during route transitions)
+  const activePage = pendingPage || currentPage;
+  const currentPageSteps = tutorialSteps
+    .filter(step => step.page === activePage)
+    .sort((a, b) => a.order - b.order);
   const currentStep = currentPageSteps[currentStepIndex] || null;
   const totalSteps = currentPageSteps.length;
 
   // Check if a page's tutorial has been completed
   const hasCompletedPage = useCallback((page: string) => {
+    if (!page) return false;
     return pageCompletionStatus[page] === true;
   }, [pageCompletionStatus]);
+
+  const hasPageTutorial = useCallback((page?: string) => {
+    const target = page ?? activePage;
+    return Boolean(target && pagesWithSteps.has(target) && pageConfig[target]);
+  }, [activePage, pagesWithSteps]);
 
   // Navigate to a different page
   const goToPage = useCallback((page: string) => {
@@ -1297,54 +1377,72 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }, [navigate]);
 
-  // Start full tutorial (all pages)
+  const getNextTourPage = useCallback((page: string) => {
+    const idx = fullTourPageOrder.indexOf(page);
+    const start = idx === -1 ? 0 : idx + 1;
+    for (let i = start; i < fullTourPageOrder.length; i++) {
+      const candidate = fullTourPageOrder[i];
+      if (pagesWithSteps.has(candidate) && pageConfig[candidate]) return candidate;
+    }
+    return null;
+  }, [pagesWithSteps]);
+
+  const getPrevTourPage = useCallback((page: string) => {
+    const idx = fullTourPageOrder.indexOf(page);
+    if (idx <= 0) return null;
+    for (let i = idx - 1; i >= 0; i--) {
+      const candidate = fullTourPageOrder[i];
+      if (pagesWithSteps.has(candidate) && pageConfig[candidate]) return candidate;
+    }
+    return null;
+  }, [pagesWithSteps]);
+
+  // Start full tutorial (all pages) — begins at workspace
   const startTutorial = useCallback(() => {
     setIsActive(true);
     setCurrentStepIndex(0);
     setTutorialMode('full');
-    // Start from dashboard
-    if (currentPage !== 'dashboard') {
-      navigate('/');
+    const startPage = availablePages[0] || 'workspace';
+    const startRoute = pageConfig[startPage] || '/unified';
+    if (location.pathname !== startRoute) {
+      navigate(startRoute);
     }
-  }, [currentPage, navigate]);
+  }, [availablePages, location.pathname, navigate]);
 
   // Start tutorial for current page only
   const startPageTutorial = useCallback((page?: string) => {
-    if (page && page !== currentPage) {
-      navigate(pageConfig[page] || '/');
+    const targetPage = page || currentPage;
+    if (!targetPage || !pagesWithSteps.has(targetPage) || !pageConfig[targetPage]) {
+      return;
+    }
+    if (targetPage !== currentPage) {
+      setPendingPage(targetPage);
+      navigate(pageConfig[targetPage]);
     }
     setIsActive(true);
     setCurrentStepIndex(0);
     setTutorialMode('page');
-  }, [currentPage, navigate]);
+  }, [currentPage, navigate, pagesWithSteps]);
 
   const nextStep = useCallback(() => {
     if (currentStepIndex < currentPageSteps.length - 1) {
       setCurrentStepIndex(prev => prev + 1);
     } else if (tutorialMode === 'full') {
-      // Mark current page as complete
       const newStatus = { ...pageCompletionStatus, [currentPage]: true };
       savePageStatus(newStatus);
 
-      // Find next page with tutorials
-      const currentOrder = currentPageSteps[currentStepIndex]?.order || 0;
-      const nextStepData = tutorialSteps.find(step => step.order > currentOrder);
-
-      if (nextStepData && nextStepData.page !== currentPage) {
-        // Navigate to next page
-        const nextRoute = pageConfig[nextStepData.page];
-        if (nextRoute) {
-          setCurrentStepIndex(0);
-          navigate(nextRoute);
-        }
+      const nextPage = getNextTourPage(currentPage);
+      if (nextPage) {
+        setPendingPage(nextPage);
+        setCurrentStepIndex(0);
+        navigate(pageConfig[nextPage]);
       } else {
-        // No more pages, complete tutorial
         setIsActive(false);
         setTutorialMode('none');
+        setPendingPage(null);
         localStorage.setItem('tutorial_completed', 'true');
         setIsCompleted(true);
 
-        // Mark all pages as complete
         const allComplete: PageTutorialStatus = {};
         availablePages.forEach(page => {
           allComplete[page] = true;
@@ -1352,38 +1450,31 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         savePageStatus(allComplete);
       }
     } else {
-      // Page tutorial mode - just complete this page
       const newStatus = { ...pageCompletionStatus, [currentPage]: true };
       savePageStatus(newStatus);
       setIsActive(false);
       setTutorialMode('none');
     }
-  }, [currentStepIndex, currentPageSteps, currentPage, tutorialMode, pageCompletionStatus, savePageStatus, navigate, availablePages]);
+  }, [currentStepIndex, currentPageSteps, currentPage, tutorialMode, pageCompletionStatus, savePageStatus, navigate, availablePages, getNextTourPage]);
 
   const previousStep = useCallback(() => {
     if (currentStepIndex > 0) {
       setCurrentStepIndex(prev => prev - 1);
     } else if (tutorialMode === 'full') {
-      // Find previous page with tutorials
-      const currentOrder = currentPageSteps[0]?.order || 0;
-      const prevSteps = tutorialSteps.filter(step => step.order < currentOrder);
-
-      if (prevSteps.length > 0) {
-        const prevStep = prevSteps[prevSteps.length - 1];
-        const prevRoute = pageConfig[prevStep.page];
-        if (prevRoute) {
-          navigate(prevRoute);
-          // Set to last step of previous page
-          const prevPageSteps = tutorialSteps.filter(step => step.page === prevStep.page);
-          setCurrentStepIndex(prevPageSteps.length - 1);
-        }
+      const prevPage = getPrevTourPage(currentPage);
+      if (prevPage) {
+        const prevPageSteps = tutorialSteps.filter(step => step.page === prevPage);
+        setPendingPage(prevPage);
+        setCurrentStepIndex(Math.max(0, prevPageSteps.length - 1));
+        navigate(pageConfig[prevPage]);
       }
     }
-  }, [currentStepIndex, currentPageSteps, tutorialMode, navigate]);
+  }, [currentStepIndex, currentPage, tutorialMode, navigate, getPrevTourPage]);
 
   const skipTutorial = useCallback(() => {
     setIsActive(false);
     setTutorialMode('none');
+    setPendingPage(null);
     localStorage.setItem('tutorial_completed', 'true');
     setIsCompleted(true);
   }, []);
@@ -1424,12 +1515,14 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     completeTutorial,
     completePageTutorial,
     isCompleted,
-    currentPage,
+    currentPage: activePage,
     setCurrentPage,
     hasCompletedPage,
+    hasPageTutorial,
     tutorialMode,
     availablePages,
     goToPage,
+    isPageTransitioning: pendingPage !== null,
   };
 
   return (

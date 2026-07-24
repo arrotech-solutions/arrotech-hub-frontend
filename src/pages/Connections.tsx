@@ -6,7 +6,8 @@ import {
 } from 'lucide-react';
 import UpgradeModal from '../components/UpgradeModal';
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import toast from 'react-hot-toast';
+import toast from '../lib/notify';
+import { Spinner } from '../components/ui';
 import { useNavigate } from 'react-router-dom';
 import apiService from '../services/api';
 import { Connection, ConnectionPlatform } from '../types';
@@ -1018,7 +1019,7 @@ const Integrations: React.FC = () => {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+          <Spinner size="xl" />
           <p className="text-slate-500 dark:text-slate-400 font-medium animate-pulse">Loading secure integrations...</p>
         </div>
       </div>
@@ -1035,7 +1036,7 @@ const Integrations: React.FC = () => {
           <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-slate-50/50 dark:bg-slate-900/20 rounded-full blur-[100px]"></div>
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 md:pt-16 pb-8">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 md:pt-16 pb-8 connections-header">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div className="max-w-2xl">
               <div className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-[10px] font-bold uppercase tracking-wider mb-4 shadow-sm">
@@ -1063,7 +1064,7 @@ const Integrations: React.FC = () => {
           </div>
 
           {/* Search Bar - Compact */}
-          <div className="mt-8 relative max-w-xl">
+          <div className="mt-8 relative max-w-xl connections-filters">
             <div className="relative bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-500/50 transition-all flex items-center p-1.5 focus-within:ring-2 focus-within:ring-indigo-100 dark:focus-within:ring-indigo-500/20 focus-within:border-indigo-400 dark:focus-within:border-indigo-500">
               <Search className="w-5 h-5 text-slate-400 dark:text-slate-500 ml-3 shrink-0" />
               <input
@@ -1103,7 +1104,7 @@ const Integrations: React.FC = () => {
       )}
 
       {/* 3. CATEGORY NAVIGATION - Sticky */}
-      <div className="sticky top-0 z-30 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur-xl border-b border-slate-200/60 dark:border-slate-800/60 shadow-sm transition-colors duration-300">
+      <div className="sticky top-0 z-30 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur-xl border-b border-slate-200/60 dark:border-slate-800/60 shadow-sm transition-colors duration-300 connections-filters">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-3" style={{ WebkitOverflowScrolling: 'touch' }}>
             {[
@@ -1152,7 +1153,7 @@ const Integrations: React.FC = () => {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 available-platforms">
             {filteredPlatforms.map(platform => {
               const connectedAccount = getConnectedAccount(platform.id);
               const isConnected = !!connectedAccount;
@@ -1337,7 +1338,7 @@ const Integrations: React.FC = () => {
                 <div className="px-6 py-4 bg-slate-50 dark:bg-slate-950/50 border-t border-slate-200 dark:border-slate-800 flex flex-col gap-3">
                   <button
                     onClick={handleSaveConnection}
-                    className="w-full flex justify-center items-center py-3.5 px-4 border border-transparent rounded-xl shadow-lg shadow-indigo-500/20 text-sm font-bold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all transform active:scale-[0.98]"
+                    className="w-full flex justify-center items-center py-3.5 px-4 border border-transparent rounded-xl shadow-lg shadow-primary-500/20 text-sm font-bold text-white bg-gradient-to-r from-primary-500 to-secondary-900 hover:from-primary-600 hover:to-secondary-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all transform active:scale-[0.98]"
                   >
                     {editingConnection ? 'Save Changes' : 'Connect Integration'}
                   </button>

@@ -1,0 +1,44 @@
+---
+description: Arrotech Hub frontend brand theme — tokens and usage
+globs: "**/*.{tsx,ts,css,js}"
+alwaysApply: false
+---
+
+# Brand Theme
+
+Single source of truth: `src/theme/tokens.ts`. App imports: `src/theme` (`chart`, `colors`, `brand`, `gradients`, `shadows`). Tailwind loads tokens via root `theme-tokens.cjs` (kept outside `src/` so Vite never serves CJS to the browser).
+
+## Changing the brand
+
+1. Edit scales / aliases in `src/theme/tokens.ts` only
+2. Mirror CSS vars in `src/index.css` if hex values changed
+3. Restart Vite; run `npm run lint:ui`
+
+Do **not** scatter new hex values across pages.
+
+## Prefer in new UI
+
+```tsx
+// ✅ semantic Tailwind
+className="bg-primary-500 text-white shadow-brand dark:bg-secondary-900"
+
+// ✅ charts / SVG / canvas
+import { chart } from '../theme';
+stroke={chart.primary}
+
+// ❌ invent hex or old indigo/blue palette
+style={{ color: '#6366F1' }}
+className="bg-[#0f0f23]"
+```
+
+Use `primary-*`, `secondary-*`, `accent-*`, `bg-brand-gradient`, `shadow-brand`. Prefer semantic names over remapped `blue-*` / `purple-*` in new code.
+
+## Banned
+
+Hardcoded off-brand hex: `#6366F1`, `#4F46E5`, `#3B82F6`, `#2563EB`, `#8B5CF6`, `#7C3AED`, `#A855F7`, `#0F0F23`, `#1A1A3E`, `#020617`, `#0B1120`, `#060B14`, `#0B1221`.
+
+## Exceptions
+
+- Partner greens: M-Pesa, WhatsApp logos/accents
+- True semantic success/error/warning when meaning requires it
+- Code-editor mock surfaces (`#0d1117`) when imitating GitHub

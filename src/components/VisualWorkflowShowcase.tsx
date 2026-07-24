@@ -15,7 +15,7 @@ const VisualWorkflowShowcase: React.FC = () => {
     }, [isPlaying]);
 
     return (
-        <section className="py-24 md:py-32 relative overflow-hidden bg-slate-50 dark:bg-[#060B14] transition-colors border-t border-slate-200 dark:border-slate-800/50">
+        <section className="py-24 md:py-32 relative overflow-hidden bg-slate-50 dark:bg-secondary-950 transition-colors border-t border-slate-200 dark:border-slate-800/50">
             {/* Massive Glowing Orbs */}
             <div className="absolute top-1/2 left-1/4 w-[800px] h-[800px] bg-blue-500/10 dark:bg-blue-600/10 rounded-full blur-[120px] -translate-y-1/2 -translate-x-1/2 pointer-events-none"></div>
             <div className="absolute top-1/2 right-1/4 w-[600px] h-[600px] bg-cyan-500/10 dark:bg-cyan-500/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
@@ -28,7 +28,7 @@ const VisualWorkflowShowcase: React.FC = () => {
                     </div>
                     <h2 className="text-5xl md:text-7xl font-black text-slate-900 dark:text-white mb-6 tracking-tighter leading-[1.05]">
                         Visual orchestration for <br className="hidden md:block" />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500 dark:from-blue-400 dark:to-cyan-300">complex logic.</span>
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-accent-400 dark:from-primary-400 dark:to-accent-300">complex logic.</span>
                     </h2>
                     <p className="text-xl text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
                         Connect agents, APIs, and databases using our state-of-the-art visual builder. No code required. Just pure, unadulterated power.
@@ -36,7 +36,7 @@ const VisualWorkflowShowcase: React.FC = () => {
                 </div>
 
                 {/* The Crazy Canvas */}
-                <div className="relative w-full aspect-[4/3] md:aspect-[21/9] bg-white/50 dark:bg-[#0B1221]/80 rounded-[3rem] border border-white dark:border-slate-800 shadow-2xl backdrop-blur-xl overflow-hidden group">
+                <div className="relative w-full aspect-[4/3] md:aspect-[21/9] bg-white/50 dark:bg-secondary-900/80 rounded-[3rem] border border-white dark:border-slate-800 shadow-2xl backdrop-blur-xl overflow-hidden group">
                     {/* Grid Background */}
                     <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080801a_1px,transparent_1px),linear-gradient(to_bottom,#8080801a_1px,transparent_1px)] bg-[size:40px_40px]"></div>
 
@@ -61,15 +61,15 @@ const VisualWorkflowShowcase: React.FC = () => {
                     <div className="absolute inset-0 z-10 flex items-center justify-center transform scale-75 md:scale-100">
                         
                         {/* SVG Connecting Lines */}
-                        <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ filter: 'drop-shadow(0 0 8px rgba(59, 130, 246, 0.3))' }}>
+                        <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ filter: 'drop-shadow(0 0 8px rgba(255, 70, 150, 0.35))' }}>
                             <defs>
                                 <linearGradient id="line-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                                    <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.2" />
-                                    <stop offset="100%" stopColor="#06b6d4" stopOpacity="1" />
+                                    <stop offset="0%" stopColor="#FF4696" stopOpacity="0.2" />
+                                    <stop offset="100%" stopColor="#FFC857" stopOpacity="1" />
                                 </linearGradient>
                                 <linearGradient id="line-gradient-2" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.2" />
-                                    <stop offset="100%" stopColor="#10b981" stopOpacity="1" />
+                                    <stop offset="0%" stopColor="#FFC857" stopOpacity="0.2" />
+                                    <stop offset="100%" stopColor="#E62E7D" stopOpacity="1" />
                                 </linearGradient>
                             </defs>
                             

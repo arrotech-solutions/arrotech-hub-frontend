@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { X, Sparkles, Send, Megaphone, Loader2, RefreshCw, AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import apiService from '../../services/api';
-import toast from 'react-hot-toast';
+import toast from '../../lib/notify';
 
 interface CreateBroadcastModalProps {
     isOpen: boolean;

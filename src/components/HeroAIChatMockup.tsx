@@ -130,7 +130,7 @@ const HeroAIChatMockup: React.FC = () => {
 
                             {step >= 3 && step < 6 && (
                                 <div className="flex items-start gap-3 animate-in fade-in slide-in-from-left-4 duration-500">
-                                    <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/20 shrink-0">
+                                    <div className="w-8 h-8 rounded-lg bg-primary-500 flex items-center justify-center shadow-lg shadow-primary-500/20 shrink-0">
                                         <Bot size={16} className="text-white" />
                                     </div>
                                     <div className="space-y-3 flex-1">
@@ -152,7 +152,7 @@ const HeroAIChatMockup: React.FC = () => {
 
                             {step >= 6 && (
                                 <div className="flex items-start gap-3 animate-in fade-in slide-in-from-left-4 duration-500">
-                                    <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/20 shrink-0">
+                                    <div className="w-8 h-8 rounded-lg bg-primary-500 flex items-center justify-center shadow-lg shadow-primary-500/20 shrink-0">
                                         <Bot size={16} className="text-white" />
                                     </div>
                                     <div className="space-y-4 flex-1">
@@ -184,7 +184,7 @@ const HeroAIChatMockup: React.FC = () => {
 
                             {step >= 8 && (
                                 <div className="flex items-start gap-3 animate-in fade-in slide-in-from-left-4 duration-500">
-                                    <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/20 shrink-0">
+                                    <div className="w-8 h-8 rounded-lg bg-primary-500 flex items-center justify-center shadow-lg shadow-primary-500/20 shrink-0">
                                         <Bot size={16} className="text-white" />
                                     </div>
                                     <div className="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-2xl rounded-tl-none flex items-center gap-4 w-full">

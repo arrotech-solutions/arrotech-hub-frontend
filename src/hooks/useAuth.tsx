@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
+import toast from '../lib/notify';
 import apiService from '../services/api';
 import organizationService from '../services/organizationService';
 import { User, Organization } from '../types';

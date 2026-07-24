@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from '../assets/Logo/fulllogo_transparent.png';
 import logoIcon from '../assets/Logo/icononly_transparent_nobuffer.png';
@@ -15,6 +16,7 @@ import { useAuth } from '../hooks/useAuth';
 import SEO from '../components/SEO';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { Fingerprint } from 'lucide-react';
+import { loginSchema, type LoginValues } from '../lib/schemas';
 
 // Microsoft Icon SVG component
 const MicrosoftIcon = () => (
@@ -25,11 +27,6 @@ const MicrosoftIcon = () => (
     <path fill="#FFB900" d="M13 13h10v10H13z" />
   </svg>
 );
-
-interface LoginFormData {
-  email: string;
-  password: string;
-}
 
 const Login: React.FC = () => {
   const { login, loginWithGoogle, loginWithMicrosoft, verifyTOTP, verifyBackupCode, sendEmailOTP, verifyEmailOTP } = useAuth();
@@ -44,7 +41,9 @@ const Login: React.FC = () => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginFormData>();
+  } = useForm<LoginValues>({
+    resolver: zodResolver(loginSchema),
+  });
 
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -57,7 +56,7 @@ const Login: React.FC = () => {
   const [emailOtpSent, setEmailOtpSent] = useState(false);
   const [emailOtpMessage, setEmailOtpMessage] = useState('');
 
-  const onSubmit = async (data: LoginFormData) => {
+  const onSubmit = async (data: LoginValues) => {
     setIsLoading(true);
     setFormError(null);
     try {
@@ -247,7 +246,7 @@ const Login: React.FC = () => {
   }, [loginWithMicrosoft, navigate]);
 
   return (
-    <div className="min-h-screen flex relative bg-slate-50 dark:bg-slate-900 transition-colors">
+    <div className="min-h-screen flex relative bg-slate-50 dark:bg-secondary-900 transition-colors">
       <SEO
         title="Log In"
         description="Sign in to your Arrotech Hub account. Access your unified inbox, calendar, tasks, and workflows in one place."
@@ -260,8 +259,8 @@ const Login: React.FC = () => {
       {/* OAuth Loading Overlay */}
       {isOAuthLoading && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center transition-all">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 shadow-2xl flex flex-col items-center gap-4 max-w-sm mx-4 border border-transparent dark:border-slate-800 transition-colors">
-            <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent"></div>
+          <div className="bg-white dark:bg-secondary-900 rounded-2xl p-8 shadow-2xl flex flex-col items-center gap-4 max-w-sm mx-4 border border-transparent dark:border-secondary-800 transition-colors">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary-500 border-t-transparent"></div>
             <div className="text-center">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white transition-colors">
                 Signing in with {oAuthProvider}...
@@ -282,7 +281,7 @@ const Login: React.FC = () => {
             <div className="flex items-center justify-center mb-4">
               <Link to="/" className="flex items-center gap-2 group hover:scale-[1.02] transition-transform">
                 <img src={logoIcon} alt="Arrotech Hub" className="h-8 w-auto object-contain" />
-                <span className="text-[18px] font-black bg-gradient-to-r from-slate-900 to-blue-600 dark:from-white dark:to-blue-400 bg-clip-text text-transparent tracking-tighter">ARROTECH</span>
+                <span className="text-[18px] font-black bg-gradient-to-r from-secondary-900 to-primary-500 dark:from-white dark:to-primary-400 bg-clip-text text-transparent tracking-tighter">ARROTECH</span>
               </Link>
             </div>
             <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-1 tracking-tighter leading-tight transition-colors">
@@ -294,7 +293,7 @@ const Login: React.FC = () => {
           </div>
 
           {/* Form */}
-          <div className="bg-white/80 dark:bg-slate-900/50 backdrop-blur-md rounded-xl p-5 shadow-xl border border-gray-200/50 dark:border-slate-800/50 transition-colors">
+          <div className="bg-white/80 dark:bg-secondary-900/50 backdrop-blur-md rounded-xl p-5 shadow-xl border border-gray-200/50 dark:border-secondary-800/50 transition-colors">
             {formError && (
               <div className="mb-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 px-3 py-1.5 rounded-lg text-[10px] flex items-start transition-colors">
                 <div className="mr-2 mt-0.5">
@@ -307,7 +306,7 @@ const Login: React.FC = () => {
             {requires2FA ? (
               <form className="space-y-4" onSubmit={handleMfaSubmit}>
                   <div className="text-center mb-4">
-                  <div className="inline-flex items-center justify-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-full mb-3 text-blue-600 dark:text-blue-400 transition-colors">
+                  <div className="inline-flex items-center justify-center p-3 bg-primary-50 dark:bg-primary-900/20 rounded-full mb-3 text-primary-600 dark:text-primary-400 transition-colors">
                     {mfaType === 'totp' ? <Lock className="w-6 h-6" /> : mfaType === 'email' ? <Mail className="w-6 h-6" /> : <Shield className="w-6 h-6" />}
                   </div>
                   <h3 className="text-sm font-bold text-gray-900 dark:text-white transition-colors">Two-Factor Authentication</h3>
@@ -325,7 +324,7 @@ const Login: React.FC = () => {
                   <div className="relative">
                     <input
                       type="text"
-                      className="w-full text-center tracking-[0.5em] text-lg py-2 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all font-mono placeholder-slate-300 dark:placeholder-slate-600"
+                      className="w-full text-center tracking-[0.5em] text-lg py-2 bg-white dark:bg-secondary-900 border border-gray-300 dark:border-secondary-700 text-slate-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all font-mono placeholder-slate-300 dark:placeholder-slate-600"
                       placeholder={mfaType === 'backup' ? "ABCDEFGH" : "000000"}
                       value={mfaCode}
                       onChange={(e) => setMfaCode(e.target.value.toUpperCase().trim())}
@@ -347,7 +346,7 @@ const Login: React.FC = () => {
                           setMfaCode('');
                           setFormError(null);
                         }}
-                        className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors"
+                        className="text-primary-600 dark:text-primary-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors"
                       >
                         Use authenticator app
                       </button>
@@ -369,7 +368,7 @@ const Login: React.FC = () => {
                             }
                           }
                         }}
-                        className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors"
+                        className="text-primary-600 dark:text-primary-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors"
                       >
                         Use email code
                       </button>
@@ -382,7 +381,7 @@ const Login: React.FC = () => {
                           setMfaCode('');
                           setFormError(null);
                         }}
-                        className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors"
+                        className="text-primary-600 dark:text-primary-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors"
                       >
                         Use backup code
                       </button>
@@ -426,7 +425,7 @@ const Login: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isLoading || !mfaCode}
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 px-6 rounded-lg font-bold text-sm hover:shadow-lg transform hover:scale-[1.01] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                  className="w-full bg-gradient-to-r from-primary-500 to-secondary-900 text-white py-2 px-6 rounded-lg font-bold text-sm hover:shadow-lg transform hover:scale-[1.01] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                 >
                   {isLoading ? (
                     <>
@@ -452,15 +451,9 @@ const Login: React.FC = () => {
                           <Mail className="h-4 w-4 text-gray-400 dark:text-gray-500 transition-colors" />
                         </div>
                         <input
-                          {...register('email', {
-                            required: 'Required',
-                            pattern: {
-                              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                              message: 'Invalid email',
-                            },
-                          })}
+                          {...register('email')}
                           type="email"
-                          className="w-full pl-9 pr-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-lg focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100 focus:border-transparent transition-all duration-200 text-sm font-medium placeholder-slate-400 dark:placeholder-slate-500"
+                          className="w-full pl-9 pr-3 py-2 border border-slate-300 dark:border-secondary-700 bg-white dark:bg-secondary-900 text-slate-900 dark:text-white rounded-lg focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100 focus:border-transparent transition-all duration-200 text-sm font-medium placeholder-slate-400 dark:placeholder-slate-500"
                           placeholder="Enter your email"
                         />
                       </div>
@@ -481,15 +474,9 @@ const Login: React.FC = () => {
                           <Lock className="h-4 w-4 text-gray-400 dark:text-gray-500 transition-colors" />
                         </div>
                         <input
-                          {...register('password', {
-                            required: 'Required',
-                            minLength: {
-                              value: 6,
-                              message: 'Min 6 chars',
-                            },
-                          })}
+                          {...register('password')}
                           type={showPassword ? 'text' : 'password'}
-                          className="w-full pl-9 pr-9 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-lg focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100 focus:border-transparent transition-all duration-200 text-sm font-medium placeholder-slate-400 dark:placeholder-slate-500"
+                          className="w-full pl-9 pr-9 py-2 border border-slate-300 dark:border-secondary-700 bg-white dark:bg-secondary-900 text-slate-900 dark:text-white rounded-lg focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100 focus:border-transparent transition-all duration-200 text-sm font-medium placeholder-slate-400 dark:placeholder-slate-500"
                           placeholder="Enter your password"
                         />
                         <button
@@ -517,7 +504,7 @@ const Login: React.FC = () => {
                     <label className="flex items-center">
                       <input
                         type="checkbox"
-                        className="rounded border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-100 focus:ring-slate-900 dark:focus:ring-slate-100 bg-white dark:bg-slate-800 transition-colors h-4 w-4"
+                        className="rounded border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-100 focus:ring-slate-900 dark:focus:ring-slate-100 bg-white dark:bg-secondary-800 transition-colors h-4 w-4"
                         checked={rememberMe}
                         onChange={(e) => setRememberMe(e.target.checked)}
                       />
@@ -531,7 +518,7 @@ const Login: React.FC = () => {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-2.5 px-6 rounded-lg font-semibold text-sm shadow-[0_4px_14px_0_rgb(0,0,0,0.1)] dark:shadow-none hover:shadow-[0_6px_20px_rgba(0,0,0,0.15)] dark:hover:shadow-none hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                    className="w-full bg-primary-500 dark:bg-primary-500 text-white py-2.5 px-6 rounded-lg font-semibold text-sm shadow-brand hover:bg-primary-600 dark:hover:bg-primary-600 hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                   >
                     {isLoading ? (
                       <>
@@ -552,7 +539,7 @@ const Login: React.FC = () => {
                     <div className="w-full border-t border-gray-200 dark:border-gray-700 transition-colors"></div>
                   </div>
                   <div className="relative flex justify-center text-[10px]">
-                    <span className="px-2 bg-white dark:bg-slate-900 text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest transition-colors">Or</span>
+                    <span className="px-2 bg-white dark:bg-secondary-900 text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest transition-colors">Or</span>
                   </div>
                 </div>
 
@@ -562,13 +549,13 @@ const Login: React.FC = () => {
                     type="button"
                     onClick={handleMicrosoftLogin}
                     disabled={!import.meta.env.VITE_MICROSOFT_CLIENT_ID}
-                    className="w-full flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700 py-2 rounded-lg text-[10px] font-black text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors uppercase tracking-tight disabled:bg-slate-50 dark:disabled:bg-slate-800 disabled:text-slate-300 dark:disabled:text-slate-600 disabled:cursor-not-allowed"
+                    className="w-full flex items-center justify-center gap-2 border border-slate-200 dark:border-secondary-700 py-2 rounded-lg text-[10px] font-black text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors uppercase tracking-tight disabled:bg-slate-50 dark:disabled:bg-slate-800 disabled:text-slate-300 dark:disabled:text-slate-600 disabled:cursor-not-allowed"
                   >
                     <MicrosoftIcon /> <span>Microsoft Account</span>
                   </button>
                 </div>
 
-                <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800 text-center transition-colors">
+                <div className="mt-6 pt-6 border-t border-slate-100 dark:border-secondary-800 text-center transition-colors">
                   <p className="text-sm text-slate-500 dark:text-slate-400 font-medium transition-colors">
                     New to Arrotech?{' '}
                     <Link to="/register" className="font-semibold text-slate-900 dark:text-slate-200 hover:text-slate-700 dark:hover:text-slate-400 transition-colors">

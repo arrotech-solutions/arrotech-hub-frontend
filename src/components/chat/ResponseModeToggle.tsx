@@ -21,8 +21,8 @@ const ResponseModeToggle: React.FC<ResponseModeToggleProps> = ({ mode, onChange,
         className={`flex items-center gap-1.5 px-3 py-1 rounded-full transition-all duration-300 ${
           mode === 'simple'
             ? isDarkMode
-              ? 'bg-indigo-500/20 text-indigo-400 shadow-sm shadow-indigo-500/10'
-              : 'bg-indigo-500/10 text-indigo-600 shadow-sm shadow-indigo-500/10'
+              ? 'bg-indigo-500/20 text-indigo-400 shadow-sm shadow-primary-500/10'
+              : 'bg-indigo-500/10 text-indigo-600 shadow-sm shadow-primary-500/10'
             : isDarkMode
               ? 'text-gray-500 hover:text-gray-400'
               : 'text-gray-400 hover:text-gray-600'

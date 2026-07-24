@@ -387,7 +387,7 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
                     onClick={handleSave}
                     disabled={!isDirty}
                     className={`w-full flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${isDirty
-                        ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-200/50'
+                        ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-primary-200/50'
                         : (isDark ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-gray-100 text-gray-400 cursor-not-allowed')
                         }`}
                 >

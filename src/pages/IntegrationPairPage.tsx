@@ -14,7 +14,7 @@ import hubspotLogo from '../assets/apps/hub_spot.png';
 
 const INTEGRATIONS: Record<string, any> = {
     'gmail': { name: 'Gmail', color: 'from-red-500 to-red-600', logo: gmailLogo },
-    'slack': { name: 'Slack', color: 'from-purple-500 to-pink-500', logo: slackLogo },
+    'slack': { name: 'Slack', color: 'from-secondary-700 to-primary-500', logo: slackLogo },
     'mpesa': { name: 'M-Pesa', color: 'from-green-500 to-emerald-600', logo: mpesaLogo },
     'whatsapp': { name: 'WhatsApp', color: 'from-green-400 to-teal-500', logo: whatsappLogo },
     'trello': { name: 'Trello', color: 'from-blue-400 to-blue-600', logo: trelloLogo },

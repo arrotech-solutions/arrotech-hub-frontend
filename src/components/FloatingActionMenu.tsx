@@ -31,6 +31,7 @@ const FloatingActionMenu: React.FC = () => {
     startPageTutorial,
     isActive: tutorialActive,
     hasCompletedPage,
+    hasPageTutorial,
     currentPage,
   } = useTutorial();
 
@@ -106,15 +107,19 @@ const FloatingActionMenu: React.FC = () => {
   if (tutorialActive || !showFloatingMenu) return null;
 
   const pageLabels: Record<string, string> = {
-    dashboard: 'Dashboard',
     workspace: 'Workspace',
+    unifiedInbox: 'Unified Inbox',
+    unifiedTasks: 'Unified Tasks',
+    unifiedCalendar: 'Unified Calendar',
     chat: 'Chat',
     workflows: 'Workflows',
     agents: 'Agents',
+    codingAgent: 'Coding Agent',
+    whatsapp: 'WhatsApp',
     connections: 'Connections',
     marketplace: 'Marketplace',
-    templates: 'Templates',
     favorites: 'Favorites',
+    productivity: 'Productivity',
     payments: 'Payments',
     activity: 'Activity',
     settings: 'Settings',
@@ -122,13 +127,13 @@ const FloatingActionMenu: React.FC = () => {
     creator: 'Creator Profile',
     mcptools: 'MCP Tools',
     pricing: 'Pricing',
-    unifiedInbox: 'Unified Inbox',
-    unifiedTasks: 'Unified Tasks',
-    unifiedCalendar: 'Unified Calendar',
+    kra: 'KRA / GavaConnect',
+    tiktok: 'TikTok Hub',
   };
 
   const currentPageLabel = pageLabels[currentPage] || 'This Page';
-  const hasCompletedCurrentPage = hasCompletedPage(currentPage);
+  const pageHasTutorial = hasPageTutorial(currentPage);
+  const hasCompletedCurrentPage = pageHasTutorial && hasCompletedPage(currentPage);
 
   // Build menu items based on user preferences
   const menuItems: MenuItem[] = [
@@ -138,7 +143,7 @@ const FloatingActionMenu: React.FC = () => {
       icon: <Bot className="w-5 h-5" />,
       label: 'AI Assistant',
       description: 'Get help with anything',
-      color: 'from-purple-500 to-blue-500',
+      color: 'from-primary-500 to-secondary-900',
       onClick: () => {
         setIsOpen(false);
         setShowAssistant(true);
@@ -150,7 +155,7 @@ const FloatingActionMenu: React.FC = () => {
       icon: <MessageCircle className="w-5 h-5" />,
       label: 'WhatsApp Support',
       description: 'Chat with our support team',
-      color: 'from-green-500 to-emerald-500',
+      color: 'from-primary-500 to-accent-400',
       onClick: () => {
         setIsOpen(false);
         window.open('https://wa.me/254797568564', '_blank');
@@ -158,24 +163,24 @@ const FloatingActionMenu: React.FC = () => {
     }] : []),
     // Tutorial items - only show if logged in AND enabled in settings
     ...(user && showTutorials ? [
-      {
+      ...(pageHasTutorial ? [{
         id: 'page-tutorial',
         icon: <BookOpen className="w-5 h-5" />,
         label: `${currentPageLabel} Tutorial`,
         description: hasCompletedCurrentPage ? 'Replay tutorial' : 'Learn this page',
-        color: 'from-blue-500 to-cyan-500',
+        color: 'from-accent-400 to-primary-500',
         onClick: () => {
           setIsOpen(false);
           startPageTutorial();
         },
         badge: hasCompletedCurrentPage ? '✓' : 'New',
-      },
+      }] : []),
       {
         id: 'full-tutorial',
         icon: <Sparkles className="w-5 h-5" />,
         label: 'Full Platform Tour',
         description: 'Explore all features',
-        color: 'from-amber-500 to-orange-500',
+        color: 'from-accent-500 to-accent-600',
         onClick: () => {
           setIsOpen(false);
           startTutorial();
@@ -201,7 +206,7 @@ const FloatingActionMenu: React.FC = () => {
           }`}>
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden w-[calc(100vw-32px)] sm:w-80 shrink-0 right-0 origin-bottom-right">
             {/* Header */}
-            <div className="px-4 py-3 bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-500">
+            <div className="px-4 py-3 bg-gradient-to-r from-primary-500 via-primary-600 to-secondary-900">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
@@ -242,10 +247,10 @@ const FloatingActionMenu: React.FC = () => {
                       </span>
                       {item.badge && (
                         <span className={`px-1.5 py-0.5 text-xs font-medium rounded-full ${item.badge === 'AI'
-                          ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300'
+                          ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/50 dark:text-primary-300'
                           : item.badge === '✓'
                             ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300'
-                            : 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300'
+                            : 'bg-accent-100 text-secondary-900 dark:bg-accent-500/20 dark:text-accent-300'
                           }`}>
                           {item.badge}
                         </span>
@@ -274,15 +279,15 @@ const FloatingActionMenu: React.FC = () => {
           onClick={() => setIsOpen(!isOpen)}
           className={`relative p-4 rounded-full shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 ${isOpen
             ? 'bg-gray-700 rotate-45'
-            : 'bg-gradient-to-br from-purple-600 via-blue-600 to-cyan-500'
+            : 'bg-gradient-to-br from-primary-500 via-primary-600 to-secondary-900'
             }`}
           aria-label="Help & Resources"
         >
           {/* Animated rings */}
           {!isOpen && (
             <>
-              <span className="absolute inset-0 rounded-full bg-gradient-to-br from-purple-600 via-blue-600 to-cyan-500 animate-ping opacity-20" />
-              <span className="absolute inset-0 rounded-full bg-gradient-to-br from-purple-600 via-blue-600 to-cyan-500 animate-pulse opacity-30" />
+              <span className="absolute inset-0 rounded-full bg-gradient-to-br from-primary-500 via-primary-600 to-secondary-900 animate-ping opacity-20" />
+              <span className="absolute inset-0 rounded-full bg-gradient-to-br from-accent-400 to-primary-500 animate-pulse opacity-30" />
             </>
           )}
 

@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { Lock, Loader, CheckCircle, AlertCircle, Smartphone } from 'lucide-react';
 import apiService from '../services/api';
-import toast from 'react-hot-toast';
+import toast from '../lib/notify';
 import SEO from '../components/SEO';
 
 interface LinkInfo {

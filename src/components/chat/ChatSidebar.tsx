@@ -105,7 +105,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
                 <div className={`flex items-center justify-between ${sidebarCollapsed ? 'flex-col space-y-4' : ''}`}>
                     <button
                         onClick={handleBackToDashboard}
-                        className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg hover:shadow-indigo-500/20 transition-all active:scale-95"
+                        className="w-10 h-10 bg-gradient-to-br from-primary-500 to-secondary-900 rounded-xl flex items-center justify-center shadow-lg hover:shadow-primary-500/20 transition-all active:scale-95"
                     >
                         <MessageCircle className="w-5 h-5 text-white" />
                     </button>

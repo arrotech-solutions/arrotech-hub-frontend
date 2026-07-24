@@ -8,7 +8,7 @@ import {
     Sparkles, ArrowRight, Pencil, BarChart3
 } from 'lucide-react';
 import apiService from '../services/api';
-import toast from 'react-hot-toast';
+import toast from '../lib/notify';
 import { Connection } from '../types';
 import { Link } from 'react-router-dom';
 import ConversationsTab, { type TeamMember, type QuickReply } from '../components/whatsapp/ConversationsTab';
@@ -17,6 +17,7 @@ import BroadcastDetailModal from '../components/whatsapp/BroadcastDetailModal';
 import AutoReplyRuleModal, { AutoReplyRule, AutoReplyRuleDraft } from '../components/whatsapp/AutoReplyRuleModal';
 import WhatsAppAnalyticsTab from '../components/whatsapp/WhatsAppAnalyticsTab';
 import { useWebSocket } from '../hooks/useWebSocket';
+import { useTutorial } from '../hooks/useTutorial';
 
 const WEEKDAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const;
 
@@ -161,6 +162,7 @@ interface Broadcast {
 type TabType = 'contacts' | 'auto-reply' | 'broadcast' | 'analytics' | 'settings';
 
 const WhatsAppDashboard: React.FC = () => {
+    const { currentStep, isActive: isTutorialActive } = useTutorial();
     const [activeTab, setActiveTab] = useState<TabType>('contacts');
     const [contacts, setContacts] = useState<Contact[]>([]);
     const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
@@ -438,6 +440,40 @@ const WhatsAppDashboard: React.FC = () => {
             console.error('Error fetching broadcasts:', error);
         }
     }, [broadcastStatusFilter]);
+
+    useEffect(() => {
+        if (!isTutorialActive || !currentStep) return;
+        if (['whatsapp-intro', 'whatsapp-stats', 'whatsapp-tabs', 'whatsapp-contacts', 'whatsapp-chat'].includes(currentStep.id)) {
+            setActiveTab('contacts');
+        } else if (currentStep.id === 'whatsapp-auto-reply') {
+            setActiveTab('auto-reply');
+        } else if (currentStep.id === 'whatsapp-broadcast') {
+            setActiveTab('broadcast');
+        } else if (currentStep.id === 'whatsapp-settings') {
+            setActiveTab('settings');
+        }
+        if (currentStep.id === 'whatsapp-chat' && !selectedContact && contacts.length > 0) {
+            setSelectedContact(contacts[0]);
+        }
+    }, [currentStep, isTutorialActive, selectedContact, contacts]);
+
+    useEffect(() => {
+        const onReveal = (event: Event) => {
+            const detail = (event as CustomEvent).detail || {};
+            if (detail.page && detail.page !== 'whatsapp') return;
+            if (
+                detail.stepId === 'whatsapp-chat' ||
+                detail.target === '.whatsapp-chat-tut'
+            ) {
+                setActiveTab('contacts');
+                if (!selectedContact && contacts.length > 0) {
+                    setSelectedContact(contacts[0]);
+                }
+            }
+        };
+        window.addEventListener('tutorial:reveal-target', onReveal);
+        return () => window.removeEventListener('tutorial:reveal-target', onReveal);
+    }, [selectedContact, contacts]);
 
     useEffect(() => {
         if (activeTab === 'broadcast') {
@@ -763,7 +799,7 @@ const WhatsAppDashboard: React.FC = () => {
                     to="/catalog-builder"
                     className="group mb-4 sm:mb-5 flex items-center gap-3 sm:gap-4 rounded-2xl border border-purple-200 dark:border-purple-500/30 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/30 dark:to-blue-950/20 p-3 sm:p-5 hover:shadow-md transition-all"
                 >
-                    <div className="flex-shrink-0 w-11 h-11 rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center shadow-lg">
+                    <div className="flex-shrink-0 w-11 h-11 rounded-xl bg-gradient-to-br from-secondary-800 to-primary-500 flex items-center justify-center shadow-lg">
                         <Sparkles className="w-5 h-5 text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -782,7 +818,7 @@ const WhatsAppDashboard: React.FC = () => {
                 )}
 
                 {activeTab === 'contacts' && (
-                    <div className="flex flex-col flex-1 min-h-0 overflow-hidden -mx-3 sm:mx-0">
+                    <div className="flex flex-col flex-1 min-h-0 overflow-hidden -mx-3 sm:mx-0 whatsapp-contacts-tut whatsapp-chat-tut">
                     <ConversationsTab
                         contacts={contacts}
                         selectedContact={selectedContact}

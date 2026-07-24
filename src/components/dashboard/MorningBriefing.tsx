@@ -261,7 +261,7 @@ const MorningBriefing: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                                                 <button
                                                     onClick={() => handleAction('email.draft_replies', 'Draft Replies')}
                                                     disabled={!!processingAction}
-                                                    className={`px-4 py-2 bg-indigo-600 dark:bg-indigo-600 text-white text-xs rounded-xl hover:bg-indigo-700 dark:hover:bg-indigo-500 transition-all font-bold flex items-center gap-2 shadow-sm shadow-indigo-500/20 ${processingAction === 'email.draft_replies' ? 'opacity-50 cursor-wait' : ''}`}
+                                                    className={`px-4 py-2 bg-indigo-600 dark:bg-indigo-600 text-white text-xs rounded-xl hover:bg-indigo-700 dark:hover:bg-indigo-500 transition-all font-bold flex items-center gap-2 shadow-sm shadow-primary-500/20 ${processingAction === 'email.draft_replies' ? 'opacity-50 cursor-wait' : ''}`}
                                                 >
                                                     <Mail className="w-4 h-4" />
                                                     {processingAction === 'email.draft_replies' ? 'Drafting...' : 'Draft Replies'}
@@ -283,7 +283,7 @@ const MorningBriefing: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                                         </div>
                                         <button
                                             onClick={onClose}
-                                            className="px-6 py-2.5 bg-gray-900 dark:bg-indigo-600 hover:bg-gray-800 dark:hover:bg-indigo-500 text-white rounded-xl font-bold text-sm flex items-center gap-2 transition-all active:scale-95 shadow-lg shadow-indigo-500/10"
+                                            className="px-6 py-2.5 bg-gray-900 dark:bg-indigo-600 hover:bg-gray-800 dark:hover:bg-indigo-500 text-white rounded-xl font-bold text-sm flex items-center gap-2 transition-all active:scale-95 shadow-lg shadow-primary-500/10"
                                         >
                                             Start My Day <ArrowRight className="w-4 h-4" />
                                         </button>

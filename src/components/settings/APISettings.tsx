@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Zap, Activity, Clock, RefreshCw, ChevronDown, ChevronRight, Copy, Check, Lock, Globe, Eye, EyeOff } from 'lucide-react';
 import { APISettings } from '../../types';
-import toast from 'react-hot-toast';
+import toast from '../../lib/notify';
 
 interface APISettingsProps {
     settings: APISettings;

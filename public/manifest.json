@@ -10,7 +10,7 @@
   ],
   "start_url": "./",
   "display": "standalone",
-  "theme_color": "#7C3AED",
-  "background_color": "#ffffff",
-  "description": "Connect your apps, automate workflows, and manage everything in one unified workspace."
+  "theme_color": "#1E1033",
+  "background_color": "#FAF8FC",
+  "description": "Connect your apps, automate workflows, and manage everything in one unified workspace. Theme: src/theme/tokens.ts (themeColor / backgroundColor)."
 }

@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import apiService from '../services/api';
+import { Spinner } from '../components/ui';
 import { useSubscription } from '../hooks/useSubscription';
+import { chart } from '../theme';
 import {
     TrendingUp,
     Flame,
@@ -85,14 +87,14 @@ interface ActivityBreakdown {
 }
 
 const ACTIVITY_COLORS: Record<string, string> = {
-    email_processed: '#6366f1',
-    email_sent: '#8b5cf6',
-    task_completed: '#10b981',
-    task_created: '#34d399',
-    meeting_attended: '#f59e0b',
-    focus_time: '#ec4899',
-    message_sent: '#06b6d4',
-    inbox_zero: '#84cc16',
+    email_processed: chart.primary,
+    email_sent: chart.primary600,
+    task_completed: chart.accent,
+    task_created: chart.primary400,
+    meeting_attended: chart.accent700,
+    focus_time: chart.primary300,
+    message_sent: chart.muted,
+    inbox_zero: chart.accent600,
 };
 
 const ACTIVITY_LABELS: Record<string, string> = {
@@ -236,7 +238,7 @@ export default function Usage() {
     if (loading && subLoading) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-900 dark:to-indigo-950/20 flex items-center justify-center transition-colors duration-300">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400"></div>
+                <Spinner size="xl" />
             </div>
         );
     }
@@ -260,7 +262,7 @@ export default function Usage() {
                                     <span className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Platform Usage</span>
                                 </div>
                                 <h1 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mb-2 tracking-tight">
-                                    Usage <span className="bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">Overview</span>
+                                    Usage <span className="bg-gradient-to-r from-primary-500 to-secondary-900 dark:from-primary-400 dark:to-primary-300 bg-clip-text text-transparent">Overview</span>
                                 </h1>
                                 <p className="text-gray-500 dark:text-slate-400 max-w-md font-medium">
                                     Monitor your resource consumption, track productivity, and optimize your workflows.
@@ -304,7 +306,7 @@ export default function Usage() {
                         {(isAiActionsWarning || isAutomationRunsWarning) && (
                             <Link
                                 to="/pricing"
-                                className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm font-bold rounded-xl hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-200"
+                                className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-primary-500 to-secondary-900 text-white text-sm font-bold rounded-xl hover:shadow-lg hover:shadow-primary-500/25 transition-all duration-200"
                             >
                                 Upgrade Plan
                                 <ArrowRight className="w-4 h-4" />
@@ -325,7 +327,7 @@ export default function Usage() {
                             icon={Workflow}
                             used={usage?.automation_runs?.used || 0}
                             limit={limits?.automation_runs_monthly || 500}
-                            color="bg-gradient-to-r from-purple-500 to-pink-500"
+                            color="bg-gradient-to-r from-secondary-700 to-primary-500"
                             accentClass="bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400"
                         />
                         <UsageBar
@@ -333,7 +335,7 @@ export default function Usage() {
                             icon={Target}
                             used={usage?.active_workflows || 0}
                             limit={limits?.max_active_workflows || 3}
-                            color="bg-gradient-to-r from-emerald-500 to-teal-500"
+                            color="bg-gradient-to-r from-primary-500 to-accent-400"
                             accentClass="bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400"
                         />
                         <UsageBar
@@ -389,8 +391,8 @@ export default function Usage() {
                                 <AreaChart data={trends}>
                                     <defs>
                                         <linearGradient id="scoreGradientFill" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
-                                            <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                                            <stop offset="5%" stopColor={chart.primary} stopOpacity={0.3} />
+                                            <stop offset="95%" stopColor={chart.primary} stopOpacity={0} />
                                         </linearGradient>
                                     </defs>
                                     <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200 dark:stroke-slate-700" />
@@ -408,8 +410,8 @@ export default function Usage() {
                                     />
                                     <Tooltip
                                         contentStyle={{
-                                            backgroundColor: '#1e293b',
-                                            border: '1px solid #475569',
+                                            backgroundColor: chart.surfaceDark,
+                                            border: `1px solid ${chart.secondary600}`,
                                             borderRadius: '12px',
                                             color: '#f1f5f9',
                                         }}
@@ -418,7 +420,7 @@ export default function Usage() {
                                     <Area
                                         type="monotone"
                                         dataKey="score"
-                                        stroke="#6366f1"
+                                        stroke={chart.primary}
                                         strokeWidth={2}
                                         fill="url(#scoreGradientFill)"
                                     />
@@ -463,8 +465,8 @@ export default function Usage() {
                                     </Pie>
                                     <Tooltip
                                         contentStyle={{
-                                            backgroundColor: '#1e293b',
-                                            border: '1px solid #475569',
+                                            backgroundColor: chart.surfaceDark,
+                                            border: `1px solid ${chart.secondary600}`,
                                             borderRadius: '8px',
                                             color: '#f1f5f9',
                                         }}
@@ -667,7 +669,7 @@ export default function Usage() {
 
                 {/* ═══════════════ Upgrade CTA (for free users) ═══════════════ */}
                 {tier === 'free' && (
-                    <div className="mt-6 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-6 text-white shadow-lg">
+                    <div className="mt-6 bg-gradient-to-r from-primary-500 to-secondary-900 rounded-2xl p-6 text-white shadow-lg">
                         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                             <div>
                                 <h3 className="text-lg font-bold">Unlock more with a paid plan</h3>

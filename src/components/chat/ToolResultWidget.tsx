@@ -65,7 +65,7 @@ const ToolResultWidget: React.FC<ToolResultWidgetProps> = ({
                                                 <a
                                                     href={`/api/chat/download/${message.conversation_id}/${message.id}/${tool.result.data.filename}`}
                                                     download={tool.result.data.filename}
-                                                    className="p-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors shadow-lg shadow-indigo-500/20"
+                                                    className="p-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors shadow-lg shadow-primary-500/20"
                                                 >
                                                     <Download size={14} />
                                                 </a>
@@ -129,7 +129,7 @@ const ToolResultWidget: React.FC<ToolResultWidgetProps> = ({
                                                 </div>
                                                 <a
                                                     href={`/workflows/${tool.result.workflow_id}`}
-                                                    className="mt-3 block w-full text-center py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors shadow-lg shadow-purple-500/20 text-xs font-bold uppercase tracking-wide"
+                                                    className="mt-3 block w-full text-center py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors shadow-lg shadow-primary-500/25 text-xs font-bold uppercase tracking-wide"
                                                 >
                                                     View & Edit Workflow
                                                 </a>

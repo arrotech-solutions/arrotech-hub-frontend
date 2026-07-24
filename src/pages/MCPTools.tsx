@@ -1,6 +1,6 @@
 import { BarChart3, CheckCircle, FileText, Globe, Palette, Play, Plus, RefreshCw, Search, Settings, Shield, Sparkles, Users, XCircle, Zap } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
+import toast from '../lib/notify';
 import { useAuth } from '../hooks/useAuth';
 import apiService from '../services/api';
 import { MCPTool, ToolInfo } from '../types';

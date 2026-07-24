@@ -618,7 +618,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ onClose, embedded = false }) 
             <div className={`max-w-[90%] sm:max-w-[85%] ${message.role === 'user' ? '' : 'space-y-2'}`}>
               <div
                 className={`rounded-2xl px-4 py-3 ${message.role === 'user'
-                  ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white'
+                  ? 'bg-gradient-to-r from-secondary-800 to-primary-500 text-white'
                   : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
                 }`}
               >
@@ -760,7 +760,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ onClose, embedded = false }) 
           <button
             onClick={() => handleSendMessage()}
             disabled={!inputValue.trim() || isLoading}
-            className="p-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-all duration-200 flex-shrink-0"
+            className="p-3 bg-gradient-to-r from-secondary-800 to-primary-500 hover:from-purple-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-all duration-200 flex-shrink-0"
           >
             {isLoading ? (
               <Loader2 className="w-5 h-5 text-white animate-spin" />
@@ -788,7 +788,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ onClose, embedded = false }) 
         onClick={() => setIsOpen(!isOpen)}
         className={`fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[60] p-4 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 ${isOpen
           ? 'bg-gray-600 hover:bg-gray-700'
-          : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700'
+          : 'bg-gradient-to-r from-secondary-800 to-primary-500 hover:from-purple-700 hover:to-indigo-700'
         }`}
         aria-label="AI Assistant"
       >

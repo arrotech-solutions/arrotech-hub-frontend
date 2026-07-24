@@ -21,9 +21,10 @@ import {
     FolderOpen,
     Loader2
 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import toast from '../lib/notify';
 import apiService from '../services/api';
 import { GalleryTemplate, TemplateCategory, Connection } from '../types';
+import { chart } from '../theme';
 
 interface WorkflowTemplatesProps {
     onWorkflowCreated?: () => void;
@@ -269,7 +270,7 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onWorkflowCreated
 
     const getCategoryColor = (categoryName: string) => {
         const category = categories.find(c => c.name.toLowerCase() === categoryName.toLowerCase());
-        return category?.color || '#8B5CF6';
+        return category?.color || chart.primary;
     };
 
     const getConnectionLabel = (conn: string) => {
@@ -448,7 +449,7 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onWorkflowCreated
                                                 e.stopPropagation();
                                                 handleUseTemplate(template.id);
                                             }}
-                                            className="w-full sm:w-auto px-6 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all font-semibold flex items-center justify-center space-x-2 shadow-sm"
+                                            className="w-full sm:w-auto px-6 py-2.5 bg-gradient-to-r from-secondary-800 to-primary-500 text-white rounded-xl hover:from-secondary-900 hover:to-primary-600 transition-all font-semibold flex items-center justify-center space-x-2 shadow-sm"
                                         >
                                             <Play className="w-4 h-4 fill-white" />
                                             <span>Use Template</span>
@@ -849,7 +850,7 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onWorkflowCreated
                                     <button
                                         onClick={() => handleUseTemplate(selectedTemplate.id)}
                                         disabled={usingTemplate}
-                                        className="flex-1 sm:flex-none px-10 py-3.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-2xl hover:shadow-xl hover:scale-[1.02] transform transition-all flex items-center justify-center space-x-3 disabled:opacity-50 shadow-lg font-black tracking-wide"
+                                        className="flex-1 sm:flex-none px-10 py-3.5 bg-gradient-to-r from-secondary-800 to-primary-500 text-white rounded-2xl hover:shadow-xl hover:scale-[1.02] transform transition-all flex items-center justify-center space-x-3 disabled:opacity-50 shadow-lg font-black tracking-wide"
                                     >
                                         {usingTemplate ? (
                                             <>

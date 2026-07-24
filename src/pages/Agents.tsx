@@ -30,7 +30,7 @@ import {
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import toast from 'react-hot-toast';
+import toast from '../lib/notify';
 import { useTutorial } from '../hooks/useTutorial';
 import apiService from '../services/api';
 import { AgentCreate, AgentResponse, AgentStatusResponse, Workflow } from '../types';
@@ -73,6 +73,32 @@ const Agents: React.FC = () => {
     }
   }, [currentStep, isTutorialActive]);
 
+  useEffect(() => {
+    const onReveal = (event: Event) => {
+      const detail = (event as CustomEvent).detail || {};
+      if (detail.page && detail.page !== 'agents') return;
+      if (
+        detail.stepId === 'agents-stats' ||
+        detail.stepId === 'agents-filters' ||
+        detail.stepId === 'agents-actions' ||
+        detail.target === '.agents-stats' ||
+        detail.target === '.agents-filters' ||
+        detail.target === '.agent-actions-container'
+      ) {
+        setActiveTab('managed');
+      } else if (
+        detail.stepId === 'agents-intro' ||
+        detail.stepId === 'agents-create' ||
+        detail.target === '.agents-header' ||
+        detail.target === '.create-agent-btn'
+      ) {
+        setActiveTab('discover');
+      }
+    };
+    window.addEventListener('tutorial:reveal-target', onReveal);
+    return () => window.removeEventListener('tutorial:reveal-target', onReveal);
+  }, []);
+
   const FEATURED_AGENTS = [
 
     {
@@ -113,7 +139,7 @@ const Agents: React.FC = () => {
       name: 'Logistics Tracker',
       description: 'Unified tracking for Sendy, G4S, and Wells Fargo shipments with automated alerts.',
       icon: <Truck className="w-6 h-6" />,
-      color: 'from-emerald-500 to-teal-600',
+      color: 'from-primary-500 to-secondary-900',
       lightColor: 'bg-emerald-50',
       textColor: 'text-emerald-700',
       category: 'Logistics',
@@ -124,7 +150,7 @@ const Agents: React.FC = () => {
       name: 'Operations Hub',
       description: 'Centralized task accountability and morning stand-up automation for Kenyan teams.',
       icon: <LayoutDashboard className="w-6 h-6" />,
-      color: 'from-purple-500 to-pink-600',
+      color: 'from-secondary-700 to-primary-500',
       lightColor: 'bg-purple-50',
       textColor: 'text-purple-700',
       category: 'Management',
@@ -419,7 +445,7 @@ const Agents: React.FC = () => {
               <span>Regional Intelligence</span>
             </div>
             <h1 className="text-5xl md:text-6xl font-black text-gray-900 dark:text-white tracking-tight leading-none agents-header transition-colors">
-              Agent <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600 dark:from-purple-400 dark:to-indigo-400">Hub</span>
+              Agent <span className="text-transparent bg-clip-text bg-gradient-to-r from-secondary-800 to-primary-500 dark:from-purple-400 dark:to-indigo-400">Hub</span>
             </h1>
             <p className="text-xl text-gray-500 dark:text-slate-400 font-medium max-w-xl transition-colors">
               Discover and manage specialized AI agents optimized for the Kenyan business landscape.
@@ -436,7 +462,7 @@ const Agents: React.FC = () => {
             </button>
             <button
               onClick={() => setShowCreateModal(true)}
-              className="flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-8 py-4 rounded-[20px] font-bold shadow-xl shadow-purple-200 dark:shadow-none hover:shadow-2xl hover:scale-[1.02] transition-all active:scale-95 create-agent-btn"
+              className="flex items-center space-x-2 bg-gradient-to-r from-secondary-800 to-primary-500 text-white px-8 py-4 rounded-[20px] font-bold shadow-xl shadow-purple-200 dark:shadow-none hover:shadow-2xl hover:scale-[1.02] transition-all active:scale-95 create-agent-btn"
             >
               <Plus className="w-6 h-6" />
               <span>Create Agent</span>
@@ -498,7 +524,7 @@ const Agents: React.FC = () => {
                     key={cat}
                     onClick={() => setHubSearch(cat === 'All' ? '' : cat)}
                     className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${(cat === 'All' && !hubSearch) || hubSearch === cat
-                      ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/20'
+                      ? 'bg-purple-600 text-white shadow-lg shadow-primary-500/25'
                       : 'bg-gray-100 dark:bg-slate-900 text-gray-500 dark:text-slate-400 hover:bg-gray-200 dark:hover:bg-slate-800'
                       }`}
                   >
@@ -594,7 +620,7 @@ const Agents: React.FC = () => {
 
             {/* Agents Display */}
             {filteredAgents.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-24 px-6 text-center bg-white/40 dark:bg-slate-800/40 backdrop-blur-md rounded-[40px] border border-white/60 dark:border-slate-700/50 agents-list-empty transition-colors">
+              <div className="flex flex-col items-center justify-center py-24 px-6 text-center bg-white/40 dark:bg-slate-800/40 backdrop-blur-md rounded-[40px] border border-white/60 dark:border-slate-700/50 agents-list-empty agent-actions-container transition-colors">
                 <div className="relative mb-10">
                   <div className="absolute inset-0 bg-purple-500/20 blur-3xl rounded-full scale-150 animate-pulse"></div>
                   <div className="relative p-8 bg-white dark:bg-slate-900 border border-purple-100 dark:border-purple-500/20 shadow-2xl rounded-[2.5rem] transform hover:rotate-6 transition-transform duration-500">
@@ -612,7 +638,7 @@ const Agents: React.FC = () => {
                   onClick={() => setShowCreateModal(true)}
                   className="group relative inline-flex items-center justify-center space-x-3 px-10 py-5 bg-gray-900 dark:bg-purple-600 text-white rounded-[2rem] hover:shadow-[0_20px_40px_rgba(0,0,0,0.2)] dark:hover:shadow-[0_20px_40px_rgba(147,51,234,0.3)] transition-all duration-300 transform hover:-translate-y-1 overflow-hidden"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600 dark:from-purple-500 dark:to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-secondary-800 to-primary-500 dark:from-purple-500 dark:to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                   <Plus className="relative w-5 h-5 transition-transform group-hover:rotate-90" />
                   <span className="relative font-bold">Deploy Your First Agent</span>
                 </button>
@@ -681,7 +707,7 @@ const Agents: React.FC = () => {
                   name: 'Inbox Zero Coach',
                   description: 'Gamified email management that bundles newsletters and drafts quick replies for you.',
                   icon: <Mail className="w-6 h-6" />,
-                  color: 'from-emerald-500 to-teal-600',
+                  color: 'from-primary-500 to-secondary-900',
                   bg: 'bg-emerald-50',
                   text: 'text-emerald-700',
                   status: 'paused',
@@ -788,7 +814,7 @@ const Agents: React.FC = () => {
                 </div>
                 <button
                   onClick={handleCreateAgent}
-                  className="w-full py-6 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-[24px] font-black text-xl shadow-xl shadow-purple-200 dark:shadow-none hover:scale-[1.01] active:scale-[0.98] transition-all"
+                  className="w-full py-6 bg-gradient-to-r from-secondary-800 to-primary-500 text-white rounded-[24px] font-black text-xl shadow-xl shadow-purple-200 dark:shadow-none hover:scale-[1.01] active:scale-[0.98] transition-all"
                 >
                   Initiate Deployment
                 </button>
