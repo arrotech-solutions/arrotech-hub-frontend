@@ -35,7 +35,7 @@ import {
     BrainCircuit
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
+import toast from '../lib/notify';
 import apiService from '../services/api';
 import { MCPTool, ToolInfo } from '../types';
 
@@ -778,7 +778,7 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
             {/* Modal */}
             <div className="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl dark:shadow-slate-900/50 border border-transparent dark:border-slate-700 w-full max-w-6xl max-h-[90vh] overflow-hidden">
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-purple-600 to-blue-600">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-secondary-800 to-primary-500">
                     <div className="flex items-center space-x-3">
                         <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
                             <Sparkles className="w-5 h-5 text-white" />
@@ -1643,7 +1643,7 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                                 setCurrentStep(currentStep + 1);
                             }}
                             disabled={!canProceed()}
-                            className="flex items-center space-x-2 px-6 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="flex items-center space-x-2 px-6 py-2.5 bg-gradient-to-r from-secondary-800 to-primary-500 text-white rounded-lg hover:from-secondary-900 hover:to-primary-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <span>Next</span>
                             <ArrowRight className="w-4 h-4" />
@@ -1652,7 +1652,7 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                         <button
                             onClick={handleCreateWorkflow}
                             disabled={loading || !canProceed()}
-                            className="flex items-center space-x-2 px-6 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all disabled:opacity-50"
+                            className="flex items-center space-x-2 px-6 py-2.5 bg-gradient-to-r from-secondary-800 to-primary-500 text-white rounded-lg hover:from-secondary-900 hover:to-primary-600 transition-all disabled:opacity-50"
                         >
                             {loading ? (
                                 <>

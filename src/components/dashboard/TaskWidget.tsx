@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Plus, CheckCircle, Trash, Loader2 } from 'lucide-react';
 import apiService from '../../services/api';
-import toast from 'react-hot-toast';
+import toast from '../../lib/notify';
 import CreateTaskModal from './CreateTaskModal';
 
 interface Task {

@@ -6,7 +6,7 @@ import {
     HelpCircle, Zap, CreditCard, Link2, Shield, Users, Send,
     Clock, Headphones
 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import toast from '../lib/notify';
 import SEO from '../components/SEO';
 
 // FAQ Data organized by category
@@ -284,7 +284,7 @@ const HelpSupport: React.FC = () => {
 
                     {/* Premium Search Bar */}
                     <div className="max-w-2xl mx-auto relative group">
-                        <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
+                        <div className="absolute -inset-0.5 bg-gradient-to-r from-primary-500 to-secondary-900 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
                         <div className="relative flex items-center bg-white dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200 dark:border-slate-700 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] transition-all overflow-hidden focus-within:ring-2 focus-within:ring-blue-500">
                             <div className="pl-6 text-slate-400">
                                 <Search className="w-6 h-6 group-focus-within:text-blue-500 transition-colors" />
@@ -386,7 +386,7 @@ const HelpSupport: React.FC = () => {
                             >
                                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/[0.03] to-purple-500/[0.03] dark:from-blue-500/[0.08] dark:to-purple-500/[0.08] opacity-0 group-hover:opacity-100 transition-opacity"></div>
                                 <div className="relative flex flex-col items-start gap-4 h-full">
-                                    <div className="p-3 bg-slate-50 dark:bg-slate-900/50 rounded-2xl text-slate-700 dark:text-slate-300 group-hover:bg-blue-600 group-hover:text-white group-hover:shadow-[0_0_20px_rgba(59,130,246,0.4)] transition-all duration-300">
+                                    <div className="p-3 bg-slate-50 dark:bg-slate-900/50 rounded-2xl text-slate-700 dark:text-slate-300 group-hover:bg-blue-600 group-hover:text-white group-hover:shadow-[0_0_20px_rgba(255,70,150,0.4)] transition-all duration-300">
                                         <option.icon className="w-6 h-6" />
                                     </div>
                                     <div>

@@ -38,7 +38,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user }) => {
                 <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700/50 p-8 shadow-sm transition-colors">
                     <div className="flex flex-col md:flex-row items-center gap-8">
                         <div className="relative">
-                            <div className="w-24 h-24 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white text-3xl font-bold shadow-lg transition-all">
+                            <div className="w-24 h-24 bg-gradient-to-br from-primary-500 to-secondary-900 rounded-full flex items-center justify-center text-white text-3xl font-bold shadow-lg transition-all">
                                 {user.name.charAt(0)}
                             </div>
                             <div className="absolute -bottom-2 -right-2 bg-green-500 border-4 border-white dark:border-slate-800 w-6 h-6 rounded-full transition-colors"></div>

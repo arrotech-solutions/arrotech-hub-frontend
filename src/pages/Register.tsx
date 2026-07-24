@@ -9,12 +9,15 @@ import {
 } from 'lucide-react';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import SEO from '../components/SEO';
 import { ThemeToggle } from '../components/ThemeToggle';
 import logo from '../assets/Logo/fulllogo_transparent.png';
 import logoIcon from '../assets/Logo/icononly_transparent_nobuffer.png';
+import { FieldError } from '../components/ui';
+import { registerSchema, type RegisterValues } from '../lib/schemas';
 
 // Microsoft Icon SVG component
 const MicrosoftIcon = () => (
@@ -25,13 +28,6 @@ const MicrosoftIcon = () => (
     <path fill="#FFB900" d="M13 13h10v10H13z" />
   </svg>
 );
-
-interface RegisterFormData {
-  name: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-}
 
 const Register: React.FC = () => {
   const { register: registerUser, loginWithGoogle, loginWithMicrosoft } = useAuth();
@@ -47,12 +43,12 @@ const Register: React.FC = () => {
   const {
     register,
     handleSubmit,
-    watch,
-  } = useForm<RegisterFormData>();
+    formState: { errors },
+  } = useForm<RegisterValues>({
+    resolver: zodResolver(registerSchema),
+  });
 
-  const password = watch('password');
-
-  const onSubmit = async (data: RegisterFormData) => {
+  const onSubmit = async (data: RegisterValues) => {
     setIsLoading(true);
     setFormError(null);
     try {
@@ -130,7 +126,7 @@ const Register: React.FC = () => {
   }, [loginWithMicrosoft, navigate]);
 
   return (
-    <div className="min-h-screen flex relative bg-slate-50 dark:bg-slate-900 transition-colors">
+    <div className="min-h-screen flex relative bg-slate-50 dark:bg-secondary-900 transition-colors">
       <SEO
         title="Create Your Account"
         description="Get started with Arrotech Hub for free. Connect your apps, automate workflows, and boost your productivity with our unified workspace."
@@ -142,8 +138,8 @@ const Register: React.FC = () => {
       </div>
       {isOAuthLoading && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center transition-all">
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-xl shadow-2xl flex flex-col items-center gap-3 border border-transparent dark:border-slate-800 transition-colors">
-            <div className="animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent"></div>
+          <div className="bg-white dark:bg-secondary-900 p-6 rounded-xl shadow-2xl flex flex-col items-center gap-3 border border-transparent dark:border-secondary-800 transition-colors">
+            <div className="animate-spin rounded-full h-8 w-8 border-4 border-primary-500 border-t-transparent"></div>
             <p className="font-bold text-sm text-gray-800 dark:text-white transition-colors">Signing up with {oAuthProvider}...</p>
           </div>
         </div>
@@ -154,13 +150,13 @@ const Register: React.FC = () => {
           <div className="text-center mb-4">
             <Link to="/" className="inline-flex items-center gap-2 group hover:scale-[1.02] transition-transform mb-2">
               <img src={logoIcon} alt="Arrotech Hub" className="h-7 w-auto object-contain" />
-              <span className="text-[16px] font-black bg-gradient-to-r from-slate-900 to-blue-600 dark:from-white dark:to-blue-400 bg-clip-text text-transparent tracking-tighter">ARROTECH</span>
+              <span className="text-[16px] font-black bg-gradient-to-r from-secondary-900 to-primary-500 dark:from-white dark:to-primary-400 bg-clip-text text-transparent tracking-tighter">ARROTECH</span>
             </Link>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-1 tracking-tighter leading-tight transition-colors">Join Arrotech Hub</h1>
             <p className="text-sm text-slate-500 dark:text-slate-400 font-medium transition-colors">Create your account</p>
           </div>
 
-          <div className="bg-white/80 dark:bg-slate-900/50 backdrop-blur-md rounded-xl p-4 shadow-xl border border-gray-100 dark:border-slate-800/50 transition-colors">
+          <div className="bg-white/80 dark:bg-secondary-900/50 backdrop-blur-md rounded-xl p-4 shadow-xl border border-gray-100 dark:border-secondary-800/50 transition-colors">
             {formError && (
               <div className="mb-2 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/50 text-red-600 dark:text-red-400 px-2 py-1 rounded text-[9px] flex items-center gap-1.5 font-bold uppercase transition-colors">
                 <Shield className="w-3 h-3 text-red-500 dark:text-red-400" /> {formError}
@@ -172,16 +168,18 @@ const Register: React.FC = () => {
                   <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 transition-colors">Full Name</label>
                   <div className="relative">
                     <User className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500 transition-colors" />
-                    <input {...register('name', { required: 'Required' })} className="w-full pl-8 pr-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-lg text-sm font-medium focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100 focus:border-transparent outline-none transition-all placeholder-slate-400 dark:placeholder-slate-500" placeholder="Enter your name" />
+                    <input {...register('name')} className="w-full pl-8 pr-3 py-2 border border-slate-300 dark:border-secondary-700 bg-white dark:bg-secondary-900 text-slate-900 dark:text-white rounded-lg text-sm font-medium focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100 focus:border-transparent outline-none transition-all placeholder-slate-400 dark:placeholder-slate-500" placeholder="Enter your name" />
                   </div>
+                  <FieldError message={errors.name?.message} />
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 transition-colors">Email Address</label>
                   <div className="relative">
                     <Mail className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500 transition-colors" />
-                    <input {...register('email', { required: 'Required' })} type="email" className="w-full pl-8 pr-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-lg text-sm font-medium focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100 focus:border-transparent outline-none transition-all placeholder-slate-400 dark:placeholder-slate-500" placeholder="name@company.com" />
+                    <input {...register('email')} type="email" className="w-full pl-8 pr-3 py-2 border border-slate-300 dark:border-secondary-700 bg-white dark:bg-secondary-900 text-slate-900 dark:text-white rounded-lg text-sm font-medium focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100 focus:border-transparent outline-none transition-all placeholder-slate-400 dark:placeholder-slate-500" placeholder="name@company.com" />
                   </div>
+                  <FieldError message={errors.email?.message} />
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
@@ -189,34 +187,36 @@ const Register: React.FC = () => {
                     <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 transition-colors">Password</label>
                     <div className="relative">
                       <Lock className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500 transition-colors" />
-                      <input {...register('password', { required: 'Required', minLength: 6 })} type={showPassword ? 'text' : 'password'} className="w-full pl-8 pr-8 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-lg text-sm font-medium focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100 focus:border-transparent outline-none transition-all placeholder-slate-400 dark:placeholder-slate-500" placeholder="Minimum 6 characters" />
+                      <input {...register('password')} type={showPassword ? 'text' : 'password'} className="w-full pl-8 pr-8 py-2 border border-slate-300 dark:border-secondary-700 bg-white dark:bg-secondary-900 text-slate-900 dark:text-white rounded-lg text-sm font-medium focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100 focus:border-transparent outline-none transition-all placeholder-slate-400 dark:placeholder-slate-500" placeholder="Minimum 8 characters" />
                       <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">{showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button>
                     </div>
+                    <FieldError message={errors.password?.message} />
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 transition-colors">Confirm Password</label>
                     <div className="relative">
                       <Lock className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500 transition-colors" />
-                      <input {...register('confirmPassword', { validate: v => v === password || 'No match' })} type={showConfirmPassword ? 'text' : 'password'} className="w-full pl-8 pr-8 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-lg text-sm font-medium focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100 focus:border-transparent outline-none transition-all placeholder-slate-400 dark:placeholder-slate-500" placeholder="Confirm password" />
+                      <input {...register('confirmPassword')} type={showConfirmPassword ? 'text' : 'password'} className="w-full pl-8 pr-8 py-2 border border-slate-300 dark:border-secondary-700 bg-white dark:bg-secondary-900 text-slate-900 dark:text-white rounded-lg text-sm font-medium focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100 focus:border-transparent outline-none transition-all placeholder-slate-400 dark:placeholder-slate-500" placeholder="Confirm password" />
                       <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">{showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button>
                     </div>
+                    <FieldError message={errors.confirmPassword?.message} />
                   </div>
                 </div>
               </div>
 
               <div className="flex items-center gap-2 py-2 mt-2">
-                <input type="checkbox" className="h-4 w-4 rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-slate-900 dark:focus:ring-slate-100 transition-colors" required />
+                <input type="checkbox" className="h-4 w-4 rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-secondary-800 text-slate-900 dark:text-slate-100 focus:ring-slate-900 dark:focus:ring-slate-100 transition-colors" required />
                 <span className="text-xs text-slate-500 dark:text-slate-400 font-medium transition-colors">I agree to the <Link to="/terms" className="text-slate-900 dark:text-slate-200 hover:text-slate-700 dark:hover:text-slate-400 font-semibold transition-colors">Terms</Link> and <Link to="/privacy" className="text-slate-900 dark:text-slate-200 hover:text-slate-700 dark:hover:text-slate-400 font-semibold transition-colors">Privacy Policy</Link></span>
               </div>
 
-              <button type="submit" disabled={isLoading} className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-2.5 rounded-lg font-semibold text-sm hover:shadow-[0_6px_20px_rgba(0,0,0,0.15)] dark:hover:shadow-none hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2 mt-4 shadow-[0_4px_14px_0_rgb(0,0,0,0.1)] dark:shadow-none">
+              <button type="submit" disabled={isLoading} className="w-full bg-primary-500 text-white py-2.5 rounded-lg font-semibold text-sm hover:bg-primary-600 hover:shadow-brand hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2 mt-4 shadow-brand">
                 {isLoading ? 'Processing...' : <>Create Account <ArrowRight className="h-3 w-3" /></>}
               </button>
             </form>
 
             <div className="relative my-6 flex items-center justify-center">
-              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200 dark:border-slate-700 transition-colors"></div></div>
-              <span className="relative px-3 bg-white dark:bg-slate-900 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest transition-colors">Or continue with</span>
+              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200 dark:border-secondary-700 transition-colors"></div></div>
+              <span className="relative px-3 bg-white dark:bg-secondary-900 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest transition-colors">Or continue with</span>
             </div>
 
             <div className="space-y-2">
@@ -225,13 +225,13 @@ const Register: React.FC = () => {
                 type="button"
                 onClick={handleMicrosoftLogin}
                 disabled={!import.meta.env.VITE_MICROSOFT_CLIENT_ID}
-                className="w-full flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700 py-2 rounded-lg text-[10px] font-black text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors uppercase tracking-tight disabled:bg-slate-50 dark:disabled:bg-slate-800 disabled:text-slate-300 dark:disabled:text-slate-600 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-center gap-2 border border-slate-200 dark:border-secondary-700 py-2 rounded-lg text-[10px] font-black text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors uppercase tracking-tight disabled:bg-slate-50 dark:disabled:bg-slate-800 disabled:text-slate-300 dark:disabled:text-slate-600 disabled:cursor-not-allowed"
               >
                 <MicrosoftIcon /> <span>Microsoft Account</span>
               </button>
             </div>
 
-            <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800 text-center transition-colors">
+            <div className="mt-6 pt-6 border-t border-slate-100 dark:border-secondary-800 text-center transition-colors">
               <p className="text-sm text-slate-500 dark:text-slate-400 font-medium transition-colors">
                 Already have an account? <Link to="/login" className="text-slate-900 dark:text-slate-200 hover:text-slate-700 dark:hover:text-slate-400 font-semibold transition-colors">Sign in</Link>
               </p>

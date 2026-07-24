@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import organizationService from '../services/organizationService';
-import toast from 'react-hot-toast';
+import toast from '../lib/notify';
 import {
     Building2, Users, Mail, Shield, Clock, Settings, Trash2,
     ChevronRight, Plus, Loader2, ArrowLeft, X, UserPlus,
@@ -247,7 +247,7 @@ const OrganizationSettings = () => {
                     <ArrowLeft className="w-5 h-5 text-gray-500 dark:text-slate-400" />
                 </button>
                 <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-secondary-900 flex items-center justify-center shadow-brand">
                         <Building2 className="w-6 h-6 text-white" />
                     </div>
                     <div>
@@ -336,7 +336,7 @@ const OrganizationSettings = () => {
                                     return (
                                         <div key={m.user_id} className="flex items-center justify-between px-5 py-4">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm">
+                                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-secondary-900 flex items-center justify-center text-white font-semibold text-sm">
                                                     {(m.name || m.email)?.[0]?.toUpperCase() || '?'}
                                                 </div>
                                                 <div>
@@ -483,7 +483,7 @@ const OrganizationSettings = () => {
                                             <div key={dept.id} className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5 hover:border-blue-200 dark:hover:border-blue-500/30 transition-colors">
                                                 <div className="flex items-start justify-between">
                                                     <div className="flex items-start gap-3">
-                                                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+                                                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary-500 to-secondary-900 flex items-center justify-center flex-shrink-0">
                                                             <FolderTree className="w-5 h-5 text-white" />
                                                         </div>
                                                         <div>

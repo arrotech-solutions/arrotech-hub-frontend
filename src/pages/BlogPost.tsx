@@ -4,6 +4,7 @@ import { ArrowLeft, Clock, Eye, Calendar, Share2, Copy, Check, ChevronRight } fr
 import { BlogPost } from '../data/blogData';
 import { apiService } from '../services/api';
 import { Helmet } from 'react-helmet-async';
+import { chart } from '../theme';
 
 /* ── Simple Markdown to HTML ───────────────────────────── */
 const renderMarkdown = (md: string): string => {
@@ -209,7 +210,7 @@ const BlogPostPage: React.FC = () => {
                             {post.category && (
                                 <span
                                     className="px-3 py-1 rounded-full text-xs font-semibold text-white"
-                                    style={{ backgroundColor: `${post.category_color || '#7C3AED'}cc` }}
+                                    style={{ backgroundColor: `${post.category_color || chart.secondary}cc` }}
                                 >
                                     {post.category}
                                 </span>
@@ -234,7 +235,7 @@ const BlogPostPage: React.FC = () => {
                         {/* Meta row */}
                         <div className="flex flex-wrap items-center gap-5 text-sm text-slate-500 dark:text-gray-400 transition-colors">
                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center text-white font-bold text-sm">
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-secondary-700 to-primary-500 flex items-center justify-center text-white font-bold text-sm">
                                     {post.author.charAt(0)}
                                 </div>
                                 <div>
@@ -315,7 +316,7 @@ const BlogPostPage: React.FC = () => {
 
                             {/* Author card */}
                             <div className="mt-8 p-6 bg-white dark:bg-slate-900/50 rounded-2xl border border-gray-200/80 dark:border-slate-800 flex items-start gap-5 transition-colors">
-                                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center text-white font-bold text-xl flex-shrink-0">
+                                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-secondary-700 to-primary-500 flex items-center justify-center text-white font-bold text-xl flex-shrink-0">
                                     {post.author.charAt(0)}
                                 </div>
                                 <div>

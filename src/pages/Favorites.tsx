@@ -11,7 +11,7 @@ import {
   Zap,
   AlertCircle,
 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import toast from '../lib/notify';
 import { useNavigate } from 'react-router-dom';
 import apiService from '../services/api';
 import { WorkflowFavorite } from '../types';

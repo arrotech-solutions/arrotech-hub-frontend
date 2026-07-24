@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import toast from 'react-hot-toast';
+import toast from '../lib/notify';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import apiService from '../services/api';

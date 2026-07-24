@@ -24,7 +24,8 @@ import {
   Zap
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
+import toast from '../lib/notify';
+import { Spinner } from '../components/ui';
 import { useAuth } from '../hooks/useAuth';
 import { getDisplayTier, getDisplayTierName, isSubscriptionExpired } from '../hooks/useSubscription';
 import apiService from '../services/api';
@@ -180,7 +181,7 @@ const Profile: React.FC = () => {
   const getSubscriptionColor = (tier: string) => {
     switch (tier) {
       case 'enterprise':
-        return 'bg-gradient-to-r from-purple-500 to-pink-500';
+        return 'bg-gradient-to-r from-secondary-700 to-primary-500';
       case 'pro':
         return 'bg-gradient-to-r from-blue-500 to-cyan-500';
       case 'business':
@@ -190,7 +191,7 @@ const Profile: React.FC = () => {
       case 'testing':
         return 'bg-gradient-to-r from-yellow-500 to-orange-500';
       default:
-        return 'bg-gradient-to-r from-green-500 to-emerald-500';
+        return 'bg-gradient-to-r from-primary-500 to-accent-400';
     }
   };
 
@@ -219,7 +220,7 @@ const Profile: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-center py-16">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-500 mx-auto mb-4"></div>
+              <Spinner size="xl" className="mx-auto mb-4" />
               <p className="text-gray-600 dark:text-slate-400">Loading profile...</p>
             </div>
           </div>

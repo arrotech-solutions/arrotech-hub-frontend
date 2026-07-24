@@ -27,7 +27,7 @@ const INTEGRATIONS: Record<string, any> = {
         description: 'Bring Slack messages into your unified inbox. Automate notifications and turn chats into tasks without switching apps.',
         features: ['Message Aggregation', 'Reply from Dashboard', 'Channel Monitoring', 'Status Sync'],
         workflow: { trigger: 'Message saved or starred in channel', action: 'Add to Hub unified task list & set reminder' },
-        color: 'from-purple-500 to-pink-500',
+        color: 'from-secondary-700 to-primary-500',
         logo: slackLogo
     },
     'mpesa': {

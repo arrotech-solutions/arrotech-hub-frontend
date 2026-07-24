@@ -313,7 +313,7 @@ const InboxWidget: React.FC = () => {
                   }`}
               >
                 {!message.read && (
-                  <div className="absolute left-1 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-indigo-500 rounded-full shadow-[0_0_8px_rgba(99,102,241,0.8)]" />
+                  <div className="absolute left-1 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-indigo-500 rounded-full shadow-[0_0_8px_rgba(255,70,150,0.7)]" />
                 )}
 
                 <div className="flex items-start justify-between mb-2">

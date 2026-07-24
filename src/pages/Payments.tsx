@@ -21,7 +21,8 @@ import {
   Users
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
+import toast from '../lib/notify';
+import { Spinner } from '../components/ui';
 import { useAuth } from '../hooks/useAuth';
 import { useSubscription, TIER_INFO, PLAN_LIMITS, SubscriptionTier, getDisplayTierName } from '../hooks/useSubscription';
 import apiService from '../services/api';
@@ -265,7 +266,7 @@ const Payments: React.FC = () => {
       );
     }
     const statusConfig: Record<string, { bg: string, text: string, label: string }> = {
-      active: { bg: 'bg-emerald-500/10', text: 'text-emerald-500', label: 'Nodes Active' },
+      active: { bg: 'bg-primary-500/10', text: 'text-primary-500', label: 'Nodes Active' },
       canceled: { bg: 'bg-rose-500/10', text: 'text-rose-500', label: 'Decommissioned' },
       grace_period: { bg: 'bg-amber-500/10', text: 'text-amber-500', label: 'Access Unstable' },
       expired: { bg: 'bg-gray-500/10', text: 'text-gray-500', label: 'Offline' }
@@ -432,7 +433,7 @@ const Payments: React.FC = () => {
         {/* Header */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center space-x-3">
-            <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
+            <div className="p-2 bg-gradient-to-br from-primary-500 to-secondary-900 rounded-lg">
               {getPaymentIcon(payment.payment_method)}
             </div>
             <div className="flex-1">
@@ -501,7 +502,7 @@ const Payments: React.FC = () => {
     <div className="payment-stats grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
       {[
         { label: 'Total Inflow', value: stats.totalPayments, icon: DollarSign, color: 'blue', detail: `${stats.successfulPayments} successful` },
-        { label: 'Settled Value', value: formatAmount(stats.totalAmount), icon: TrendingUp, color: 'emerald', detail: 'Lifetime volume' },
+        { label: 'Settled Value', value: formatAmount(stats.totalAmount), icon: TrendingUp, color: 'primary', detail: 'Lifetime volume' },
         { label: 'Monthly Throughput', value: formatAmount(stats.monthlyRevenue), icon: BarChart3, color: 'purple', detail: 'Current cycle' },
         { label: 'Active Clusters', value: stats.activeSubscriptions, icon: Users, color: 'orange', detail: 'Neural nodes' }
       ].map((stat, i) => {
@@ -529,7 +530,7 @@ const Payments: React.FC = () => {
         <div className="max-w-7xl mx-auto p-6">
           <div className="flex items-center justify-center py-16">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <Spinner size="xl" className="mx-auto mb-4" />
               <p className="text-gray-600 dark:text-slate-400">Loading payment data...</p>
             </div>
           </div>
@@ -539,24 +540,24 @@ const Payments: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-emerald-50/20 dark:from-slate-950 dark:via-slate-900 dark:to-emerald-950/20">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-primary-50/20 dark:from-slate-950 dark:via-slate-900 dark:to-primary-950/20">
       <main className="max-w-7xl mx-auto px-6 md:px-10 py-10">
         {/* Header with Mesh Gradient */}
         <div className="relative overflow-hidden bg-white dark:bg-slate-900 rounded-[40px] border border-gray-200 dark:border-slate-800 shadow-sm mb-12 group payments-header">
-          <div className="absolute top-0 right-0 -mt-20 -mr-20 w-96 h-96 bg-emerald-400/20 rounded-full blur-3xl animate-pulse group-hover:bg-emerald-400/30 transition-colors duration-1000"></div>
-          <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-80 h-80 bg-green-400/20 rounded-full blur-3xl animate-pulse group-hover:bg-green-400/30 transition-colors duration-1000" style={{ animationDelay: '2s' }}></div>
+          <div className="absolute top-0 right-0 -mt-20 -mr-20 w-96 h-96 bg-primary-400/20 rounded-full blur-3xl animate-pulse group-hover:bg-primary-400/30 transition-colors duration-1000"></div>
+          <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-80 h-80 bg-accent-400/20 rounded-full blur-3xl animate-pulse group-hover:bg-accent-400/30 transition-colors duration-1000" style={{ animationDelay: '2s' }}></div>
 
           <div className="relative px-8 py-12 md:px-12">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-10">
               <div className="flex-1">
                 <div className="flex items-center space-x-3 mb-4">
-                  <div className="p-2 bg-emerald-100/80 dark:bg-emerald-500/20 rounded-xl">
-                    <Sparkles className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                  <div className="p-2 bg-primary-100/80 dark:bg-primary-500/20 rounded-xl">
+                    <Sparkles className="w-5 h-5 text-primary-600 dark:text-primary-400" />
                   </div>
-                  <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-[0.2em]">Billing Nexus</span>
+                  <span className="text-xs font-black text-primary-600 dark:text-primary-400 uppercase tracking-[0.2em]">Billing Nexus</span>
                 </div>
                 <h1 className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-4 tracking-tight leading-tight">
-                  Node <span className="bg-gradient-to-r from-emerald-600 to-green-600 dark:from-emerald-400 dark:to-green-400 bg-clip-text text-transparent">Settlement</span> Center
+                  Node <span className="bg-gradient-to-r from-primary-600 to-secondary-800 dark:from-primary-400 dark:to-accent-300 bg-clip-text text-transparent">Settlement</span> Center
                 </h1>
                 <p className="text-gray-500 dark:text-slate-400 max-w-xl font-medium text-lg leading-relaxed">
                   Consolidated ledger for your autonomous clusters. Manage subscriptions, purge logs, and track infrastructure inflow.
@@ -566,7 +567,7 @@ const Payments: React.FC = () => {
               <div className="shrink-0 flex items-center gap-4 payment-actions">
                 <button
                   onClick={() => setShowPaystackModal(true)}
-                  className="flex items-center space-x-2 px-8 py-4 bg-gray-900 hover:bg-emerald-600 text-white rounded-[24px] font-black text-xs uppercase tracking-widest transition-all duration-300 shadow-xl active:scale-95"
+                  className="flex items-center space-x-2 px-8 py-4 bg-gray-900 hover:bg-primary-500 text-white rounded-[24px] font-black text-xs uppercase tracking-widest transition-all duration-300 shadow-xl active:scale-95"
                 >
                   <CreditCard className="w-4 h-4" />
                   <span>Card / Mobile</span>
@@ -574,7 +575,7 @@ const Payments: React.FC = () => {
                 <button
                   onClick={() => setShowMpesaModal(true)}
                   disabled={true}
-                  className="flex items-center space-x-2 px-8 py-4 bg-emerald-600/50 text-white/50 rounded-[24px] font-black text-xs uppercase tracking-widest cursor-not-allowed shadow-none"
+                  className="flex items-center space-x-2 px-8 py-4 bg-primary-500/50 text-white/50 rounded-[24px] font-black text-xs uppercase tracking-widest cursor-not-allowed shadow-none"
                 >
                   <Smartphone className="w-4 h-4" />
                   <span>STK Push</span>
@@ -592,8 +593,8 @@ const Payments: React.FC = () => {
             <section className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl rounded-[48px] border border-white dark:border-slate-700 p-10 payment-history">
               <div className="flex items-center justify-between mb-10">
                 <div className="flex items-center space-x-4">
-                  <div className="p-1 bg-emerald-100 dark:bg-emerald-500/20 rounded-lg">
-                    <RefreshCw className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  <div className="p-1 bg-primary-100 dark:bg-primary-500/20 rounded-lg">
+                    <RefreshCw className="w-4 h-4 text-primary-600 dark:text-primary-400" />
                   </div>
                   <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">Ledger Logs</h2>
                 </div>
@@ -606,12 +607,12 @@ const Payments: React.FC = () => {
                       placeholder="Filter nodes..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-12 pr-6 py-3 bg-white/40 dark:bg-slate-900/40 border-none rounded-2xl w-full text-sm font-medium focus:ring-2 focus:ring-emerald-500 text-gray-900 dark:text-white"
+                      className="pl-12 pr-6 py-3 bg-white/40 dark:bg-slate-900/40 border-none rounded-2xl w-full text-sm font-medium focus:ring-2 focus:ring-primary-500 text-gray-900 dark:text-white"
                     />
                   </div>
                   <button
                     onClick={() => setShowFilters(!showFilters)}
-                    className={`p-3 rounded-2xl border transition-all ${showFilters ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white/40 dark:bg-slate-900/40 text-gray-400 dark:text-slate-500 border-white/60 dark:border-slate-700 hover:bg-white/80 dark:hover:bg-slate-800'}`}
+                    className={`p-3 rounded-2xl border transition-all ${showFilters ? 'bg-primary-500 text-white border-primary-500' : 'bg-white/40 dark:bg-slate-900/40 text-gray-400 dark:text-slate-500 border-white/60 dark:border-slate-700 hover:bg-white/80 dark:hover:bg-slate-800'}`}
                   >
                     <Filter className="w-5 h-5" />
                   </button>
@@ -665,18 +666,18 @@ const Payments: React.FC = () => {
           {/* Sidebar Area */}
           <div className="space-y-12">
             <section className="bg-gray-900 dark:bg-slate-950 rounded-[48px] p-1 text-white shadow-2xl overflow-hidden relative group">
-              <div className="absolute top-0 right-0 -mt-20 -mr-20 w-64 h-64 bg-emerald-500/20 dark:bg-emerald-500/10 rounded-full blur-3xl"></div>
+              <div className="absolute top-0 right-0 -mt-20 -mr-20 w-64 h-64 bg-primary-500/20 dark:bg-primary-500/10 rounded-full blur-3xl"></div>
 
               <div className="p-10 relative">
                 <div className="flex items-center space-x-3 mb-10">
                   <div className="p-2 bg-white/10 rounded-xl">
-                    <Zap className="w-5 h-5 text-emerald-400" />
+                    <Zap className="w-5 h-5 text-primary-400" />
                   </div>
                   <h2 className="text-xl font-black tracking-tight uppercase">Current Tier</h2>
                 </div>
 
                 <div className="bg-white/5 dark:bg-slate-900/40 rounded-[32px] p-8 border border-white/10 mb-10 text-center relative overflow-hidden group/card shadow-inner">
-                  <div className={`absolute top-0 right-0 w-24 h-24 -mr-12 -mt-12 rounded-full blur-2xl opacity-20 bg-emerald-500`}></div>
+                  <div className={`absolute top-0 right-0 w-24 h-24 -mr-12 -mt-12 rounded-full blur-2xl opacity-20 bg-primary-500`}></div>
                   <div className="relative">
                     <div className="w-16 h-16 bg-white/10 dark:bg-slate-800/40 rounded-[20px] flex items-center justify-center mx-auto mb-6 shadow-xl border border-white/10 group-hover/card:scale-110 transition-transform duration-500">
                       <Star className="w-8 h-8 text-white fill-white/20" />
@@ -685,7 +686,7 @@ const Payments: React.FC = () => {
                     {tierTagline && (
                       <p className="text-gray-400 text-xs uppercase tracking-widest mb-2">{tierTagline}</p>
                     )}
-                    <p className="text-emerald-400 font-black text-sm uppercase tracking-widest mb-6">
+                    <p className="text-primary-400 font-black text-sm uppercase tracking-widest mb-6">
                       {currentPlan.price > 0 ? `KES ${currentPlan.price.toLocaleString()} / mo` : 'Open Source'}
                     </p>
                     {subscriptionExpired && (
@@ -704,8 +705,8 @@ const Payments: React.FC = () => {
                 <div className="space-y-5 mb-10">
                   {currentPlanFeatures.slice(0, 4).map((f, i) => (
                     <div key={i} className="flex items-center space-x-3">
-                      <div className="p-1 bg-emerald-500/20 rounded-full">
-                        <Check className="w-3 h-3 text-emerald-500" />
+                      <div className="p-1 bg-primary-500/20 rounded-full">
+                        <Check className="w-3 h-3 text-primary-500" />
                       </div>
                       <span className="text-sm font-medium text-gray-400 dark:text-slate-500">{f}</span>
                     </div>
@@ -717,7 +718,7 @@ const Payments: React.FC = () => {
                   {isFree ? (
                     <button
                       onClick={() => navigate('/pricing')}
-                      className="w-full py-5 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white rounded-[24px] font-black text-xs uppercase tracking-widest transition-all duration-300 shadow-xl shadow-emerald-900/40 active:scale-95 flex items-center justify-center space-x-2"
+                      className="w-full py-5 bg-gradient-to-r from-primary-600 to-secondary-800 hover:from-primary-500 hover:to-secondary-800 text-white rounded-[24px] font-black text-xs uppercase tracking-widest transition-all duration-300 shadow-xl shadow-primary-900/40 active:scale-95 flex items-center justify-center space-x-2"
                     >
                       <Zap className="w-4 h-4 fill-white" />
                       <span>Boost Performance</span>
@@ -728,7 +729,7 @@ const Payments: React.FC = () => {
                         <button
                           onClick={handleReactivate}
                           disabled={reactivating}
-                          className="w-full py-5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-[24px] font-black text-xs uppercase tracking-widest transition-all duration-300 disabled:opacity-50 flex items-center justify-center space-x-2"
+                          className="w-full py-5 bg-primary-500 hover:bg-primary-400 text-white rounded-[24px] font-black text-xs uppercase tracking-widest transition-all duration-300 disabled:opacity-50 flex items-center justify-center space-x-2"
                         >
                           <RefreshCw className={`w-4 h-4 ${reactivating ? 'animate-spin' : ''}`} />
                           <span>Reactivate Node</span>
@@ -807,10 +808,10 @@ const Payments: React.FC = () => {
         {showMpesaModal && (
           <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-6 animate-in fade-in duration-300">
             <div className="bg-white dark:bg-slate-900 rounded-[40px] p-10 w-full max-w-md shadow-2xl border border-white dark:border-slate-800 group relative overflow-hidden">
-              <div className="absolute top-0 right-0 -mt-10 -mr-10 w-32 h-32 bg-emerald-100 rounded-full blur-2xl opacity-50"></div>
+              <div className="absolute top-0 right-0 -mt-10 -mr-10 w-32 h-32 bg-primary-100 rounded-full blur-2xl opacity-50"></div>
               <div className="flex items-center space-x-4 mb-10">
-                <div className="p-3 bg-emerald-100 dark:bg-emerald-500/20 rounded-2xl">
-                  <Smartphone className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+                <div className="p-3 bg-primary-100 dark:bg-primary-500/20 rounded-2xl">
+                  <Smartphone className="w-6 h-6 text-primary-600 dark:text-primary-400" />
                 </div>
                 <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight uppercase">M-Pesa STK</h2>
               </div>
@@ -822,7 +823,7 @@ const Payments: React.FC = () => {
                     type="tel"
                     value={mpesaForm.phone_number}
                     onChange={(e) => setMpesaForm({ ...mpesaForm, phone_number: e.target.value })}
-                    className="w-full px-6 py-4 bg-gray-50 dark:bg-slate-800 border-none rounded-2xl font-black text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500"
+                    className="w-full px-6 py-4 bg-gray-50 dark:bg-slate-800 border-none rounded-2xl font-black text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
                     placeholder="254700000000"
                   />
                 </div>
@@ -832,7 +833,7 @@ const Payments: React.FC = () => {
                     type="number"
                     value={mpesaForm.amount}
                     onChange={(e) => setMpesaForm({ ...mpesaForm, amount: parseInt(e.target.value) || 0 })}
-                    className="w-full px-6 py-4 bg-gray-50 dark:bg-slate-800 border-none rounded-2xl font-black text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500"
+                    className="w-full px-6 py-4 bg-gray-50 dark:bg-slate-800 border-none rounded-2xl font-black text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
                     placeholder="Amount"
                   />
                 </div>
@@ -848,7 +849,7 @@ const Payments: React.FC = () => {
                 <button
                   onClick={handleMpesaPayment}
                   disabled={!mpesaForm.phone_number || !mpesaForm.amount}
-                  className="flex-1 py-4 bg-emerald-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-emerald-500 transition-all shadow-lg disabled:opacity-50"
+                  className="flex-1 py-4 bg-primary-500 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-primary-400 transition-all shadow-lg shadow-brand disabled:opacity-50"
                 >
                   Execute
                 </button>

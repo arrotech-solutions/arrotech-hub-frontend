@@ -32,8 +32,8 @@ export default defineConfig(({ mode }) => {
                     name: 'Arrotech Hub',
                     short_name: 'Hub',
                     description: 'Unified inbox, calendar, tasks, and workflow automation.',
-                    theme_color: '#7C3AED',
-                    background_color: '#0F172A',
+                    theme_color: '#1E1033',
+                    background_color: '#FAF8FC',
                     display: 'standalone',
                     start_url: '/',
                     icons: [

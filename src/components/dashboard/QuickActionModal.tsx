@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, Loader2, Calendar, CheckSquare, Mail, MessageSquare } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import { toast } from 'react-hot-toast';
+import { toast } from '../../lib/notify';
 import { apiService } from '../../services/api';
 
 export type ActionType = 'email' | 'slack' | 'calendar' | 'task' | null;
@@ -92,7 +92,7 @@ const QuickActionModal: React.FC<QuickActionModalProps> = ({ isOpen, type, onClo
         switch (type) {
             case 'email': return { bg: 'bg-blue-50', text: 'text-blue-600', icon: Mail, gradient: 'from-blue-600 to-blue-700' };
             case 'slack': return { bg: 'bg-purple-50', text: 'text-purple-600', icon: MessageSquare, gradient: 'from-purple-600 to-purple-700' };
-            case 'calendar': return { bg: 'bg-emerald-50', text: 'text-emerald-600', icon: Calendar, gradient: 'from-emerald-600 to-emerald-700' };
+            case 'calendar': return { bg: 'bg-emerald-50', text: 'text-emerald-600', icon: Calendar, gradient: 'from-primary-600 to-primary-700' };
             case 'task': return { bg: 'bg-orange-50', text: 'text-orange-600', icon: CheckSquare, gradient: 'from-orange-600 to-orange-700' };
             default: return { bg: 'bg-gray-50', text: 'text-gray-600', icon: Mail, gradient: 'from-gray-700 to-gray-800' };
         }

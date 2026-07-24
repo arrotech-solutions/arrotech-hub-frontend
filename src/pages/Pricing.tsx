@@ -17,7 +17,7 @@ import {
     Lock,
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
-import toast from 'react-hot-toast';
+import toast from '../lib/notify';
 import apiService from '../services/api';
 import { PaystackButton } from 'react-paystack';
 import SEO from '../components/SEO';
@@ -204,20 +204,20 @@ const Pricing: React.FC = () => {
             {/* Hero */}
             <section className="relative overflow-hidden py-12 sm:py-16 md:py-22">
                 <div className="absolute inset-0 -z-10">
-                    <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-indigo-400/15 rounded-full blur-3xl" />
-                    <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-emerald-400/10 rounded-full blur-3xl" />
+                    <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-primary-400/15 rounded-full blur-3xl" />
+                    <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent-400/10 rounded-full blur-3xl" />
                     </div>
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center pricing-hero-tut">
                     <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] font-bold text-slate-900 dark:text-white mb-4 sm:mb-5 tracking-tight leading-[1.08] px-1">
                         One workspace.
-                        <span className="block bg-gradient-to-r from-indigo-600 to-emerald-600 bg-clip-text text-transparent">WhatsApp built in.</span>
+                        <span className="block bg-gradient-to-r from-primary-500 to-accent-400 bg-clip-text text-transparent">WhatsApp built in.</span>
                     </h1>
                     <p className="text-base sm:text-lg text-slate-500 dark:text-slate-400 max-w-xl mx-auto mb-6 sm:mb-8 font-medium leading-relaxed px-1">
-                        Start with a <span className="font-semibold text-violet-600 dark:text-violet-400">7-day Business preview</span> — no card required.
+                        Start with a <span className="font-semibold text-primary-600 dark:text-primary-400">7-day Business preview</span> — no card required.
                         WhatsApp, AI, and workflows included with fair caps so you can evaluate properly.
                     </p>
 
-                    <div className="inline-flex items-center gap-3 p-1.5 bg-gray-100/80 dark:bg-slate-800/80 rounded-2xl backdrop-blur-sm">
+                    <div className="inline-flex items-center gap-3 p-1.5 bg-gray-100/80 dark:bg-slate-800/80 rounded-2xl backdrop-blur-sm pricing-billing-tut">
                         {(['monthly', 'yearly'] as BillingCycle[]).map((cycle) => (
                         <button
                                 key={cycle}
@@ -241,7 +241,7 @@ const Pricing: React.FC = () => {
             </section>
 
             {/* Plan cards — horizontal snap on mobile, equal collapsed height on desktop */}
-            <section className="pb-14 -mt-4">
+            <section className="pb-14 -mt-4 pricing-plans-tut">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <p className="text-center text-xs text-slate-400 mb-3 lg:hidden">Swipe to compare plans →</p>
                     <div className="flex lg:grid lg:grid-cols-3 xl:grid-cols-5 xl:items-stretch gap-4 lg:gap-5 overflow-x-auto lg:overflow-visible snap-x snap-mandatory lg:snap-none pb-2 lg:pb-0 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0">
@@ -264,7 +264,7 @@ const Pricing: React.FC = () => {
                                         !isExpanded ? 'self-stretch' : 'self-start'
                                     } ${
                                         plan.highlight
-                                            ? 'border-indigo-400 dark:border-indigo-500 shadow-lg shadow-indigo-500/10 xl:scale-[1.03] z-10'
+                                            ? 'border-indigo-400 dark:border-indigo-500 shadow-lg shadow-primary-500/10 xl:scale-[1.03] z-10'
                                             : isHighlighted
                                               ? 'border-slate-300 dark:border-slate-600 shadow-md lg:-translate-y-1'
                                               : 'border-slate-200 dark:border-slate-800'
@@ -404,7 +404,7 @@ const Pricing: React.FC = () => {
                             </div>
 
                     <div className="relative">
-                        <div className="hidden md:block absolute top-8 left-[12%] right-[12%] h-0.5 bg-gradient-to-r from-slate-200 via-emerald-300 to-indigo-400 dark:from-slate-700 dark:via-emerald-700 dark:to-indigo-600" />
+                        <div className="hidden md:block absolute top-8 left-[12%] right-[12%] h-0.5 bg-gradient-to-r from-slate-200 via-primary-300 to-accent-400 dark:from-slate-700 dark:via-primary-700 dark:to-accent-600" />
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-3">
                             {WHATSAPP_JOURNEY.map((step, idx) => {
                                 const plan = WORKSPACE_PLANS.find((p) => p.id === step.planId);
@@ -448,7 +448,7 @@ const Pricing: React.FC = () => {
                 </section>
 
             {/* Feature explorer — lens tabs + accordion categories */}
-            <section id="feature-explorer" className="py-16 md:py-20">
+            <section id="feature-explorer" className="py-16 md:py-20 pricing-features-tut">
                 <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-8">
                         <div>
@@ -469,8 +469,8 @@ const Pricing: React.FC = () => {
                                     className={`inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all shrink-0 whitespace-nowrap ${
                                         activeLens === id
                                             ? id === 'whatsapp'
-                                                ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/20'
-                                                : 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20'
+                                                ? 'bg-primary-500 text-white shadow-md shadow-primary-500/20'
+                                                : 'bg-secondary-900 text-white shadow-md shadow-primary-500/20'
                                             : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-slate-300'
                                     }`}
                                 >
@@ -510,7 +510,7 @@ const Pricing: React.FC = () => {
                                     key={category.id}
                                     className={`rounded-2xl border overflow-hidden transition-shadow ${
                                         isWhatsApp
-                                            ? 'border-emerald-200 dark:border-emerald-800/60 shadow-sm shadow-emerald-500/5'
+                                            ? 'border-primary-200 dark:border-primary-800/60 shadow-sm shadow-primary-500/5'
                                             : 'border-slate-200 dark:border-slate-800'
                                     } ${isOpen ? 'shadow-md' : ''}`}
                                 >

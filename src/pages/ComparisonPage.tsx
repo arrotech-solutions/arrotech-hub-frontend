@@ -140,7 +140,7 @@ const ComparisonPage: React.FC = () => {
             {/* Hero */}
             <section className="pt-20 pb-16 px-4 sm:px-6 lg:px-8 text-center max-w-7xl mx-auto">
                 <h1 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white mb-6 tracking-tight transition-colors">
-                    Switch to the <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">Better Alternative</span>
+                    Switch to the <span className="bg-gradient-to-r from-secondary-800 to-primary-500 bg-clip-text text-transparent">Better Alternative</span>
                 </h1>
                 <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-10 transition-colors">
                     Why businesses are choosing Arrotech Hub over {compData.name} for unified productivity and payments.

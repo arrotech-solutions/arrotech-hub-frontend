@@ -65,7 +65,7 @@ const EarningsDashboard: React.FC<EarningsDashboardProps> = ({ className }) => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center space-x-3">
-          <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg shrink-0 shadow-lg shadow-emerald-500/20">
+          <div className="p-2 bg-gradient-to-br from-primary-500 to-secondary-900 rounded-lg shrink-0 shadow-lg shadow-primary-500/20">
             <Wallet className="w-5 h-5 text-white" />
           </div>
           <div>
@@ -85,7 +85,7 @@ const EarningsDashboard: React.FC<EarningsDashboardProps> = ({ className }) => {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {/* Total Earnings */}
-        <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-emerald-500/10 dark:to-green-500/5 rounded-xl p-5 border border-green-200 dark:border-emerald-500/20 shadow-sm">
+        <div className="bg-gradient-to-br from-primary-50 to-accent-50 dark:from-primary-500/10 dark:to-accent-500/5 rounded-xl p-5 border border-primary-200 dark:border-primary-500/20 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-green-800 dark:text-emerald-400">Total Earnings</p>

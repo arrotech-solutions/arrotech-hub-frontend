@@ -19,9 +19,10 @@ import {
     ArrowLeft,
     Layout, Sun, Moon
 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import toast from '../../lib/notify';
 import apiService from '../../services/api';
 import { MCPTool, ToolInfo } from '../../types';
+import { chart, shadows } from '../../theme';
 import WorkflowNodeComponent, { WorkflowNodeData } from './WorkflowNode';
 import CanvasToolbar from './CanvasToolbar';
 import NodeConfigPanel from './NodeConfigPanel';
@@ -65,8 +66,8 @@ const nodeTypes = {
 };
 
 // Edge default style
-const EDGE_STYLE = { stroke: '#8b5cf6', strokeWidth: 2.5, filter: 'drop-shadow(0 0 3px rgba(139, 92, 246, 0.4))' };
-const EDGE_MARKER = { type: MarkerType.ArrowClosed as const, color: '#8b5cf6' };
+const EDGE_STYLE = { stroke: chart.primary600, strokeWidth: 2.5, filter: shadows.edgeGlow };
+const EDGE_MARKER = { type: MarkerType.ArrowClosed as const, color: chart.primary600 };
 
 const defaultEdgeOptions = {
     type: 'smoothstep',
@@ -640,7 +641,7 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
                     <button
                         onClick={handleSave}
                         disabled={saving}
-                        className="flex items-center space-x-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-lg hover:shadow-blue-200/50 transition-all font-bold text-sm disabled:opacity-50 shrink-0 whitespace-nowrap"
+                        className="flex items-center space-x-2 px-5 py-2.5 bg-gradient-to-r from-primary-500 to-secondary-900 text-white rounded-xl hover:shadow-lg hover:shadow-primary-200/50 transition-all font-bold text-sm disabled:opacity-50 shrink-0 whitespace-nowrap"
                     >
                         {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                         <span>{isEditing ? 'Update' : 'Save'}</span>
@@ -649,7 +650,7 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
             </div>
 
             {/* Main content */}
-            <div className={`flex-1 relative overflow-hidden ${isDark ? 'bg-[#0f111a]' : 'bg-slate-50'}`}>
+            <div className={`flex-1 relative overflow-hidden ${isDark ? 'bg-secondary-950' : 'bg-slate-50'}`}>
                 {/* Background ambient gradients */}
                 <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
                     <div className={`absolute -top-20 -left-20 w-96 h-96 ${isDark ? 'bg-purple-900/20' : 'bg-purple-300/20'} rounded-full blur-3xl opacity-50`}></div>
@@ -699,7 +700,7 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
                         proOptions={{ hideAttribution: true }}
                         className="workflow-canvas"
                     >
-                        <Background variant={BackgroundVariant.Cross} gap={24} size={2} color={isDark ? '#334155' : '#cbd5e1'} className="opacity-50" />
+                        <Background variant={BackgroundVariant.Cross} gap={24} size={2} color={isDark ? chart.secondary600 : '#E4DCEC'} className="opacity-50" />
                         <Controls
                             showZoom={true}
                             showFitView={true}

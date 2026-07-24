@@ -118,7 +118,7 @@ const LandingPage: React.FC = () => {
     ];
 
     return (
-        <div className="min-h-screen bg-white dark:bg-slate-950 transition-colors duration-500 overflow-x-hidden">
+        <div className="min-h-screen bg-white dark:bg-secondary-950 transition-colors duration-500 overflow-x-hidden">
             <SEO
                 title="Arrotech Hub | The Intelligent Command Center for Modern Teams"
                 description="Unify your tools, tasks, and teams in one intelligent platform. Arrotech Hub uses autonomous agents and seamless integrations to 10x your team's productivity."
@@ -128,11 +128,11 @@ const LandingPage: React.FC = () => {
             <section className="relative pt-20 pb-16 lg:pt-32 lg:pb-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
                 {/* Dynamic Mesh Gradient Background */}
                 <div className="absolute inset-0 mesh-gradient-subtle opacity-50 dark:opacity-30 pointer-events-none"></div>
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-blue-500/10 via-transparent to-transparent dark:from-blue-900/20 pointer-events-none"></div>
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-primary-500/10 via-transparent to-transparent dark:from-blue-900/20 pointer-events-none"></div>
 
                 {/* Floating Elements for Premium Feel */}
-                <div className="absolute top-1/4 -left-20 w-96 h-96 bg-blue-500/10 rounded-full blur-[60px] md:blur-[100px] animate-pulse"></div>
-                <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-blue-500/10 rounded-full blur-[60px] md:blur-[100px] animate-pulse" style={{ animationDelay: '2s' }}></div>
+                <div className="absolute top-1/4 -left-20 w-96 h-96 bg-primary-500/10 rounded-full blur-[60px] md:blur-[100px] animate-pulse"></div>
+                <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-primary-500/10 rounded-full blur-[60px] md:blur-[100px] animate-pulse" style={{ animationDelay: '2s' }}></div>
 
                 <div className="max-w-7xl mx-auto relative z-10">
                     <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -143,19 +143,19 @@ const LandingPage: React.FC = () => {
                         </h1>
                             <div className="space-y-5 mb-8 animate-slide-up-delayed">
                                 <div className="flex items-start gap-3">
-                                    <div className="w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-[10px] font-bold text-slate-400">1</div>
+                                    <div className="w-5 h-5 rounded-full bg-slate-100 dark:bg-secondary-800 flex items-center justify-center text-[10px] font-bold text-slate-400">1</div>
                                     <p className="text-base text-slate-600 dark:text-slate-400 leading-snug">
                                         <span className="font-bold text-slate-900 dark:text-white">Unify context.</span> Chat, Tasks, Data, and 50+ Apps in one place.
                                     </p>
                                 </div>
                                 <div className="flex items-start gap-3">
-                                    <div className="w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-[10px] font-bold text-slate-400">2</div>
+                                    <div className="w-5 h-5 rounded-full bg-slate-100 dark:bg-secondary-800 flex items-center justify-center text-[10px] font-bold text-slate-400">2</div>
                                     <p className="text-base text-slate-600 dark:text-slate-400 leading-snug">
                                         <span className="font-bold text-slate-900 dark:text-white">Deploy intelligence.</span> AI Agents that think, reason, and act autonomously.
                                     </p>
                                 </div>
                                 <div className="flex items-start gap-3">
-                                    <div className="w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-[10px] font-bold text-slate-400">3</div>
+                                    <div className="w-5 h-5 rounded-full bg-slate-100 dark:bg-secondary-800 flex items-center justify-center text-[10px] font-bold text-slate-400">3</div>
                                     <p className="text-base text-slate-600 dark:text-slate-400 leading-snug">
                                         <span className="font-bold text-slate-900 dark:text-white">Run on autopilot.</span> Create infinite Workflows with zero coding.
                                     </p>
@@ -165,30 +165,30 @@ const LandingPage: React.FC = () => {
                             <div className="flex flex-col sm:flex-row gap-4 animate-slide-up-delayed-2">
                                 <Link
                                     to="/register"
-                                    className="w-full sm:w-auto bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 px-8 py-4 rounded-xl font-bold text-lg transition-all shadow-xl hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-2"
+                                    className="w-full sm:w-auto bg-primary-500 dark:bg-primary-500 text-white hover:bg-slate-800 dark:hover:bg-slate-100 px-8 py-4 rounded-xl font-bold text-lg transition-all shadow-xl hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-2"
                                 >
                                     Start Building for Free <ArrowRight size={20} />
                                 </Link>
                                 <Link
                                     to="/pricing"
-                                    className="w-full sm:w-auto bg-white dark:bg-slate-900 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 px-8 py-4 rounded-xl font-bold text-lg transition-all flex items-center justify-center"
+                                    className="w-full sm:w-auto bg-white dark:bg-secondary-900 text-slate-900 dark:text-white border border-slate-200 dark:border-secondary-800 hover:border-slate-300 dark:hover:border-slate-700 px-8 py-4 rounded-xl font-bold text-lg transition-all flex items-center justify-center"
                                 >
                                     View Pricing
                                 </Link>
                             </div>
 
                             {/* Social Proof Stats */}
-                            <div className="mt-12 lg:mt-14 flex flex-wrap items-center justify-start gap-4 sm:gap-6 border-t border-slate-200 dark:border-slate-800 pt-8 transition-colors">
+                            <div className="mt-12 lg:mt-14 flex flex-wrap items-center justify-start gap-4 sm:gap-6 border-t border-slate-200 dark:border-secondary-800 pt-8 transition-colors">
                                 <div className="flex flex-col items-start hidden sm:flex">
                                     <div className="text-base font-bold text-slate-900 dark:text-white tracking-tight">Trusted by</div>
                                     <div className="text-[10px] uppercase tracking-wider text-slate-500 font-bold mt-1">Early-Stage Tech Teams</div>
                                 </div>
-                                <div className="w-px h-8 bg-slate-200 dark:bg-slate-800 hidden sm:block"></div>
+                                <div className="w-px h-8 bg-slate-200 dark:bg-secondary-800 hidden sm:block"></div>
                                 <div className="flex flex-col items-start">
                                     <div className="text-base font-bold text-slate-900 dark:text-white tracking-tight">50+ Connectors</div>
                                     <div className="text-[10px] uppercase tracking-wider text-slate-500 font-bold mt-1">Ready on Day One</div>
                                 </div>
-                                <div className="w-px h-8 bg-slate-200 dark:bg-slate-800 hidden sm:block"></div>
+                                <div className="w-px h-8 bg-slate-200 dark:bg-secondary-800 hidden sm:block"></div>
                                 <div className="flex flex-col items-start">
                                     <div className="text-base font-bold text-slate-900 dark:text-white tracking-tight">Zero Coding</div>
                                     <div className="text-[10px] uppercase tracking-wider text-slate-500 font-bold mt-1">Instant Agent Setup</div>
@@ -198,9 +198,9 @@ const LandingPage: React.FC = () => {
 
                         {/* Right Area: AI Mockup */}
                         <div className="w-full h-full flex justify-center lg:justify-end items-center mt-12 lg:mt-0 relative perspective-2000">
-                            <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/10 to-cyan-500/20 dark:from-blue-900/30 dark:to-cyan-900/30 blur-[60px] md:blur-[120px] rounded-full pointer-events-none -mr-40"></div>
+                            <div className="absolute inset-0 bg-gradient-to-tr from-primary-500/15 to-accent-500/20 dark:from-primary-900/30 dark:to-secondary-900/50 blur-[60px] md:blur-[120px] rounded-full pointer-events-none -mr-40"></div>
                             <div className="absolute -top-10 -left-10 w-24 h-24 bg-white/10 backdrop-blur-3xl rounded-3xl border border-white/20 shadow-2xl z-0 animate-float hidden xl:block"></div>
-                            <div className="absolute -bottom-10 right-20 w-32 h-32 bg-blue-500/10 backdrop-blur-3xl rounded-[2rem] border border-blue-500/20 shadow-2xl z-0 animate-float-delayed hidden xl:block"></div>
+                            <div className="absolute -bottom-10 right-20 w-32 h-32 bg-primary-500/10 backdrop-blur-3xl rounded-[2rem] border border-blue-500/20 shadow-2xl z-0 animate-float-delayed hidden xl:block"></div>
 
                             <div className="relative z-10 w-full max-w-3xl lg:max-w-none transform lg:scale-110 xl:scale-125 lg:translate-x-10 transition-all duration-1000">
                                 <HeroAIChatMockup />
@@ -238,7 +238,7 @@ const LandingPage: React.FC = () => {
 
                 <div ref={aiReveal.ref} className={`max-w-7xl mx-auto relative z-10 transition-all duration-700 ${aiReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                     <div className="text-center mb-10 md:mb-16">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-wider mb-6">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-500/10 border border-blue-500/20 text-primary-600 dark:text-primary-400 text-xs font-bold uppercase tracking-wider mb-6">
                             <Cpu className="w-4 h-4" />
                             <span>Total Control</span>
                         </div>
@@ -276,14 +276,14 @@ const LandingPage: React.FC = () => {
 
                         {/* Right: Cloud Intelligence */}
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="p-6 bg-white dark:bg-slate-900/50 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm transition-all hover:shadow-md">
-                                <div className="w-10 h-10 rounded-xl bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 mb-4">
+                            <div className="p-6 bg-white dark:bg-secondary-900/50 rounded-2xl border border-gray-100 dark:border-secondary-800 shadow-sm transition-all hover:shadow-md">
+                                <div className="w-10 h-10 rounded-xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-600 dark:text-primary-400 mb-4">
                                     <Bot className="w-6 h-6" />
                                 </div>
                                 <h3 className="font-bold text-slate-900 dark:text-white mb-2">Cloud Models</h3>
                                 <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Top-tier reasoning with GPT-4, Claude 3.5, and Gemini Pro.</p>
                             </div>
-                            <div className="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm flex flex-col items-center justify-center text-center opacity-50 grayscale">
+                            <div className="p-6 bg-slate-50 dark:bg-secondary-800/50 rounded-2xl border border-gray-100 dark:border-secondary-800 shadow-sm flex flex-col items-center justify-center text-center opacity-50 grayscale">
                                 <div className="flex gap-2 mb-3">
                                     <div className="w-6 h-6 rounded bg-slate-200 dark:bg-slate-700"></div>
                                     <div className="w-6 h-6 rounded bg-slate-200 dark:bg-slate-700"></div>
@@ -291,7 +291,7 @@ const LandingPage: React.FC = () => {
                                 </div>
                                 <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Coming Soon</p>
                             </div>
-                            <div className="col-span-2 p-6 bg-blue-600 dark:bg-blue-500 rounded-2xl text-white shadow-xl relative overflow-hidden group">
+                            <div className="col-span-2 p-6 bg-primary-500 dark:bg-primary-500 rounded-2xl text-white shadow-xl relative overflow-hidden group">
                                 <div className="absolute top-0 right-0 p-4 opacity-20 group-hover:opacity-40 transition-opacity">
                                     <Globe className="w-16 h-16" />
                                 </div>
@@ -318,19 +318,19 @@ const LandingPage: React.FC = () => {
             <VisualWorkflowShowcase />
 
             {/* Creator Economy Section (Crazy Rewrite) */}
-            <section className="py-24 md:py-32 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-slate-50 dark:bg-slate-950 transition-colors border-t border-slate-200 dark:border-slate-800/50">
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-emerald-500/10 dark:from-blue-900/20 via-transparent dark:via-[#020617] to-transparent dark:to-[#020617] pointer-events-none"></div>
+            <section className="py-24 md:py-32 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-slate-50 dark:bg-secondary-950 transition-colors border-t border-slate-200 dark:border-secondary-800/50">
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary-500/10 dark:from-primary-900/20 via-transparent dark:via-secondary-950 to-transparent dark:to-secondary-950 pointer-events-none"></div>
 
                 <div ref={creatorReveal.ref} className={`max-w-7xl mx-auto relative z-10 transition-all duration-1000 ${creatorReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-16'}`}>
                     <div className="grid lg:grid-cols-2 gap-16 items-center">
                         <div className="order-2 lg:order-1 relative h-[500px]">
                             {/* Massive floating elements */}
                             <div className="absolute inset-0 z-0">
-                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-gradient-to-r from-emerald-500/20 to-blue-500/20 rounded-full blur-[80px] animate-pulse"></div>
+                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-gradient-to-r from-primary-500/20 to-accent-400/20 rounded-full blur-[80px] animate-pulse"></div>
                             </div>
 
                             {/* Main Earnings Card - 3D Tilted */}
-                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm bg-white/80 dark:bg-[#0B1120]/80 backdrop-blur-2xl rounded-3xl border border-slate-200 dark:border-white/10 shadow-xl dark:shadow-[0_0_100px_rgba(59,130,246,0.15)] p-8 transform rotate-[-5deg] hover:rotate-0 hover:scale-105 transition-all duration-500 z-20">
+                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm bg-white/80 dark:bg-secondary-950/80 backdrop-blur-2xl rounded-3xl border border-slate-200 dark:border-white/10 shadow-xl dark:shadow-[0_0_100px_rgba(255,70,150,0.18)] p-8 transform rotate-[-5deg] hover:rotate-0 hover:scale-105 transition-all duration-500 z-20">
                                 <div className="absolute inset-0 bg-gradient-to-tr from-white/20 dark:from-white/5 to-transparent rounded-3xl"></div>
                                 <div className="relative">
                                     <div className="flex justify-between items-start mb-8">
@@ -346,7 +346,7 @@ const LandingPage: React.FC = () => {
                                     {/* Chart bars simulation */}
                                     <div className="flex items-end gap-2 h-24 mb-6">
                                         {[40, 60, 45, 80, 55, 90, 100].map((h, i) => (
-                                            <div key={i} className="flex-1 bg-gradient-to-t from-emerald-500/40 dark:from-emerald-500/20 to-emerald-500 dark:to-emerald-400/80 rounded-t-sm transition-all duration-1000" style={{ height: `${creatorReveal.isVisible ? h : 0}%`, transitionDelay: `${i * 100}ms` }}></div>
+                                            <div key={i} className="flex-1 bg-gradient-to-t from-primary-500/40 dark:from-primary-500/20 to-primary-500 dark:to-primary-400/80 rounded-t-sm transition-all duration-1000" style={{ height: `${creatorReveal.isVisible ? h : 0}%`, transitionDelay: `${i * 100}ms` }}></div>
                                         ))}
                                     </div>
 
@@ -358,30 +358,30 @@ const LandingPage: React.FC = () => {
                             </div>
 
                             {/* Floating Transaction Card 1 */}
-                            <div className="absolute top-10 right-0 w-64 bg-white/90 dark:bg-[#0F172A]/90 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-2xl p-4 shadow-xl dark:shadow-2xl transform rotate-[10deg] hover:rotate-0 translate-x-10 hover:translate-x-0 transition-all duration-500 z-30 delay-100">
+                            <div className="absolute top-10 right-0 w-64 bg-white/90 dark:bg-secondary-900/90 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-2xl p-4 shadow-xl dark:shadow-2xl transform rotate-[10deg] hover:rotate-0 translate-x-10 hover:translate-x-0 transition-all duration-500 z-30 delay-100">
                                 <div className="flex items-center gap-4">
-                                    <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
-                                        <Lock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                                    <div className="w-10 h-10 rounded-full bg-primary-500/20 flex items-center justify-center">
+                                        <Lock className="w-5 h-5 text-primary-600 dark:text-primary-400" />
                                     </div>
                                     <div>
                                         <p className="text-slate-900 dark:text-white font-bold text-sm">Enterprise Tier</p>
                                         <p className="text-slate-500 dark:text-slate-400 text-xs">Yearly Subscription</p>
                                     </div>
-                                    <div className="ml-auto text-emerald-600 dark:text-emerald-400 font-bold">+$12k</div>
+                                    <div className="ml-auto text-primary-600 dark:text-primary-400 font-bold">+$12k</div>
                                 </div>
                             </div>
 
                             {/* Floating Transaction Card 2 */}
-                            <div className="absolute bottom-10 left-0 w-64 bg-white/90 dark:bg-[#0F172A]/90 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-2xl p-4 shadow-xl dark:shadow-2xl transform rotate-[-15deg] hover:rotate-0 -translate-x-10 hover:translate-x-0 transition-all duration-500 z-30 delay-200">
+                            <div className="absolute bottom-10 left-0 w-64 bg-white/90 dark:bg-secondary-900/90 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-2xl p-4 shadow-xl dark:shadow-2xl transform rotate-[-15deg] hover:rotate-0 -translate-x-10 hover:translate-x-0 transition-all duration-500 z-30 delay-200">
                                 <div className="flex items-center gap-4">
-                                    <div className="w-10 h-10 rounded-full bg-cyan-500/20 flex items-center justify-center">
-                                        <Sparkles className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
+                                    <div className="w-10 h-10 rounded-full bg-primary-500/20 flex items-center justify-center">
+                                        <Sparkles className="w-5 h-5 text-primary-600 dark:text-primary-400" />
                                     </div>
                                     <div>
                                         <p className="text-slate-900 dark:text-white font-bold text-sm">Custom Agent</p>
                                         <p className="text-slate-500 dark:text-slate-400 text-xs">Marketplace Sale</p>
                                     </div>
-                                    <div className="ml-auto text-emerald-600 dark:text-emerald-400 font-bold">+$499</div>
+                                    <div className="ml-auto text-accent-600 dark:text-accent-400 font-bold">+$499</div>
                                 </div>
                             </div>
                         </div>
@@ -393,7 +393,7 @@ const LandingPage: React.FC = () => {
                             </div>
                             <h2 className="text-4xl sm:text-5xl md:text-6xl font-black text-slate-900 dark:text-white mb-6 tracking-tighter leading-[1.05]">
                                 Don't just work. <br/>
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-cyan-500 dark:from-emerald-400 dark:to-cyan-400">Build an Empire.</span>
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-secondary-700 dark:from-primary-400 dark:to-primary-300">Build an Empire.</span>
                             </h2>
                             <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-10 leading-relaxed font-medium">
                                 Arrotech isn't just a productivity tool. It's a complete monetization engine. Sell your custom AI agents, charge for premium workflows, and process payments instantly.
@@ -406,7 +406,7 @@ const LandingPage: React.FC = () => {
                                     { title: "Automated Invoicing", desc: "Let your AI generate and chase invoices while you sleep." }
                                 ].map((item, i) => (
                                     <li key={i} className="flex gap-4 group">
-                                        <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center flex-shrink-0 group-hover:border-emerald-500 group-hover:bg-emerald-500/10 transition-colors">
+                                        <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-secondary-800 border border-slate-200 dark:border-secondary-700 flex items-center justify-center flex-shrink-0 group-hover:border-emerald-500 group-hover:bg-emerald-500/10 transition-colors">
                                             <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                                         </div>
                                         <div>
@@ -427,7 +427,7 @@ const LandingPage: React.FC = () => {
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
                 <div ref={securityReveal.ref} className={`max-w-7xl mx-auto relative z-10 transition-all duration-700 ${securityReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                     <div className="text-center mb-16">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-wider mb-6">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/40 text-primary-600 dark:text-primary-400 text-xs font-bold uppercase tracking-wider mb-6">
                             <Shield className="w-4 h-4" />
                             <span>Enterprise Trust</span>
                         </div>
@@ -441,8 +441,8 @@ const LandingPage: React.FC = () => {
 
                     <div className="grid md:grid-cols-3 gap-8">
                         {/* SOC 2 */}
-                        <div className="bg-white dark:bg-slate-900/50 rounded-2xl p-8 border border-gray-100 dark:border-slate-800 hover:shadow-lg dark:hover:shadow-none transition-all">
-                            <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 mb-6">
+                        <div className="bg-white dark:bg-secondary-900/50 rounded-2xl p-8 border border-gray-100 dark:border-secondary-800 hover:shadow-lg dark:hover:shadow-none transition-all">
+                            <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-primary-600 dark:text-primary-400 mb-6">
                                 <Shield className="w-6 h-6" />
                             </div>
                             <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-3 tracking-tight">SOC 2 Type II Compliant</h3>
@@ -452,8 +452,8 @@ const LandingPage: React.FC = () => {
                         </div>
 
                         {/* Encryption */}
-                        <div className="bg-white dark:bg-slate-900/50 rounded-2xl p-8 border border-gray-100 dark:border-slate-800 hover:shadow-lg dark:hover:shadow-none transition-all">
-                            <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 mb-6">
+                        <div className="bg-white dark:bg-secondary-900/50 rounded-2xl p-8 border border-gray-100 dark:border-secondary-800 hover:shadow-lg dark:hover:shadow-none transition-all">
+                            <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-primary-600 dark:text-primary-400 mb-6">
                                 <Lock className="w-6 h-6" />
                             </div>
                             <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-3 tracking-tight">End-to-End Encryption</h3>
@@ -463,7 +463,7 @@ const LandingPage: React.FC = () => {
                         </div>
 
                         {/* Uptime */}
-                        <div className="bg-white dark:bg-slate-900/50 rounded-2xl p-8 border border-gray-100 dark:border-slate-800 hover:shadow-lg dark:hover:shadow-none transition-all">
+                        <div className="bg-white dark:bg-secondary-900/50 rounded-2xl p-8 border border-gray-100 dark:border-secondary-800 hover:shadow-lg dark:hover:shadow-none transition-all">
                             <div className="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400 mb-6">
                                 <Activity className="w-6 h-6" />
                             </div>
@@ -478,16 +478,16 @@ const LandingPage: React.FC = () => {
 
 
             {/* Clean Premium CTA */}
-            <section className="py-20 lg:py-32 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-slate-50 dark:bg-slate-900/20 transition-colors border-t border-slate-200 dark:border-slate-800/50">
+            <section className="py-20 lg:py-32 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-slate-50 dark:bg-secondary-900/20 transition-colors border-t border-slate-200 dark:border-secondary-800/50">
                 <div className="max-w-5xl mx-auto relative z-10">
-                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[2.5rem] shadow-xl overflow-hidden relative">
+                    <div className="bg-white dark:bg-secondary-900 border border-slate-200 dark:border-secondary-800 rounded-[2.5rem] shadow-xl overflow-hidden relative">
                         {/* Decorative Background Accents */}
-                        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-72 h-72 bg-blue-500/10 dark:bg-blue-500/5 rounded-full blur-[80px]"></div>
+                        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-72 h-72 bg-primary-500/10 dark:bg-primary-500/5 rounded-full blur-[80px]"></div>
                         <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-72 h-72 bg-emerald-500/10 dark:bg-emerald-500/5 rounded-full blur-[80px]"></div>
                         
                         <div className="px-6 py-16 md:px-16 md:py-20 text-center relative z-10">
                             <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-slate-900 dark:text-white mb-6 tracking-tight leading-tight">
-                                Ready to work <span className="text-blue-600 dark:text-blue-500">smarter?</span>
+                                Ready to work <span className="text-primary-600 dark:text-primary-500">smarter?</span>
                             </h2>
                             <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-10 max-w-2xl mx-auto leading-relaxed">
                                 Join thousands of modern teams unifying their tools, processes, and intelligence in one powerful platform.
@@ -496,19 +496,19 @@ const LandingPage: React.FC = () => {
                             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                                 <Link
                                     to="/register"
-                                    className="w-full sm:w-auto px-8 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 rounded-xl font-bold text-lg transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:scale-95 flex items-center justify-center gap-2"
+                                    className="w-full sm:w-auto px-8 py-4 bg-primary-500 dark:bg-primary-500 text-white hover:bg-slate-800 dark:hover:bg-slate-100 rounded-xl font-bold text-lg transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:scale-95 flex items-center justify-center gap-2"
                                 >
                                     Get Started for Free <ArrowRight className="w-5 h-5" />
                                 </Link>
                                 <Link
                                     to="/contact"
-                                    className="w-full sm:w-auto px-8 py-4 bg-transparent border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600 rounded-xl font-bold text-lg transition-all hover:bg-slate-50 dark:hover:bg-slate-800/50 flex items-center justify-center"
+                                    className="w-full sm:w-auto px-8 py-4 bg-transparent border-2 border-slate-200 dark:border-secondary-700 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600 rounded-xl font-bold text-lg transition-all hover:bg-slate-50 dark:hover:bg-slate-800/50 flex items-center justify-center"
                                 >
                                     Talk to Sales
                                 </Link>
                             </div>
                             
-                            <div className="mt-10 pt-10 border-t border-slate-100 dark:border-slate-800 flex flex-wrap justify-center gap-6 md:gap-12 text-sm font-medium text-slate-500 dark:text-slate-400">
+                            <div className="mt-10 pt-10 border-t border-slate-100 dark:border-secondary-800 flex flex-wrap justify-center gap-6 md:gap-12 text-sm font-medium text-slate-500 dark:text-slate-400">
                                 <div className="flex items-center gap-2">
                                     <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                                     <span>No credit card required</span>

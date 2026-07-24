@@ -538,8 +538,8 @@ const CapabilityExplorer: React.FC<CapabilityExplorerProps> = ({
               onSuggestionClick('What can you do?');
               onClose();
             }}
-            className="w-full py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-indigo-500 to-purple-600 text-white 
-              hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 shadow-lg shadow-indigo-500/20
+            className="w-full py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-primary-500 to-secondary-900 text-white 
+              hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 shadow-lg shadow-primary-500/20
               flex items-center justify-center space-x-2"
           >
             <Sparkles size={14} />

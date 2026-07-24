@@ -5,7 +5,7 @@ import {
     Menu, ArrowLeft, Star, Trash, Clock, Sparkles
 } from 'lucide-react';
 import apiService from '../services/api';
-import toast from 'react-hot-toast';
+import toast from '../lib/notify';
 
 // Brand Assets
 import gmailLogo from '../assets/apps/gmail.png';
@@ -13,6 +13,7 @@ import slackLogo from '../assets/apps/slack.jpg';
 import teamsLogo from '../assets/apps/microsoft_teams.png';
 import outlookLogo from '../assets/apps/outlook.png';
 import { useWebSocket } from '../hooks/useWebSocket';
+import { useTutorial } from '../hooks/useTutorial';
 
 interface Message {
     id: string;
@@ -132,6 +133,7 @@ const parseGmailBody = (payload: any): string => {
 };
 
 const UnifiedInbox: React.FC = () => {
+    const { currentStep, isActive: isTutorialActive } = useTutorial();
     // State
     const [activeTab, setActiveTab] = useState<'all' | 'gmail' | 'slack' | 'teams' | 'outlook'>('all');
     const [messages, setMessages] = useState<Message[]>([]);
@@ -171,6 +173,18 @@ const UnifiedInbox: React.FC = () => {
     // Compose Attachment State
     const composeFileInputRef = useRef<HTMLInputElement>(null);
     const [composeAttachments, setComposeAttachments] = useState<File[]>([]);
+
+    // Reveal sidebar targets during guided tours (compose / tabs live in the drawer on mobile)
+    useEffect(() => {
+        const sidebarSteps = new Set([
+            'inbox-compose',
+            'inbox-tabs',
+        ]);
+        if (isTutorialActive && currentStep && sidebarSteps.has(currentStep.id)) {
+            setSidebarCollapsed(false);
+            setMobileMenuOpen(true);
+        }
+    }, [isTutorialActive, currentStep]);
 
     // Compose File Handlers
     const handleComposeFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -239,6 +253,88 @@ const UnifiedInbox: React.FC = () => {
         if (!msg.read) setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, read: true } : m));
         setSelectedMessage({ ...msg, read: true });
     }, []);
+
+    const openFirstVisibleMessage = useCallback(() => {
+        const visible = messages.filter((msg) => {
+            const matchesTab = activeTab === 'all' || msg.source === activeTab;
+            const matchesSearch =
+                !searchTerm ||
+                msg.subject?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                msg.sender?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                msg.preview?.toLowerCase().includes(searchTerm.toLowerCase());
+            return matchesTab && matchesSearch && !snoozedMessages.has(msg.id);
+        });
+        if (visible.length > 0) {
+            void handleSelectMessage(visible[0]);
+            return true;
+        }
+        // Empty inbox during tour — seed a demo thread so AI / detail targets exist
+        const demo: Message = {
+            id: 'tutorial-demo-message',
+            source: 'gmail',
+            sender: 'Arrotech Hub',
+            senderEmail: 'hello@arrotech.solutions',
+            subject: 'Welcome to Unified Inbox',
+            preview: 'This is a sample message so you can explore the reading pane and AI reply assistant.',
+            fullContent: 'This is a sample message so you can explore the reading pane and AI reply assistant during the guided tour.',
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            timestamp: Date.now(),
+            read: true,
+            starred: false,
+            avatar: 'https://ui-avatars.com/api/?name=Arrotech+Hub&background=FF4696&color=fff',
+        };
+        setMessages((prev) => (prev.some((m) => m.id === demo.id) ? prev : [demo, ...prev]));
+        setSelectedMessage(demo);
+        setEnrichments((prev) => ({
+            ...prev,
+            [demo.id]: {
+                priority: 3,
+                labels: ['tour'],
+                summary: 'Sample thread for the guided tour.',
+                quick_replies: ['Thanks!', 'Got it — I will follow up.', 'Can we schedule a quick call?'],
+            },
+        }));
+        return true;
+    }, [messages, activeTab, searchTerm, snoozedMessages, handleSelectMessage]);
+
+    useEffect(() => {
+        const onReveal = (event: Event) => {
+            const detail = (event as CustomEvent).detail || {};
+            if (detail.page && detail.page !== 'unifiedInbox') return;
+            if (
+                detail.stepId === 'inbox-compose' ||
+                detail.stepId === 'inbox-tabs' ||
+                detail.target === '.unified-inbox-compose-tut' ||
+                detail.target === '.unified-inbox-tabs-tut'
+            ) {
+                setSidebarCollapsed(false);
+                setMobileMenuOpen(true);
+            }
+            if (
+                detail.stepId === 'inbox-detail' ||
+                detail.stepId === 'inbox-ai' ||
+                detail.target === '.unified-inbox-detail-tut' ||
+                detail.target === '.unified-inbox-ai-tut'
+            ) {
+                openFirstVisibleMessage();
+            }
+        };
+        window.addEventListener('tutorial:reveal-target', onReveal);
+        return () => window.removeEventListener('tutorial:reveal-target', onReveal);
+    }, [openFirstVisibleMessage]);
+
+    // Auto-open a message for tutorial steps that live in the reading pane
+    useEffect(() => {
+        if (!isTutorialActive || !currentStep) return;
+        const needsMessage = currentStep.id === 'inbox-detail' || currentStep.id === 'inbox-ai';
+        if (!needsMessage || selectedMessage) return;
+        openFirstVisibleMessage();
+    }, [
+        isTutorialActive,
+        currentStep,
+        selectedMessage,
+        openFirstVisibleMessage,
+    ]);
 
     // --- Mock Data & Fetching ---
     const stats = {
@@ -1064,10 +1160,10 @@ const UnifiedInbox: React.FC = () => {
                                 onClick={handleSendCompose}
                                 disabled={loading}
                                 className="relative isolate overflow-hidden rounded-xl px-8 py-3 font-semibold text-white transition-all duration-300
-                                bg-gradient-to-br from-indigo-600 via-violet-600 to-indigo-700
+                                bg-gradient-to-br from-primary-500 via-primary-600 to-secondary-900
                                 before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/20 before:to-transparent before:opacity-100
                                 after:absolute after:inset-0 after:shadow-[inset_0_-2px_4px_rgba(0,0,0,0.3)]
-                                shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]
+                                shadow-lg shadow-primary-500/30 hover:shadow-primary-500/50 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]
                                 flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                             >
                                 <span className="relative z-10 flex items-center gap-2">
@@ -1110,8 +1206,8 @@ const UnifiedInbox: React.FC = () => {
                         onClick={() => { setIsComposeOpen(true); setMobileMenuOpen(false); }}
                         className={`unified-inbox-compose-tut w-full flex items-center group relative overflow-hidden transition-all duration-300 mb-8
                         ${sidebarCollapsed
-                                ? 'justify-center h-12 w-12 rounded-2xl mx-auto bg-indigo-600 shadow-lg shadow-indigo-500/30 hover:scale-105 active:scale-95'
-                                : 'px-4 py-3.5 rounded-2xl bg-white dark:bg-slate-800 shadow-[0_2px_10px_rgba(99,102,241,0.15)] hover:shadow-[0_4px_15px_rgba(99,102,241,0.25)] border border-indigo-50 dark:border-slate-700 text-indigo-600 dark:text-indigo-400 hover:border-indigo-100 dark:hover:border-indigo-500/30 hover:-translate-y-0.5'
+                                ? 'justify-center h-12 w-12 rounded-2xl mx-auto bg-indigo-600 shadow-lg shadow-primary-500/30 hover:scale-105 active:scale-95'
+                                : 'px-4 py-3.5 rounded-2xl bg-white dark:bg-slate-800 shadow-[0_2px_10px_rgba(255,70,150,0.15)] hover:shadow-[0_4px_15px_rgba(255,70,150,0.25)] border border-indigo-50 dark:border-slate-700 text-indigo-600 dark:text-indigo-400 hover:border-indigo-100 dark:hover:border-indigo-500/30 hover:-translate-y-0.5'
                             }`}
                     >
                         {sidebarCollapsed ? (
@@ -1463,9 +1559,10 @@ const UnifiedInbox: React.FC = () => {
                                     </div>
                                 </div>
 
-                                {/* Phase 3: Quick Reply Suggestions */}
-                                {enrichments[selectedMessage.id]?.quick_replies && enrichments[selectedMessage.id].quick_replies!.length > 0 && (
-                                    <div className="unified-inbox-ai-tut mb-3">
+                                {/* Phase 3: Quick Reply Suggestions — keep tut target mounted for guided tours */}
+                                <div className="unified-inbox-ai-tut mb-3">
+                                    {enrichments[selectedMessage.id]?.quick_replies && enrichments[selectedMessage.id].quick_replies!.length > 0 ? (
+                                        <>
                                         <div className="flex items-center gap-2 text-xs text-slate-500 mb-2">
                                             <Sparkles className="w-3 h-3 text-indigo-500" />
                                             <span>Quick replies</span>
@@ -1482,8 +1579,14 @@ const UnifiedInbox: React.FC = () => {
                                                 </button>
                                             ))}
                                         </div>
-                                    </div>
-                                )}
+                                        </>
+                                    ) : (
+                                        <div className="flex items-center gap-2 text-xs text-slate-500">
+                                            <Sparkles className="w-3 h-3 text-indigo-500" />
+                                            <span>AI reply suggestions appear here when available for the selected message.</span>
+                                        </div>
+                                    )}
+                                </div>
 
                                 {/* Input Card */}
                                 <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg shadow-slate-200/50 dark:shadow-black/20 border border-slate-200/80 dark:border-slate-700/80 overflow-hidden transition-all duration-200 focus-within:shadow-xl focus-within:border-indigo-300 dark:focus-within:border-indigo-500/50 focus-within:ring-2 focus-within:ring-indigo-100 dark:focus-within:ring-indigo-500/10">
@@ -1598,7 +1701,7 @@ const UnifiedInbox: React.FC = () => {
                                                     group relative inline-flex items-center gap-2 px-4 md:px-5 py-2 md:py-2.5 rounded-xl text-sm font-semibold
                                                     transition-all duration-200 transform font-sans
                                                     ${replyText.trim() && !replySending
-                                                        ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-200 dark:shadow-black/40 hover:shadow-lg hover:shadow-indigo-300 dark:hover:shadow-indigo-500/20 hover:scale-[1.02] active:scale-[0.98]'
+                                                        ? 'bg-gradient-to-r from-secondary-700 to-primary-500 text-white shadow-md shadow-primary-200 dark:shadow-black/40 hover:shadow-lg hover:shadow-primary-300 dark:hover:shadow-primary-500/20 hover:scale-[1.02] active:scale-[0.98]'
                                                         : 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed'
                                                     }
                                                 `}
