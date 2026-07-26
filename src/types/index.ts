@@ -471,11 +471,30 @@ export interface AgentSchedule {
 }
 
 // Settings Types
+export interface NotificationCategoryChannels {
+  in_app: boolean;
+  email: boolean;
+  slack: boolean;
+  webhook: boolean;
+}
+
+export type NotificationRules = Record<string, NotificationCategoryChannels>;
+
+export interface QuietHours {
+  start?: string;
+  end?: string;
+  timezone?: string;
+}
+
 export interface NotificationSettings {
   email_notifications: boolean;
   slack_notifications: boolean;
   webhook_notifications: boolean;
   notification_webhook_url?: string;
+  notification_rules?: NotificationRules;
+  quiet_hours?: QuietHours | null;
+  digest_email_daily?: boolean;
+  categories?: Array<{ id: string; label: string }>;
 }
 
 export interface APISettings {
@@ -1744,16 +1763,17 @@ export type NotificationType =
   | 'earnings_received';
 
 export interface AppNotification {
-  id: number;
-  notification_type: NotificationType;
+  id: string;
+  notification_type: NotificationType | string;
   title: string;
   message: string;
   is_read: boolean;
   action_url?: string;
-  workflow_id?: number;
+  workflow_id?: string;
   workflow_name?: string;
   actor_name?: string;
   metadata?: Record<string, any>;
+  extra_data?: Record<string, any>;
   created_at: string;
 }
 

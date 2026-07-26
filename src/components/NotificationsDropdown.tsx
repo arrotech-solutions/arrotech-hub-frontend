@@ -1,20 +1,27 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
+  AlertTriangle,
   Bell,
   Check,
   CheckCheck,
+  CreditCard,
   Download,
   ExternalLink,
   Gift,
   Info,
+  MessageSquare,
   RefreshCw,
+  Settings,
+  Shield,
   Star,
   Trash2,
   UserPlus,
+  Workflow,
   Zap,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import apiService from '../services/api';
+import { useWebSocket } from '../hooks/useWebSocket';
 import { AppNotification } from '../types';
 
 const NotificationsDropdown: React.FC = () => {
@@ -23,31 +30,63 @@ const NotificationsDropdown: React.FC = () => {
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
+  const { lastEvent } = useWebSocket();
+  // Avoid re-applying the same WS event when the dropdown opens/closes
+  const handledEventRef = useRef<string | null>(null);
+  const isOpenRef = useRef(isOpen);
+  isOpenRef.current = isOpen;
 
   useEffect(() => {
     fetchUnreadCount();
-    // Poll for new notifications every 30 seconds
-    const interval = setInterval(fetchUnreadCount, 30000);
+    // Poll fallback every 60s (live updates via WebSocket when connected)
+    const interval = setInterval(fetchUnreadCount, 60000);
     return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
     if (isOpen) {
       fetchNotifications();
+      // Resync badge from server when opening (heals any optimistic drift)
+      fetchUnreadCount();
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    if (!lastEvent || lastEvent.type !== 'notification.created') return;
+
+    const incoming = lastEvent.data?.notification as AppNotification | undefined;
+    const eventKey = incoming?.id
+      ? `id:${incoming.id}`
+      : `raw:${JSON.stringify(lastEvent.data ?? {})}`;
+
+    // lastEvent stays sticky in useWebSocket — toggling UI must not re-count it
+    if (handledEventRef.current === eventKey) return;
+    handledEventRef.current = eventKey;
+
+    if (!incoming?.id) {
+      fetchUnreadCount();
+      if (isOpenRef.current) fetchNotifications();
+      return;
+    }
+
+    setNotifications((prev) => {
+      if (prev.some((n) => n.id === incoming.id)) return prev;
+      if (!incoming.is_read) {
+        setUnreadCount((count) => count + 1);
+      }
+      return [incoming, ...prev].slice(0, 20);
+    });
+  }, [lastEvent]);
+
   const fetchUnreadCount = async () => {
-    // Avoid hitting the API at all if we know the token is gone
     if (!localStorage.getItem('auth_token')) return;
-    
+
     try {
       const response = await apiService.getUnreadNotificationCount();
       if (response.success) {
         setUnreadCount(response.data?.unread_count || 0);
       }
     } catch (error: any) {
-      // If it's a 401, the interceptor will handle logout. No need to spam console errors.
       if (error?.response?.status === 401) {
         return;
       }
@@ -69,13 +108,13 @@ const NotificationsDropdown: React.FC = () => {
     }
   };
 
-  const handleMarkAsRead = async (notificationId: number) => {
+  const handleMarkAsRead = async (notificationId: string) => {
     try {
       await apiService.markNotificationAsRead(notificationId);
-      setNotifications(prev =>
-        prev.map(n => (n.id === notificationId ? { ...n, is_read: true } : n))
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === notificationId ? { ...n, is_read: true } : n))
       );
-      setUnreadCount(prev => Math.max(0, prev - 1));
+      setUnreadCount((prev) => Math.max(0, prev - 1));
     } catch (error) {
       console.error('Failed to mark as read:', error);
     }
@@ -84,17 +123,17 @@ const NotificationsDropdown: React.FC = () => {
   const handleMarkAllAsRead = async () => {
     try {
       await apiService.markAllNotificationsAsRead();
-      setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
       setUnreadCount(0);
     } catch (error) {
       console.error('Failed to mark all as read:', error);
     }
   };
 
-  const handleDelete = async (notificationId: number) => {
+  const handleDelete = async (notificationId: string) => {
     try {
       await apiService.deleteNotification(notificationId);
-      setNotifications(prev => prev.filter(n => n.id !== notificationId));
+      setNotifications((prev) => prev.filter((n) => n.id !== notificationId));
     } catch (error) {
       console.error('Failed to delete notification:', error);
     }
@@ -111,6 +150,21 @@ const NotificationsDropdown: React.FC = () => {
   };
 
   const getNotificationIcon = (type: string) => {
+    if (type.startsWith('payment') || type.startsWith('withdrawal') || type.startsWith('subscription') || type === 'order_received' || type === 'stk_result') {
+      return <CreditCard className="w-4 h-4 text-emerald-500" />;
+    }
+    if (type.includes('password') || type.includes('email_changed') || type.includes('login') || type.includes('2fa') || type.includes('api_key') || type === 'suspicious_activity') {
+      return <Shield className="w-4 h-4 text-red-500" />;
+    }
+    if (type.startsWith('workflow_run') || type === 'quota_exceeded') {
+      return <Workflow className="w-4 h-4 text-indigo-500" />;
+    }
+    if (type.startsWith('agent_') || type === 'sla_breach') {
+      return <AlertTriangle className="w-4 h-4 text-orange-500" />;
+    }
+    if (type.startsWith('connection_') || type === 'conversation_assigned') {
+      return <MessageSquare className="w-4 h-4 text-sky-500" />;
+    }
     switch (type) {
       case 'workflow_imported':
         return <Download className="w-4 h-4 text-green-500" />;
@@ -124,6 +178,7 @@ const NotificationsDropdown: React.FC = () => {
       case 'earnings_received':
         return <Gift className="w-4 h-4 text-pink-500" />;
       case 'system_announcement':
+      case 'maintenance':
       default:
         return <Info className="w-4 h-4 text-gray-500" />;
     }
@@ -133,11 +188,11 @@ const NotificationsDropdown: React.FC = () => {
     const date = new Date(dateString);
     const now = new Date();
     const diff = now.getTime() - date.getTime();
-    
+
     const minutes = Math.floor(diff / 60000);
     const hours = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);
-    
+
     if (minutes < 1) return 'Just now';
     if (minutes < 60) return `${minutes}m ago`;
     if (hours < 24) return `${hours}h ago`;
@@ -161,15 +216,9 @@ const NotificationsDropdown: React.FC = () => {
 
       {isOpen && (
         <>
-          {/* Backdrop */}
-          <div
-            className="fixed inset-0 z-40"
-            onClick={() => setIsOpen(false)}
-          />
+          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
 
-          {/* Dropdown */}
           <div className="fixed sm:absolute top-16 sm:top-auto right-4 sm:right-0 left-4 sm:left-auto sm:mt-2 w-auto sm:w-96 bg-white rounded-xl shadow-xl border border-gray-200 z-50 overflow-hidden">
-            {/* Header */}
             <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
               <h3 className="font-semibold text-gray-900">Notifications</h3>
               <div className="flex items-center space-x-2">
@@ -182,16 +231,12 @@ const NotificationsDropdown: React.FC = () => {
                     <span>Mark all read</span>
                   </button>
                 )}
-                <button
-                  onClick={fetchNotifications}
-                  className="p-1 text-gray-400 hover:text-gray-600"
-                >
+                <button onClick={fetchNotifications} className="p-1 text-gray-400 hover:text-gray-600">
                   <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
                 </button>
               </div>
             </div>
 
-            {/* Notifications List */}
             <div className="max-h-96 overflow-y-auto">
               {loading && notifications.length === 0 ? (
                 <div className="p-8 text-center text-gray-500">
@@ -218,7 +263,11 @@ const NotificationsDropdown: React.FC = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between">
-                          <p className={`text-sm font-medium ${!notification.is_read ? 'text-gray-900' : 'text-gray-700'}`}>
+                          <p
+                            className={`text-sm font-medium ${
+                              !notification.is_read ? 'text-gray-900' : 'text-gray-700'
+                            }`}
+                          >
                             {notification.title}
                           </p>
                           <div className="flex items-center space-x-1 ml-2">
@@ -246,16 +295,10 @@ const NotificationsDropdown: React.FC = () => {
                             </button>
                           </div>
                         </div>
-                        <p className="text-sm text-gray-600 mt-0.5 line-clamp-2">
-                          {notification.message}
-                        </p>
+                        <p className="text-sm text-gray-600 mt-0.5 line-clamp-2">{notification.message}</p>
                         <div className="flex items-center space-x-2 mt-1">
-                          <span className="text-xs text-gray-400">
-                            {formatTimeAgo(notification.created_at)}
-                          </span>
-                          {notification.action_url && (
-                            <ExternalLink className="w-3 h-3 text-gray-400" />
-                          )}
+                          <span className="text-xs text-gray-400">{formatTimeAgo(notification.created_at)}</span>
+                          {notification.action_url && <ExternalLink className="w-3 h-3 text-gray-400" />}
                         </div>
                       </div>
                     </div>
@@ -264,20 +307,18 @@ const NotificationsDropdown: React.FC = () => {
               )}
             </div>
 
-            {/* Footer */}
-            {notifications.length > 0 && (
-              <div className="px-4 py-2 border-t border-gray-100 bg-gray-50">
-                <button
-                  onClick={() => {
-                    setIsOpen(false);
-                    // Navigate to full notifications page if you have one
-                  }}
-                  className="text-sm text-purple-600 hover:text-purple-700 font-medium"
-                >
-                  View all notifications
-                </button>
-              </div>
-            )}
+            <div className="px-4 py-2 border-t border-gray-100 bg-gray-50 flex items-center justify-between">
+              <button
+                onClick={() => {
+                  setIsOpen(false);
+                  navigate('/settings?tab=notifications');
+                }}
+                className="text-sm text-gray-600 hover:text-gray-900 font-medium flex items-center gap-1"
+              >
+                <Settings className="w-3.5 h-3.5" />
+                Notification settings
+              </button>
+            </div>
           </div>
         </>
       )}
@@ -286,4 +327,3 @@ const NotificationsDropdown: React.FC = () => {
 };
 
 export default NotificationsDropdown;
-

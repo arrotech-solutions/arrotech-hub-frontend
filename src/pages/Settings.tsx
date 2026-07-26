@@ -8,7 +8,7 @@ import {
 import React, { useEffect, useState } from 'react';
 import toast from '../lib/notify';
 import { Spinner } from '../components/ui';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import SettingsSidebar from '../components/settings/SettingsSidebar';
 import APISettingsTab from '../components/settings/APISettings';
 import DashboardSettingsTab from '../components/settings/DashboardSettings';
@@ -31,12 +31,18 @@ import {
 
 const Settings: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [settings, setSettings] = useState<UserSettings | null>(null);
   const [user, setUser] = useState<any>(null); // To store full user object including API key
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState('profile'); // Default to profile
+  const [activeTab, setActiveTab] = useState(() => searchParams.get('tab') || 'profile');
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab) setActiveTab(tab);
+  }, [searchParams]);
 
   useEffect(() => {
     loadSettings();
