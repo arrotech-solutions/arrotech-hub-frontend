@@ -2781,7 +2781,7 @@ class ApiService {
     return response.data;
   }
 
-  async markNotificationAsRead(notificationId: number): Promise<ApiResponse<any>> {
+  async markNotificationAsRead(notificationId: string): Promise<ApiResponse<any>> {
     const response = await this.api.put(`/notifications/${notificationId}/read`);
     return response.data;
   }
@@ -2791,7 +2791,7 @@ class ApiService {
     return response.data;
   }
 
-  async deleteNotification(notificationId: number): Promise<ApiResponse<any>> {
+  async deleteNotification(notificationId: string): Promise<ApiResponse<any>> {
     const response = await this.api.delete(`/notifications/${notificationId}`);
     return response.data;
   }

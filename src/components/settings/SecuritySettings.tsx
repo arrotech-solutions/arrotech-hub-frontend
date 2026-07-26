@@ -20,9 +20,15 @@ const SecuritySettingsTab: React.FC<SecuritySettingsProps> = ({
     const [localSettings, setLocalSettings] = useState(settings);
 
     const handleChange = (key: keyof SecuritySettings, value: any) => {
+        if (localSettings[key] === value) return;
         const newSettings = { ...localSettings, [key]: value };
         setLocalSettings(newSettings);
         onUpdate(newSettings);
+    };
+
+    /** Update local UI only — never persist (used when hydrating from API). */
+    const syncLocal = (key: keyof SecuritySettings, value: any) => {
+        setLocalSettings((prev) => (prev[key] === value ? prev : { ...prev, [key]: value }));
     };
 
     const [isSettingUp2FA, setIsSettingUp2FA] = useState(false);
@@ -81,8 +87,8 @@ const SecuritySettingsTab: React.FC<SecuritySettingsProps> = ({
             if (res.data.success) {
                 setHasTotp(res.data.data.has_totp);
                 setIsEmail2FAEnabled(res.data.data.has_email_2fa);
-                // Sync the generic flag just in case
-                handleChange('two_factor_enabled', res.data.data.two_factor_enabled);
+                // Hydrate UI only — do not PUT /settings on every tab open
+                syncLocal('two_factor_enabled', res.data.data.two_factor_enabled);
             }
         } catch (error) {
             console.error('Failed to fetch 2FA status', error);
