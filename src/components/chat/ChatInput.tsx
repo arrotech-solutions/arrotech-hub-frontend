@@ -32,6 +32,7 @@ interface ChatInputProps {
     setUseReasoning: (val: boolean) => void;
     useSearch: boolean;
     setUseSearch: (val: boolean) => void;
+    onFilesSelected?: (files: File[]) => void;
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({
@@ -54,8 +55,10 @@ const ChatInput: React.FC<ChatInputProps> = ({
     setUseReasoning,
     useSearch,
     setUseSearch,
+    onFilesSelected,
 }) => {
     const [showFeaturesMenu, setShowFeaturesMenu] = React.useState(false);
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
     
     // Close menu when clicking outside
     React.useEffect(() => {
@@ -102,6 +105,11 @@ const ChatInput: React.FC<ChatInputProps> = ({
                           >
                               <div className="p-2 space-y-1">
                                   <button
+                                      type="button"
+                                      onClick={() => {
+                                          fileInputRef.current?.click();
+                                          setShowFeaturesMenu(false);
+                                      }}
                                       className={`w-full flex items-center p-2.5 rounded-lg text-sm transition-colors
                                           ${isDarkMode ? 'hover:bg-gray-700/50 text-gray-200' : 'hover:bg-gray-50 text-gray-700'}
                                       `}
@@ -112,6 +120,17 @@ const ChatInput: React.FC<ChatInputProps> = ({
                                           <span className="font-medium">Add photos/files</span>
                                       </div>
                                   </button>
+                                  <input
+                                      ref={fileInputRef}
+                                      type="file"
+                                      multiple
+                                      className="hidden"
+                                      onChange={(e) => {
+                                          const files = Array.from(e.target.files || []);
+                                          if (files.length && onFilesSelected) onFilesSelected(files);
+                                          e.target.value = '';
+                                      }}
+                                  />
                                   <button
                                       onClick={() => { setUseSearch(!useSearch); setShowFeaturesMenu(false); }}
                                       className={`w-full flex items-center justify-between p-2.5 rounded-lg text-sm transition-colors
