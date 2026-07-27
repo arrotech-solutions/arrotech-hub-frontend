@@ -152,7 +152,7 @@ const MessageItem: React.FC<MessageItemProps> = ({
     const markdownComponents = createMarkdownComponents(isDarkMode);
 
     return (
-        <div className={`group flex flex-col mb-8 animate-in fade-in slide-in-from-bottom-2 duration-500
+        <div className={`group flex flex-col mb-8
       ${isUser ? 'items-end' : 'items-start'}`}
         >
             <div className={`flex max-w-[85%] lg:max-w-[75%] ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
