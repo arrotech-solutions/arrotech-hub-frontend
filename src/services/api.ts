@@ -2078,6 +2078,11 @@ class ApiService {
     return response.data;
   }
 
+  async confirmToolProposal(proposalId: string, approve: boolean = true): Promise<ApiResponse<any>> {
+    const response = await this.api.post(`/chat/proposals/${proposalId}/confirm`, { approve });
+    return response.data;
+  }
+
   // Settings endpoints
   async getUserSettings(): Promise<ApiResponse<UserSettings>> {
     const response = await this.api.get('/settings');

@@ -45,7 +45,19 @@ export interface Message {
 }
 
 // Tool Call Types for Workflow Extraction
-export type StreamEventType = 'thinking' | 'tool_start' | 'tool_result' | 'tool_context' | 'reasoning_delta' | 'content_delta' | 'content' | 'done' | 'error' | 'message_saved' | 'search_sources';
+export type StreamEventType =
+  | 'thinking'
+  | 'tool_start'
+  | 'tool_result'
+  | 'tool.propose'
+  | 'tool_context'
+  | 'reasoning_delta'
+  | 'content_delta'
+  | 'content'
+  | 'done'
+  | 'error'
+  | 'message_saved'
+  | 'search_sources';
 
 export interface SearchSource {
   title: string;
@@ -72,8 +84,8 @@ export interface StreamEvent {
   tool?: string;           // For tool_start, tool_result, tool_context
   args?: Record<string, any>; // For tool_start
   success?: boolean;       // For tool_result
-  summary?: string;        // For tool_result
-  message_id?: number;     // For message_saved
+  summary?: string;        // For tool_result / tool.propose
+  message_id?: number | string;     // For message_saved
   tokens_used?: number;    // For done
   tools_called?: Array<ToolCall>; // For done
   error?: string;          // For error
@@ -86,6 +98,10 @@ export interface StreamEvent {
   category?: string;
   connection_status?: string;
   reason?: string;
+  // HITL proposal fields
+  proposal_id?: string;
+  pending_confirmation?: boolean;
+  arguments?: Record<string, any>;
 }
 
 export interface ToolCall {

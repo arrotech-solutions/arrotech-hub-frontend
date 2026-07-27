@@ -86,16 +86,28 @@ const MessageList: React.FC<MessageListProps> = ({
             ([entry]) => {
                 setShowScrollFab(!entry.isIntersecting);
             },
-            { root: null, threshold: 0 }
+            { root: scrollContainerRef.current, threshold: 0 }
         );
         const target = messagesEndRef.current;
         if (target) observer.observe(target);
         return () => { if (target) observer.unobserve(target); };
-    }, [messagesEndRef, messages.length]);
+    }, [messagesEndRef, messages.length, isStreaming]);
 
     const scrollToBottom = useCallback(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messagesEndRef]);
+
+    // Seamless handoff: once the assistant MessageItem is painted, drop the ghost stream
+    // so we never show duplicate content/tools.
+    const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null;
+    const handoffPainted =
+        streamState.phase === 'done' &&
+        lastMessage?.role === 'assistant' &&
+        (
+            Boolean(lastMessage.content) ||
+            Boolean(lastMessage.tools_called && lastMessage.tools_called.length > 0)
+        );
+    const showLiveStream = isStreaming && !handoffPainted;
     // -- Discovery data for dynamic welcome screen --
     const [discoveryData, setDiscoveryData] = useState<any>(null);
     const [discoveryLoading, setDiscoveryLoading] = useState(false);
@@ -283,7 +295,7 @@ const MessageList: React.FC<MessageListProps> = ({
     };
 
     return (
-        <div className="flex-1 overflow-y-auto custom-scrollbar px-4 py-8 chat-messages-area">
+        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto custom-scrollbar px-4 py-8 chat-messages-area">
             <div className="max-w-4xl mx-auto flex flex-col min-h-full">
                 {!currentConversation ? (
                     renderWelcomeScreen()
@@ -307,7 +319,7 @@ const MessageList: React.FC<MessageListProps> = ({
                                 key={msg.id}
                                 message={msg}
                                 isDarkMode={isDarkMode}
-                                isLast={idx === messages.length - 1 && !isStreaming}
+                                isLast={idx === messages.length - 1 && !showLiveStream}
                                 responseMode={responseMode || 'simple'}
                                 onResponseModeChange={onResponseModeChange}
                                 messageVersions={messageVersions[msg.id]}
@@ -351,14 +363,13 @@ const MessageList: React.FC<MessageListProps> = ({
                             </div>
                         )}
 
-                        {/* ── Claude Code-Style Streaming Activity Log ── */}
-                        {isStreaming && (
+                        {/* Live stream — unmounts the instant the final MessageItem is painted */}
+                        {showLiveStream && (
                             <StreamingActivityLog
                                 streamState={streamState}
                                 isDarkMode={isDarkMode}
                                 onCancel={onCancelStream}
-                                // Hide the ghost content if the real assistant message is already in the list
-                                hideContent={streamState.phase === 'done' && messages.length > 0 && messages[messages.length - 1].role === 'assistant'}
+                                scrollContainerRef={scrollContainerRef}
                                 onViewSources={onViewSources}
                             />
                         )}

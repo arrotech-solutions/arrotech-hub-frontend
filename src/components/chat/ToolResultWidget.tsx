@@ -16,6 +16,7 @@ import { Message } from '../../types';
 
 import ToolInsightCard from './ToolInsightCard';
 import SearchSourceCards from './SearchSourceCards';
+import ToolProposalCard from './ToolProposalCard';
 
 interface ToolResultWidgetProps {
     message: Message;
@@ -32,11 +33,29 @@ const ToolResultWidget: React.FC<ToolResultWidgetProps> = ({
 }) => {
     if (!message.tools_called) return null;
 
+    const pendingProposals = message.tools_called.filter(
+        (t) => t?.result?.pending_confirmation && t?.result?.proposal_id
+    );
+
     return (
         <div className="space-y-4 my-4">
+            {pendingProposals.map((tool, idx) => (
+                <ToolProposalCard
+                    key={`proposal_${tool.result?.proposal_id || idx}`}
+                    proposalId={String(tool.result.proposal_id)}
+                    summary={tool.result.summary || tool.result.message || `Confirm ${tool.name}`}
+                    toolName={tool.name}
+                    isDarkMode={isDarkMode}
+                />
+            ))}
+
             {message.tools_called.map((tool, idx) => {
                 const isSuccess = tool.success !== false && !tool.result?.error;
                 const toolContext = (tool as any).context;
+                // Proposal cards already rendered above
+                if (tool?.result?.pending_confirmation) {
+                    return null;
+                }
 
                 return (
                     <ToolInsightCard
@@ -99,6 +118,59 @@ const ToolResultWidget: React.FC<ToolResultWidgetProps> = ({
                                                         <ExternalLink size={14} />
                                                     </a>
                                                 </div>
+                                            </div>
+                                        )}
+
+                                        {/* WhatsApp inbox / thread widgets */}
+                                        {(tool.name === 'whatsapp_inbox' || tool.result?.data?.widget === 'whatsapp_inbox') && tool.result.data?.conversations && (
+                                            <div className="space-y-2">
+                                                {tool.result.data.conversations.slice(0, 6).map((c: any, i: number) => (
+                                                    <a
+                                                        key={i}
+                                                        href={c.inbox_url || '/inbox'}
+                                                        className={`flex items-center justify-between p-3 rounded-xl border ${isDarkMode ? 'bg-gray-900 border-gray-700 hover:border-emerald-600' : 'bg-emerald-50/50 border-emerald-100 hover:border-emerald-300'}`}
+                                                    >
+                                                        <div>
+                                                            <p className="text-xs font-bold">{c.name || c.phone_number}</p>
+                                                            <p className={`text-[10px] ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>{c.phone_number}</p>
+                                                        </div>
+                                                        {(c.unread_count || 0) > 0 && (
+                                                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-600 text-white">{c.unread_count}</span>
+                                                        )}
+                                                    </a>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        {(tool.name === 'whatsapp_inbox' || tool.result?.data?.widget === 'whatsapp_thread') && tool.result.data?.messages && (
+                                            <div className={`rounded-xl border p-3 space-y-2 max-h-64 overflow-y-auto ${isDarkMode ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'}`}>
+                                                {tool.result.data.contact && (
+                                                    <a href={tool.result.data.inbox_url || '/inbox'} className="text-xs font-bold text-emerald-600 flex items-center gap-1">
+                                                        Open in Inbox <ExternalLink size={12} />
+                                                    </a>
+                                                )}
+                                                {tool.result.data.messages.slice(-8).map((m: any, i: number) => (
+                                                    <div key={i} className={`text-xs p-2 rounded-lg ${m.direction === 'incoming' || m.direction === 'INCOMING' ? (isDarkMode ? 'bg-slate-800' : 'bg-gray-100') : (isDarkMode ? 'bg-emerald-900/30' : 'bg-emerald-50')}`}>
+                                                        <p className="opacity-60 text-[10px] mb-0.5">{m.direction}{m.is_agent ? ' · agent' : ''}</p>
+                                                        <p className="whitespace-pre-wrap">{m.content}</p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        {/* Google Workspace quick chips */}
+                                        {tool.name?.startsWith('google_workspace_') && tool.result.data && !Array.isArray(tool.result.data) && (
+                                            <div className={`flex flex-wrap gap-2 ${isDarkMode ? 'text-sky-200' : 'text-sky-800'}`}>
+                                                {tool.result.data.html_link && (
+                                                    <a href={tool.result.data.html_link} target="_blank" rel="noreferrer" className="text-xs underline inline-flex items-center gap-1">
+                                                        Open in Google <ExternalLink size={12} />
+                                                    </a>
+                                                )}
+                                                {tool.result.data.webViewLink && (
+                                                    <a href={tool.result.data.webViewLink} target="_blank" rel="noreferrer" className="text-xs underline inline-flex items-center gap-1">
+                                                        Open Drive file <ExternalLink size={12} />
+                                                    </a>
+                                                )}
                                             </div>
                                         )}
 

@@ -55,7 +55,6 @@ const Chat: React.FC = () => {
   const {
     streamState,
     isStreaming,
-    isDone,
     content: streamingContent,
     activeArtifact,
     sources: streamingSources,
@@ -214,7 +213,8 @@ const Chat: React.FC = () => {
 
   const loadTools = async () => {
     try {
-      await apiService.getAvailableTools();
+      // Warm discovery cache for Capability Explorer / welcome suggestions
+      await apiService.getToolDiscovery();
     } catch (error) {
       console.error('Error loading tools:', error);
     }
@@ -250,11 +250,6 @@ const Chat: React.FC = () => {
       toast.error('Failed to update title');
     }
   };
-
-  const streamStateRef = useRef(streamState);
-  useEffect(() => {
-    streamStateRef.current = streamState;
-  }, [streamState]);
 
   const sendMessage = async () => {
     if (selectedProvider && !isProviderAvailable(selectedProvider)) {
@@ -307,40 +302,49 @@ const Chat: React.FC = () => {
       // Track which conversation this stream belongs to
       streamingConversationRef.current = conversationToUse!.id;
 
-      await sendStreamingMessage(
+      const finalState = await sendStreamingMessage(
         conversationToUse!.id,
         messageContent,
         selectedProvider,
         useReasoning,
         useSearch
       );
-      
+
       // ── Seamless Handover ──
-      // Instead of reloading from DB, we finalize the local state instantly.
-      const finalState = streamStateRef.current;
-      if (finalState.content || finalState.activityLog.length > 0) {
+      // Snapshot is authoritative (not React state). Paint MessageItem first, then
+      // flush the live stream on the next frames so there is no flicker / truncation.
+      if (
+        finalState.content ||
+        finalState.activityLog.length > 0 ||
+        (finalState.finalToolsCalled && finalState.finalToolsCalled.length > 0)
+      ) {
         const assistantMsg: Message = {
-          id: finalState.lastMessageId || (Date.now() + 1),
+          id: (finalState.lastMessageId as any) || (Date.now() + 1),
           conversation_id: conversationToUse!.id,
           role: 'assistant',
-          content: finalState.content,
+          content: finalState.content || '',
           tools_called: finalState.finalToolsCalled,
           created_at: new Date().toISOString(),
           status: 'completed'
         };
-        
+
         setMessages(prev => {
-          // Prevent duplicates if by any chance it's already there
           if (prev.some(m => m.id === assistantMsg.id)) return prev;
           return [...prev, assistantMsg];
         });
 
-        // Small delay to ensure React has painted the new message before we hide the ghost
-        setTimeout(() => {
-          flushStreamState();
-          setIsLoading(false);
-          streamingConversationRef.current = null;
-        }, 50);
+        // Double-rAF: wait until MessageItem has committed, then drop the ghost stream.
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            flushStreamState();
+            setIsLoading(false);
+            streamingConversationRef.current = null;
+          });
+        });
+      } else {
+        setIsLoading(false);
+        streamingConversationRef.current = null;
+        flushStreamState();
       }
 
     } catch (error) {
@@ -603,6 +607,18 @@ const Chat: React.FC = () => {
           setUseReasoning={setUseReasoning}
           useSearch={useSearch}
           setUseSearch={setUseSearch}
+          onFilesSelected={(files) => {
+            const names = files.map((f) => f.name).join(', ');
+            const prompt =
+              `Upload these file(s) to my Google Drive (create a sensible folder if needed): ${names}. ` +
+              `Use google_workspace_drive. If Drive is not connected, tell me to connect Google Workspace.`;
+            setInputMessage(inputMessage ? `${inputMessage}\n\n${prompt}` : prompt);
+            toast.success(
+              files.length === 1
+                ? 'Added Drive upload prompt for 1 file'
+                : `Added Drive upload prompt for ${files.length} files`
+            );
+          }}
         />
       </main>
 
