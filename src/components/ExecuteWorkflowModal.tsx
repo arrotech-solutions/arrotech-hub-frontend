@@ -216,7 +216,7 @@ const ExecuteWorkflowModal: React.FC<ExecuteWorkflowModalProps> = ({
       />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-hidden">
+      <div className="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-hidden border border-transparent dark:border-slate-700">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-green-600 to-blue-600">
           <div className="flex items-center space-x-3">
@@ -240,7 +240,7 @@ const ExecuteWorkflowModal: React.FC<ExecuteWorkflowModalProps> = ({
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-180px)]">
           {/* Mode Toggle */}
           <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center space-x-2 text-sm text-gray-600">
+            <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-slate-400">
               <Info className="w-4 h-4" />
               <span>
                 {inputFields.length > 0
@@ -248,12 +248,12 @@ const ExecuteWorkflowModal: React.FC<ExecuteWorkflowModalProps> = ({
                   : 'No input parameters required'}
               </span>
             </div>
-            <div className="flex items-center bg-gray-100 rounded-lg p-1">
+            <div className="flex items-center bg-gray-100 dark:bg-slate-800 rounded-lg p-1">
               <button
                 onClick={() => setInputMode('simple')}
                 className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${inputMode === 'simple'
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'bg-white dark:bg-slate-700 text-gray-900 dark:text-white shadow-sm'
+                  : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white'
                   }`}
               >
                 <FormInput className="w-4 h-4" />
@@ -262,8 +262,8 @@ const ExecuteWorkflowModal: React.FC<ExecuteWorkflowModalProps> = ({
               <button
                 onClick={() => setInputMode('advanced')}
                 className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${inputMode === 'advanced'
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'bg-white dark:bg-slate-700 text-gray-900 dark:text-white shadow-sm'
+                  : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white'
                   }`}
               >
                 <Code className="w-4 h-4" />
@@ -278,7 +278,7 @@ const ExecuteWorkflowModal: React.FC<ExecuteWorkflowModalProps> = ({
               {inputFields.length > 0 ? (
                 inputFields.map((field) => (
                   <div key={field.name}>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
                       {field.name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                       {field.required && <span className="text-red-500 ml-1">*</span>}
                     </label>
@@ -293,7 +293,7 @@ const ExecuteWorkflowModal: React.FC<ExecuteWorkflowModalProps> = ({
                           />
                           <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                         </label>
-                        <span className="text-sm text-gray-600">
+                        <span className="text-sm text-gray-600 dark:text-slate-400">
                           {inputData[field.name] ? 'Enabled' : 'Disabled'}
                         </span>
                       </div>
@@ -302,7 +302,7 @@ const ExecuteWorkflowModal: React.FC<ExecuteWorkflowModalProps> = ({
                         <select
                           value={inputData[field.name] || ''}
                           onChange={(e) => handleFieldChange(field.name, e.target.value)}
-                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white font-medium"
+                          className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white dark:bg-slate-800 text-gray-900 dark:text-white font-medium"
                         >
                           <option value="">Select {field.name.replace(/_/g, ' ')}...</option>
                           {field.options.map((option: string) => (
@@ -328,7 +328,7 @@ const ExecuteWorkflowModal: React.FC<ExecuteWorkflowModalProps> = ({
                             handleFieldChange(field.name, isNaN(num) ? val : num);
                           }
                         }}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
                         placeholder={`Enter ${field.name.replace(/_/g, ' ')} or {{variable}}`}
                       />
                     ) : (
@@ -336,20 +336,20 @@ const ExecuteWorkflowModal: React.FC<ExecuteWorkflowModalProps> = ({
                         type="text"
                         value={inputData[field.name] || ''}
                         onChange={(e) => handleFieldChange(field.name, e.target.value)}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
                         placeholder={`Enter ${field.name.replace(/_/g, ' ')}`}
                       />
                     )}
                     {field.description && (
-                      <p className="text-xs text-gray-500 mt-1">{field.description}</p>
+                      <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">{field.description}</p>
                     )}
                   </div>
                 ))
               ) : (
-                <div className="text-center py-8 bg-gray-50 rounded-lg">
+                <div className="text-center py-8 bg-gray-50 dark:bg-slate-800/60 rounded-lg">
                   <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-3" />
-                  <p className="text-gray-700 font-medium">No input required</p>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-gray-700 dark:text-slate-200 font-medium">No input required</p>
+                  <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">
                     This workflow will run with its default configuration.
                   </p>
                 </div>
@@ -361,46 +361,46 @@ const ExecuteWorkflowModal: React.FC<ExecuteWorkflowModalProps> = ({
           {inputMode === 'advanced' && (
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">
                   Input Data (JSON)
                 </label>
                 {jsonError && (
-                  <span className="text-xs text-red-600">{jsonError}</span>
+                  <span className="text-xs text-red-600 dark:text-red-400">{jsonError}</span>
                 )}
               </div>
               <textarea
                 value={jsonInput}
                 onChange={(e) => handleJsonChange(e.target.value)}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent font-mono text-sm ${jsonError
-                  ? 'border-red-300 bg-red-50 focus:ring-red-500'
-                  : 'border-gray-300 focus:ring-blue-500'
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent font-mono text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white ${jsonError
+                  ? 'border-red-300 dark:border-red-500/40 bg-red-50 dark:bg-red-500/10 focus:ring-red-500'
+                  : 'border-gray-300 dark:border-slate-700 focus:ring-blue-500'
                   }`}
                 rows={8}
                 placeholder="{}"
                 spellCheck={false}
               />
-              <p className="text-xs text-gray-500">
-                💡 Tip: Use <code className="bg-gray-100 px-1 rounded">{'{{input.field_name}}'}</code> in workflow steps to reference these values.
+              <p className="text-xs text-gray-500 dark:text-slate-400">
+                Tip: Use <code className="bg-gray-100 dark:bg-slate-700 px-1 rounded">{'{{input.field_name}}'}</code> in workflow steps to reference these values.
               </p>
             </div>
           )}
 
           {/* Workflow Steps Preview */}
-          <div className="mt-6 border-t pt-4">
+          <div className="mt-6 border-t border-gray-200 dark:border-slate-700 pt-4">
             <button
               onClick={() => setShowSteps(!showSteps)}
               className="flex items-center justify-between w-full text-left"
             >
               <div className="flex items-center space-x-2">
-                <Zap className="w-4 h-4 text-purple-600" />
-                <span className="text-sm font-medium text-gray-700">
+                <Zap className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                <span className="text-sm font-medium text-gray-700 dark:text-slate-300">
                   Workflow Steps ({workflow.steps?.length || 0})
                 </span>
               </div>
               {showSteps ? (
-                <ChevronUp className="w-4 h-4 text-gray-500" />
+                <ChevronUp className="w-4 h-4 text-gray-500 dark:text-slate-400" />
               ) : (
-                <ChevronDown className="w-4 h-4 text-gray-500" />
+                <ChevronDown className="w-4 h-4 text-gray-500 dark:text-slate-400" />
               )}
             </button>
 
@@ -409,17 +409,17 @@ const ExecuteWorkflowModal: React.FC<ExecuteWorkflowModalProps> = ({
                 {workflow.steps.map((step, index) => (
                   <div
                     key={step.id || index}
-                    className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg"
+                    className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-slate-800/60 rounded-lg"
                   >
-                    <div className="w-6 h-6 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-xs font-medium">
+                    <div className="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center text-xs font-medium">
                       {step.step_number || index + 1}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
                         {step.tool_name}
                       </p>
                       {step.description && (
-                        <p className="text-xs text-gray-500 truncate">
+                        <p className="text-xs text-gray-500 dark:text-slate-400 truncate">
                           {step.description}
                         </p>
                       )}
@@ -432,10 +432,10 @@ const ExecuteWorkflowModal: React.FC<ExecuteWorkflowModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 bg-gray-50">
+        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-gray-700 hover:text-gray-900 transition-colors"
+            className="px-4 py-2 text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white transition-colors"
           >
             Cancel
           </button>

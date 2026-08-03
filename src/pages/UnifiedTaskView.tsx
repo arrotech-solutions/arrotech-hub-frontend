@@ -33,6 +33,16 @@ const UnifiedTaskView: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [filterText, setFilterText] = useState('');
     const [activePlatformFilter, setActivePlatformFilter] = useState<string | null>(null);
+    /** Mobile kanban: one status column at a time */
+    const [mobileStatusTab, setMobileStatusTab] = useState<'todo' | 'in_progress' | 'review' | 'done'>('todo');
+    /** Per-column visible count for long lists */
+    const [columnVisibleCount, setColumnVisibleCount] = useState<Record<string, number>>({
+        todo: 15,
+        in_progress: 15,
+        review: 15,
+        done: 15,
+    });
+    const [statsCollapsed, setStatsCollapsed] = useState(true);
 
     // Real-time WebSocket connection
     const { lastEvent } = useWebSocket();
@@ -321,6 +331,15 @@ const UnifiedTaskView: React.FC = () => {
             task.project.toLowerCase().includes(filterText.toLowerCase());
         return matchPlatform && matchSearch;
     });
+
+    useEffect(() => {
+        setColumnVisibleCount({
+            todo: 15,
+            in_progress: 15,
+            review: 15,
+            done: 15,
+        });
+    }, [filterText, activePlatformFilter]);
 
     const getPlatformIcon = (platform: string) => {
         switch (platform) {
@@ -1249,7 +1268,7 @@ const UnifiedTaskView: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-4 md:p-6 lg:p-8 relative overflow-hidden transition-colors duration-500">
+        <div className="h-[calc(100dvh-0.5rem)] md:h-[calc(100dvh-1rem)] max-h-[calc(100dvh-0.5rem)] flex flex-col bg-slate-50 dark:bg-slate-950 p-3 md:p-4 lg:p-6 relative overflow-hidden transition-colors duration-500">
             {/* Ambient Animated Background */}
             <div className="fixed inset-0 pointer-events-none">
                 <div className="absolute top-0 left-0 w-full h-[600px] bg-gradient-to-b from-indigo-50/60 dark:from-indigo-900/10 to-transparent" />
@@ -1823,13 +1842,13 @@ const UnifiedTaskView: React.FC = () => {
             )}
 
             {/* Header / Toolbar */}
-            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-white/50 dark:border-slate-800 px-4 md:px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 sticky top-0 z-30 unified-tasks-header shadow-sm transition-colors">
+            <div className="relative z-30 shrink-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/50 dark:border-slate-800 rounded-2xl px-4 md:px-6 py-3 md:py-4 flex flex-col md:flex-row md:items-center justify-between gap-3 unified-tasks-header shadow-sm transition-colors mb-3">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight flex items-center gap-2">
-                        <CheckSquare className="w-7 h-7 text-indigo-600 dark:text-indigo-400" />
+                    <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white tracking-tight flex items-center gap-2">
+                        <CheckSquare className="w-6 h-6 md:w-7 md:h-7 text-indigo-600 dark:text-indigo-400" />
                         Task Hub
                     </h1>
-                    <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Manage all your work across varying platforms in one place.</p>
+                    <p className="text-sm text-gray-500 dark:text-slate-400 mt-0.5 hidden sm:block">Manage all your work across platforms in one place.</p>
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -1868,30 +1887,38 @@ const UnifiedTaskView: React.FC = () => {
             </div>
 
             {/* Main Content Area */}
-            <div className={`flex-1 flex ${viewMode === 'kanban' ? 'overflow-visible md:overflow-hidden' : 'overflow-hidden'}`}>
+            <div className="relative z-10 flex-1 flex min-h-0 overflow-hidden">
                 {/* Sidebar / Filters (Optional - Inline for now) */}
 
-                <div className="flex-1 flex flex-col min-w-0">
-                    {/* Bento Grid Header */}
-                    <div className="px-4 md:px-8 pt-6 pb-2">
-                        <div className="tasks-stats-tut flex overflow-x-auto pb-2 gap-4 mb-6 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:pb-0 sm:overflow-visible custom-scrollbar snap-x snap-mandatory">
+                <div className="flex-1 flex flex-col min-w-0 min-h-0">
+                    {/* Compact stats + filters */}
+                    <div className="px-1 md:px-2 pt-1 pb-2 shrink-0">
+                        <button
+                            type="button"
+                            onClick={() => setStatsCollapsed((v) => !v)}
+                            className="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 mb-2"
+                        >
+                            {statsCollapsed ? 'Show overview' : 'Hide overview'}
+                        </button>
+                        {!statsCollapsed && (
+                        <div className="tasks-stats-tut flex overflow-x-auto pb-2 gap-3 mb-3 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:pb-0 sm:overflow-visible custom-scrollbar snap-x snap-mandatory">
                             {/* Summary Cards */}
                             {stats.map((stat, i) => (
-                                <div key={i} className="min-w-[240px] sm:min-w-0 bg-white/70 dark:bg-slate-900/50 backdrop-blur-lg p-5 rounded-2xl border border-white/60 dark:border-slate-800/50 shadow-sm flex items-center justify-between hover:shadow-md dark:hover:shadow-primary-500/10 hover:scale-[1.02] transition-all snap-start">
+                                <div key={i} className="min-w-[180px] sm:min-w-0 bg-white/70 dark:bg-slate-900/50 backdrop-blur-lg p-3 sm:p-4 rounded-2xl border border-white/60 dark:border-slate-800/50 shadow-sm flex items-center justify-between hover:shadow-md dark:hover:shadow-primary-500/10 transition-all snap-start">
                                     <div>
-                                        <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide">{stat.label}</p>
-                                        <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{stat.value}</p>
+                                        <p className="text-[10px] font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide">{stat.label}</p>
+                                        <p className="text-xl font-bold text-gray-900 dark:text-white mt-0.5">{stat.value}</p>
                                     </div>
-                                    <div className={`p-3 rounded-xl ${stat.color} bg-opacity-10 backdrop-blur-sm`}>
-                                        <stat.icon className={`w-5 h-5 ${stat.color.replace('bg-', 'text-').replace('text-white', '')}`} style={{ color: stat.color.includes('text-white') ? undefined : 'currentColor' }} />
+                                    <div className={`p-2.5 rounded-xl ${stat.color} bg-opacity-10 backdrop-blur-sm`}>
+                                        <stat.icon className={`w-4 h-4 ${stat.color.replace('bg-', 'text-').replace('text-white', '')}`} style={{ color: stat.color.includes('text-white') ? undefined : 'currentColor' }} />
                                     </div>
                                 </div>
                             ))}
                             {/* Mini Chart */}
-                            <div className="min-w-[240px] sm:min-w-0 bg-white dark:bg-slate-900/50 p-1 rounded-2xl border border-gray-200/60 dark:border-slate-800 shadow-sm relative overflow-hidden flex items-center justify-center sm:col-span-1 lg:col-span-1 min-h-[100px] snap-start transition-colors">
+                            <div className="min-w-[180px] sm:min-w-0 bg-white dark:bg-slate-900/50 p-1 rounded-2xl border border-gray-200/60 dark:border-slate-800 shadow-sm relative overflow-hidden flex items-center justify-center sm:col-span-1 lg:col-span-1 min-h-[72px] snap-start transition-colors">
                                 <div className="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none">
-                                    <PieChart width={100} height={100}>
-                                        <Pie data={chartData} innerRadius={35} outerRadius={45} paddingAngle={2} dataKey="value">
+                                    <PieChart width={80} height={80}>
+                                        <Pie data={chartData} innerRadius={28} outerRadius={36} paddingAngle={2} dataKey="value">
                                             {chartData.map((entry, index) => (
                                                 <Cell key={index} fill={entry.color} stroke="none" />
                                             ))}
@@ -1899,14 +1926,15 @@ const UnifiedTaskView: React.FC = () => {
                                     </PieChart>
                                 </div>
                                 <div className="text-center z-10">
-                                    <span className="block text-xl font-bold text-gray-800 dark:text-slate-200">{Math.round((tasks.filter(t => t.status === 'done').length / (tasks.length || 1)) * 100)}%</span>
+                                    <span className="block text-lg font-bold text-gray-800 dark:text-slate-200">{Math.round((tasks.filter(t => t.status === 'done').length / (tasks.length || 1)) * 100)}%</span>
                                     <span className="text-[10px] uppercase font-bold text-gray-400 dark:text-slate-500">Completion</span>
                                 </div>
                             </div>
                         </div>
+                        )}
 
                         {/* Filters Bar */}
-                        <div className="tasks-filters-tut flex items-center gap-3 overflow-x-auto pb-4 custom-scrollbar no-scrollbar-mobile">
+                        <div className="tasks-filters-tut flex items-center gap-3 overflow-x-auto pb-2 custom-scrollbar no-scrollbar-mobile">
                             <div className="relative shrink-0">
                                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-gray-400 dark:text-slate-500" />
                                 <input
@@ -1914,7 +1942,7 @@ const UnifiedTaskView: React.FC = () => {
                                     placeholder="Filter by name..."
                                     value={filterText}
                                     onChange={(e) => setFilterText(e.target.value)}
-                                    className="tasks-search-tut pl-9 pr-4 py-1.5 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700/50 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 focus:border-blue-500 dark:focus:border-indigo-500 w-48 shadow-sm transition-all dark:text-white"
+                                    className="tasks-search-tut pl-9 pr-4 py-1.5 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700/50 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-indigo-500/20 focus:border-blue-500 dark:focus:border-indigo-500 w-40 sm:w-48 shadow-sm transition-all dark:text-white"
                                 />
                             </div>
                             <div className="h-6 w-px bg-gray-200 dark:bg-slate-800 mx-1 shrink-0" />
@@ -1935,6 +1963,33 @@ const UnifiedTaskView: React.FC = () => {
                                 </button>
                             ))}
                         </div>
+
+                        {/* Mobile status tabs — one column at a time */}
+                        {viewMode === 'kanban' && (
+                            <div className="md:hidden flex gap-1 p-1 mt-1 bg-white/70 dark:bg-slate-900/70 rounded-xl border border-gray-200/60 dark:border-slate-800 overflow-x-auto custom-scrollbar">
+                                {columns.map((col) => {
+                                    const count = filteredTasks.filter((t) => t.status === col.id).length;
+                                    const active = mobileStatusTab === col.id;
+                                    return (
+                                        <button
+                                            key={col.id}
+                                            type="button"
+                                            onClick={() => setMobileStatusTab(col.id as typeof mobileStatusTab)}
+                                            className={`flex-1 min-w-[4.5rem] px-2 py-2 rounded-lg text-[11px] font-bold transition-all flex flex-col items-center gap-0.5 ${
+                                                active
+                                                    ? 'bg-indigo-600 text-white shadow-sm'
+                                                    : 'text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800'
+                                            }`}
+                                        >
+                                            <span className="truncate max-w-full">{col.label}</span>
+                                            <span className={`text-[10px] tabular-nums ${active ? 'text-white/80' : 'text-gray-400 dark:text-slate-500'}`}>
+                                                {count}
+                                            </span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        )}
                     </div>
 
                     {/* Main Content Area */}
@@ -1943,18 +1998,24 @@ const UnifiedTaskView: React.FC = () => {
                     ) : (
                         <>
                             {viewMode === 'kanban' && (
-                                <div className="tasks-kanban-tut flex-1 overflow-visible md:overflow-x-auto custom-scrollbar px-4 md:px-8 pb-8">
-                                    <div className="flex flex-col md:flex-row gap-6 md:gap-6 h-auto md:h-full md:min-w-max md:overflow-y-hidden pb-20 md:pb-0">
+                                <div className="tasks-kanban-tut flex-1 min-h-0 overflow-hidden md:overflow-x-auto custom-scrollbar px-1 md:px-2 pb-2">
+                                    <div className="flex flex-col md:flex-row gap-4 md:gap-6 h-full md:min-w-max md:overflow-y-hidden">
                                         {columns.map(col => {
                                             const colTasks = filteredTasks.filter(t => t.status === col.id);
+                                            const visibleLimit = columnVisibleCount[col.id] ?? 15;
+                                            const visibleTasks = colTasks.slice(0, visibleLimit);
+                                            const remaining = colTasks.length - visibleTasks.length;
+                                            const isMobileActive = col.id === mobileStatusTab;
                                             return (
                                                 <div
                                                     key={col.id}
-                                                    className="w-full md:w-[320px] flex flex-col h-auto md:h-full shrink-0 bg-white/30 dark:bg-slate-900/30 backdrop-blur-md rounded-3xl border border-white/40 dark:border-white/5 p-3"
+                                                    className={`w-full md:w-[320px] flex-col h-full min-h-0 shrink-0 bg-white/30 dark:bg-slate-900/30 backdrop-blur-md rounded-3xl border border-white/40 dark:border-white/5 p-3 ${
+                                                        isMobileActive ? 'flex' : 'hidden md:flex'
+                                                    }`}
                                                     onDragOver={handleDragOver}
                                                     onDrop={(e) => handleDrop(e, col.id as any)}
                                                 >
-                                                    <div className="flex items-center justify-between mb-4">
+                                                    <div className="flex items-center justify-between mb-3 shrink-0">
                                                         <div className="flex items-center gap-2">
                                                             <span className={`w-2 h-2 rounded-full ${col.dot}`} />
                                                             <h3 className="font-bold text-gray-700 dark:text-slate-300 text-sm">{col.label}</h3>
@@ -1963,13 +2024,13 @@ const UnifiedTaskView: React.FC = () => {
                                                         <button className="text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300"><MoreHorizontal className="w-4 h-4" /></button>
                                                     </div>
 
-                                                    <div className="flex-1 md:overflow-y-auto pr-0 md:pr-2 custom-scrollbar space-y-3 pb-4">
+                                                    <div className="flex-1 min-h-0 overflow-y-auto pr-0 md:pr-2 custom-scrollbar space-y-3 pb-2 overscroll-contain">
                                                         {colTasks.length === 0 && (
                                                             <div className="border-2 border-dashed border-gray-100 dark:border-slate-800/50 rounded-xl h-24 flex items-center justify-center text-gray-300 dark:text-slate-700 text-xs font-medium">
                                                                 No Tasks
                                                             </div>
                                                         )}
-                                                        {colTasks.map(task => (
+                                                        {visibleTasks.map(task => (
                                                             <div
                                                                 key={task.id}
                                                                 draggable
@@ -2008,6 +2069,20 @@ const UnifiedTaskView: React.FC = () => {
                                                                 </div>
                                                             </div>
                                                         ))}
+                                                        {remaining > 0 && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() =>
+                                                                    setColumnVisibleCount((prev) => ({
+                                                                        ...prev,
+                                                                        [col.id]: (prev[col.id] ?? 15) + 20,
+                                                                    }))
+                                                                }
+                                                                className="w-full py-2.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50/80 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 rounded-xl border border-indigo-100 dark:border-indigo-500/30 transition-colors"
+                                                            >
+                                                                Show {Math.min(remaining, 20)} more ({remaining} left)
+                                                            </button>
+                                                        )}
                                                     </div>
                                                 </div>
                                             );
@@ -2017,11 +2092,11 @@ const UnifiedTaskView: React.FC = () => {
                             )}
 
                             {viewMode === 'list' && (
-                                <div className="tasks-list-tut flex-1 overflow-y-auto px-4 md:px-8 pb-8 custom-scrollbar">
+                                <div className="tasks-list-tut flex-1 min-h-0 overflow-y-auto px-1 md:px-2 pb-2 custom-scrollbar">
                                     {/* Desktop Table View */}
                                     <div className="hidden md:block bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-gray-100 dark:border-slate-800 overflow-hidden min-w-[600px] transition-colors">
                                         <table className="w-full text-left text-sm text-gray-600 dark:text-slate-400">
-                                            <thead className="bg-gray-50/50 dark:bg-slate-800 text-xs uppercase font-semibold text-gray-500 dark:text-slate-400">
+                                            <thead className="bg-gray-50/50 dark:bg-slate-800 text-xs uppercase font-semibold text-gray-500 dark:text-slate-400 sticky top-0 z-10">
                                                 <tr>
                                                     <th className="px-6 py-4">Task</th>
                                                     <th className="px-6 py-4">Platform</th>

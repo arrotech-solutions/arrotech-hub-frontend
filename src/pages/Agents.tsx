@@ -31,11 +31,13 @@ import {
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from '../lib/notify';
+import { useConfirm } from '../components/ui';
 import { useTutorial } from '../hooks/useTutorial';
 import apiService from '../services/api';
 import { AgentCreate, AgentResponse, AgentStatusResponse, Workflow } from '../types';
 
 const Agents: React.FC = () => {
+  const { confirm } = useConfirm();
   const [agents, setAgents] = useState<AgentResponse[]>([]);
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -259,7 +261,13 @@ const Agents: React.FC = () => {
   };
 
   const handleDeleteAgent = async (agentId: string) => {
-    if (!window.confirm('Are you sure you want to delete this agent?')) return;
+    const ok = await confirm({
+      title: 'Delete this agent?',
+      description: 'The agent will stop running and be removed from your workspace.',
+      tone: 'danger',
+      confirmLabel: 'Delete agent',
+    });
+    if (!ok) return;
     try {
       await apiService.deleteAgent(agentId);
       toast.success('Agent deleted successfully');
@@ -394,15 +402,15 @@ const Agents: React.FC = () => {
   );
 
   const renderAgentList = (agent: AgentResponse) => (
-    <div key={agent.agent_id} className="group relative bg-white rounded-[24px] p-5 border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 agent-card">
+    <div key={agent.agent_id} className="group relative bg-white dark:bg-slate-900 rounded-[24px] p-5 border border-gray-100 dark:border-slate-800 shadow-sm hover:shadow-lg transition-all duration-300 agent-card">
       <div className="flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="flex items-center space-x-5 flex-1">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-purple-200">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-purple-200 dark:shadow-purple-900/30">
             <Bot className="w-6 h-6" />
           </div>
           <div className="flex-1">
             <div className="flex items-center space-x-3 mb-1">
-              <h3 className="font-bold text-gray-900 group-hover:text-purple-600 transition-colors text-lg">
+              <h3 className="font-bold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors text-lg">
                 {agent.workflow_name || `Agent ${agent.agent_id}`}
               </h3>
               <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${getStatusColor(agent.status)}`}>
@@ -417,13 +425,13 @@ const Agents: React.FC = () => {
           </div>
         </div>
         <div className="flex items-center space-x-3 agent-actions-container">
-          <div className="flex items-center bg-gray-50 rounded-2xl p-1.5 border border-gray-100">
+          <div className="flex items-center bg-gray-50 dark:bg-slate-800 rounded-2xl p-1.5 border border-gray-100 dark:border-slate-700">
             {agent.status === 'active' ? (
-              <button onClick={() => handlePauseAgent(agent.agent_id)} className="w-10 h-10 rounded-xl bg-white text-amber-600 flex items-center justify-center shadow-sm border border-gray-100 agent-pause-btn"><Pause className="w-4 h-4" /></button>
+              <button onClick={() => handlePauseAgent(agent.agent_id)} className="w-10 h-10 rounded-xl bg-white dark:bg-slate-900 text-amber-600 flex items-center justify-center shadow-sm border border-gray-100 dark:border-slate-700 agent-pause-btn"><Pause className="w-4 h-4" /></button>
             ) : (
-              <button onClick={() => handleResumeAgent(agent.agent_id)} className="w-10 h-10 rounded-xl bg-white text-green-600 flex items-center justify-center shadow-sm border border-gray-100 agent-resume-btn"><Play className="w-4 h-4" /></button>
+              <button onClick={() => handleResumeAgent(agent.agent_id)} className="w-10 h-10 rounded-xl bg-white dark:bg-slate-900 text-green-600 flex items-center justify-center shadow-sm border border-gray-100 dark:border-slate-700 agent-resume-btn"><Play className="w-4 h-4" /></button>
             )}
-            <button onClick={() => handleExecuteAgent(agent.agent_id)} className="px-5 h-10 rounded-xl bg-purple-600 text-white font-bold text-sm flex items-center space-x-2 ml-1.5 shadow-lg shadow-purple-200 agent-execute-btn"><Zap className="w-4 h-4" /><span>Run</span></button>
+            <button onClick={() => handleExecuteAgent(agent.agent_id)} className="px-5 h-10 rounded-xl bg-purple-600 text-white font-bold text-sm flex items-center space-x-2 ml-1.5 shadow-lg shadow-purple-200 dark:shadow-purple-900/40 agent-execute-btn"><Zap className="w-4 h-4" /><span>Run</span></button>
           </div>
           <div className="flex items-center space-x-1 pl-3 border-l border-gray-200 dark:border-slate-700">
             <button onClick={() => { setSelectedAgent(agent); loadAgentStatus(agent.agent_id); }} className="p-2.5 text-gray-400 dark:text-slate-500 hover:text-purple-600 dark:hover:text-purple-400 transition-colors rounded-xl agent-view-btn"><Eye className="w-5 h-5" /></button>

@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import apiService from '../../services/api';
 import toast from '../../lib/notify';
+import { useConfirm } from '../ui';
 import ContactAvatar from './ContactAvatar';
 import WhatsAppMessageMedia from './WhatsAppMessageMedia';
 import { useWebSocket } from '../../hooks/useWebSocket';
@@ -162,6 +163,7 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
     onSharedQuickRepliesChange,
 }) => {
     const { user } = useAuth();
+    const { prompt } = useConfirm();
     const { lastEvent, sendPresence, isConnected } = useWebSocket();
     const [searchQuery, setSearchQuery] = useState('');
     const [newMessage, setNewMessage] = useState('');
@@ -600,7 +602,17 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
 
     const handleAssignAgent = async (agentId: string) => {
         if (!selectedContact) return;
-        const note = window.prompt('Internal note for reassignment (optional):');
+        const note = await prompt({
+            title: 'Reassign conversation',
+            description: 'Optionally leave an internal note for your team.',
+            confirmLabel: 'Reassign',
+            tone: 'default',
+            input: {
+                label: 'Internal note',
+                placeholder: 'Optional note…',
+                required: false,
+            },
+        });
         if (note === null) return;
         try {
             const response = await apiService.reassignWhatsAppContact(String(selectedContact.id), {
@@ -993,8 +1005,18 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
         setActiveSegmentId(null);
     };
 
-    const saveCurrentAsSegment = () => {
-        const name = window.prompt('Segment name');
+    const saveCurrentAsSegment = async () => {
+        const name = await prompt({
+            title: 'Save segment',
+            description: 'Give this filter set a name so you can reopen it later.',
+            confirmLabel: 'Save segment',
+            tone: 'default',
+            input: {
+                label: 'Segment name',
+                placeholder: 'e.g. Unread VIP leads',
+                required: true,
+            },
+        });
         if (!name?.trim()) return;
         const segment: SavedSegment = {
             id: `custom-${Date.now()}`,

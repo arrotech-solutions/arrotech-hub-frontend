@@ -204,6 +204,11 @@ class ApiService {
     return response.data;
   }
 
+  async updateOnboarding(data: import('../types').OnboardingUpdatePayload): Promise<ApiResponse<any>> {
+    const response = await this.api.patch('/auth/me/onboarding', data);
+    return response.data;
+  }
+
   async deleteAccount(confirmation: string): Promise<ApiResponse<any>> {
     const response = await this.api.delete('/auth/me', { params: { confirmation } });
     return response.data;

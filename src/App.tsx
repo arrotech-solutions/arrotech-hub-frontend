@@ -1,6 +1,6 @@
 import React, { lazy, Suspense } from 'react';
 import { HelmetProvider } from 'react-helmet-async';
-import { Navigate, Route, Routes, useNavigate } from 'react-router-dom';
+import { Navigate, Route, Routes, useNavigate, useLocation } from 'react-router-dom';
 import Layout from './components/Layout';
 import PublicLayout from './components/PublicLayout'; // New shared layout
 import TutorialButton from './components/TutorialButton';
@@ -17,6 +17,8 @@ import { NotFound } from './components/states/NotFound';
 import { SessionExpiredModal } from './components/states/SessionExpiredModal';
 import { PermissionDenied } from './components/states/PermissionDenied';
 import { PageLoader } from './components/states/LoadingState';
+import { ConfirmProvider } from './components/ui/ConfirmDialog';
+import { peekOnboardingResume } from './components/onboarding/connectHelpers';
 import {
   LayoutDashboard, Mail, CheckSquare, Calendar, Settings as SettingsIcon, LogOut,
   GitBranch, Bot, MessageCircle, Video, ShoppingBag, Link, Activity as ActivityIcon, User
@@ -76,6 +78,7 @@ const StatesShowcase = lazy(() => import('./pages/dev/StatesShowcase'));
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return <PageLoader />;
@@ -83,6 +86,26 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
   if (!user) {
     return <Navigate to="/login" replace />;
+  }
+
+  const path = location.pathname;
+  const onboardingExempt =
+    path.startsWith('/onboarding') ||
+    path.startsWith('/verify-email') ||
+    path.startsWith('/create-organization') ||
+    path.startsWith('/invite') ||
+    path.startsWith('/auth/');
+
+  if (user.email_verified === false && !path.startsWith('/verify-email')) {
+    return <Navigate to="/verify-email" replace />;
+  }
+
+  if (user.email_verified !== false && !user.onboarding_completed_at && !onboardingExempt) {
+    // Allow Connections while returning from OAuth mid-wizard
+    if (path.startsWith('/connections') && peekOnboardingResume() != null) {
+      return <>{children}</>;
+    }
+    return <Navigate to="/onboarding" replace />;
   }
 
   return <>{children}</>;
@@ -98,6 +121,12 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   }
 
   if (user) {
+    if (user.email_verified === false) {
+      return <Navigate to="/verify-email" replace />;
+    }
+    if (!user.onboarding_completed_at) {
+      return <Navigate to="/onboarding" replace />;
+    }
     return <Navigate to="/unified" replace />;
   }
 
@@ -594,21 +623,23 @@ const App: React.FC = () => {
   return (
     <HelmetProvider>
       <AuthProvider>
-        <CommandProvider>
-          <TutorialProvider>
-            <ErrorBoundary>
-              <Suspense fallback={<FallbackLoader />}>
-                <AppRoutes />
-              </Suspense>
-            </ErrorBoundary>
-            <SessionExpiredModal />
-            <GlobalCommandPalette />
-            <DefaultGlobalCommands />
-            <TutorialButton />
-            <TutorialOverlay />
-            <FloatingActionMenu />
-          </TutorialProvider>
-        </CommandProvider>
+        <ConfirmProvider>
+          <CommandProvider>
+            <TutorialProvider>
+              <ErrorBoundary>
+                <Suspense fallback={<FallbackLoader />}>
+                  <AppRoutes />
+                </Suspense>
+              </ErrorBoundary>
+              <SessionExpiredModal />
+              <GlobalCommandPalette />
+              <DefaultGlobalCommands />
+              <TutorialButton />
+              <TutorialOverlay />
+              <FloatingActionMenu />
+            </TutorialProvider>
+          </CommandProvider>
+        </ConfirmProvider>
       </AuthProvider>
     </HelmetProvider>
   );

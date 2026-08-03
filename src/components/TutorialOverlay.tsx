@@ -382,7 +382,7 @@ const TutorialOverlay: React.FC = () => {
       {/* Tooltip */}
       <div
         ref={tooltipRef}
-        className="fixed z-[10000] max-w-sm bg-white rounded-2xl shadow-2xl border border-gray-200 transition-all duration-200 ease-out"
+        className="fixed z-[10000] max-w-sm bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-slate-700 transition-all duration-200 ease-out"
         style={tooltipPosition}
       >
         <div className="p-6">
@@ -394,24 +394,24 @@ const TutorialOverlay: React.FC = () => {
               </div>
               <div>
                 <div className="flex items-center space-x-2">
-                  <h3 className="text-lg font-semibold text-gray-900">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                     {currentStep.title}
                   </h3>
                 </div>
                 <div className="flex items-center space-x-2 mt-1">
-                  <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded capitalize">
+                  <span className="text-xs bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded capitalize">
                     {currentPage}
                   </span>
                   <div className="flex space-x-1">
                     {Array.from({ length: totalSteps }, (_, i) => (
                       <div
                         key={i}
-                        className={`w-2 h-2 rounded-full transition-colors ${i === currentStepIndex ? 'bg-blue-500' : 'bg-gray-300'
+                        className={`w-2 h-2 rounded-full transition-colors ${i === currentStepIndex ? 'bg-blue-500' : 'bg-gray-300 dark:bg-slate-600'
                           }`}
                       />
                     ))}
                   </div>
-                  <span className="text-sm text-gray-500">
+                  <span className="text-sm text-gray-500 dark:text-slate-400">
                     {currentStepIndex + 1}/{totalSteps}
                   </span>
                 </div>
@@ -419,7 +419,7 @@ const TutorialOverlay: React.FC = () => {
             </div>
             <button
               onClick={skipTutorial}
-              className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+              className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-slate-200 transition-colors"
               title="Close tutorial"
             >
               <X className="w-5 h-5" />
@@ -427,20 +427,20 @@ const TutorialOverlay: React.FC = () => {
           </div>
 
           {!isTargetVisible && showLocatingHint && (
-            <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <p className="text-sm text-yellow-800">
+            <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-500/10 border border-yellow-200 dark:border-yellow-500/30 rounded-lg">
+              <p className="text-sm text-yellow-800 dark:text-yellow-300">
                 Locating this control… If it stays hidden, open the left menu or scroll, then click Next.
               </p>
             </div>
           )}
           {!isTargetVisible && !showLocatingHint && (
-            <div className="mb-4 p-3 bg-slate-50 border border-slate-200 rounded-lg">
-              <p className="text-sm text-slate-600">Loading this page…</p>
+            <div className="mb-4 p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg">
+              <p className="text-sm text-slate-600 dark:text-slate-400">Loading this page…</p>
             </div>
           )}
 
           {/* Description */}
-          <p className="text-gray-600 mb-6 leading-relaxed">
+          <p className="text-gray-600 dark:text-slate-300 mb-6 leading-relaxed">
             {currentStep.description}
           </p>
 
@@ -450,7 +450,7 @@ const TutorialOverlay: React.FC = () => {
               <button
                 onClick={previousStep}
                 disabled={currentStepIndex === 0}
-                className="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="flex items-center space-x-2 px-4 py-2 text-gray-600 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronLeft className="w-4 h-4" />
                 <span>Previous</span>

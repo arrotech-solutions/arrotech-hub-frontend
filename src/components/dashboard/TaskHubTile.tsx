@@ -206,16 +206,16 @@ const TaskHubTile: React.FC<TaskHubTileProps> = ({ onCreateTask }) => {
 
 
     return (
-        <div className="bg-white/40 backdrop-blur-xl rounded-3xl border border-white/60 shadow-xl flex flex-col h-full overflow-hidden group transition-all hover:shadow-2xl relative">
+        <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl rounded-3xl border border-white/60 dark:border-slate-700/60 shadow-xl flex flex-col h-full overflow-hidden group transition-all hover:shadow-2xl relative">
             {/* Premium Header (2-Row Layout) */}
-            <div className="px-6 py-4 border-b border-white/30 flex flex-col gap-3 bg-gradient-to-r from-white/40 to-transparent">
+            <div className="px-6 py-4 border-b border-white/30 dark:border-slate-700/40 flex flex-col gap-3 bg-gradient-to-r from-white/40 to-transparent dark:from-slate-800/40 dark:to-transparent">
                 {/* Row 1: Title & Actions */}
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-indigo-500/10 rounded-xl">
-                            <CheckSquare className="w-5 h-5 text-indigo-600" />
+                            <CheckSquare className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                         </div>
-                        <h2 className="text-lg font-bold text-gray-800 tracking-tight">Task Hub</h2>
+                        <h2 className="text-lg font-bold text-gray-800 dark:text-white tracking-tight">Task Hub</h2>
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -224,7 +224,7 @@ const TaskHubTile: React.FC<TaskHubTileProps> = ({ onCreateTask }) => {
                             <span className="text-xs font-bold relative z-10">New Task</span>
                             <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 opacity-0 group-hover/btn:opacity-100 transition-opacity" />
                         </button>
-                        <button onClick={fetchTasks} className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-white/50 rounded-xl transition-all">
+                        <button onClick={fetchTasks} className="p-2 text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-slate-800 rounded-xl transition-all">
                             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
                         </button>
                     </div>
@@ -232,21 +232,21 @@ const TaskHubTile: React.FC<TaskHubTileProps> = ({ onCreateTask }) => {
 
                 {/* Row 2: Stats & Tabs */}
                 <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-xs text-gray-500 font-medium pl-1">
+                    <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-slate-400 font-medium pl-1">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                         {tasks.filter(t => t.status !== 'done').length} Active Tasks
                     </div>
 
-                    <div className="flex items-center bg-white/40 p-1 rounded-xl border border-white/50 backdrop-blur-sm shadow-sm">
+                    <div className="flex items-center bg-white/40 dark:bg-slate-800/40 p-1 rounded-xl border border-white/50 dark:border-slate-700/50 backdrop-blur-sm shadow-sm">
                         <button
                             onClick={() => setFilter('my_tasks')}
-                            className={`px-3 py-1 text-[11px] font-bold rounded-lg transition-all ${filter === 'my_tasks' ? 'bg-white text-indigo-600 shadow-sm ring-1 ring-black/5' : 'text-gray-500 hover:text-gray-700'}`}
+                            className={`px-3 py-1 text-[11px] font-bold rounded-lg transition-all ${filter === 'my_tasks' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm ring-1 ring-black/5 dark:ring-white/10' : 'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200'}`}
                         >
                             My Tasks
                         </button>
                         <button
                             onClick={() => setFilter('all')}
-                            className={`px-3 py-1 text-[11px] font-bold rounded-lg transition-all ${filter === 'all' ? 'bg-white text-indigo-600 shadow-sm ring-1 ring-black/5' : 'text-gray-500 hover:text-gray-700'}`}
+                            className={`px-3 py-1 text-[11px] font-bold rounded-lg transition-all ${filter === 'all' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm ring-1 ring-black/5 dark:ring-white/10' : 'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200'}`}
                         >
                             All
                         </button>
@@ -266,17 +266,17 @@ const TaskHubTile: React.FC<TaskHubTileProps> = ({ onCreateTask }) => {
                     )}
 
                     {tasks.map((task) => (
-                        <div key={task.id} className="group/item relative flex items-center gap-4 p-3.5 bg-white/60 hover:bg-white/90 rounded-2xl border border-white/60 hover:border-indigo-200 shadow-sm hover:shadow-md transition-all cursor-pointer">
+                        <div key={task.id} className="group/item relative flex items-center gap-4 p-3.5 bg-white/60 dark:bg-slate-800/60 hover:bg-white/90 dark:hover:bg-slate-800/90 rounded-2xl border border-white/60 dark:border-slate-700/60 hover:border-indigo-200 dark:hover:border-indigo-500/30 shadow-sm hover:shadow-md transition-all cursor-pointer">
 
                             {/* Priority/Status Indicator strip */}
                             <div className={`absolute left-0 top-4 bottom-4 w-1 rounded-r-full transition-all ${task.status === 'in_progress' ? 'bg-indigo-500' :
                                 task.status === 'review' ? 'bg-purple-500' :
-                                    task.status === 'done' ? 'bg-emerald-400' : 'bg-gray-300'
+                                    task.status === 'done' ? 'bg-emerald-400' : 'bg-gray-300 dark:bg-slate-600'
                                 }`} />
 
                             {/* Leading Icon */}
                             <div className="pl-2">
-                                <div className="w-8 h-8 rounded-xl bg-white shadow-sm border border-gray-100 flex items-center justify-center group-hover/item:scale-110 transition-transform">
+                                <div className="w-8 h-8 rounded-xl bg-white dark:bg-slate-700 shadow-sm border border-gray-100 dark:border-slate-600 flex items-center justify-center group-hover/item:scale-110 transition-transform">
                                     {getIcon(task.platform)}
                                 </div>
                             </div>
@@ -284,16 +284,16 @@ const TaskHubTile: React.FC<TaskHubTileProps> = ({ onCreateTask }) => {
                             {/* Task Content */}
                             <div className="flex-1 min-w-0">
                                 <div className="flex justify-between items-start">
-                                    <p className={`text-sm font-bold truncate pr-2 transition-colors ${task.status === 'done' ? 'text-gray-400 line-through decoration-indigo-300' : 'text-gray-800 group-hover/item:text-indigo-900'}`}>{task.description}</p>
-                                    <span className="text-[10px] font-bold text-gray-400 bg-gray-50 px-2 py-0.5 rounded-md border border-gray-100 shrink-0 uppercase tracking-wider">{task.platform}</span>
+                                    <p className={`text-sm font-bold truncate pr-2 transition-colors ${task.status === 'done' ? 'text-gray-400 dark:text-slate-500 line-through decoration-indigo-300' : 'text-gray-800 dark:text-slate-100 group-hover/item:text-indigo-900 dark:group-hover/item:text-indigo-300'}`}>{task.description}</p>
+                                    <span className="text-[10px] font-bold text-gray-400 dark:text-slate-400 bg-gray-50 dark:bg-slate-700/60 px-2 py-0.5 rounded-md border border-gray-100 dark:border-slate-600 shrink-0 uppercase tracking-wider">{task.platform}</span>
                                 </div>
                                 <div className="flex items-center gap-3 mt-1">
-                                    <span className="text-[11px] font-medium text-gray-500 flex items-center gap-1.5">
-                                        <span className="w-1 h-1 rounded-full bg-gray-300"></span>
+                                    <span className="text-[11px] font-medium text-gray-500 dark:text-slate-400 flex items-center gap-1.5">
+                                        <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-slate-600"></span>
                                         {task.project}
                                     </span>
                                     {task.dueDate !== 'No Date' && (
-                                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${task.dueDate === 'Today' ? 'bg-red-50 text-red-600 border-red-100' : 'bg-gray-50 text-gray-400 border-gray-100'
+                                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${task.dueDate === 'Today' ? 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border-red-100 dark:border-red-500/30' : 'bg-gray-50 dark:bg-slate-700/60 text-gray-400 dark:text-slate-400 border-gray-100 dark:border-slate-600'
                                             }`}>
                                             {task.dueDate}
                                         </span>
@@ -303,9 +303,9 @@ const TaskHubTile: React.FC<TaskHubTileProps> = ({ onCreateTask }) => {
 
                             {/* Status Dot (Minimalist) */}
                             <div className="pr-1 flex flex-col items-end gap-1">
-                                <div className={`w-2.5 h-2.5 rounded-full border-2 border-white shadow-sm ${task.status === 'in_progress' ? 'bg-indigo-500' :
+                                <div className={`w-2.5 h-2.5 rounded-full border-2 border-white dark:border-slate-800 shadow-sm ${task.status === 'in_progress' ? 'bg-indigo-500' :
                                     task.status === 'review' ? 'bg-purple-500' :
-                                        task.status === 'done' ? 'bg-emerald-500' : 'bg-gray-300'
+                                        task.status === 'done' ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-slate-600'
                                     }`} title={task.status.replace('_', ' ')} />
                             </div>
                         </div>
@@ -313,8 +313,8 @@ const TaskHubTile: React.FC<TaskHubTileProps> = ({ onCreateTask }) => {
                 </div>
 
                 {/* Premium Chart Sidebar (XL screens) */}
-                <div className="w-[200px] hidden xl:flex flex-col p-0 bg-white/20 border-l border-white/40 backdrop-blur-sm relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />
+                <div className="w-[200px] hidden xl:flex flex-col p-0 bg-white/20 dark:bg-slate-800/20 border-l border-white/40 dark:border-slate-700/40 backdrop-blur-sm relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-b from-white/10 dark:from-slate-700/10 to-transparent pointer-events-none" />
 
                     <div className="h-40 w-full relative mt-4">
                         <ResponsiveContainer width="100%" height="100%">
@@ -341,8 +341,8 @@ const TaskHubTile: React.FC<TaskHubTileProps> = ({ onCreateTask }) => {
                             </PieChart>
                         </ResponsiveContainer>
                         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                            <span className="text-3xl font-black text-gray-800 tracking-tighter">{tasks.length}</span>
-                            <span className="text-[10px] uppercase font-bold text-gray-400 tracking-widest mt-[-2px]">Total</span>
+                            <span className="text-3xl font-black text-gray-800 dark:text-white tracking-tighter">{tasks.length}</span>
+                            <span className="text-[10px] uppercase font-bold text-gray-400 dark:text-slate-500 tracking-widest mt-[-2px]">Total</span>
                         </div>
                     </div>
 
@@ -350,15 +350,15 @@ const TaskHubTile: React.FC<TaskHubTileProps> = ({ onCreateTask }) => {
                         {statusData.filter(d => d.value > 0).map((item) => (
                             <div key={item.name} className="flex items-center justify-between group cursor-default">
                                 <div className="flex items-center gap-2">
-                                    <div className="w-2 h-2 rounded-full ring-2 ring-white shadow-sm" style={{ backgroundColor: item.color }} />
-                                    <span className="text-[11px] text-gray-500 font-bold group-hover:text-gray-700 transition-colors">{item.name}</span>
+                                    <div className="w-2 h-2 rounded-full ring-2 ring-white dark:ring-slate-800 shadow-sm" style={{ backgroundColor: item.color }} />
+                                    <span className="text-[11px] text-gray-500 dark:text-slate-400 font-bold group-hover:text-gray-700 dark:group-hover:text-slate-200 transition-colors">{item.name}</span>
                                 </div>
-                                <span className="text-[11px] font-bold text-gray-800 bg-white/50 px-1.5 rounded-md min-w-[20px] text-center">{item.value}</span>
+                                <span className="text-[11px] font-bold text-gray-800 dark:text-slate-200 bg-white/50 dark:bg-slate-700/50 px-1.5 rounded-md min-w-[20px] text-center">{item.value}</span>
                             </div>
                         ))}
                     </div>
 
-                    <button className="mx-4 mb-4 py-2 text-xs font-bold text-indigo-600 bg-indigo-50/50 hover:bg-indigo-50 rounded-xl border border-indigo-100 transition-colors">
+                    <button className="mx-4 mb-4 py-2 text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-500/10 hover:bg-indigo-50 dark:hover:bg-indigo-500/20 rounded-xl border border-indigo-100 dark:border-indigo-500/30 transition-colors">
                         View Analytics
                     </button>
                 </div>

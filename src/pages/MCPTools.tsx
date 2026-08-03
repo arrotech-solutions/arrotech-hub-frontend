@@ -676,25 +676,25 @@ const MCPTools: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:bg-slate-950">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
+            <div className="h-8 bg-gray-200 dark:bg-slate-700 rounded w-1/4 mb-6"></div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="bg-white rounded-lg shadow p-6">
-                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
-                  <div className="h-3 bg-gray-200 rounded w-1/2 mb-2"></div>
-                  <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                <div key={i} className="bg-white dark:bg-slate-900 rounded-lg shadow p-6 border border-transparent dark:border-slate-800">
+                  <div className="h-4 bg-gray-200 dark:bg-slate-700 rounded w-3/4 mb-4"></div>
+                  <div className="h-3 bg-gray-200 dark:bg-slate-700 rounded w-1/2 mb-2"></div>
+                  <div className="h-3 bg-gray-200 dark:bg-slate-700 rounded w-2/3"></div>
                 </div>
               ))}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[...Array(6)].map((_, i) => (
-                <div key={i} className="bg-white rounded-lg shadow p-6">
-                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
-                  <div className="h-3 bg-gray-200 rounded w-1/2 mb-2"></div>
-                  <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                <div key={i} className="bg-white dark:bg-slate-900 rounded-lg shadow p-6 border border-transparent dark:border-slate-800">
+                  <div className="h-4 bg-gray-200 dark:bg-slate-700 rounded w-3/4 mb-4"></div>
+                  <div className="h-3 bg-gray-200 dark:bg-slate-700 rounded w-1/2 mb-2"></div>
+                  <div className="h-3 bg-gray-200 dark:bg-slate-700 rounded w-2/3"></div>
                 </div>
               ))}
             </div>
@@ -705,21 +705,21 @@ const MCPTools: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-950">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mcptools-header mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">MCP Tools</h1>
-              <p className="mt-2 text-gray-600">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">MCP Tools</h1>
+              <p className="mt-2 text-gray-600 dark:text-slate-400">
                 Execute AI-powered tools and integrations. Tools are dynamically generated based on your connections.
               </p>
             </div>
             <div className="flex items-center space-x-3">
               <button
                 onClick={fetchTools}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-slate-700 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Refresh
@@ -731,14 +731,14 @@ const MCPTools: React.FC = () => {
         {/* Stats Cards */}
         <div className="mcptools-stats grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {stats.map((stat, index) => (
-            <div key={index} className="bg-white rounded-lg shadow p-6">
+            <div key={index} className="bg-white dark:bg-slate-900 rounded-lg shadow p-6 border border-transparent dark:border-slate-800">
               <div className="flex items-center">
                 <div className={`p-3 rounded-lg ${stat.color}`}>
                   <stat.icon className="w-6 h-6 text-white" />
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">{stat.label}</p>
-                  <p className="text-2xl font-semibold text-gray-900">{stat.value}</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-slate-400">{stat.label}</p>
+                  <p className="text-2xl font-semibold text-gray-900 dark:text-white">{stat.value}</p>
                 </div>
               </div>
             </div>
@@ -746,8 +746,8 @@ const MCPTools: React.FC = () => {
         </div>
 
         {/* Filters and Search */}
-        <div className="mcptools-filters bg-white rounded-lg shadow mb-6">
-          <div className="p-6 border-b border-gray-200">
+        <div className="mcptools-filters bg-white dark:bg-slate-900 rounded-lg shadow mb-6 border border-transparent dark:border-slate-800">
+          <div className="p-6 border-b border-gray-200 dark:border-slate-800">
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1">
                 <div className="relative">
@@ -757,7 +757,7 @@ const MCPTools: React.FC = () => {
                     placeholder="Search tools..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500"
                   />
                 </div>
               </div>
@@ -768,7 +768,7 @@ const MCPTools: React.FC = () => {
                     onClick={() => setFilterCategory(category)}
                     className={`px-4 py-2 rounded-lg whitespace-nowrap text-sm font-medium transition-colors ${filterCategory === category
                         ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        : 'bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-700'
                       }`}
                   >
                     {category === 'all' ? 'All Tools' : category.charAt(0).toUpperCase() + category.slice(1).replace(/_/g, ' ')}
@@ -784,13 +784,13 @@ const MCPTools: React.FC = () => {
           {filteredTools.map((tool) => (
             <div
               key={tool.name}
-              className="tool-card bg-white rounded-lg shadow border border-gray-200 p-6 hover:shadow-lg transition-shadow"
+              className="tool-card bg-white dark:bg-slate-900 rounded-lg shadow border border-gray-200 dark:border-slate-800 p-6 hover:shadow-lg transition-shadow"
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center space-x-3">
                   <span className="text-2xl">{getToolIcon(tool.name)}</span>
                   <div>
-                    <h3 className="font-semibold text-gray-900">{tool.name.replace(/_/g, ' ')}</h3>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">{tool.name.replace(/_/g, ' ')}</h3>
                     <div className="flex items-center space-x-2">
                       {getStatusIcon(getToolStatus(tool))}
                       <span className={`text-sm ${getStatusColor(getToolStatus(tool))}`}>
@@ -804,19 +804,19 @@ const MCPTools: React.FC = () => {
                 </div>
               </div>
 
-              <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+              <p className="text-gray-600 dark:text-slate-400 text-sm mb-4 line-clamp-2">
                 {getToolDescription(tool.name)}
               </p>
 
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2 text-sm text-gray-500">
+                <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-slate-400">
                   {getCategoryIcon(getToolCategory(tool.name))}
                   <span>{getToolCategory(tool.name).replace(/_/g, ' ')}</span>
                 </div>
                 <button
                   onClick={() => openExecuteModal(tool)}
                   disabled={getToolStatus(tool) !== 'available'}
-                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 dark:disabled:bg-slate-700 disabled:cursor-not-allowed transition-colors text-sm font-medium"
                 >
                   <Play className="w-4 h-4" />
                   <span>Execute</span>
@@ -827,10 +827,10 @@ const MCPTools: React.FC = () => {
         </div>
 
         {filteredTools.length === 0 && (
-          <div className="text-center py-12 bg-white rounded-lg shadow">
+          <div className="text-center py-12 bg-white dark:bg-slate-900 rounded-lg shadow border border-transparent dark:border-slate-800">
             <div className="text-gray-400 text-6xl mb-4">🔧</div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No tools found</h3>
-            <p className="text-gray-600">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No tools found</h3>
+            <p className="text-gray-600 dark:text-slate-400">
               {searchTerm || filterCategory !== 'all'
                 ? 'Try adjusting your search or filter criteria.'
                 : 'No tools are currently available. Check your connections to see available tools.'
@@ -842,20 +842,20 @@ const MCPTools: React.FC = () => {
         {/* Execute Tool Modal */}
         {showExecuteModal && selectedTool && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="p-6 border-b border-gray-200">
+            <div className="bg-white dark:bg-slate-900 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-transparent dark:border-slate-700">
+              <div className="p-6 border-b border-gray-200 dark:border-slate-800">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-semibold text-gray-900">
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
                     Execute: {selectedTool.name.replace(/_/g, ' ')}
                   </h2>
                   <button
                     onClick={() => setShowExecuteModal(false)}
-                    className="text-gray-400 hover:text-gray-600"
+                    className="text-gray-400 hover:text-gray-600 dark:hover:text-slate-200"
                   >
                     <XCircle className="w-6 h-6" />
                   </button>
                 </div>
-                <p className="text-gray-600 mt-2">{getToolDescription(selectedTool.name)}</p>
+                <p className="text-gray-600 dark:text-slate-400 mt-2">{getToolDescription(selectedTool.name)}</p>
               </div>
 
               <div className="p-6">
@@ -863,14 +863,14 @@ const MCPTools: React.FC = () => {
 
                 {/* Streaming Status */}
                 {isStreaming && streamingStatus && (
-                  <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/30 rounded-lg">
                     <div className="flex items-center space-x-2">
                       <div className="flex space-x-1">
                         <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
                         <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" style={{ animationDelay: '0.1s' }}></div>
                         <div className="w-2 h-2 bg-pink-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
                       </div>
-                      <span className="text-sm text-blue-700 font-medium">{streamingStatus}</span>
+                      <span className="text-sm text-blue-700 dark:text-blue-300 font-medium">{streamingStatus}</span>
                     </div>
                   </div>
                 )}
@@ -895,7 +895,7 @@ const MCPTools: React.FC = () => {
                   </button>
                   <button
                     onClick={() => setShowExecuteModal(false)}
-                    className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                    className="px-4 py-2 border border-gray-300 dark:border-slate-700 text-gray-700 dark:text-slate-300 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
                   >
                     Cancel
                   </button>
@@ -903,9 +903,9 @@ const MCPTools: React.FC = () => {
 
                 {executionResult && (
                   <div className="mt-6">
-                    <h3 className="font-medium text-gray-900 mb-2">Result</h3>
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <pre className="text-sm text-gray-800 overflow-x-auto">
+                    <h3 className="font-medium text-gray-900 dark:text-white mb-2">Result</h3>
+                    <div className="bg-gray-50 dark:bg-slate-800 rounded-lg p-4">
+                      <pre className="text-sm text-gray-800 dark:text-slate-200 overflow-x-auto">
                         {JSON.stringify(executionResult, null, 2)}
                       </pre>
                     </div>

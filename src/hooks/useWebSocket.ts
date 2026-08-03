@@ -163,6 +163,11 @@ export function sendWebSocketMessage(payload: unknown) {
     }
 }
 
+/** Force-close the shared realtime socket (logout / account deletion). */
+export function disconnectRealtime() {
+    closeSharedConnection();
+}
+
 export function useWebSocket() {
     const [isConnected, setIsConnected] = useState(
         () => sharedSocket?.readyState === WebSocket.OPEN

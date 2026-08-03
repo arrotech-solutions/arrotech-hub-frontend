@@ -52,15 +52,15 @@ export const UsageMeter: React.FC<UsageMeterProps> = ({
     };
 
     const getTextColor = () => {
-        if (isAtLimit) return 'text-red-600';
-        if (isWarning) return 'text-amber-600';
-        return 'text-gray-600';
+        if (isAtLimit) return 'text-red-600 dark:text-red-400';
+        if (isWarning) return 'text-amber-600 dark:text-amber-400';
+        return 'text-gray-600 dark:text-slate-400';
     };
 
     const getBgColor = () => {
-        if (isAtLimit) return 'bg-red-50 border-red-200';
-        if (isWarning) return 'bg-amber-50 border-amber-200';
-        return 'bg-gray-50 border-gray-200';
+        if (isAtLimit) return 'bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/30';
+        if (isWarning) return 'bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/30';
+        return 'bg-gray-50 dark:bg-slate-800/60 border-gray-200 dark:border-slate-700';
     };
 
     // Size classes
@@ -101,21 +101,21 @@ export const UsageMeter: React.FC<UsageMeterProps> = ({
             <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                     <IconComponent className={`${sizes.icon} ${getTextColor()}`} />
-                    <span className={`font-medium ${sizes.text} text-gray-700`}>{label}</span>
+                    <span className={`font-medium ${sizes.text} text-gray-700 dark:text-slate-200`}>{label}</span>
                 </div>
                 <div className="flex items-center gap-1">
                     <span className={`font-semibold ${sizes.text} ${getTextColor()}`}>
                         {used.toLocaleString()}
                     </span>
-                    <span className={`${sizes.text} text-gray-400`}>/</span>
-                    <span className={`${sizes.text} text-gray-500`}>
+                    <span className={`${sizes.text} text-gray-400 dark:text-slate-500`}>/</span>
+                    <span className={`${sizes.text} text-gray-500 dark:text-slate-400`}>
                         {formatLimit(limit)}
                     </span>
                 </div>
             </div>
 
             {/* Progress Bar */}
-            <div className={`w-full bg-gray-200 rounded-full overflow-hidden ${sizes.bar}`}>
+            <div className={`w-full bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden ${sizes.bar}`}>
                 <div
                     className={`${getBarColor()} ${sizes.bar} rounded-full transition-all duration-300`}
                     style={{ width: `${isUnlimited ? 0 : Math.min(percentage, 100)}%` }}
@@ -177,8 +177,8 @@ export const UsageMetersCard: React.FC<UsageMetersCardProps> = ({
     if (!aiActions && !automationRuns) return null;
 
     return (
-        <div className={`bg-white rounded-xl border border-gray-200 p-4 ${className}`}>
-            <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+        <div className={`bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-700 p-4 ${className}`}>
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-slate-200 mb-3 flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-indigo-500" />
                 Monthly Usage
             </h3>
