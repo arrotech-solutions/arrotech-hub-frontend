@@ -92,19 +92,19 @@ const CalendarHubTile: React.FC = () => {
     }, []);
 
     return (
-        <div className="bg-white/40 backdrop-blur-md rounded-3xl border border-white/40 shadow-xl flex flex-col h-full overflow-hidden group transition-all hover:shadow-2xl relative">
+        <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-md rounded-3xl border border-white/40 dark:border-slate-700/60 shadow-xl flex flex-col h-full overflow-hidden group transition-all hover:shadow-2xl relative">
             {/* Header */}
-            <div className="p-6 pb-4 border-b border-white/20 flex items-center justify-between z-10">
+            <div className="p-6 pb-4 border-b border-white/20 dark:border-slate-700/40 flex items-center justify-between z-10">
                 <div>
-                    <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                    <h2 className="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
                         Up Next
                         {loading && <Loader2 className="w-4 h-4 animate-spin text-gray-400" />}
                     </h2>
-                    <p className="text-xs text-gray-500 font-medium mt-1">
+                    <p className="text-xs text-gray-500 dark:text-slate-400 font-medium mt-1">
                         {events.length} events today
                     </p>
                 </div>
-                <div className="p-2 bg-white/50 rounded-xl hover:bg-white transition-colors cursor-pointer text-gray-500 hover:text-indigo-600">
+                <div className="p-2 bg-white/50 dark:bg-slate-800/60 rounded-xl hover:bg-white dark:hover:bg-slate-700 transition-colors cursor-pointer text-gray-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400">
                     <CalendarIcon className="w-5 h-5" />
                 </div>
             </div>
@@ -112,18 +112,18 @@ const CalendarHubTile: React.FC = () => {
             {/* Events List */}
             <div className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar relative z-0">
                 {events.length === 0 && !loading && (
-                    <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                    <div className="flex flex-col items-center justify-center h-full text-gray-400 dark:text-slate-500">
                         <CalendarIcon className="w-8 h-8 mb-2 opacity-50" />
                         <span className="text-sm font-medium">No upcoming events</span>
                     </div>
                 )}
 
                 {events.map((event, index) => (
-                    <div key={event.id} className="group/item relative flex items-start gap-4 p-3 bg-white/40 hover:bg-white/70 rounded-xl border border-white/40 hover:border-indigo-100 transition-all cursor-pointer">
+                    <div key={event.id} className="group/item relative flex items-start gap-4 p-3 bg-white/40 dark:bg-slate-800/40 hover:bg-white/70 dark:hover:bg-slate-800/70 rounded-xl border border-white/40 dark:border-slate-700/40 hover:border-indigo-100 dark:hover:border-indigo-500/30 transition-all cursor-pointer">
                         {/* Time Column */}
-                        <div className="flex flex-col items-center min-w-[3.5rem] pt-1 border-r border-white/30 pr-3">
-                            <span className="text-xs font-bold text-gray-800">{event.time}</span>
-                            <span className="text-[10px] font-medium text-gray-400 mt-0.5">{event.duration}</span>
+                        <div className="flex flex-col items-center min-w-[3.5rem] pt-1 border-r border-white/30 dark:border-slate-700/50 pr-3">
+                            <span className="text-xs font-bold text-gray-800 dark:text-slate-100">{event.time}</span>
+                            <span className="text-[10px] font-medium text-gray-400 dark:text-slate-500 mt-0.5">{event.duration}</span>
                         </div>
 
                         {/* Content Column */}

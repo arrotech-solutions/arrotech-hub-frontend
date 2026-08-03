@@ -17,8 +17,37 @@ export interface User {
   role?: 'user' | 'employee' | 'admin';
   permissions?: Record<string, boolean>;
   email_verified?: boolean;
+  onboarding_completed_at?: string | null;
+  onboarding_version?: number | null;
+  primary_goal?: OnboardingPrimaryGoal | null;
+  secondary_goals?: OnboardingPrimaryGoal[];
+  workspace_type?: 'solo' | 'team' | null;
+  onboarding_role?: string | null;
+  preferred_apps?: string[];
+  activation_event?: string | null;
+  onboarding_step?: number | null;
   created_at: string;
   updated_at: string;
+}
+
+export type OnboardingPrimaryGoal =
+  | 'unified_productivity'
+  | 'messaging_agents'
+  | 'ask_ai'
+  | 'automations'
+  | 'social_content'
+  | 'exploring';
+
+export interface OnboardingUpdatePayload {
+  primary_goal?: OnboardingPrimaryGoal;
+  secondary_goals?: OnboardingPrimaryGoal[];
+  workspace_type?: 'solo' | 'team';
+  onboarding_role?: string;
+  preferred_apps?: string[];
+  activation_event?: string;
+  onboarding_step?: number;
+  complete?: boolean;
+  onboarding_version?: number;
 }
 
 // Chat Types

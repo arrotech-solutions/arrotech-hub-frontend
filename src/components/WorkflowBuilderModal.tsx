@@ -236,7 +236,7 @@ const WorkflowBuilderModal: React.FC<WorkflowBuilderModalProps> = ({
       />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden">
+      <div className="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden border border-transparent dark:border-slate-700">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-secondary-800 to-primary-500">
           <div className="flex items-center space-x-3">
@@ -263,19 +263,19 @@ const WorkflowBuilderModal: React.FC<WorkflowBuilderModalProps> = ({
           {success ? (
             // Success State
             <div className="text-center py-8">
-              <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
-                <CheckCircle className="w-8 h-8 text-green-600" />
+              <div className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-500/20 flex items-center justify-center mx-auto mb-4">
+                <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
                 Workflow Created Successfully!
               </h3>
-              <p className="text-gray-600 mb-6">
+              <p className="text-gray-600 dark:text-slate-400 mb-6">
                 Your workflow "{createdWorkflow?.name}" has been saved with {selectedSteps.length} steps.
               </p>
               <div className="flex items-center justify-center space-x-4">
                 <button
                   onClick={onClose}
-                  className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  className="px-6 py-2.5 border border-gray-300 dark:border-slate-700 rounded-lg text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
                 >
                   Close
                 </button>
@@ -519,7 +519,7 @@ const WorkflowBuilderModal: React.FC<WorkflowBuilderModalProps> = ({
                             onClick={() => handleFieldToggle(field)}
                             className={`flex items-center space-x-1.5 px-3 py-1.5 text-sm rounded-full transition-all ${parameterizeFields.includes(field)
                               ? 'bg-blue-600 text-white'
-                              : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
+                              : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700'
                               }`}
                           >
                             <span>{parameterizeFields.includes(field) ? '✓' : '○'}</span>
@@ -540,29 +540,29 @@ const WorkflowBuilderModal: React.FC<WorkflowBuilderModalProps> = ({
               {/* Step 2: Review */}
               {activeStep === 2 && (
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-gray-900">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                     Review Workflow
                   </h3>
 
-                  <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                  <div className="bg-gray-50 dark:bg-slate-800/60 rounded-lg p-4 space-y-3">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Name</span>
-                      <span className="font-medium">{workflowName}</span>
+                      <span className="text-gray-600 dark:text-slate-400">Name</span>
+                      <span className="font-medium text-gray-900 dark:text-white">{workflowName}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Steps</span>
-                      <span className="font-medium">{selectedSteps.length}</span>
+                      <span className="text-gray-600 dark:text-slate-400">Steps</span>
+                      <span className="font-medium text-gray-900 dark:text-white">{selectedSteps.length}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Trigger</span>
-                      <span className="font-medium capitalize">{triggerType}</span>
+                      <span className="text-gray-600 dark:text-slate-400">Trigger</span>
+                      <span className="font-medium capitalize text-gray-900 dark:text-white">{triggerType}</span>
                     </div>
                     {parameterizeFields.length > 0 && (
                       <div className="flex justify-between items-start">
-                        <span className="text-gray-600">Input Parameters</span>
+                        <span className="text-gray-600 dark:text-slate-400">Input Parameters</span>
                         <div className="flex flex-wrap gap-1 justify-end max-w-[200px]">
                           {parameterizeFields.map(f => (
-                            <span key={f} className="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs rounded">
+                            <span key={f} className="px-2 py-0.5 bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 text-xs rounded">
                               {f}
                             </span>
                           ))}
@@ -572,16 +572,16 @@ const WorkflowBuilderModal: React.FC<WorkflowBuilderModalProps> = ({
                   </div>
 
                   <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">Steps Preview</h4>
+                    <h4 className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Steps Preview</h4>
                     <div className="space-y-2">
                       {toolCalls
                         .filter(tc => selectedSteps.includes(tc.id))
                         .map((tc, index) => (
-                          <div key={tc.id} className="flex items-center space-x-3 p-3 bg-white border border-gray-200 rounded-lg">
-                            <div className="w-6 h-6 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-sm font-medium">
+                          <div key={tc.id} className="flex items-center space-x-3 p-3 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg">
+                            <div className="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center text-sm font-medium">
                               {index + 1}
                             </div>
-                            <span className="font-medium text-gray-900">{tc.tool_name}</span>
+                            <span className="font-medium text-gray-900 dark:text-white">{tc.tool_name}</span>
                           </div>
                         ))
                       }
@@ -595,7 +595,7 @@ const WorkflowBuilderModal: React.FC<WorkflowBuilderModalProps> = ({
 
         {/* Footer */}
         {!success && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 bg-gray-50">
+          <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50">
             <button
               onClick={activeStep === 0 ? onClose : () => setActiveStep(activeStep - 1)}
               className="px-4 py-2 text-gray-700 hover:text-gray-900 transition-colors"

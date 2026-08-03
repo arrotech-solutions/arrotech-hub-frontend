@@ -100,6 +100,13 @@ const Chat: React.FC = () => {
     document.documentElement.classList.toggle('dark', isDarkMode);
   }, [isDarkMode]);
 
+  // Surface stream errors that were not already toasted at send-time
+  useEffect(() => {
+    if (streamError && streamError !== 'Request cancelled') {
+      toast.error(streamError);
+    }
+  }, [streamError]);
+
   // Initial Data Load
   useEffect(() => {
     const loadData = async () => {
@@ -313,7 +320,12 @@ const Chat: React.FC = () => {
       // ── Seamless Handover ──
       // Snapshot is authoritative (not React state). Paint MessageItem first, then
       // flush the live stream on the next frames so there is no flicker / truncation.
-      if (
+      if (finalState.error) {
+        toast.error(finalState.error);
+        setIsLoading(false);
+        streamingConversationRef.current = null;
+        flushStreamState();
+      } else if (
         finalState.content ||
         finalState.activityLog.length > 0 ||
         (finalState.finalToolsCalled && finalState.finalToolsCalled.length > 0)
@@ -342,6 +354,7 @@ const Chat: React.FC = () => {
           });
         });
       } else {
+        toast.error('No response received. Please try again.');
         setIsLoading(false);
         streamingConversationRef.current = null;
         flushStreamState();
@@ -382,15 +395,36 @@ const Chat: React.FC = () => {
       setEditingMessageText('');
 
       setIsLoading(true);
-      const response = await apiService.sendMessage(currentConversation!.id, {
-        content: editedContent,
-        provider: selectedProvider
-      });
-      setMessages(prev => [...prev, response]);
+      streamingConversationRef.current = currentConversation!.id;
+      const finalState = await sendStreamingMessage(
+        currentConversation!.id,
+        editedContent,
+        selectedProvider,
+        useReasoning,
+        useSearch
+      );
+      if (finalState.error) {
+        toast.error(finalState.error);
+      } else if (finalState.content || (finalState.finalToolsCalled && finalState.finalToolsCalled.length > 0)) {
+        const assistantMsg: Message = {
+          id: (finalState.lastMessageId as any) || (Date.now() + 1),
+          conversation_id: currentConversation!.id,
+          role: 'assistant',
+          content: finalState.content || '',
+          tools_called: finalState.finalToolsCalled,
+          created_at: new Date().toISOString(),
+          status: 'completed'
+        };
+        setMessages(prev => [...prev, assistantMsg]);
+      } else {
+        toast.error('No response received. Please try again.');
+      }
+      flushStreamState();
     } catch (error) {
       toast.error('Failed to resend message');
     } finally {
       setIsLoading(false);
+      streamingConversationRef.current = null;
     }
   };
 

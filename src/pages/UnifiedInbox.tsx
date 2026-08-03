@@ -854,7 +854,7 @@ const UnifiedInbox: React.FC = () => {
         }
 
         if (!isValid) {
-            alert('Please fill in all required fields (Recipient/Channel + Message).');
+            toast.error('Please fill in all required fields (Recipient/Channel + Message).');
             return;
         }
 
@@ -967,7 +967,7 @@ const UnifiedInbox: React.FC = () => {
             }
         } catch (error) {
             console.error(error);
-            alert('An error occurred while sending the message.');
+            toast.error('An error occurred while sending the message.');
         } finally {
             setLoading(false);
         }
@@ -1095,10 +1095,10 @@ const UnifiedInbox: React.FC = () => {
                                             return (
                                                 <div
                                                     key={index}
-                                                    className="group relative flex items-center gap-2 p-2 bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md hover:border-indigo-200 transition-all"
+                                                    className="group relative flex items-center gap-2 p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm hover:shadow-md hover:border-indigo-200 dark:hover:border-indigo-500/40 transition-all"
                                                 >
                                                     {isImage ? (
-                                                        <div className="w-10 h-10 rounded-lg overflow-hidden bg-slate-100 flex-shrink-0">
+                                                        <div className="w-10 h-10 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-700 flex-shrink-0">
                                                             <img
                                                                 src={URL.createObjectURL(file)}
                                                                 alt={file.name}
@@ -1106,16 +1106,16 @@ const UnifiedInbox: React.FC = () => {
                                                             />
                                                         </div>
                                                     ) : (
-                                                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center flex-shrink-0">
-                                                            <Paperclip className="w-4 h-4 text-indigo-600" />
+                                                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/50 dark:to-purple-900/50 flex items-center justify-center flex-shrink-0">
+                                                            <Paperclip className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                                                         </div>
                                                     )}
 
                                                     <div className="flex flex-col min-w-0 pr-6">
-                                                        <span className="text-xs font-medium text-slate-700 truncate max-w-[100px] md:max-w-[150px]">
+                                                        <span className="text-xs font-medium text-slate-700 dark:text-slate-200 truncate max-w-[100px] md:max-w-[150px]">
                                                             {file.name}
                                                         </span>
-                                                        <span className="text-[10px] text-slate-400">
+                                                        <span className="text-[10px] text-slate-400 dark:text-slate-500">
                                                             {formatFileSize(file.size)}
                                                         </span>
                                                     </div>
@@ -1728,9 +1728,9 @@ const UnifiedInbox: React.FC = () => {
                         </div>
                     </>
                 ) : (
-                    <div className="flex flex-col items-center justify-center h-full bg-slate-50/50">
-                        <Inbox className="w-16 h-16 text-slate-200 mb-4" />
-                        <p className="text-slate-500 font-medium">Select a message to view</p>
+                    <div className="flex flex-col items-center justify-center h-full bg-slate-50/50 dark:bg-slate-900/50">
+                        <Inbox className="w-16 h-16 text-slate-200 dark:text-slate-700 mb-4" />
+                        <p className="text-slate-500 dark:text-slate-400 font-medium">Select a message to view</p>
                     </div>
                 )}
             </div>

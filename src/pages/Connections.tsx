@@ -7,7 +7,7 @@ import {
 import UpgradeModal from '../components/UpgradeModal';
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import toast from '../lib/notify';
-import { Spinner } from '../components/ui';
+import { Spinner, useConfirm } from '../components/ui';
 import { useNavigate } from 'react-router-dom';
 import apiService from '../services/api';
 import { Connection, ConnectionPlatform } from '../types';
@@ -49,7 +49,7 @@ import TelegramLogoImg from '../assets/apps/telegram.png';
 
 const Integrations: React.FC = () => {
   const navigate = useNavigate();
-
+  const { confirm } = useConfirm();
 
   // State
   const [connections, setConnections] = useState<Connection[]>([]);
@@ -229,6 +229,16 @@ const Integrations: React.FC = () => {
         toast.success('Telegram connected successfully!');
       } else {
         toast.success('Connection successful!');
+      }
+      try {
+        const resume = sessionStorage.getItem('hub_onboarding_resume_step');
+        if (resume != null) {
+          navigate(`/onboarding?step=${resume}`, { replace: true });
+          processedCallback.current = true;
+          return;
+        }
+      } catch {
+        /* ignore */
       }
       navigate('/connections', { replace: true });
       processedCallback.current = true;
@@ -1346,7 +1356,13 @@ const Integrations: React.FC = () => {
                   {editingConnection && (
                     <button
                       onClick={async () => {
-                        if (!window.confirm('Are you sure you want to disconnect? This will stop all related automations.')) return;
+                        const ok = await confirm({
+                          title: 'Disconnect this service?',
+                          description: 'Related automations and syncs that depend on this connection will stop working.',
+                          tone: 'danger',
+                          confirmLabel: 'Disconnect',
+                        });
+                        if (!ok) return;
                         try {
                           await apiService.deleteConnection(editingConnection.id);
                           toast.success('Disconnected successfully');

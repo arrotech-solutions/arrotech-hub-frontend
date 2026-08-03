@@ -15,6 +15,7 @@ import {
   Code
 } from 'lucide-react';
 import api from '../../services/api';
+import { useConfirm } from '../ui';
 import { DeveloperApp } from '../../types';
 
 interface AppDetailsModalProps {
@@ -27,6 +28,7 @@ interface AppDetailsModalProps {
 
 
 const AppDetailsModal: React.FC<AppDetailsModalProps> = ({ app, isOpen, onClose, onUpdate, onDelete }) => {
+  const { confirm } = useConfirm();
   const [activeTab, setActiveTab] = useState<'overview' | 'settings'>('overview');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -63,7 +65,13 @@ const AppDetailsModal: React.FC<AppDetailsModalProps> = ({ app, isOpen, onClose,
   };
 
   const handleRotateSecret = async () => {
-    if (!confirm('Are you sure you want to rotate the client secret? The old secret will stop working immediately.')) return;
+    const ok = await confirm({
+      title: 'Rotate client secret?',
+      description: 'The current secret stops working immediately. Update any apps or scripts that still use it.',
+      tone: 'warning',
+      confirmLabel: 'Rotate secret',
+    });
+    if (!ok) return;
     
     setLoading(true);
     try {
@@ -81,7 +89,13 @@ const AppDetailsModal: React.FC<AppDetailsModalProps> = ({ app, isOpen, onClose,
   };
 
   const handleDelete = async () => {
-    if (!confirm('Are you sure you want to delete this app? This action cannot be undone.')) return;
+    const ok = await confirm({
+      title: 'Delete this app?',
+      description: 'This permanently removes the developer app and its credentials. This cannot be undone.',
+      tone: 'danger',
+      confirmLabel: 'Delete app',
+    });
+    if (!ok) return;
     
     setLoading(true);
     try {

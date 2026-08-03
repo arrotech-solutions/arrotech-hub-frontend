@@ -154,15 +154,15 @@ const Dashboard: React.FC = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
+            <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     <div className="animate-pulse">
-                        <div className="h-8 bg-gray-200 rounded w-1/3 mb-8"></div>
+                        <div className="h-8 bg-gray-200 dark:bg-slate-700 rounded w-1/3 mb-8"></div>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                             {Array.from({ length: 4 }).map((_, i) => (
-                                <div key={i} className="bg-white rounded-2xl p-6 shadow-sm">
-                                    <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
-                                    <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+                                <div key={i} className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-transparent dark:border-slate-700">
+                                    <div className="h-4 bg-gray-200 dark:bg-slate-700 rounded w-1/2 mb-2"></div>
+                                    <div className="h-8 bg-gray-200 dark:bg-slate-700 rounded w-1/3"></div>
                                 </div>
                             ))}
                         </div>

@@ -180,7 +180,7 @@ const NotificationsDropdown: React.FC = () => {
       case 'system_announcement':
       case 'maintenance':
       default:
-        return <Info className="w-4 h-4 text-gray-500" />;
+        return <Info className="w-4 h-4 text-gray-500 dark:text-slate-400" />;
     }
   };
 
@@ -204,7 +204,7 @@ const NotificationsDropdown: React.FC = () => {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+        className="relative p-2 text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
       >
         <Bell className="w-5 h-5" />
         {unreadCount > 0 && (
@@ -218,20 +218,23 @@ const NotificationsDropdown: React.FC = () => {
         <>
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
 
-          <div className="fixed sm:absolute top-16 sm:top-auto right-4 sm:right-0 left-4 sm:left-auto sm:mt-2 w-auto sm:w-96 bg-white rounded-xl shadow-xl border border-gray-200 z-50 overflow-hidden">
-            <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-              <h3 className="font-semibold text-gray-900">Notifications</h3>
+          <div className="fixed sm:absolute top-16 sm:top-auto right-4 sm:right-0 left-4 sm:left-auto sm:mt-2 w-auto sm:w-96 bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-gray-200 dark:border-slate-700 z-50 overflow-hidden">
+            <div className="px-4 py-3 border-b border-gray-100 dark:border-slate-700/80 flex items-center justify-between">
+              <h3 className="font-semibold text-gray-900 dark:text-white">Notifications</h3>
               <div className="flex items-center space-x-2">
                 {unreadCount > 0 && (
                   <button
                     onClick={handleMarkAllAsRead}
-                    className="text-xs text-purple-600 hover:text-purple-700 flex items-center space-x-1"
+                    className="text-xs text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 flex items-center space-x-1"
                   >
                     <CheckCheck className="w-3 h-3" />
                     <span>Mark all read</span>
                   </button>
                 )}
-                <button onClick={fetchNotifications} className="p-1 text-gray-400 hover:text-gray-600">
+                <button
+                  onClick={fetchNotifications}
+                  className="p-1 text-gray-400 dark:text-slate-400 hover:text-gray-600 dark:hover:text-slate-200"
+                >
                   <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
                 </button>
               </div>
@@ -239,21 +242,23 @@ const NotificationsDropdown: React.FC = () => {
 
             <div className="max-h-96 overflow-y-auto">
               {loading && notifications.length === 0 ? (
-                <div className="p-8 text-center text-gray-500">
+                <div className="p-8 text-center text-gray-500 dark:text-slate-400">
                   <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2" />
                   <p>Loading...</p>
                 </div>
               ) : notifications.length === 0 ? (
-                <div className="p-8 text-center text-gray-500">
-                  <Bell className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                <div className="p-8 text-center text-gray-500 dark:text-slate-400">
+                  <Bell className="w-8 h-8 mx-auto mb-2 text-gray-300 dark:text-slate-600" />
                   <p>No notifications yet</p>
                 </div>
               ) : (
                 notifications.map((notification) => (
                   <div
                     key={notification.id}
-                    className={`px-4 py-3 border-b border-gray-50 hover:bg-gray-50 cursor-pointer transition-colors ${
-                      !notification.is_read ? 'bg-purple-50/50' : ''
+                    className={`px-4 py-3 border-b border-gray-50 dark:border-slate-800 hover:bg-gray-50 dark:hover:bg-slate-800/80 cursor-pointer transition-colors ${
+                      !notification.is_read
+                        ? 'bg-purple-50/50 dark:bg-purple-950/40'
+                        : 'bg-transparent'
                     }`}
                     onClick={() => handleNotificationClick(notification)}
                   >
@@ -265,7 +270,9 @@ const NotificationsDropdown: React.FC = () => {
                         <div className="flex items-start justify-between">
                           <p
                             className={`text-sm font-medium ${
-                              !notification.is_read ? 'text-gray-900' : 'text-gray-700'
+                              !notification.is_read
+                                ? 'text-gray-900 dark:text-white'
+                                : 'text-gray-700 dark:text-slate-200'
                             }`}
                           >
                             {notification.title}
@@ -277,7 +284,7 @@ const NotificationsDropdown: React.FC = () => {
                                   e.stopPropagation();
                                   handleMarkAsRead(notification.id);
                                 }}
-                                className="p-1 text-gray-400 hover:text-green-500"
+                                className="p-1 text-gray-400 dark:text-slate-500 hover:text-green-500"
                                 title="Mark as read"
                               >
                                 <Check className="w-3 h-3" />
@@ -288,17 +295,23 @@ const NotificationsDropdown: React.FC = () => {
                                 e.stopPropagation();
                                 handleDelete(notification.id);
                               }}
-                              className="p-1 text-gray-400 hover:text-red-500"
+                              className="p-1 text-gray-400 dark:text-slate-500 hover:text-red-500"
                               title="Delete"
                             >
                               <Trash2 className="w-3 h-3" />
                             </button>
                           </div>
                         </div>
-                        <p className="text-sm text-gray-600 mt-0.5 line-clamp-2">{notification.message}</p>
+                        <p className="text-sm text-gray-600 dark:text-slate-400 mt-0.5 line-clamp-2">
+                          {notification.message}
+                        </p>
                         <div className="flex items-center space-x-2 mt-1">
-                          <span className="text-xs text-gray-400">{formatTimeAgo(notification.created_at)}</span>
-                          {notification.action_url && <ExternalLink className="w-3 h-3 text-gray-400" />}
+                          <span className="text-xs text-gray-400 dark:text-slate-500">
+                            {formatTimeAgo(notification.created_at)}
+                          </span>
+                          {notification.action_url && (
+                            <ExternalLink className="w-3 h-3 text-gray-400 dark:text-slate-500" />
+                          )}
                         </div>
                       </div>
                     </div>
@@ -307,13 +320,13 @@ const NotificationsDropdown: React.FC = () => {
               )}
             </div>
 
-            <div className="px-4 py-2 border-t border-gray-100 bg-gray-50 flex items-center justify-between">
+            <div className="px-4 py-2 border-t border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-950/60 flex items-center justify-between">
               <button
                 onClick={() => {
                   setIsOpen(false);
                   navigate('/settings?tab=notifications');
                 }}
-                className="text-sm text-gray-600 hover:text-gray-900 font-medium flex items-center gap-1"
+                className="text-sm text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white font-medium flex items-center gap-1"
               >
                 <Settings className="w-3.5 h-3.5" />
                 Notification settings

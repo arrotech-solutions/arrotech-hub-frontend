@@ -45,7 +45,7 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({ isOpen, onClo
             } else if (channel === 'slack') {
                 result = await apiService.executeMCPTool('slack_team_communication', {
                     action: 'send_message',
-                    channel: recipient, // Assuming recipient is channel name or ID
+                    channel: recipient,
                     message: message
                 });
             } else if (channel === 'teams') {
@@ -75,63 +75,61 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({ isOpen, onClo
 
     if (!isOpen) return null;
 
+    const channelBtn = (id: typeof channel, activeText: string) =>
+        `w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-colors ${
+            channel === id
+                ? `bg-white dark:bg-slate-800 ${activeText} shadow-sm`
+                : 'text-gray-500 dark:text-slate-400 hover:bg-gray-200/50 dark:hover:bg-slate-800/80'
+        }`;
+
+    const inputClass =
+        'w-full px-4 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 rounded-xl focus:bg-white dark:focus:bg-slate-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all';
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-            <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200">
-                {/* Header */}
-                <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-                    <h3 className="text-lg font-bold text-gray-900">Compose Message</h3>
-                    <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-200 transition-colors">
-                        <X className="w-5 h-5 text-gray-500" />
+            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200 border border-transparent dark:border-slate-700">
+                <div className="p-4 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between bg-gray-50/50 dark:bg-slate-950/50">
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">Compose Message</h3>
+                    <button
+                        onClick={onClose}
+                        className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-slate-800 transition-colors"
+                    >
+                        <X className="w-5 h-5 text-gray-500 dark:text-slate-400" />
                     </button>
                 </div>
 
                 <div className="flex">
-                    {/* Sidebar / Channel Selector */}
-                    <div className="w-48 bg-gray-50 border-r border-gray-100 p-2 space-y-1">
-                        <button
-                            onClick={() => setChannel('gmail')}
-                            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-colors ${channel === 'gmail' ? 'bg-white text-red-600 shadow-sm' : 'text-gray-500 hover:bg-gray-200/50'}`}
-                        >
+                    <div className="w-48 bg-gray-50 dark:bg-slate-950/60 border-r border-gray-100 dark:border-slate-800 p-2 space-y-1">
+                        <button onClick={() => setChannel('gmail')} className={channelBtn('gmail', 'text-red-600 dark:text-red-400')}>
                             <Mail className="w-4 h-4" />
                             Gmail
                         </button>
-                        <button
-                            onClick={() => setChannel('outlook')}
-                            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-colors ${channel === 'outlook' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:bg-gray-200/50'}`}
-                        >
+                        <button onClick={() => setChannel('outlook')} className={channelBtn('outlook', 'text-blue-600 dark:text-blue-400')}>
                             <OutlookLogo className="w-4 h-4" />
                             Outlook
                         </button>
-                        <button
-                            onClick={() => setChannel('slack')}
-                            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-colors ${channel === 'slack' ? 'bg-white text-purple-600 shadow-sm' : 'text-gray-500 hover:bg-gray-200/50'}`}
-                        >
+                        <button onClick={() => setChannel('slack')} className={channelBtn('slack', 'text-purple-600 dark:text-purple-400')}>
                             <MessageCircle className="w-4 h-4" />
                             Slack
                         </button>
-                        <button
-                            onClick={() => setChannel('teams')}
-                            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-colors ${channel === 'teams' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:bg-gray-200/50'}`}
-                        >
+                        <button onClick={() => setChannel('teams')} className={channelBtn('teams', 'text-indigo-600 dark:text-indigo-400')}>
                             <MessageSquare className="w-4 h-4" />
                             Microsoft Teams
                         </button>
                     </div>
 
-                    {/* Form Area */}
-                    <form onSubmit={handleSubmit} className="flex-1 p-6 flex flex-col h-[500px]">
+                    <form onSubmit={handleSubmit} className="flex-1 p-6 flex flex-col h-[500px] bg-white dark:bg-slate-900">
                         <div className="space-y-4 flex-1">
                             <div>
                                 <div className="flex justify-between mb-1.5">
-                                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                    <label className="block text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">
                                         {channel === 'slack' || channel === 'teams' ? 'Channel / Recipient' : 'To'}
                                     </label>
                                     {(channel === 'gmail' || channel === 'outlook') && (
                                         <button
                                             type="button"
                                             onClick={() => setShowCcBcc(!showCcBcc)}
-                                            className="text-xs text-indigo-600 hover:text-indigo-700 font-medium"
+                                            className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium"
                                         >
                                             Cc/Bcc
                                         </button>
@@ -142,7 +140,7 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({ isOpen, onClo
                                     value={recipient}
                                     onChange={(e) => setRecipient(e.target.value)}
                                     placeholder={channel === 'slack' ? '#general or @user' : 'recipient@example.com'}
-                                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all"
+                                    className={inputClass}
                                     required
                                 />
                             </div>
@@ -150,23 +148,23 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({ isOpen, onClo
                             {showCcBcc && (channel === 'gmail' || channel === 'outlook') && (
                                 <div className="space-y-4 animate-in slide-in-from-top-2 duration-200">
                                     <div>
-                                        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Cc</label>
+                                        <label className="block text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Cc</label>
                                         <input
                                             type="text"
                                             value={cc}
                                             onChange={(e) => setCc(e.target.value)}
                                             placeholder="cc@example.com"
-                                            className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all"
+                                            className={inputClass}
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Bcc</label>
+                                        <label className="block text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Bcc</label>
                                         <input
                                             type="text"
                                             value={bcc}
                                             onChange={(e) => setBcc(e.target.value)}
                                             placeholder="bcc@example.com"
-                                            className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all"
+                                            className={inputClass}
                                         />
                                     </div>
                                 </div>
@@ -174,52 +172,51 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({ isOpen, onClo
 
                             {(channel === 'gmail' || channel === 'outlook') && (
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Subject</label>
+                                    <label className="block text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Subject</label>
                                     <input
                                         type="text"
                                         value={subject}
                                         onChange={(e) => setSubject(e.target.value)}
                                         placeholder="Enter subject..."
-                                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all"
+                                        className={inputClass}
                                         required
                                     />
                                 </div>
                             )}
 
                             <div className="flex-1 flex flex-col">
-                                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Message</label>
+                                <label className="block text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Message</label>
                                 <textarea
                                     value={message}
                                     onChange={(e) => setMessage(e.target.value)}
                                     placeholder="Type your message here..."
-                                    className="flex-1 w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all resize-none"
+                                    className={`${inputClass} flex-1 py-3 resize-none`}
                                     required
                                 />
                             </div>
                         </div>
 
-                        {/* Footer */}
-                        <div className="mt-6 flex items-center justify-between pt-4 border-t border-gray-100">
-                            <button type="button" className="p-2 text-gray-400 hover:bg-gray-100 rounded-lg transition-colors">
+                        <div className="mt-6 flex items-center justify-between pt-4 border-t border-gray-100 dark:border-slate-800">
+                            <button type="button" className="p-2 text-gray-400 dark:text-slate-500 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
                                 <Paperclip className="w-5 h-5" />
                             </button>
                             <div className="flex gap-3">
                                 <button
                                     type="button"
                                     onClick={onClose}
-                                    className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+                                    className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium shadow-lg hover:shadow-primary-200 transition-all flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                                    className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium shadow-lg transition-all flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                                 >
                                     {loading ? 'Sending...' : (
                                         <>
-                                            <span>Send</span>
-                                            <Send className="w-3.5 h-3.5" />
+                                            <Send className="w-4 h-4" />
+                                            Send
                                         </>
                                     )}
                                 </button>

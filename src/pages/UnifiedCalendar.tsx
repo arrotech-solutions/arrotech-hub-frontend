@@ -6,6 +6,7 @@ import {
     ArrowRight
 } from 'lucide-react';
 import apiService from '../services/api';
+import toast from '../lib/notify';
 import { ClickUpLogo, TrelloLogo, JiraLogo, AsanaLogo } from '../components/BrandIcons';
 import CreateEventModal from '../components/dashboard/CreateEventModal';
 import EventDetailsModal from '../components/dashboard/EventDetailsModal';
@@ -452,8 +453,7 @@ const UnifiedCalendar: React.FC = () => {
             // Check for blocked operation (upgrade required)
             const innerResult = result?.result;
             if (innerResult?.upgrade_required || innerResult?.success === false) {
-                // Import toast if needed - using alert as fallback
-                alert(innerResult?.error || 'Editing calendar events requires an upgrade. Please upgrade your plan.');
+                toast.error(innerResult?.error || 'Editing calendar events requires an upgrade. Please upgrade your plan.');
                 return;
             }
 

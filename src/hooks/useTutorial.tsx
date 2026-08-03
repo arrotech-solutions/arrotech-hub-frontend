@@ -1333,11 +1333,12 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setCurrentPage(page);
   }, [location.pathname, currentPage, resolvePageFromPath, pendingPage]);
 
-  // Check if tutorial should be shown for new users
+  // Check if tutorial should be shown for new users (only after onboarding is done)
   useEffect(() => {
-    if (user && !isCompleted && !isActive) {
+    if (user && !isCompleted && !isActive && user.onboarding_completed_at) {
       const hasSeenTutorial = localStorage.getItem('tutorial_completed');
-      if (!hasSeenTutorial) {
+      const skipAuto = localStorage.getItem('hub_skip_auto_tutorial') === '1';
+      if (!hasSeenTutorial && !skipAuto) {
         const timer = setTimeout(() => {
           const page = resolvePageFromPath(location.pathname);
           if (tutorialSteps.some((s) => s.page === page)) {
