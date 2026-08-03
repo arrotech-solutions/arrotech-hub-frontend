@@ -3,6 +3,7 @@ import toast from '../lib/notify';
 import apiService from '../services/api';
 import organizationService from '../services/organizationService';
 import { User, Organization } from '../types';
+import { disconnectRealtime } from './useWebSocket';
 
 interface OrgSummary {
   id: number;
@@ -10,6 +11,13 @@ interface OrgSummary {
   slug: string;
   logo_url?: string;
   role: string;
+}
+
+interface LogoutOptions {
+  /** Skip POST /auth/logout (e.g. account already deleted). */
+  skipServer?: boolean;
+  /** Suppress the success toast. */
+  silent?: boolean;
 }
 
 interface AuthContextType {
@@ -26,7 +34,7 @@ interface AuthContextType {
   loginWithGoogle: (credential: string) => Promise<any>;
   loginWithMicrosoft: (accessToken: string) => Promise<any>;
   register: (email: string, password: string, name: string) => Promise<any>;
-  logout: () => Promise<void>;
+  logout: (options?: LogoutOptions) => Promise<void>;
   updateUser: (data: Partial<User>) => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
   resetPassword: (token: string, newPassword: string) => Promise<void>;
@@ -44,6 +52,42 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+/** Auth + user-scoped client storage keys wiped on logout / account deletion. */
+const AUTH_STORAGE_KEYS = [
+  'auth_token',
+  'refresh_token',
+  'remember_me_token',
+  'active_org_id',
+] as const;
+
+const USER_SCOPED_STORAGE_KEYS = [
+  'wa_inbox_segments',
+  'hub_getting_started_dismissed',
+  'hub_getting_started_done',
+  'hub_skip_auto_tutorial',
+  'hub_onboarding_resume_step',
+  'arrotech_assistant_messages',
+  'assistant_session_id',
+  'catalog_builder_drafts_v2',
+  'chat_response_mode',
+] as const;
+
+function clearClientSessionStorage() {
+  for (const key of AUTH_STORAGE_KEYS) {
+    localStorage.removeItem(key);
+  }
+  for (const key of USER_SCOPED_STORAGE_KEYS) {
+    localStorage.removeItem(key);
+    sessionStorage.removeItem(key);
+  }
+  // Drop any remaining session-only resume / ephemeral keys for this browser tab.
+  try {
+    sessionStorage.clear();
+  } catch {
+    /* ignore quota / private mode */
+  }
+}
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -305,19 +349,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const logout = async () => {
-    try {
-      await apiService.logout();
-    } catch (error) {
-      // Ignore logout errors
-    } finally {
-      setUser(null);
-      setOrganizations([]);
-      setActiveOrg(null);
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('refresh_token');
-      localStorage.removeItem('remember_me_token');
-      localStorage.removeItem('active_org_id');
+  const logout = async (options: LogoutOptions = {}) => {
+    if (!options.skipServer) {
+      try {
+        await apiService.logout();
+      } catch {
+        // Ignore logout errors (network / already invalidated)
+      }
+    }
+
+    disconnectRealtime();
+    setUser(null);
+    setOrganizations([]);
+    setActiveOrg(null);
+    clearClientSessionStorage();
+
+    if (!options.silent) {
       toast.success('Logged out successfully');
     }
   };

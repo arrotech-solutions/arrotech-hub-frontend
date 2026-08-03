@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import apiService from '../../services/api';
+import toast from '../../lib/notify';
 import BriefingCard, { BriefingCardItem } from './BriefingCard';
 
 // Enhanced types for Phase 2
@@ -182,13 +183,13 @@ const EnhancedBriefing: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         try {
             const res = await apiService.executeBriefingAction(actionId);
             if (res.success) {
-                alert(res.message || `Action "${label}" executed successfully!`);
+                toast.success(res.message || `Action "${label}" executed successfully!`);
             } else {
-                alert(`Action completed with warnings: ${res.message || 'Check logs for details.'}`);
+                toast.warning(res.message || 'Action completed with warnings. Check logs for details.');
             }
         } catch (error) {
             console.error("Action failed", error);
-            alert("Failed to execute action. Please try again.");
+            toast.error("Failed to execute action. Please try again.");
         } finally {
             setProcessingAction(null);
         }
@@ -206,7 +207,7 @@ const EnhancedBriefing: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 setProcessingAction(null);
                 return;
             } else {
-                alert('No meeting link available for this event.');
+                toast.error('No meeting link available for this event.');
                 setProcessingAction(null);
                 return;
             }
@@ -217,7 +218,7 @@ const EnhancedBriefing: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             // For now, show success feedback
             setTimeout(() => {
                 setProcessingAction(null);
-                alert('Task marked as complete! (Backend integration coming in Phase 3)');
+                toast.success('Task marked as complete! (Backend integration coming in Phase 3)');
             }, 500);
             return;
         }
@@ -241,7 +242,7 @@ const EnhancedBriefing: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             // TODO: Call backend to archive email
             setTimeout(() => {
                 setProcessingAction(null);
-                alert('Email archived! (Backend integration coming in Phase 3)');
+                toast.success('Email archived! (Backend integration coming in Phase 3)');
             }, 500);
             return;
         }

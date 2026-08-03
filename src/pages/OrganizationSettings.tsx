@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import organizationService from '../services/organizationService';
 import toast from '../lib/notify';
+import { useConfirm } from '../components/ui';
 import {
     Building2, Users, Mail, Shield, Clock, Settings, Trash2,
     ChevronRight, Plus, Loader2, ArrowLeft, X, UserPlus,
@@ -13,6 +14,7 @@ type Tab = 'general' | 'members' | 'departments' | 'invitations' | 'audit';
 
 const OrganizationSettings = () => {
     const navigate = useNavigate();
+    const { confirm } = useConfirm();
     const { activeOrg, refreshOrganizations } = useAuth();
     const [tab, setTab] = useState<Tab>('general');
     const [loading, setLoading] = useState(true);
@@ -116,7 +118,13 @@ const OrganizationSettings = () => {
 
     const handleRemoveMember = async (userId: number) => {
         if (!activeOrg) return;
-        if (!confirm('Remove this member?')) return;
+        const ok = await confirm({
+            title: 'Remove this member?',
+            description: 'They will lose access to this organization immediately.',
+            tone: 'danger',
+            confirmLabel: 'Remove member',
+        });
+        if (!ok) return;
         try {
             await organizationService.removeMember(activeOrg.id, userId);
             toast.success('Member removed');
@@ -187,7 +195,13 @@ const OrganizationSettings = () => {
 
     const handleDeptDelete = async (deptId: number) => {
         if (!activeOrg) return;
-        if (!confirm('Delete this department? Members will be unassigned.')) return;
+        const ok = await confirm({
+            title: 'Delete this department?',
+            description: 'Members assigned to it will be unassigned. This cannot be undone.',
+            tone: 'danger',
+            confirmLabel: 'Delete department',
+        });
+        if (!ok) return;
         try {
             await organizationService.deleteDepartment(activeOrg.id, deptId);
             toast.success('Department deleted');

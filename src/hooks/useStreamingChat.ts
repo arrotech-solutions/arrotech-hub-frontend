@@ -353,7 +353,11 @@ export function useStreamingChat() {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
-      snapshotRef.current = withStatus({ ...snapshotRef.current, phase: 'done' });
+      snapshotRef.current = withStatus({
+        ...snapshotRef.current,
+        phase: 'error',
+        error: 'Request cancelled',
+      });
       paintNow();
     }
   }, [paintNow]);

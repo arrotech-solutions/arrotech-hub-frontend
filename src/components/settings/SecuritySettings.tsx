@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Shield, Clock, Globe, ChevronDown, ChevronRight, Lock, Key, Copy, Check, Smartphone, Mail, Eye, EyeOff, Pencil, Loader2 } from 'lucide-react';
 import toast from '../../lib/notify';
+import { useConfirm } from '../ui';
 import { SecuritySettings } from '../../types';
 import apiService from '../../services/api';
 
@@ -17,6 +18,7 @@ const SecuritySettingsTab: React.FC<SecuritySettingsProps> = ({
     expanded = true,
     onToggle
 }) => {
+    const { confirm } = useConfirm();
     const [localSettings, setLocalSettings] = useState(settings);
 
     const handleChange = (key: keyof SecuritySettings, value: any) => {
@@ -214,13 +216,19 @@ const SecuritySettingsTab: React.FC<SecuritySettingsProps> = ({
         } catch (error: any) {
             const detail = error.response?.data?.detail || 'Failed to verify code. Please try again.';
             console.error('Failed to verify 2FA setup', detail);
-            alert(detail);
+            toast.error(detail);
         }
     };
 
     const handleDisable2FA = async (method: string = 'all') => {
         const methodLabel = method === 'all' ? 'all 2FA methods' : method === 'totp' ? 'Authenticator App' : 'Email 2FA';
-        if (!confirm(`Are you sure you want to disable ${methodLabel}? This will make your account less secure.`)) return;
+        const ok = await confirm({
+            title: `Disable ${methodLabel}?`,
+            description: 'Your account will be less secure without this protection. You can turn it back on anytime.',
+            tone: 'warning',
+            confirmLabel: 'Disable',
+        });
+        if (!ok) return;
         try {
             const res = await apiService.request({
                 method: 'POST',
