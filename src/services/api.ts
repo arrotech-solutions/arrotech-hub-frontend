@@ -519,9 +519,24 @@ class ApiService {
     }
   }
 
+  /** Include the browser origin so OAuth callbacks return to localhost/prod correctly. */
+  private oauthAuthQuery(extra?: Record<string, string | undefined>): string {
+    const params = new URLSearchParams();
+    if (typeof window !== 'undefined' && window.location?.origin) {
+      params.set('frontend_origin', window.location.origin);
+    }
+    if (extra) {
+      Object.entries(extra).forEach(([key, value]) => {
+        if (value != null && value !== '') params.set(key, value);
+      });
+    }
+    const qs = params.toString();
+    return qs ? `?${qs}` : '';
+  }
+
   // Google Workspace OAuth endpoints
   async getGoogleWorkspaceAuthUrl(): Promise<{ auth_url: string; state: string }> {
-    const response = await this.api.get('/api/google-workspace/auth-url');
+    const response = await this.api.get(`/api/google-workspace/auth-url${this.oauthAuthQuery()}`);
     return response.data;  // Backend returns {auth_url, state} directly
   }
 
@@ -532,7 +547,7 @@ class ApiService {
 
   // Slack OAuth endpoints
   async getSlackAuthUrl(): Promise<{ auth_url: string; state: string }> {
-    const response = await this.api.get('/api/slack/auth-url');
+    const response = await this.api.get(`/api/slack/auth-url${this.oauthAuthQuery()}`);
     return response.data;
   }
 
@@ -543,7 +558,7 @@ class ApiService {
 
   // HubSpot OAuth endpoints
   async getHubSpotAuthUrl(): Promise<{ auth_url: string; state: string }> {
-    const response = await this.api.get('/api/hubspot/auth-url');
+    const response = await this.api.get(`/api/hubspot/auth-url${this.oauthAuthQuery()}`);
     return response.data;
   }
 
@@ -554,7 +569,7 @@ class ApiService {
 
   // QuickBooks OAuth endpoints
   async getQuickBooksAuthUrl(): Promise<{ auth_url: string; state: string }> {
-    const response = await this.api.get('/api/quickbooks/auth-url');
+    const response = await this.api.get(`/api/quickbooks/auth-url${this.oauthAuthQuery()}`);
     return response.data;
   }
 
@@ -565,13 +580,13 @@ class ApiService {
 
   // Xero OAuth endpoints
   async getXeroAuthUrl(): Promise<{ auth_url: string; state: string }> {
-    const response = await this.api.get('/api/xero/auth-url');
+    const response = await this.api.get(`/api/xero/auth-url${this.oauthAuthQuery()}`);
     return response.data;
   }
 
   // Airtable OAuth endpoints
   async getAirtableAuthUrl(): Promise<{ auth_url: string; state: string }> {
-    const response = await this.api.get('/api/airtable/auth-url');
+    const response = await this.api.get(`/api/airtable/auth-url${this.oauthAuthQuery()}`);
     return response.data;
   }
 
@@ -582,7 +597,7 @@ class ApiService {
 
   // GitHub OAuth endpoints
   async getGitHubAuthUrl(): Promise<{ auth_url: string; state: string }> {
-    const response = await this.api.get('/api/github/auth-url');
+    const response = await this.api.get(`/api/github/auth-url${this.oauthAuthQuery()}`);
     return response.data;
   }
 
@@ -593,8 +608,9 @@ class ApiService {
 
 
   async getWhatsAppAuthUrl(configId?: string): Promise<{ url: string }> {
-    const params = configId ? `?config_id=${configId}` : '';
-    const response = await this.api.get(`/api/whatsapp/auth-url${params}`);
+    const response = await this.api.get(
+      `/api/whatsapp/auth-url${this.oauthAuthQuery({ config_id: configId })}`
+    );
     return response.data;
   }
 
@@ -917,31 +933,31 @@ class ApiService {
 
   // Facebook OAuth endpoints
   async getFacebookAuthUrl(): Promise<{ url: string }> {
-    const response = await this.api.get('/api/facebook/auth-url');
+    const response = await this.api.get(`/api/facebook/auth-url${this.oauthAuthQuery()}`);
     return response.data;
   }
 
   // LinkedIn OAuth endpoints
   async getLinkedInAuthUrl(): Promise<{ url: string }> {
-    const response = await this.api.get('/api/linkedin/auth-url');
+    const response = await this.api.get(`/api/linkedin/auth-url${this.oauthAuthQuery()}`);
     return response.data;
   }
 
   // Instagram OAuth endpoints
   async getInstagramAuthUrl(): Promise<{ url: string }> {
-    const response = await this.api.get('/api/instagram/auth-url');
+    const response = await this.api.get(`/api/instagram/auth-url${this.oauthAuthQuery()}`);
     return response.data;
   }
 
   // Twitter OAuth endpoints
   async getTwitterAuthUrl(): Promise<{ url: string }> {
-    const response = await this.api.get('/api/twitter/auth-url');
+    const response = await this.api.get(`/api/twitter/auth-url${this.oauthAuthQuery()}`);
     return response.data;
   }
 
   // TikTok OAuth endpoints
   async getTikTokAuthUrl(): Promise<{ url: string }> {
-    const response = await this.api.get('/api/tiktok/auth-url');
+    const response = await this.api.get(`/api/tiktok/auth-url${this.oauthAuthQuery()}`);
     return response.data;
   }
 
@@ -999,7 +1015,7 @@ class ApiService {
 
   // Telegram OAuth endpoints
   async getTelegramAuthUrl(): Promise<{ auth_url: string; state: string }> {
-    const response = await this.api.get('/api/telegram/auth-url');
+    const response = await this.api.get(`/api/telegram/auth-url${this.oauthAuthQuery()}`);
     return response.data;
   }
 
@@ -1015,13 +1031,13 @@ class ApiService {
   }
 
   async getClickUpAuthUrl(): Promise<{ url: string }> {
-    const response = await this.api.get('/api/clickup/auth-url');
+    const response = await this.api.get(`/api/clickup/auth-url${this.oauthAuthQuery()}`);
     return response.data;
   }
 
   // Microsoft Teams OAuth endpoints
   async getTeamsAuthUrl(): Promise<{ auth_url: string; state: string }> {
-    const response = await this.api.get('/api/teams/auth-url');
+    const response = await this.api.get(`/api/teams/auth-url${this.oauthAuthQuery()}`);
     return response.data;
   }
 
@@ -1032,7 +1048,7 @@ class ApiService {
 
   // Outlook OAuth endpoints
   async getOutlookAuthUrl(): Promise<{ auth_url: string; state: string }> {
-    const response = await this.api.get('/api/outlook/auth-url');
+    const response = await this.api.get(`/api/outlook/auth-url${this.oauthAuthQuery()}`);
     return response.data;
   }
 
@@ -1043,7 +1059,7 @@ class ApiService {
 
   // Notion OAuth endpoints
   async getNotionAuthUrl(): Promise<{ auth_url: string; state: string }> {
-    const response = await this.api.get('/api/notion/auth-url');
+    const response = await this.api.get(`/api/notion/auth-url${this.oauthAuthQuery()}`);
     return response.data;
   }
 
@@ -1054,7 +1070,7 @@ class ApiService {
 
   // Trello OAuth endpoints
   async getTrelloAuthUrl(): Promise<{ auth_url: string; state: string }> {
-    const response = await this.api.get('/api/trello/auth-url');
+    const response = await this.api.get(`/api/trello/auth-url${this.oauthAuthQuery()}`);
     return response.data;
   }
 
@@ -1065,7 +1081,7 @@ class ApiService {
 
   // Jira OAuth endpoints
   async getJiraAuthUrl(): Promise<{ auth_url: string; state: string }> {
-    const response = await this.api.get('/api/jira/auth-url');
+    const response = await this.api.get(`/api/jira/auth-url${this.oauthAuthQuery()}`);
     return response.data;
   }
 
@@ -1076,7 +1092,7 @@ class ApiService {
 
   // Zoom OAuth endpoints
   async getZoomAuthUrl(): Promise<{ auth_url: string; state: string }> {
-    const response = await this.api.get('/api/zoom/auth-url');
+    const response = await this.api.get(`/api/zoom/auth-url${this.oauthAuthQuery()}`);
     return response.data;
   }
 
@@ -1087,7 +1103,7 @@ class ApiService {
 
   // Asana OAuth endpoints
   async getAsanaAuthUrl(): Promise<{ url: string }> {
-    const response = await this.api.get('/auth/asana/url');
+    const response = await this.api.get(`/auth/asana/url${this.oauthAuthQuery()}`);
     return response.data;
   }
 
@@ -3382,7 +3398,7 @@ class ApiService {
 
   // ── Zoho Integration ──────────────────────────────────────
   async getZohoAuthUrl(): Promise<{ success: boolean; auth_url: string }> {
-    const response = await this.api.get('/api/zoho/auth-url');
+    const response = await this.api.get(`/api/zoho/auth-url${this.oauthAuthQuery()}`);
     return response.data;
   }
 
