@@ -18,35 +18,68 @@ const AUTH_URL_BY_PLATFORM: Record<string, AuthUrlFn> = {
   hubspot: () => apiService.getHubSpotAuthUrl(),
 };
 
-export function markOnboardingResume(step: number) {
+function writeResume(step: number) {
+  const value = String(step);
   try {
-    sessionStorage.setItem(ONBOARDING_RESUME_KEY, String(step));
+    sessionStorage.setItem(ONBOARDING_RESUME_KEY, value);
+  } catch {
+    /* ignore */
+  }
+  try {
+    localStorage.setItem(ONBOARDING_RESUME_KEY, value);
   } catch {
     /* ignore */
   }
 }
 
-export function consumeOnboardingResume(): number | null {
+function readResume(consume: boolean): number | null {
+  let raw: string | null = null;
   try {
-    const raw = sessionStorage.getItem(ONBOARDING_RESUME_KEY);
-    if (!raw) return null;
-    sessionStorage.removeItem(ONBOARDING_RESUME_KEY);
-    const step = parseInt(raw, 10);
-    return Number.isFinite(step) ? step : null;
+    raw = sessionStorage.getItem(ONBOARDING_RESUME_KEY);
   } catch {
-    return null;
+    /* ignore */
   }
+  if (raw == null) {
+    try {
+      raw = localStorage.getItem(ONBOARDING_RESUME_KEY);
+    } catch {
+      /* ignore */
+    }
+  }
+  if (consume) {
+    try {
+      sessionStorage.removeItem(ONBOARDING_RESUME_KEY);
+    } catch {
+      /* ignore */
+    }
+    try {
+      localStorage.removeItem(ONBOARDING_RESUME_KEY);
+    } catch {
+      /* ignore */
+    }
+  }
+  if (!raw) return null;
+  const step = parseInt(raw, 10);
+  return Number.isFinite(step) ? step : null;
+}
+
+export function markOnboardingResume(step: number) {
+  writeResume(step);
+}
+
+export function consumeOnboardingResume(): number | null {
+  return readResume(true);
 }
 
 export function peekOnboardingResume(): number | null {
-  try {
-    const raw = sessionStorage.getItem(ONBOARDING_RESUME_KEY);
-    if (!raw) return null;
-    const step = parseInt(raw, 10);
-    return Number.isFinite(step) ? step : null;
-  } catch {
-    return null;
-  }
+  return readResume(false);
+}
+
+/** After an OAuth round-trip, send the user back into the wizard when applicable. */
+export function onboardingResumePath(): string | null {
+  const step = peekOnboardingResume();
+  if (step == null) return null;
+  return `/onboarding?step=${step}`;
 }
 
 export async function startPlatformOAuth(platformId: string, resumeStep: number) {

@@ -9,6 +9,7 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import toast from '../lib/notify';
 import { Spinner, useConfirm } from '../components/ui';
 import { useNavigate } from 'react-router-dom';
+import { onboardingResumePath } from '../components/onboarding/connectHelpers';
 import apiService from '../services/api';
 import { Connection, ConnectionPlatform } from '../types';
 import {
@@ -175,13 +176,22 @@ const Integrations: React.FC = () => {
     const state = params.get('state');
     const error = params.get('error');
 
+    const finishOAuthNavigation = (refreshList = false) => {
+      const resumePath = onboardingResumePath();
+      if (resumePath) {
+        navigate(resumePath, { replace: true });
+        return;
+      }
+      navigate('/connections', { replace: true });
+      if (refreshList) fetchData();
+    };
+
     if (error) {
       const detail = params.get('detail');
       const errorMessage = detail ? decodeURIComponent(detail) : error;
       toast.error('Connection failed: ' + errorMessage, { duration: 8000 });
-      navigate('/connections', { replace: true });
+      finishOAuthNavigation();
       processedCallback.current = true;
-
       return;
     }
 
@@ -230,19 +240,8 @@ const Integrations: React.FC = () => {
       } else {
         toast.success('Connection successful!');
       }
-      try {
-        const resume = sessionStorage.getItem('hub_onboarding_resume_step');
-        if (resume != null) {
-          navigate(`/onboarding?step=${resume}`, { replace: true });
-          processedCallback.current = true;
-          return;
-        }
-      } catch {
-        /* ignore */
-      }
-      navigate('/connections', { replace: true });
+      finishOAuthNavigation(true);
       processedCallback.current = true;
-      fetchData(); // Refresh list to show new connection
       return;
     }
 
@@ -252,8 +251,10 @@ const Integrations: React.FC = () => {
         console.log('OAuth Callback Debug:', { code, state });
         const toastId = toast.loading('Finalizing connection...');
         try {
-          if (state.startsWith('user_')) {
-            // Try to determine if it's Google or Slack 
+          // State may include "|fe=..." frontend-origin payload from the API
+          const rawState = state.split('|fe=')[0];
+          if (rawState.startsWith('user_')) {
+            // Try to determine if it's Google or Slack
             try {
               await apiService.getGoogleWorkspaceCallback(code, state);
               toast.success('Google Workspace connected successfully!', { id: toastId });
@@ -267,19 +268,18 @@ const Integrations: React.FC = () => {
               }
             }
 
-          } else if (state === 'asana_connection' || state.includes('asana_connection')) {
+          } else if (rawState === 'asana_connection' || rawState.includes('asana_connection')) {
             await apiService.getAsanaCallback(code, state);
             toast.success('Asana connected successfully!', { id: toastId });
           } else {
             // Handle other callbacks if any
             toast.error('Unknown connection type', { id: toastId });
           }
-          fetchData();
-          navigate('/connections', { replace: true });
+          finishOAuthNavigation(true);
         } catch (error) {
           console.error('Callback error:', error);
           toast.error('Connection failed. Please try again.', { id: toastId });
-          navigate('/connections', { replace: true });
+          finishOAuthNavigation();
         }
       };
       handleCallback();
