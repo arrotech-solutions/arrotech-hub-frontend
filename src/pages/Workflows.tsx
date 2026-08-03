@@ -40,7 +40,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSubscription } from '../hooks/useSubscription';
 import { useWebSocket } from '../hooks/useWebSocket';
 import toast from '../lib/notify';
-import { Spinner } from '../components/ui';
+import { Spinner, useConfirm } from '../components/ui';
 import EnhancedWorkflowCreator from '../components/EnhancedWorkflowCreator';
 import ExecuteWorkflowModal from '../components/ExecuteWorkflowModal';
 import WorkflowTemplates from '../components/WorkflowTemplates';
@@ -57,6 +57,7 @@ const Workflows: React.FC = () => {
   const { user } = useAuth();
   const { canUseFeature, tier } = useSubscription();
   const navigate = useNavigate();
+  const { confirm } = useConfirm();
   const [workflows, setWorkflows] = useState<WorkflowType[]>([]);
   const [executions, setExecutions] = useState<WorkflowExecution[]>([]);
   const [loading, setLoading] = useState(true);
@@ -232,7 +233,13 @@ const Workflows: React.FC = () => {
   };
 
   const handleDeleteWorkflow = async (workflowId: number) => {
-    if (!window.confirm('Are you sure you want to delete this workflow?')) return;
+    const ok = await confirm({
+      title: 'Delete this workflow?',
+      description: 'This removes the workflow and its configuration. Past executions may remain in history.',
+      tone: 'danger',
+      confirmLabel: 'Delete workflow',
+    });
+    if (!ok) return;
 
     try {
       await apiService.deleteWorkflow(workflowId);
@@ -347,24 +354,24 @@ const Workflows: React.FC = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active':
-        return 'text-green-600 bg-green-100 border-green-200';
+        return 'text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-500/20 border-green-200 dark:border-green-500/30';
       case 'draft':
-        return 'text-yellow-600 bg-yellow-100 border-yellow-200';
+        return 'text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-500/20 border-yellow-200 dark:border-yellow-500/30';
       case 'paused':
       case 'inactive':
-        return 'text-orange-600 bg-orange-100 border-orange-200';
+        return 'text-orange-600 dark:text-orange-400 bg-orange-100 dark:bg-orange-500/20 border-orange-200 dark:border-orange-500/30';
       case 'completed':
-        return 'text-blue-600 bg-blue-100 border-blue-200';
+        return 'text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-500/20 border-blue-200 dark:border-blue-500/30';
       case 'running':
-        return 'text-blue-600 bg-blue-100 border-blue-200';
+        return 'text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-500/20 border-blue-200 dark:border-blue-500/30';
       case 'pending':
-        return 'text-yellow-600 bg-yellow-100 border-yellow-200';
+        return 'text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-500/20 border-yellow-200 dark:border-yellow-500/30';
       case 'failed':
-        return 'text-red-600 bg-red-100 border-red-200';
+        return 'text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-500/20 border-red-200 dark:border-red-500/30';
       case 'cancelled':
-        return 'text-gray-600 bg-gray-100 border-gray-200';
+        return 'text-gray-600 dark:text-slate-300 bg-gray-100 dark:bg-slate-800 border-gray-200 dark:border-slate-700';
       default:
-        return 'text-gray-600 bg-gray-100 border-gray-200';
+        return 'text-gray-600 dark:text-slate-300 bg-gray-100 dark:bg-slate-800 border-gray-200 dark:border-slate-700';
     }
   };
 
@@ -395,24 +402,24 @@ const Workflows: React.FC = () => {
   const getStatusBgColor = (status: string) => {
     switch (status) {
       case 'active':
-        return 'bg-green-50 border-green-200';
+        return 'bg-green-50 dark:bg-green-500/10 border-green-200 dark:border-green-500/30';
       case 'draft':
-        return 'bg-yellow-50 border-yellow-200';
+        return 'bg-yellow-50 dark:bg-yellow-500/10 border-yellow-200 dark:border-yellow-500/30';
       case 'paused':
       case 'inactive':
-        return 'bg-orange-50 border-orange-200';
+        return 'bg-orange-50 dark:bg-orange-500/10 border-orange-200 dark:border-orange-500/30';
       case 'completed':
-        return 'bg-blue-50 border-blue-200';
+        return 'bg-blue-50 dark:bg-blue-500/10 border-blue-200 dark:border-blue-500/30';
       case 'running':
-        return 'bg-blue-50 border-blue-200';
+        return 'bg-blue-50 dark:bg-blue-500/10 border-blue-200 dark:border-blue-500/30';
       case 'pending':
-        return 'bg-yellow-50 border-yellow-200';
+        return 'bg-yellow-50 dark:bg-yellow-500/10 border-yellow-200 dark:border-yellow-500/30';
       case 'failed':
-        return 'bg-red-50 border-red-200';
+        return 'bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/30';
       case 'cancelled':
-        return 'bg-gray-50 border-gray-200';
+        return 'bg-gray-50 dark:bg-slate-800 border-gray-200 dark:border-slate-700';
       default:
-        return 'bg-gray-50 border-gray-200';
+        return 'bg-gray-50 dark:bg-slate-800 border-gray-200 dark:border-slate-700';
     }
   };
 

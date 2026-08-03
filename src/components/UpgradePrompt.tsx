@@ -122,15 +122,15 @@ export const UpgradePrompt: React.FC<UpgradePromptProps> = ({
                 </div>
 
                 {/* Overlay */}
-                <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center">
-                    <div className="bg-white border border-gray-200 rounded-xl shadow-lg p-6 text-center max-w-sm">
-                        <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <Lock className="w-6 h-6 text-indigo-600" />
+                <div className="absolute inset-0 bg-white/60 dark:bg-slate-950/70 backdrop-blur-[2px] flex items-center justify-center">
+                    <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl shadow-lg p-6 text-center max-w-sm">
+                        <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Lock className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
                         </div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                             Upgrade to Unlock
                         </h3>
-                        <p className="text-gray-600 mb-4">
+                        <p className="text-gray-600 dark:text-slate-400 mb-4">
                             {message}
                         </p>
                         <Link

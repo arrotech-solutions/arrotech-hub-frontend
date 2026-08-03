@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import toast from '../lib/notify';
-import { Spinner } from '../components/ui';
+import { Spinner, useConfirm } from '../components/ui';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import SettingsSidebar from '../components/settings/SettingsSidebar';
 import APISettingsTab from '../components/settings/APISettings';
@@ -19,6 +19,7 @@ import MpesaSettingsTab from '../components/settings/MpesaSettingsTab';
 import DataPrivacySettings from '../components/settings/DataPrivacySettings';
 import ProfileSettings from '../components/settings/ProfileSettings';
 import apiService from '../services/api';
+import { useAuth } from '../hooks/useAuth';
 import {
   APISettings,
   DashboardSettings,
@@ -32,6 +33,8 @@ import {
 const Settings: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { confirm } = useConfirm();
+  const { logout } = useAuth();
   const [settings, setSettings] = useState<UserSettings | null>(null);
   const [user, setUser] = useState<any>(null); // To store full user object including API key
   const [loading, setLoading] = useState(true);
@@ -97,35 +100,45 @@ const Settings: React.FC = () => {
   };
 
   const resetSettings = async () => {
-    if (window.confirm('Are you sure you want to reset all settings to defaults?')) {
-      try {
-        setSaving(true);
-        await apiService.resetUserSettings();
-        await loadSettings();
-        setMessage({ type: 'success', text: 'Settings reset to defaults' });
-        toast.success('Settings reset to defaults');
-      } catch (error) {
-        console.error('Error resetting settings:', error);
-        setMessage({ type: 'error', text: 'Failed to reset settings' });
-        toast.error('Failed to reset settings');
-      } finally {
-        setSaving(false);
-      }
+    const ok = await confirm({
+      title: 'Reset settings?',
+      description: 'All preferences will return to their defaults. You can change them again anytime.',
+      tone: 'warning',
+      confirmLabel: 'Reset to defaults',
+    });
+    if (!ok) return;
+    try {
+      setSaving(true);
+      await apiService.resetUserSettings();
+      await loadSettings();
+      setMessage({ type: 'success', text: 'Settings reset to defaults' });
+      toast.success('Settings reset to defaults');
+    } catch (error) {
+      console.error('Error resetting settings:', error);
+      setMessage({ type: 'error', text: 'Failed to reset settings' });
+      toast.error('Failed to reset settings');
+    } finally {
+      setSaving(false);
     }
   };
 
   const handleRegenerateApiKey = async () => {
-    if (window.confirm("Are you sure? This will invalidate your old API key immediately.")) {
-      try {
-        const response = await apiService.regenerateApiKey();
-        if (response.success && response.data?.api_key) {
-          toast.success("API Key regenerated");
-          setUser({ ...user, api_key: response.data.api_key });
-        }
-      } catch (error) {
-        console.error("Failed to regenerate key", error);
-        toast.error("Failed to regenerate API Key");
+    const ok = await confirm({
+      title: 'Regenerate API key?',
+      description: 'Your current key will stop working immediately. Update any integrations that use it.',
+      tone: 'warning',
+      confirmLabel: 'Regenerate key',
+    });
+    if (!ok) return;
+    try {
+      const response = await apiService.regenerateApiKey();
+      if (response.success && response.data?.api_key) {
+        toast.success('API Key regenerated');
+        setUser({ ...user, api_key: response.data.api_key });
       }
+    } catch (error) {
+      console.error('Failed to regenerate key', error);
+      toast.error('Failed to regenerate API Key');
     }
   };
 
@@ -170,19 +183,30 @@ const Settings: React.FC = () => {
   };
 
   const handleDeleteAccount = async () => {
-    const confirmation = window.prompt("WARNING: This will permanently delete your account and all data.\n\nType 'DELETE' to confirm.");
-    if (confirmation === 'DELETE') {
-      try {
-        await apiService.deleteAccount(confirmation);
-        toast.success('Account deleted successfully');
-        localStorage.removeItem('auth_token');
-        navigate('/login');
-      } catch (error) {
-        console.error("Delete failed", error);
-        toast.error('Failed to delete account');
-      }
-    } else if (confirmation !== null) {
-      toast.error("Incorrect confirmation text.");
+    const ok = await confirm({
+      title: 'Delete your account?',
+      description: (
+        <>
+          This permanently removes your account, workflows, conversations, and connected data.
+          <span className="mt-2 block font-medium text-red-600 dark:text-red-400">
+            This cannot be undone.
+          </span>
+        </>
+      ),
+      tone: 'danger',
+      confirmLabel: 'Delete forever',
+      requireText: 'DELETE',
+    });
+    if (!ok) return;
+    try {
+      await apiService.deleteAccount('DELETE');
+      toast.success('Account deleted successfully');
+      // Account is already gone — clear React auth state, tokens, sessions, and sockets locally.
+      await logout({ skipServer: true, silent: true });
+      navigate('/login', { replace: true });
+    } catch (error) {
+      console.error('Delete failed', error);
+      toast.error('Failed to delete account');
     }
   };
 

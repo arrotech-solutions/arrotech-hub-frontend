@@ -119,36 +119,36 @@ const UnifiedInboxTile: React.FC<UnifiedInboxTileProps> = ({ onCompose }) => {
     const filteredMessages = activeFilter === 'all' ? messages : messages.filter((m: Message) => !m.read);
 
     return (
-        <div className="bg-white/40 backdrop-blur-md rounded-3xl border border-white/40 shadow-xl flex flex-col h-full overflow-hidden group transition-all hover:shadow-2xl relative">
+        <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-md rounded-3xl border border-white/40 dark:border-slate-700/60 shadow-xl flex flex-col h-full overflow-hidden group transition-all hover:shadow-2xl relative">
             {/* Header */}
-            <div className="p-6 pb-4 border-b border-white/20 flex items-center justify-between z-10">
+            <div className="p-6 pb-4 border-b border-white/20 dark:border-slate-700/40 flex items-center justify-between z-10">
                 <div>
-                    <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                    <h2 className="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
                         Inbox
                         {loading && <Loader2 className="w-4 h-4 animate-spin text-gray-400" />}
                     </h2>
                     <div className="flex items-center gap-2 mt-1">
                         <button
                             onClick={() => setActiveFilter('all')}
-                            className={`text-xs font-semibold px-2.5 py-1 rounded-lg transition-colors ${activeFilter === 'all' ? 'bg-indigo-100 text-indigo-700' : 'text-gray-500 hover:bg-white/50'}`}
+                            className={`text-xs font-semibold px-2.5 py-1 rounded-lg transition-colors ${activeFilter === 'all' ? 'bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300' : 'text-gray-500 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-slate-800'}`}
                         >
                             All
                         </button>
                         <button
                             onClick={() => setActiveFilter('unread')}
-                            className={`text-xs font-semibold px-2.5 py-1 rounded-lg transition-colors ${activeFilter === 'unread' ? 'bg-indigo-100 text-indigo-700' : 'text-gray-500 hover:bg-white/50'}`}
+                            className={`text-xs font-semibold px-2.5 py-1 rounded-lg transition-colors ${activeFilter === 'unread' ? 'bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300' : 'text-gray-500 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-slate-800'}`}
                         >
                             Unread
                         </button>
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
-                    <button onClick={onCompose} className="p-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-lg hover:shadow-primary-200 transition-all" title="Compose">
+                    <button onClick={onCompose} className="p-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-lg transition-all" title="Compose">
                         <PenSquare className="w-5 h-5" />
                     </button>
                     <div
                         onClick={fetchMessages}
-                        className="p-2 bg-white/50 rounded-xl hover:bg-white transition-colors cursor-pointer text-gray-500 hover:text-indigo-600"
+                        className="p-2 bg-white/50 dark:bg-slate-800/60 rounded-xl hover:bg-white dark:hover:bg-slate-700 transition-colors cursor-pointer text-gray-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400"
                         title="Refresh"
                     >
                         <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
@@ -166,10 +166,10 @@ const UnifiedInboxTile: React.FC<UnifiedInboxTileProps> = ({ onCompose }) => {
                 )}
 
                 {filteredMessages.map((msg: Message) => (
-                    <div key={msg.id} className="group/item relative bg-white/40 hover:bg-white/70 border border-white/40 hover:border-indigo-100 rounded-2xl p-4 transition-all cursor-pointer transform hover:-translate-y-0.5 hover:shadow-md">
+                    <div key={msg.id} className="group/item relative bg-white/40 dark:bg-slate-800/40 hover:bg-white/70 dark:hover:bg-slate-800/70 border border-white/40 dark:border-slate-700/40 hover:border-indigo-100 dark:hover:border-indigo-500/30 rounded-2xl p-4 transition-all cursor-pointer transform hover:-translate-y-0.5 hover:shadow-md">
                         <div className="flex justify-between items-start mb-2">
                             <div className="flex items-center gap-2">
-                                <div className="p-1.5 bg-white rounded-lg shadow-sm">
+                                <div className="p-1.5 bg-white dark:bg-slate-700 rounded-lg shadow-sm">
                                     {getIcon(msg.source)}
                                 </div>
                                 <span className={`text-sm font-bold ${!msg.read ? 'text-gray-900' : 'text-gray-600'}`}>
@@ -188,10 +188,10 @@ const UnifiedInboxTile: React.FC<UnifiedInboxTileProps> = ({ onCompose }) => {
 
                         {/* Hover Actions */}
                         <div className="absolute right-4 bottom-4 flex items-center gap-1 opacity-0 group-hover/item:opacity-100 transition-opacity transform translate-x-2 group-hover/item:translate-x-0">
-                            <div className="p-1.5 bg-white rounded-lg text-gray-400 hover:text-yellow-500 shadow-sm hover:shadow">
+                            <div className="p-1.5 bg-white dark:bg-slate-700 rounded-lg text-gray-400 dark:text-slate-400 hover:text-yellow-500 shadow-sm hover:shadow">
                                 <Star className="w-3.5 h-3.5" />
                             </div>
-                            <div className="p-1.5 bg-white rounded-lg text-gray-400 hover:text-red-500 shadow-sm hover:shadow">
+                            <div className="p-1.5 bg-white dark:bg-slate-700 rounded-lg text-gray-400 dark:text-slate-400 hover:text-red-500 shadow-sm hover:shadow">
                                 <Trash className="w-3.5 h-3.5" />
                             </div>
                             <div className="p-1.5 bg-indigo-500 rounded-lg text-white shadow-sm hover:bg-indigo-600">

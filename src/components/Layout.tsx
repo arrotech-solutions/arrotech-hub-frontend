@@ -39,9 +39,10 @@ import {
 } from 'lucide-react';
 import logo from '../assets/Logo/icononly_transparent_nobuffer.png';
 import React from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { getDisplayTier, getDisplayTierName } from '../hooks/useSubscription';
+import { peekOnboardingResume } from './onboarding/connectHelpers';
 
 import NotificationsDropdown from './NotificationsDropdown';
 import CookieConsent from './CookieConsent';
@@ -52,6 +53,7 @@ import { ThemeToggle } from './ThemeToggle';
 import OrgSwitcher from './OrgSwitcher/OrgSwitcher';
 import { OfflineBanner } from './states/OfflineBanner';
 import { SlowNetworkBanner } from './states/SlowNetworkBanner';
+import GettingStartedChecklist from './onboarding/GettingStartedChecklist';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -65,6 +67,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [collapsed, setCollapsed] = React.useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = React.useState(false);
   const [expandedMenus, setExpandedMenus] = React.useState<string[]>(['Workspace']); // Default expanded
+
+  if (user && user.email_verified !== false && !user.onboarding_completed_at) {
+    if (location.pathname.startsWith('/connections') && peekOnboardingResume() != null) {
+      // mid-wizard OAuth return — Connections will bounce back to onboarding
+    } else {
+      return <Navigate to="/onboarding" replace />;
+    }
+  }
 
   const toggleMenu = (name: string) => {
     setExpandedMenus(prev =>
@@ -698,6 +708,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
         {/* Page content */}
         <main className="flex-1 overflow-x-hidden overflow-y-auto">
+          <GettingStartedChecklist />
           {children}
         </main>
       </div>

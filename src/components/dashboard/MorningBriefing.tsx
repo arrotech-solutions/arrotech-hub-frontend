@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { X, Sun, CheckCircle, AlertTriangle, ArrowRight, Coffee, Mail, Sparkles } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import apiService from '../../services/api';
+import toast from '../../lib/notify';
 
 
 interface BriefingData {
@@ -71,13 +72,13 @@ const MorningBriefing: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             const res = await apiService.executeBriefingAction(actionId);
             // Show real feedback from backend
             if (res.success) {
-                alert(res.message || `Action "${label}" executed successfully!`);
+                toast.success(res.message || `Action "${label}" executed successfully!`);
             } else {
-                alert(`Action completed with warnings: ${res.message || 'Check logs for details.'}`);
+                toast.warning(res.message || 'Action completed with warnings. Check logs for details.');
             }
         } catch (error) {
             console.error("Action failed", error);
-            alert("Failed to execute action. Please try again.");
+            toast.error("Failed to execute action. Please try again.");
         } finally {
             setProcessingAction(null);
         }

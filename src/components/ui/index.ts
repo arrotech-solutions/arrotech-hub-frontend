@@ -15,3 +15,5 @@ export type { FormFieldProps } from './FormField';
 export { FieldError } from './FieldError';
 export type { FieldErrorProps } from './FieldError';
 export { Toaster } from './Toaster';
+export { ConfirmProvider, useConfirm } from './ConfirmDialog';
+export type { ConfirmOptions, DialogTone } from './ConfirmDialog';

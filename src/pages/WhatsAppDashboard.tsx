@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import apiService from '../services/api';
 import toast from '../lib/notify';
+import { useConfirm } from '../components/ui';
 import { Connection } from '../types';
 import { Link } from 'react-router-dom';
 import ConversationsTab, { type TeamMember, type QuickReply } from '../components/whatsapp/ConversationsTab';
@@ -163,6 +164,7 @@ type TabType = 'contacts' | 'auto-reply' | 'broadcast' | 'analytics' | 'settings
 
 const WhatsAppDashboard: React.FC = () => {
     const { currentStep, isActive: isTutorialActive } = useTutorial();
+    const { confirm } = useConfirm();
     const [activeTab, setActiveTab] = useState<TabType>('contacts');
     const [contacts, setContacts] = useState<Contact[]>([]);
     const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
@@ -626,7 +628,13 @@ const WhatsAppDashboard: React.FC = () => {
 
     // Delete auto-reply rule
     const handleDeleteRule = async (ruleId: string) => {
-        if (!window.confirm('Delete this rule?')) return;
+        const ok = await confirm({
+            title: 'Delete this rule?',
+            description: 'Incoming messages will no longer match this auto-reply.',
+            tone: 'danger',
+            confirmLabel: 'Delete rule',
+        });
+        if (!ok) return;
         try {
             await apiService.deleteWhatsAppAutoReply(ruleId);
             await fetchAutoReplies();
