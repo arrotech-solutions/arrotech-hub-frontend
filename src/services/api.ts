@@ -1615,6 +1615,7 @@ class ApiService {
     trigger_type?: string;
     trigger_config?: Record<string, any>;
     variables?: Record<string, any>;
+    workflow_metadata?: Record<string, any>;
   }): Promise<ApiResponse<any>> {
     console.log('[API] createWorkflowFromSteps request:', data);
     const response = await this.api.post('/workflows/create-from-steps', data);

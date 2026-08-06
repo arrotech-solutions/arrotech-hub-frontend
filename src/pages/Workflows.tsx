@@ -147,14 +147,15 @@ const Workflows: React.FC = () => {
     loadExecutions();
   }, []);
 
-  // Deep-link from Agents "Edit automation" → /workflows?id=<uuid>
+  // Deep-link from Agents "Edit automation" → /workflows?id=<uuid> (opens canvas)
   useEffect(() => {
     const workflowId = searchParams.get('id');
     if (!workflowId || loading || workflows.length === 0) return;
     const match = workflows.find((w) => String(w.id) === String(workflowId));
     if (!match) return;
-    setEditingWorkflow(match);
-    setShowEnhancedCreator(true);
+    setCanvasInitialData(match);
+    setFormToCanvasState(null);
+    setShowCanvas(true);
     setActiveTab('workflows');
     const next = new URLSearchParams(searchParams);
     next.delete('id');
@@ -647,11 +648,19 @@ const Workflows: React.FC = () => {
               {/* Dropdown Menu */}
               <div className="absolute right-0 top-full mt-1 w-32 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-gray-100 dark:border-slate-700 py-1 hidden group-hover/menu:block z-10">
                 <button onClick={() => {
+                  setCanvasInitialData(workflow);
+                  setFormToCanvasState(null);
+                  setShowCanvas(true);
+                }} className="w-full text-left px-3 py-2 text-xs font-semibold text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center space-x-2">
+                  <Edit className="w-3.5 h-3.5" />
+                  <span>Edit in Canvas</span>
+                </button>
+                <button onClick={() => {
                   setEditingWorkflow(workflow);
                   setShowEnhancedCreator(true);
                 }} className="w-full text-left px-3 py-2 text-xs font-semibold text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center space-x-2">
                   <Edit className="w-3.5 h-3.5" />
-                  <span>Edit</span>
+                  <span>Edit in Form</span>
                 </button>
                 <button onClick={() => openShareModal(workflow)} className="w-full text-left px-3 py-2 text-xs font-semibold text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center space-x-2">
                   <Share2 className="w-3.5 h-3.5" />
@@ -806,10 +815,11 @@ const Workflows: React.FC = () => {
             </button>
             <button
               onClick={() => {
-                setEditingWorkflow(workflow);
-                setShowEnhancedCreator(true);
+                setCanvasInitialData(workflow);
+                setFormToCanvasState(null);
+                setShowCanvas(true);
               }}
-              className="p-1.5 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors" title="Edit"
+              className="p-1.5 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors" title="Edit in Canvas"
             >
               <Edit className="w-4 h-4" />
             </button>
@@ -872,6 +882,7 @@ const Workflows: React.FC = () => {
                       }
                       setCanvasInitialData(null);
                       setFormToCanvasState(null);
+                      setEditingWorkflow(null);
                       setShowCanvas(true);
                     }}
                     className="flex-1 sm:flex-none flex items-center justify-center space-x-2 px-6 py-4 bg-gradient-to-r from-primary-500 to-secondary-900 text-white rounded-2xl hover:shadow-[0_0_20px_rgba(255,70,150,0.4)] transform hover:-translate-y-1 transition-all duration-300 font-bold workflow-builder"
@@ -1156,8 +1167,15 @@ const Workflows: React.FC = () => {
           }}
           onSwitchToCanvas={(state: CanvasState) => {
             setShowEnhancedCreator(false);
-            setEditingWorkflow(null);
             setFormToCanvasState(state);
+            // Keep edit identity so Save updates instead of creating a duplicate
+            if (editingWorkflow?.id) {
+              setCanvasInitialData(editingWorkflow);
+            } else if (state.workflowId) {
+              setCanvasInitialData({ id: state.workflowId, name: state.workflowName } as any);
+            } else {
+              setCanvasInitialData(null);
+            }
             setShowCanvas(true);
           }}
         />
@@ -1169,6 +1187,7 @@ const Workflows: React.FC = () => {
             setShowCanvas(false);
             setCanvasInitialData(null);
             setFormToCanvasState(null);
+            setEditingWorkflow(null);
           }}
           initialData={canvasInitialData}
           initialCanvasState={formToCanvasState}
@@ -1179,10 +1198,18 @@ const Workflows: React.FC = () => {
             setFormToCanvasState(null);
           }}
           onSwitchToForm={(state: CanvasState) => {
+            const editing = canvasInitialData;
             setShowCanvas(false);
             setCanvasInitialData(null);
             setFormToCanvasState(null);
             setCanvasToFormState(state);
+            if (editing?.id) {
+              setEditingWorkflow(editing);
+            } else if (state.workflowId) {
+              setEditingWorkflow({ id: state.workflowId, name: state.workflowName } as any);
+            } else {
+              setEditingWorkflow(null);
+            }
             setShowEnhancedCreator(true);
           }}
         />

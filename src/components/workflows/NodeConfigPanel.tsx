@@ -1,10 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useImperativeHandle, forwardRef, useCallback, useMemo } from 'react';
 import {
     X, Settings, Trash2, ChevronDown, Save,
-    RotateCcw, Clock, AlertCircle, Loader2, Search
+    RotateCcw, Clock, AlertCircle, Loader2, Play, ExternalLink, Bot
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { MCPTool, ToolInfo } from '../../types';
 import { apiService } from '../../services/api';
+import { isAgentTool, isMessagingSendTool, CONDITION_TOOL } from './shared/toolCategories';
+import toast from '../../lib/notify';
+
+export interface NodeConfigPanelHandle {
+    /** Apply dirty local edits into the graph; returns merged node patch for sync save. */
+    flush: () => NodeConfigPendingUpdate | null;
+    isDirty: () => boolean;
+}
+
+export type NodeConfigPendingUpdate = {
+    nodeId: string;
+    parameters: Record<string, any>;
+    description: string;
+    retry_config: { max_retries: number; retry_delay: number };
+    timeout: number;
+    conditionExpression: string;
+};
 
 interface NodeConfigPanelProps {
     nodeId: string;
@@ -14,53 +32,112 @@ interface NodeConfigPanelProps {
     retryConfig?: { max_retries: number; retry_delay: number };
     timeout?: number;
     description: string;
+    conditionExpression?: string;
     onUpdateParams: (nodeId: string, params: Record<string, any>) => void;
     onUpdateDescription: (nodeId: string, description: string) => void;
     onUpdateRetry: (nodeId: string, config: { max_retries: number; retry_delay: number }) => void;
     onUpdateTimeout: (nodeId: string, timeout: number) => void;
+    onUpdateCondition?: (nodeId: string, expression: string) => void;
     onDelete: (nodeId: string) => void;
     onClose: () => void;
+    onTestComplete?: (nodeId: string, ok: boolean) => void;
     isDark?: boolean;
 }
 
-const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
+const NodeConfigPanel = forwardRef<NodeConfigPanelHandle, NodeConfigPanelProps>(function NodeConfigPanel({
     nodeId, toolName, tool, parameters, retryConfig, timeout, description,
+    conditionExpression,
     onUpdateParams, onUpdateDescription, onUpdateRetry, onUpdateTimeout,
-    onDelete, onClose, isDark
-}) => {
+    onUpdateCondition,
+    onDelete, onClose, onTestComplete, isDark
+}, ref) {
     const [localParams, setLocalParams] = useState<Record<string, any>>(parameters || {});
     const [localDescription, setLocalDescription] = useState(description || '');
     const [localRetry, setLocalRetry] = useState(retryConfig || { max_retries: 3, retry_delay: 30 });
     const [localTimeout, setLocalTimeout] = useState(timeout || 60);
     const [showAdvanced, setShowAdvanced] = useState(false);
     const [isDirty, setIsDirty] = useState(false);
+    const [localCondition, setLocalCondition] = useState(conditionExpression || '');
+    const [testing, setTesting] = useState(false);
+    const [testResult, setTestResult] = useState<string | null>(null);
     
     // Dynamic Options State
     const [dynamicOptions, setDynamicOptions] = useState<Record<string, { label: string, value: any }[]>>({});
     const [loadingDynamic, setLoadingDynamic] = useState<Record<string, boolean>>({});
+
+    const isCondition = toolName === CONDITION_TOOL || toolName === 'condition';
+    const showAgentLink = isAgentTool(toolName) || isMessagingSendTool(toolName);
 
     useEffect(() => {
         setLocalParams(parameters || {});
         setLocalDescription(description || '');
         setLocalRetry(retryConfig || { max_retries: 3, retry_delay: 30 });
         setLocalTimeout(timeout || 60);
+        setLocalCondition(conditionExpression || parameters?.expression || '');
         setIsDirty(false);
-    }, [nodeId, parameters, description, retryConfig, timeout]);
+        setTestResult(null);
+        setDynamicOptions({});
+        setLoadingDynamic({});
+    }, [nodeId, parameters, description, retryConfig, timeout, conditionExpression]);
 
     const handleParamChange = (name: string, value: any) => {
         setLocalParams(prev => ({ ...prev, [name]: value }));
         setIsDirty(true);
     };
 
-    const handleSave = () => {
-        onUpdateParams(nodeId, localParams);
-        onUpdateDescription(nodeId, localDescription);
-        onUpdateRetry(nodeId, localRetry);
-        onUpdateTimeout(nodeId, localTimeout);
+    const buildPending = useCallback((): NodeConfigPendingUpdate => {
+        const params = isCondition
+            ? { ...localParams, expression: localCondition }
+            : localParams;
+        return {
+            nodeId,
+            parameters: params,
+            description: localDescription,
+            retry_config: localRetry,
+            timeout: localTimeout,
+            conditionExpression: localCondition,
+        };
+    }, [isCondition, localParams, localCondition, nodeId, localDescription, localRetry, localTimeout]);
+
+    const handleSave = useCallback(() => {
+        const pending = buildPending();
+        onUpdateParams(pending.nodeId, pending.parameters);
+        onUpdateDescription(pending.nodeId, pending.description);
+        onUpdateRetry(pending.nodeId, pending.retry_config);
+        onUpdateTimeout(pending.nodeId, pending.timeout);
+        onUpdateCondition?.(pending.nodeId, pending.conditionExpression);
         setIsDirty(false);
+        return pending;
+    }, [buildPending, onUpdateParams, onUpdateDescription, onUpdateRetry, onUpdateTimeout, onUpdateCondition]);
+
+    useImperativeHandle(ref, () => ({
+        flush: () => {
+            if (!isDirty) return null;
+            return handleSave();
+        },
+        isDirty: () => isDirty,
+    }), [isDirty, handleSave]);
+
+    const handleTestNode = async () => {
+        setTesting(true);
+        setTestResult(null);
+        try {
+            const response = await apiService.executeTool(toolName, { ...localParams }) as any;
+            const ok = response?.success !== false && !response?.error;
+            setTestResult(ok ? 'Test succeeded' : (response?.error || response?.message || 'Test failed'));
+            onTestComplete?.(nodeId, ok);
+            if (ok) toast.success('Node test succeeded');
+            else toast.error('Node test failed');
+        } catch (err: any) {
+            setTestResult(err?.message || 'Test failed');
+            onTestComplete?.(nodeId, false);
+            toast.error(err?.message || 'Node test failed');
+        } finally {
+            setTesting(false);
+        }
     };
 
-    const fetchDynamicOptions = async (fieldKey: string, toolOperation: string) => {
+    const fetchDynamicOptions = useCallback(async (fieldKey: string, toolOperation: string) => {
         if (dynamicOptions[fieldKey] || loadingDynamic[fieldKey]) return;
 
         try {
@@ -79,21 +156,48 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
                 options = response.options;
             } else if (Array.isArray(response.result)) {
                 options = response.result;
-            } else if (Array.isArray(response.data)) {
-                options = response.data;
-            } else if (Array.isArray(response)) {
-                options = response;
             }
 
             if (options) {
-                setDynamicOptions(prev => ({ ...prev, [fieldKey]: options }));
+                const mapped = options.map((o: any) =>
+                    typeof o === 'string'
+                        ? { label: o, value: o }
+                        : { label: o.label || o.name || String(o.value ?? o.id), value: o.value ?? o.id ?? o.name }
+                );
+                setDynamicOptions(prev => ({ ...prev, [fieldKey]: mapped }));
             }
         } catch (err) {
-            console.error(`Error fetching dynamic options for ${fieldKey}:`, err);
+            console.warn('Failed to load dynamic options', fieldKey, err);
         } finally {
             setLoadingDynamic(prev => ({ ...prev, [fieldKey]: false }));
         }
-    };
+    }, [dynamicOptions, loadingDynamic]);
+
+    // Load dynamic option fields via effect (avoid setState during render)
+    const dynamicFieldSpecs = useMemo(() => {
+        const props = (tool as any)?.inputSchema?.properties || (tool as any)?.input_schema?.properties || {};
+        const specs: { name: string; source: string }[] = [];
+        Object.entries(props).forEach(([name, schema]: [string, any]) => {
+            let dynamicSource =
+                schema?.['x-dynamic-options'] ||
+                schema?.x_dynamic_options ||
+                schema?.xDynamicOptions;
+            if (toolName === 'rag_ingest_source' && name === 'url_or_id' && localParams['source_type'] === 'google_drive') {
+                dynamicSource = 'google_workspace_drive.list_folders';
+            }
+            if (dynamicSource) specs.push({ name, source: dynamicSource });
+        });
+        return specs;
+    }, [tool, toolName, localParams]);
+
+    useEffect(() => {
+        dynamicFieldSpecs.forEach(({ name, source }) => {
+            const fieldKey = `${toolName}.${name}`;
+            if (!dynamicOptions[fieldKey] && !loadingDynamic[fieldKey]) {
+                fetchDynamicOptions(fieldKey, source);
+            }
+        });
+    }, [dynamicFieldSpecs, toolName, dynamicOptions, loadingDynamic, fetchDynamicOptions]);
 
     // Get input schema from tool
     const inputSchema = tool ? (tool as any).inputSchema : null;
@@ -102,11 +206,11 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
 
     const renderField = (name: string, schema: any) => {
         const isLongText = ['system_prompt', 'prompt', 'context', 'message', 'description', 'base_content', 'text'].includes(name.toLowerCase());
-        const inputBaseStyles = `w-full px-3.5 py-2.5 text-sm rounded-xl shadow-sm focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/50 outline-none transition-all duration-200`;
+        const inputBaseStyles = `w-full px-3.5 py-2.5 text-sm rounded-xl shadow-sm focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500/50 outline-none transition-all duration-200`;
         const darkModeStyles = `bg-black/20 border border-white/10 text-white placeholder:text-gray-500 focus:bg-black/40`;
-        const lightModeStyles = `bg-white border border-gray-200 focus:bg-white placeholder:text-gray-400 focus:border-purple-400`;
+        const lightModeStyles = `bg-white border border-gray-200 focus:bg-white placeholder:text-gray-400 focus:border-primary-400`;
 
-        // Handle dynamic options
+        // Handle dynamic options (fetched in useEffect above)
         let dynamicSource = 
             schema['x-dynamic-options'] || 
             schema.x_dynamic_options || 
@@ -121,12 +225,6 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
 
         if (dynamicSource) {
             const fieldKey = `${toolName}.${name}`;
-            
-            // Trigger fetch
-            if (!dynamicOptions[fieldKey] && !loadingDynamic[fieldKey]) {
-                fetchDynamicOptions(fieldKey, dynamicSource);
-            }
-
             const currentOptions = dynamicOptions[fieldKey] || [];
             const isLoading = loadingDynamic[fieldKey];
 
@@ -152,7 +250,7 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
                         )}
                     </select>
                     {isLoading ? (
-                        <Loader2 className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-500 animate-spin" />
+                        <Loader2 className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary-500 animate-spin" />
                     ) : (
                         <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                     )}
@@ -186,11 +284,11 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
                     <div className="flex items-center space-x-3 pt-1 pb-2">
                         <button
                             onClick={() => handleParamChange(name, !localParams[name])}
-                            className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500/40 ${localParams[name] ? 'bg-purple-600' : (isDark ? 'bg-gray-700' : 'bg-gray-200')}`}
+                            className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500/40 ${localParams[name] ? 'bg-primary-500' : (isDark ? 'bg-gray-700' : 'bg-gray-200')}`}
                         >
                             <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${localParams[name] ? 'translate-x-5' : 'translate-x-0'}`} />
                         </button>
-                        <span className={`text-xs font-medium ${localParams[name] ? (isDark ? 'text-purple-400' : 'text-purple-600') : (isDark ? 'text-gray-500' : 'text-gray-500')}`}>
+                        <span className={`text-xs font-medium ${localParams[name] ? (isDark ? 'text-primary-300' : 'text-primary-600') : (isDark ? 'text-gray-500' : 'text-gray-500')}`}>
                             {localParams[name] ? 'Enabled' : 'Disabled'}
                         </span>
                     </div>
@@ -239,15 +337,19 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
     };
 
     return (
-        <div className={`w-[340px] flex flex-col h-full ${isDark ? 'bg-gray-900/60 backdrop-blur-2xl' : 'bg-white/60 backdrop-blur-2xl'}`}>
+        <div
+          className={`nowheel nopan grid h-full min-h-0 w-full grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden sm:w-[340px] ${
+            isDark ? 'bg-secondary-950' : 'bg-white'
+          }`}
+        >
             {/* Header */}
-            <div className={`px-5 py-5 border-b ${isDark ? 'border-white/5 bg-gray-900/40' : 'border-black/5 bg-white/40'}`}>
+            <div className={`shrink-0 px-5 py-4 border-b ${isDark ? 'border-white/5' : 'border-slate-100'}`}>
                 <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                        <Settings className="w-4 h-4 text-blue-600" />
+                        <Settings className="w-4 h-4 text-primary-500" />
                         <h3 className={`text-sm font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Configure Node</h3>
                     </div>
-                    <button onClick={onClose} className={`p-1.5 rounded-full transition-colors ${isDark ? 'hover:bg-white/10' : 'hover:bg-black/5'}`}>
+                    <button type="button" onClick={onClose} aria-label="Close configure panel" className={`p-1.5 rounded-full transition-colors ${isDark ? 'hover:bg-white/10' : 'hover:bg-black/5'}`}>
                         <X className={`w-4 h-4 ${isDark ? 'text-gray-400' : 'text-gray-500'}`} />
                     </button>
                 </div>
@@ -256,8 +358,23 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
                 </p>
             </div>
 
-            {/* Content */}
-            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5" style={{ scrollbarWidth: 'thin' }}>
+            {/* Scrollable body — nowheel lets wheel events scroll this panel instead of the canvas */}
+            <div
+              className="canvas-inspector-scroll min-h-0 overflow-y-scroll overscroll-contain px-5 py-4 space-y-5"
+              role="region"
+              aria-label="Node configuration"
+            >
+                {showAgentLink && (
+                    <Link
+                        to="/agents?tab=deploy"
+                        className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 text-xs font-bold transition ${isDark ? 'border-primary-500/30 bg-primary-500/10 text-primary-300 hover:bg-primary-500/20' : 'border-primary-200 bg-primary-50 text-primary-700 hover:bg-primary-100'}`}
+                    >
+                        <Bot className="h-3.5 w-3.5" />
+                        Open Agents Deploy
+                        <ExternalLink className="ml-auto h-3 w-3" />
+                    </Link>
+                )}
+
                 {/* Description */}
                 <div>
                     <label className={`block text-xs font-bold uppercase tracking-wider mb-1.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
@@ -266,10 +383,28 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
                     <textarea
                         value={localDescription}
                         onChange={e => { setLocalDescription(e.target.value); setIsDirty(true); }}
-                        className={`w-full px-3.5 py-2.5 text-sm rounded-xl shadow-sm focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/50 outline-none transition-all duration-200 resize-y min-h-[80px] leading-relaxed ${isDark ? 'bg-black/20 border border-white/10 text-white placeholder:text-gray-500 focus:bg-black/40' : 'bg-white border border-gray-200 focus:bg-white placeholder:text-gray-400 focus:border-purple-400'}`}
+                        className={`w-full px-3.5 py-2.5 text-sm rounded-xl shadow-sm focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500/50 outline-none transition-all duration-200 resize-y min-h-[80px] leading-relaxed ${isDark ? 'bg-black/20 border border-white/10 text-white placeholder:text-gray-500 focus:bg-black/40' : 'bg-white border border-gray-200 focus:bg-white placeholder:text-gray-400 focus:border-primary-400'}`}
                         placeholder="What does this step do?"
                     />
                 </div>
+
+                {isCondition && (
+                    <div>
+                        <label className={`block text-xs font-bold uppercase tracking-wider mb-1.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                            Condition expression
+                        </label>
+                        <input
+                            type="text"
+                            value={localCondition}
+                            onChange={(e) => { setLocalCondition(e.target.value); setIsDirty(true); }}
+                            placeholder="e.g. {{amount}} > 1000"
+                            className={`w-full px-3.5 py-2.5 text-sm rounded-xl font-mono outline-none focus:ring-2 focus:ring-primary-500/30 ${isDark ? 'bg-black/20 border border-white/10 text-white' : 'bg-white border border-gray-200'}`}
+                        />
+                        <p className={`mt-1 text-[10px] ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                            Connect True / False handles to branch steps.
+                        </p>
+                    </div>
+                )}
 
                 {/* Parameters */}
                 {Object.keys(properties).length > 0 && (
@@ -289,8 +424,8 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
                                         </label>
                                         <div className="flex items-center gap-1.5">
                                             {isSessionKey && (
-                                                <span className={`inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold tracking-wide ${isDark ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' : 'bg-purple-50 text-purple-600 border border-purple-200'}`}>
-                                                    💬 Context Memory
+                                                <span className={`inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold tracking-wide ${isDark ? 'bg-primary-500/20 text-primary-300 border border-primary-500/30' : 'bg-primary-50 text-primary-600 border border-primary-200'}`}>
+                                                    Context Memory
                                                 </span>
                                             )}
                                             <span className={`text-[9px] uppercase font-bold ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>{schema.type}</span>
@@ -302,9 +437,9 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
                                     {isSessionKey && !localParams[name] && (
                                         <button
                                             onClick={() => handleParamChange(name, '{{session_key}}')}
-                                            className={`mb-1.5 inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-semibold transition-all ${isDark ? 'bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 border border-purple-500/20' : 'bg-purple-50 text-purple-600 hover:bg-purple-100 border border-purple-200'}`}
+                                            className={`mb-1.5 inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-semibold transition-all ${isDark ? 'bg-primary-500/10 text-primary-400 hover:bg-primary-500/20 border border-primary-500/20' : 'bg-primary-50 text-primary-600 hover:bg-primary-100 border border-primary-200'}`}
                                         >
-                                            ⚡ Auto-fill with {'{{session_key}}'}
+                                            Auto-fill with {'{{session_key}}'}
                                         </button>
                                     )}
                                     {renderField(name, schema)}
@@ -382,12 +517,26 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
             </div>
 
             {/* Footer */}
-            <div className={`px-5 py-5 border-t space-y-2.5 ${isDark ? 'border-white/5 bg-gray-900/40' : 'border-black/5 bg-white/40'}`}>
+            <div className={`shrink-0 border-t px-5 py-4 space-y-2.5 ${isDark ? 'border-white/5 bg-secondary-900/80' : 'border-slate-100 bg-slate-50/80'}`}>
+                {!isCondition && (
+                    <button
+                        type="button"
+                        onClick={handleTestNode}
+                        disabled={testing}
+                        className={`w-full flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${isDark ? 'bg-secondary-800 text-secondary-100 hover:bg-secondary-700' : 'bg-secondary-900 text-white hover:bg-secondary-800'}`}
+                    >
+                        {testing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5" />}
+                        <span>Test this node</span>
+                    </button>
+                )}
+                {testResult && (
+                    <p className={`text-[11px] font-medium ${testResult.includes('succeed') ? 'text-emerald-600' : 'text-red-500'}`}>{testResult}</p>
+                )}
                 <button
                     onClick={handleSave}
                     disabled={!isDirty}
                     className={`w-full flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${isDirty
-                        ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-primary-200/50'
+                        ? 'bg-primary-500 text-white hover:bg-primary-600 shadow-lg shadow-primary-500/25'
                         : (isDark ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-gray-100 text-gray-400 cursor-not-allowed')
                         }`}
                 >
@@ -404,6 +553,6 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
             </div>
         </div>
     );
-};
+});
 
 export default NodeConfigPanel;
