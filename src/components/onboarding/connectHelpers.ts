@@ -83,6 +83,13 @@ export function onboardingResumePath(): string | null {
 }
 
 export async function startPlatformOAuth(platformId: string, resumeStep: number) {
+  // Telegram uses BotFather token entry on Connections (not OAuth / Login Widget)
+  if (platformId === 'telegram') {
+    markOnboardingResume(resumeStep);
+    window.location.href = '/connections?connect=telegram';
+    return;
+  }
+
   const fn = AUTH_URL_BY_PLATFORM[platformId];
   if (!fn) {
     toast.error('This connection isn’t available from onboarding yet. You can connect it later.');

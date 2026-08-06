@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import toast from '../lib/notify';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
@@ -44,7 +44,15 @@ const Chat: React.FC = () => {
   const [providers, setProviders] = useState<LLMProviderResponse | null>(null);
   const [selectedProvider, setSelectedProvider] = useState<string>('ollama');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    if (typeof document === 'undefined') return false;
+    // Prefer live document class (already applied by ThemeToggle / other pages),
+    // then localStorage — never default to light and overwrite the app theme.
+    if (document.documentElement.classList.contains('dark')) return true;
+    const saved = localStorage.getItem('theme');
+    if (saved === 'dark' || saved === 'light') return saved === 'dark';
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
   const [isRecording, setIsRecording] = useState(false);
   const [recognition, setRecognition] = useState<any>(null);
   const [editingMessage, setEditingMessage] = useState<number | null>(null);
@@ -88,17 +96,33 @@ const Chat: React.FC = () => {
 
   // -- Initialization & Effects --
 
-  // Theme Management
+  // Keep Chat in sync with the global theme; only write DOM/storage on explicit toggle.
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
-    const darkMode = savedTheme ? savedTheme === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
-    setIsDarkMode(darkMode);
+    const syncFromDom = () => {
+      setIsDarkMode(document.documentElement.classList.contains('dark'));
+    };
+    const observer = new MutationObserver(syncFromDom);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === 'theme' && e.newValue) {
+        setIsDarkMode(e.newValue === 'dark');
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('storage', onStorage);
+    };
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
-    document.documentElement.classList.toggle('dark', isDarkMode);
-  }, [isDarkMode]);
+  const toggleTheme = useCallback(() => {
+    setIsDarkMode((prev) => {
+      const next = !prev;
+      localStorage.setItem('theme', next ? 'dark' : 'light');
+      document.documentElement.classList.toggle('dark', next);
+      return next;
+    });
+  }, []);
 
   // Surface stream errors that were not already toasted at send-time
   useEffect(() => {
@@ -522,7 +546,7 @@ const Chat: React.FC = () => {
         createNewConversation={createNewConversation}
         deleteConversation={deleteConversation}
         isDarkMode={isDarkMode}
-        toggleTheme={() => setIsDarkMode(!isDarkMode)}
+        toggleTheme={toggleTheme}
         sidebarCollapsed={sidebarCollapsed}
         setSidebarCollapsed={setSidebarCollapsed}
         updateConversationTitle={updateConversationTitle}

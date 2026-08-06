@@ -332,7 +332,7 @@ export type WorkflowVisibility = 'private' | 'unlisted' | 'public' | 'marketplac
 export type WorkflowLicense = 'free' | 'personal' | 'commercial' | 'enterprise';
 
 export interface Workflow {
-  id: number;
+  id: string;
   name: string;
   description: string;
   status: 'draft' | 'active' | 'inactive' | 'archived';
@@ -481,7 +481,7 @@ export interface VariableSubstitutionResponse {
 // Agent Types
 export interface AgentResponse {
   agent_id: string;
-  workflow_id: number;
+  workflow_id: string;
   workflow_name: string;
   status: string;
   trigger_type: string;
@@ -490,11 +490,15 @@ export interface AgentResponse {
   performance_metrics: Record<string, any>;
   created_at: string;
   updated_at: string;
+  channel?: string | null;
+  job_type?: string | null;
+  agent_kind?: string | null;
+  template_id?: string | null;
 }
 
 export interface AgentStatusResponse {
   agent_id: string;
-  workflow_id: number;
+  workflow_id: string;
   workflow_name: string;
   status: string;
   trigger_type: string;
@@ -503,10 +507,14 @@ export interface AgentStatusResponse {
   performance_metrics: Record<string, any>;
   created_at: string;
   updated_at: string;
+  channel?: string | null;
+  job_type?: string | null;
+  agent_kind?: string | null;
+  template_id?: string | null;
 }
 
 export interface AgentCreate {
-  workflow_id: number;
+  workflow_id: string;
   agent_config?: Record<string, any>;
 }
 

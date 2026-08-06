@@ -36,7 +36,7 @@ import {
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useSubscription } from '../hooks/useSubscription';
 import { useWebSocket } from '../hooks/useWebSocket';
 import toast from '../lib/notify';
@@ -57,6 +57,7 @@ const Workflows: React.FC = () => {
   const { user } = useAuth();
   const { canUseFeature, tier } = useSubscription();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { confirm } = useConfirm();
   const [workflows, setWorkflows] = useState<WorkflowType[]>([]);
   const [executions, setExecutions] = useState<WorkflowExecution[]>([]);
@@ -146,6 +147,21 @@ const Workflows: React.FC = () => {
     loadExecutions();
   }, []);
 
+  // Deep-link from Agents "Edit automation" → /workflows?id=<uuid> (opens canvas)
+  useEffect(() => {
+    const workflowId = searchParams.get('id');
+    if (!workflowId || loading || workflows.length === 0) return;
+    const match = workflows.find((w) => String(w.id) === String(workflowId));
+    if (!match) return;
+    setCanvasInitialData(match);
+    setFormToCanvasState(null);
+    setShowCanvas(true);
+    setActiveTab('workflows');
+    const next = new URLSearchParams(searchParams);
+    next.delete('id');
+    setSearchParams(next, { replace: true });
+  }, [workflows, loading, searchParams, setSearchParams]);
+
   useEffect(() => {
     // Calculate stats when workflows or executions change
     const total = workflows.length;
@@ -232,7 +248,7 @@ const Workflows: React.FC = () => {
     }
   };
 
-  const handleDeleteWorkflow = async (workflowId: number) => {
+  const handleDeleteWorkflow = async (workflowId: string | number) => {
     const ok = await confirm({
       title: 'Delete this workflow?',
       description: 'This removes the workflow and its configuration. Past executions may remain in history.',
@@ -632,11 +648,19 @@ const Workflows: React.FC = () => {
               {/* Dropdown Menu */}
               <div className="absolute right-0 top-full mt-1 w-32 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-gray-100 dark:border-slate-700 py-1 hidden group-hover/menu:block z-10">
                 <button onClick={() => {
+                  setCanvasInitialData(workflow);
+                  setFormToCanvasState(null);
+                  setShowCanvas(true);
+                }} className="w-full text-left px-3 py-2 text-xs font-semibold text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center space-x-2">
+                  <Edit className="w-3.5 h-3.5" />
+                  <span>Edit in Canvas</span>
+                </button>
+                <button onClick={() => {
                   setEditingWorkflow(workflow);
                   setShowEnhancedCreator(true);
                 }} className="w-full text-left px-3 py-2 text-xs font-semibold text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center space-x-2">
                   <Edit className="w-3.5 h-3.5" />
-                  <span>Edit</span>
+                  <span>Edit in Form</span>
                 </button>
                 <button onClick={() => openShareModal(workflow)} className="w-full text-left px-3 py-2 text-xs font-semibold text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center space-x-2">
                   <Share2 className="w-3.5 h-3.5" />
@@ -791,10 +815,11 @@ const Workflows: React.FC = () => {
             </button>
             <button
               onClick={() => {
-                setEditingWorkflow(workflow);
-                setShowEnhancedCreator(true);
+                setCanvasInitialData(workflow);
+                setFormToCanvasState(null);
+                setShowCanvas(true);
               }}
-              className="p-1.5 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors" title="Edit"
+              className="p-1.5 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors" title="Edit in Canvas"
             >
               <Edit className="w-4 h-4" />
             </button>
@@ -829,10 +854,10 @@ const Workflows: React.FC = () => {
                   <span className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Workspace Management</span>
                 </div>
                 <h1 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mb-2 tracking-tight workflows-header-tut">
-                  Welcome back, <span className="bg-gradient-to-r from-primary-500 to-secondary-900 dark:from-primary-400 dark:to-primary-300 bg-clip-text text-transparent">{user?.name?.split(' ')[0] || 'Builder'}</span>!
+                  Automations
                 </h1>
                 <p className="text-gray-500 dark:text-slate-400 max-w-md font-medium">
-                  Supercharge your productivity with intelligent automated workflows.
+                  Build, run, and monitor the workflows behind your agents and business processes.
                 </p>
               </div>
               <div className="flex items-center space-x-3 w-full sm:w-auto justify-center sm:justify-end workflows-builders-tut">
@@ -857,6 +882,7 @@ const Workflows: React.FC = () => {
                       }
                       setCanvasInitialData(null);
                       setFormToCanvasState(null);
+                      setEditingWorkflow(null);
                       setShowCanvas(true);
                     }}
                     className="flex-1 sm:flex-none flex items-center justify-center space-x-2 px-6 py-4 bg-gradient-to-r from-primary-500 to-secondary-900 text-white rounded-2xl hover:shadow-[0_0_20px_rgba(255,70,150,0.4)] transform hover:-translate-y-1 transition-all duration-300 font-bold workflow-builder"
@@ -1141,8 +1167,15 @@ const Workflows: React.FC = () => {
           }}
           onSwitchToCanvas={(state: CanvasState) => {
             setShowEnhancedCreator(false);
-            setEditingWorkflow(null);
             setFormToCanvasState(state);
+            // Keep edit identity so Save updates instead of creating a duplicate
+            if (editingWorkflow?.id) {
+              setCanvasInitialData(editingWorkflow);
+            } else if (state.workflowId) {
+              setCanvasInitialData({ id: state.workflowId, name: state.workflowName } as any);
+            } else {
+              setCanvasInitialData(null);
+            }
             setShowCanvas(true);
           }}
         />
@@ -1154,6 +1187,7 @@ const Workflows: React.FC = () => {
             setShowCanvas(false);
             setCanvasInitialData(null);
             setFormToCanvasState(null);
+            setEditingWorkflow(null);
           }}
           initialData={canvasInitialData}
           initialCanvasState={formToCanvasState}
@@ -1164,10 +1198,18 @@ const Workflows: React.FC = () => {
             setFormToCanvasState(null);
           }}
           onSwitchToForm={(state: CanvasState) => {
+            const editing = canvasInitialData;
             setShowCanvas(false);
             setCanvasInitialData(null);
             setFormToCanvasState(null);
             setCanvasToFormState(state);
+            if (editing?.id) {
+              setEditingWorkflow(editing);
+            } else if (state.workflowId) {
+              setEditingWorkflow({ id: state.workflowId, name: state.workflowName } as any);
+            } else {
+              setEditingWorkflow(null);
+            }
             setShowEnhancedCreator(true);
           }}
         />
