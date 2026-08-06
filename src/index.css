@@ -453,16 +453,97 @@
 .workflow-canvas .react-flow__controls-button {
   border: none !important;
   border-bottom: 1px solid #e5e7eb !important;
+  background: transparent !important;
+}
+
+.workflow-canvas .react-flow__controls-button svg {
+  fill: #1E1033 !important;
+}
+
+.workflow-canvas .react-flow__controls-button:hover {
+  background: rgba(30, 16, 51, 0.06) !important;
 }
 
 .workflow-canvas .react-flow__controls-button:last-child {
   border-bottom: none !important;
 }
 
+.dark .workflow-canvas .react-flow__controls {
+  background: rgba(30, 16, 51, 0.92) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+.dark .workflow-canvas .react-flow__controls-button {
+  border-bottom-color: rgba(255, 255, 255, 0.12) !important;
+  background: transparent !important;
+}
+
+.dark .workflow-canvas .react-flow__controls-button svg {
+  fill: #F3EEF8 !important;
+}
+
+.dark .workflow-canvas .react-flow__controls-button:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.dark .workflow-canvas .react-flow__controls-button:hover svg {
+  fill: #FF4696 !important;
+}
+
 .workflow-canvas .react-flow__minimap {
-  border: 1px solid #e5e7eb;
+  border: 1px solid rgba(30, 16, 51, 0.12);
   border-radius: 12px;
   overflow: hidden;
+}
+
+.dark .workflow-canvas .react-flow__minimap {
+  border-color: rgba(255, 70, 150, 0.2);
+}
+
+/* Always-visible scrollbar on canvas inspector panels */
+.canvas-inspector-scroll {
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(30, 16, 51, 0.35) transparent;
+}
+
+.canvas-inspector-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.canvas-inspector-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.canvas-inspector-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(30, 16, 51, 0.35);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.dark .canvas-inspector-scroll {
+  scrollbar-color: rgba(255, 255, 255, 0.35) transparent;
+}
+
+.dark .canvas-inspector-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.35);
+}
+
+.workflow-canvas .react-flow__edge-label {
+  pointer-events: all;
+}
+
+.workflow-canvas .react-flow__handle {
+  width: 12px;
+  height: 12px;
+}
+
+@media (pointer: coarse) {
+  .workflow-canvas .react-flow__handle {
+    width: 16px;
+    height: 16px;
+  }
 }
 
 /* Animations & Premium Effects */
