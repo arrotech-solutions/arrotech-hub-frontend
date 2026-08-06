@@ -2,42 +2,29 @@ import {
     AlertCircle,
     ArrowLeft,
     ArrowRight,
-    BarChart3,
     CheckCircle,
     ChevronDown,
     ChevronRight,
     ChevronUp,
     Clock,
-    FileText,
-    Globe,
     Loader2,
     MousePointer,
-    Palette,
     Play,
     Plus,
     Save,
     Search,
     Settings,
-    Shield,
     Sparkles,
     Trash2,
-    Users,
     Webhook,
     X,
     Zap,
-    Activity,
-    CreditCard,
-    Droplets,
-    Leaf,
-    ShoppingBag,
-    Truck,
-    Database,
-    BrainCircuit
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import toast from '../lib/notify';
 import apiService from '../services/api';
 import { MCPTool, ToolInfo } from '../types';
+import { TOOL_CATEGORIES, getToolCategory } from './workflows/shared/toolCategories';
 
 interface EnhancedWorkflowCreatorProps {
     open: boolean;
@@ -52,6 +39,8 @@ interface EnhancedWorkflowCreatorProps {
         category: string;
         tags: string;
         steps: WorkflowStep[];
+        variables?: Record<string, any>;
+        workflowId?: string;
     } | null;
     onSwitchToCanvas?: (state: {
         workflowName: string;
@@ -61,6 +50,8 @@ interface EnhancedWorkflowCreatorProps {
         category: string;
         tags: string;
         steps: WorkflowStep[];
+        variables?: Record<string, any>;
+        workflowId?: string;
     }) => void;
 }
 
@@ -162,109 +153,6 @@ async function buildWorkflowVariableState(workflow: any): Promise<{
     return { schema, values };
 }
 
-const TOOL_CATEGORIES = {
-    'Fintech': {
-        icon: CreditCard,
-        color: 'emerald',
-        keywords: ['payment', 'mpesa', 'airtel', 't_kash', 'equity_jenga', 'flutterwave', 'paystack', 'kopo_kopo', 'cellulant', 'pesapal', 'ipay', 'little_pay']
-    },
-    'E-commerce': {
-        icon: ShoppingBag,
-        color: 'blue',
-        keywords: ['ecommerce', 'jumia', 'kilimall', 'jiji', 'masoko', 'copia', 'twiga', 'wasoko', 'sky_garden']
-    },
-    'Accounting': {
-        icon: FileText,
-        color: 'indigo',
-        keywords: ['accounting', 'kra', 'itax', 'quickbooks', 'xero', 'zoho', 'lipabiz', 'sasapay']
-    },
-    'Logistics': {
-        icon: Truck,
-        color: 'amber',
-        keywords: ['logistics', 'amitruck', 'lori', 'sendy', 'busybee', 'fargo', 'g4s']
-    },
-    'Human Resources': {
-        icon: Users,
-        color: 'rose',
-        keywords: ['hr', 'workpay', 'seamlesshr', 'bitrix', 'bamboo']
-    },
-    'Agritech': {
-        icon: Leaf,
-        color: 'green',
-        keywords: ['agri', 'shamba', 'digifarm', 'apollo', 'iprocure', 'farmdrive']
-    },
-    'Healthtech': {
-        icon: Activity,
-        color: 'red',
-        keywords: ['health', 'mydawa', 'penda', 'ilara', 'tibu']
-    },
-    'Utilities': {
-        icon: Droplets,
-        color: 'cyan',
-        keywords: ['utility', 'kenya_power', 'nairobi_water', 'safaricom_biz', 'zuku']
-    },
-    'Slack': {
-        icon: Users,
-        color: 'purple',
-        prefix: 'slack_'
-    },
-    'HubSpot': {
-        icon: BarChart3,
-        color: 'orange',
-        prefix: 'hubspot_'
-    },
-    'Analytics': {
-        icon: BarChart3,
-        color: 'blue',
-        prefix: 'ga4_'
-    },
-    'Communication': {
-        icon: Users,
-        color: 'green',
-        keywords: ['whatsapp_', 'telegram_', 'instagram_']
-    },
-    'File Management': {
-        icon: FileText,
-        color: 'purple',
-        prefix: 'file_'
-    },
-    'Web Tools': {
-        icon: Globe,
-        color: 'orange',
-        prefix: 'web_'
-    },
-    'Content Creation': {
-        icon: Palette,
-        color: 'pink',
-        prefix: 'content_'
-    },
-    'Advanced': {
-        icon: Zap,
-        color: 'indigo',
-        prefix: 'advanced_'
-    },
-    'Enterprise': {
-        icon: Shield,
-        color: 'red',
-        prefix: 'enterprise_'
-    },
-    'Knowledge Base': {
-        icon: Database,
-        color: 'violet',
-        keywords: ['rag_', 'pinecone_', 'qdrant_', 'weaviate_', 'llamaparse_', 'unstructured_', 'firecrawl_']
-    },
-    'AI & LLM': {
-        icon: BrainCircuit,
-        color: 'fuchsia',
-        keywords: ['ai_text_generation', 'ai_embeddings', 'ai_']
-    },
-    'General': {
-        icon: Settings,
-        color: 'gray',
-        prefix: ''
-    }
-};
-
 const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
     open,
     onClose,
@@ -306,7 +194,8 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
     const [error, setError] = useState<string | null>(null);
     const [dynamicOptions, setDynamicOptions] = useState<Record<string, { label: string, value: any }[]>>({});
     const [loadingDynamic, setLoadingDynamic] = useState<Record<string, boolean>>({});
-    const isEditing = !!initialData;
+    const editId = initialData?.id ?? initialCanvasState?.workflowId;
+    const isEditing = !!editId;
 
     useEffect(() => {
         if (open) {
@@ -321,6 +210,9 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                 setCategory(initialCanvasState.category || '');
                 setTags(initialCanvasState.tags || '');
                 setWorkflowSteps(initialCanvasState.steps || []);
+                if (initialCanvasState.variables) {
+                    setWorkflowVariableValues(initialCanvasState.variables);
+                }
             } else if (initialData) {
                 setCurrentStep(0);
                 setWorkflowName(initialData.name || '');
@@ -388,31 +280,13 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
         }
     };
 
-    const getToolCategory = (toolName: string): string => {
-        const lowerName = toolName.toLowerCase();
-        for (const [category, config] of Object.entries(TOOL_CATEGORIES)) {
-            const cfg = config as any;
-            if (cfg.prefix && lowerName.startsWith(cfg.prefix)) {
-                return category;
-            }
-            if (cfg.keywords) {
-                for (const keyword of cfg.keywords) {
-                    if (lowerName.includes(keyword)) {
-                        return category;
-                    }
-                }
-            }
-        }
-        return 'General';
-    };
-
     const getCategoryColor = (category: string): string => {
-        const config = TOOL_CATEGORIES[category as keyof typeof TOOL_CATEGORIES];
+        const config = TOOL_CATEGORIES[category];
         return config?.color || 'gray';
     };
 
     const getCategoryIcon = (category: string) => {
-        const config = TOOL_CATEGORIES[category as keyof typeof TOOL_CATEGORIES];
+        const config = TOOL_CATEGORIES[category];
         const Icon = config?.icon || Settings;
         return <Icon className="w-4 h-4" />;
     };
@@ -517,12 +391,13 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                 tool_name: step.tool_name,
                 tool_parameters: step.tool_parameters,
                 description: step.description,
+                condition: step.condition,
                 retry_config: step.retry_config,
                 timeout: step.timeout
             }));
 
             if (isEditing) {
-                const response = await apiService.updateWorkflow(initialData.id, {
+                const response = await apiService.updateWorkflow(editId, {
                     name: workflowName,
                     description: description || `Updated with ${workflowSteps.length} steps`,
                     steps: steps,
@@ -530,6 +405,7 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                     trigger_config: triggerConfig,
                     variables: workflowVariableValues,
                     workflow_metadata: {
+                        ...(initialData?.workflow_metadata || {}),
                         category: category,
                         tags: tags.split(',').map(t => t.trim()).filter(Boolean)
                     }
@@ -549,7 +425,11 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                     steps: steps,
                     trigger_type: triggerType,
                     trigger_config: triggerConfig,
-                    variables: workflowVariableValues
+                    variables: workflowVariableValues,
+                    workflow_metadata: {
+                        category: category,
+                        tags: tags.split(',').map(t => t.trim()).filter(Boolean)
+                    }
                 });
 
                 if (response.success && response.data) {
@@ -801,6 +681,8 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                                     category,
                                     tags,
                                     steps: workflowSteps,
+                                    variables: workflowVariableValues,
+                                    workflowId: initialData?.id ? String(initialData.id) : undefined,
                                 })}
                                 className="px-3 py-1.5 rounded-lg bg-white/20 hover:bg-white/30 transition-colors text-white text-xs font-bold"
                             >

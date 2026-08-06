@@ -129,23 +129,23 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       badge: null
     },
     {
-      name: 'Workflows',
+      name: 'Automations',
       href: '/workflows',
       icon: Workflow,
-      description: 'Automated processes',
+      description: 'Build and run automations',
       badge: 'New'
     },
     {
       name: 'Agents',
       icon: Bot,
-      description: 'AI-powered agents',
+      description: 'Deployed AI workers',
       badge: 'New',
       children: [
         {
           name: 'Agent Hub',
           href: '/agents',
           icon: Bot,
-          description: 'Discover and manage AI agents',
+          description: 'Deploy and manage messaging agents',
           badge: 'New'
         },
         {

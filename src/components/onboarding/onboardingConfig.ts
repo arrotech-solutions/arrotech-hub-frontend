@@ -101,7 +101,7 @@ export const GOAL_RECOMMENDED_APPS: Record<OnboardingPrimaryGoal, RecommendedApp
 
 export const GOAL_LANDING: Record<OnboardingPrimaryGoal, string> = {
   unified_productivity: '/unified/inbox',
-  messaging_agents: '/agents',
+  messaging_agents: '/agents?tab=deploy',
   ask_ai: '/chat',
   automations: '/workflows',
   social_content: '/connections',
@@ -131,9 +131,9 @@ export const GOAL_FIRST_WIN: Record<
     activation: 'ask_ai_open',
   },
   automations: {
-    title: 'Browse workflow templates',
+    title: 'Browse automation templates',
     description: 'Pick a template and connect the apps it needs — no code required.',
-    cta: 'Open Workflows',
+    cta: 'Open Automations',
     activation: 'workflows_open',
   },
   social_content: {
@@ -165,7 +165,7 @@ export const CHECKLIST_BY_GOAL: Record<
   ],
   messaging_agents: [
     { id: 'connect_wa', label: 'Connect WhatsApp or Telegram', href: '/connections' },
-    { id: 'create_agent', label: 'Create an agent from a template', href: '/agents' },
+    { id: 'create_agent', label: 'Deploy an agent from a template', href: '/agents?tab=deploy' },
     { id: 'wa_workspace', label: 'Explore WhatsApp workspace', href: '/whatsapp' },
   ],
   ask_ai: [
@@ -173,8 +173,8 @@ export const CHECKLIST_BY_GOAL: Record<
     { id: 'ask_prompt', label: 'Send your first Ask AI prompt', href: '/chat' },
   ],
   automations: [
-    { id: 'browse_templates', label: 'Browse workflow templates', href: '/workflows' },
-    { id: 'connect_apps', label: 'Connect apps your workflow needs', href: '/connections' },
+    { id: 'browse_templates', label: 'Browse automation templates', href: '/workflows' },
+    { id: 'connect_apps', label: 'Connect apps your automation needs', href: '/connections' },
   ],
   social_content: [
     { id: 'connect_social', label: 'Connect a social account', href: '/connections' },

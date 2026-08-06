@@ -115,7 +115,7 @@ const Integrations: React.FC = () => {
   };
 
   const getPlatformCategory = (id: string): string => {
-    if (id.includes('slack') || id.includes('whatsapp') || id.includes('google') || id.includes('teams') || id.includes('outlook')) return 'Communication';
+    if (id.includes('slack') || id.includes('whatsapp') || id.includes('telegram') || id.includes('google') || id.includes('teams') || id.includes('outlook')) return 'Communication';
     if (id.includes('hubspot') || id.includes('salesforce')) return 'CRM';
     if (id.includes('facebook') || id.includes('instagram') || id.includes('twitter') || id.includes('linkedin')) return 'Social';
     if (id.includes('ga4') || id.includes('analytics')) return 'Analytics';
@@ -166,6 +166,34 @@ const Integrations: React.FC = () => {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // Deep-link from onboarding: /connections?connect=telegram
+  useEffect(() => {
+    if (loading || platforms.length === 0 || showCreateModal) return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('connect') !== 'telegram') return;
+    const platform = platforms.find((p) => p.id === 'telegram');
+    if (!platform) return;
+    const existing = connections.find((c) => c.platform === 'telegram');
+    if (existing) {
+      setEditingConnection(existing);
+      setFormData({
+        platform: existing.platform,
+        name: existing.name,
+        config: existing.config || {},
+      });
+    } else {
+      setEditingConnection(null);
+      setFormData({
+        platform: 'telegram',
+        name: 'Telegram Ordering Bot',
+        config: { bot_token: '', notify_chat_id: '' },
+      });
+    }
+    setSelectedPlatform(platform);
+    setShowCreateModal(true);
+    navigate('/connections', { replace: true });
+  }, [loading, platforms, connections, showCreateModal, navigate]);
 
   // Handle OAuth Callback
   useEffect(() => {
@@ -781,18 +809,17 @@ const Integrations: React.FC = () => {
       }
     }
 
-    // Redirect to Telegram Auth
+    // Telegram: open BotFather token form (not Login Widget)
     if (platform.id === 'telegram' && !existing) {
-      try {
-        toast.loading('Redirecting to Telegram...', { id: 'oauth-redirect' });
-        const { auth_url } = await apiService.getTelegramAuthUrl();
-        window.location.href = auth_url;
-        return;
-      } catch (error: any) {
-        toast.dismiss('oauth-redirect');
-        toast.error('Failed to initiate Telegram connection');
-        return;
-      }
+      setEditingConnection(null);
+      setFormData({
+        platform: platform.id,
+        name: 'Telegram Ordering Bot',
+        config: { bot_token: '', notify_chat_id: '' }
+      });
+      setSelectedPlatform(platform);
+      setShowCreateModal(true);
+      return;
     }
 
     // Redirect to HubSpot OAuth if it's HubSpot AND NOT already connected
@@ -962,6 +989,10 @@ const Integrations: React.FC = () => {
 
   const handleSaveConnection = async () => {
     try {
+      if (formData.platform === 'telegram' && !formData.config?.bot_token?.trim()) {
+        toast.error('Paste your BotFather bot token to continue');
+        return;
+      }
       if (editingConnection) {
         await apiService.updateConnection(editingConnection.id, {
           name: formData.name,
@@ -971,11 +1002,17 @@ const Integrations: React.FC = () => {
         toast.success(`Updated ${selectedPlatform?.name}`);
       } else {
         await apiService.createConnection(formData);
-        toast.success(`Connected to ${selectedPlatform?.name}`);
+        toast.success(
+          formData.platform === 'telegram'
+            ? 'Telegram bot connected — webhook registered'
+            : `Connected to ${selectedPlatform?.name}`
+        );
       }
       setShowCreateModal(false);
       fetchData();
-    } catch (error) {
+    } catch (error: any) {
+      const detail = error?.response?.data?.detail || error?.message || 'Failed to save connection';
+      toast.error(typeof detail === 'string' ? detail : 'Failed to save connection');
     }
   };
 
@@ -1297,19 +1334,57 @@ const Integrations: React.FC = () => {
                     </div>
 
                     {/* Dynamic Fields */}
-                    {Object.keys(selectedPlatform.config_schema || {}).map(key => (
-                      <div key={key} className="bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 rounded-xl p-3 flex items-start gap-3">
-                        <div className="p-1 bg-indigo-100 dark:bg-indigo-500/20 rounded text-indigo-600 dark:text-indigo-400 mt-0.5">
-                          <Settings className="w-3.5 h-3.5" />
-                        </div>
-                        <div>
-                          <h4 className="text-xs font-bold text-indigo-900 dark:text-indigo-100 uppercase tracking-wide mb-0.5">Requirement</h4>
-                          <p className="text-sm text-indigo-700 dark:text-indigo-300">This integration needs <span className="font-semibold">{key}</span> configuration.</p>
-                        </div>
+                    {Object.entries(selectedPlatform.config_schema?.properties || {}).map(([key, schema]: [string, any]) => (
+                      <div key={key}>
+                        <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                          {schema.title || key}
+                          {(selectedPlatform.config_schema?.required || []).includes(key) && (
+                            <span className="text-rose-500 ml-1">*</span>
+                          )}
+                        </label>
+                        <input
+                          type={schema.format === 'password' ? 'password' : 'text'}
+                          value={formData.config?.[key] || ''}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              config: { ...formData.config, [key]: e.target.value },
+                            })
+                          }
+                          className="block w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all shadow-sm"
+                          placeholder={schema.description || key}
+                          autoComplete="off"
+                        />
+                        {schema.description && (
+                          <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">{schema.description}</p>
+                        )}
                       </div>
                     ))}
 
-                    {!selectedPlatform.id.includes('oauth') && (
+                    {selectedPlatform.id === 'telegram' && (
+                      <div className="p-4 bg-sky-50 dark:bg-sky-500/10 border border-sky-100 dark:border-sky-500/20 rounded-2xl text-sm text-sky-900 dark:text-sky-100 space-y-2">
+                        <p className="font-bold">How to connect</p>
+                        <ol className="list-decimal list-inside space-y-1 text-sky-800 dark:text-sky-200 text-xs">
+                          <li>Open Telegram and message <span className="font-mono">@BotFather</span></li>
+                          <li>Create a bot with <span className="font-mono">/newbot</span> and paste the token here</li>
+                          <li>Optional: add your chat ID for order alerts (message your bot, then use @userinfobot)</li>
+                          <li>Deploy the Telegram Ordering Agent from Agents → Deploy</li>
+                        </ol>
+                        {(editingConnection?.config?.webhook_url || formData.config?.webhook_url) && (
+                          <p className="text-xs mt-2 break-all">
+                            Webhook: <span className="font-mono">{editingConnection?.config?.webhook_url || formData.config?.webhook_url}</span>
+                          </p>
+                        )}
+                        {(editingConnection?.config?.bot_username) && (
+                          <p className="text-xs">
+                            Bot: <span className="font-mono">@{editingConnection.config.bot_username}</span>
+                          </p>
+                        )}
+                      </div>
+                    )}
+
+                    {!selectedPlatform.id.includes('oauth') &&
+                      Object.keys(selectedPlatform.config_schema?.properties || {}).length === 0 && (
                       <div className="p-6 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-2xl text-center">
                         <Database className="w-8 h-8 text-slate-300 dark:text-slate-700 mx-auto mb-3" />
                         <h4 className="text-sm font-semibold text-slate-900 dark:text-white mb-1">Manual Configuration</h4>
