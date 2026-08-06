@@ -1631,7 +1631,15 @@ class ApiService {
 
   async getAgents(): Promise<ApiResponse<AgentResponse[]>> {
     const response = await this.api.get('/agents/');
-    return response.data;
+    const payload = response.data;
+    // Backend returns a raw AgentResponse[] for GET /agents/
+    if (Array.isArray(payload)) {
+      return { success: true, data: payload };
+    }
+    if (payload && typeof payload === 'object' && Array.isArray(payload.data)) {
+      return { success: true, data: payload.data, ...payload };
+    }
+    return payload;
   }
 
   async getAgentStatus(agentId: string): Promise<ApiResponse<AgentStatusResponse>> {

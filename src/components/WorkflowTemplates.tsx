@@ -28,6 +28,8 @@ import { chart } from '../theme';
 
 interface WorkflowTemplatesProps {
     onWorkflowCreated?: () => void;
+    /** When true, only show messaging/agent templates (ordering, support, rent, etc.). */
+    agentTemplatesOnly?: boolean;
 }
 
 interface DriveFolder {
@@ -35,7 +37,7 @@ interface DriveFolder {
     name: string;
 }
 
-const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onWorkflowCreated }) => {
+const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onWorkflowCreated, agentTemplatesOnly = false }) => {
     const [templates, setTemplates] = useState<GalleryTemplate[]>([]);
     const [categories, setCategories] = useState<TemplateCategory[]>([]);
     const [loading, setLoading] = useState(true);
@@ -67,7 +69,7 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onWorkflowCreated
         loadTemplates();
         loadCategories();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedCategory, selectedDifficulty, searchQuery]);
+    }, [selectedCategory, selectedDifficulty, searchQuery, agentTemplatesOnly]);
 
     // Load user connections once
     useEffect(() => {
@@ -200,6 +202,12 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onWorkflowCreated
 
             if (response.success) {
                 let loaded = response.data?.templates || [];
+                if (agentTemplatesOnly) {
+                    loaded = loaded.filter((t: GalleryTemplate) =>
+                        String(t.id).endsWith('_agent') ||
+                        (t.tags || []).map((x) => String(x).toLowerCase()).includes('agent')
+                    );
+                }
                 const pinRent = !selectedCategory || selectedCategory.toLowerCase() === 'real estate';
                 if (pinRent) {
                     loaded = [...loaded].sort((a, b) => {
@@ -235,7 +243,7 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onWorkflowCreated
             const response = await apiService.useTemplate(templateId, configValues);
 
             if (response.success) {
-                toast.success(`Workflow created from template!`);
+                toast.success(agentTemplatesOnly ? 'Agent deployed successfully!' : 'Workflow created from template!');
                 setSelectedTemplate(null);
                 if (templateId === 'whatsapp_rent_collection_agent') {
                     setDeployedSpreadsheetId(configValues.storage_spreadsheet_id || '');
@@ -294,6 +302,19 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onWorkflowCreated
 
     return (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {!agentTemplatesOnly && (
+                <div className="mb-6 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 px-5 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <p className="text-sm text-slate-600 dark:text-slate-300 font-medium">
+                        Looking for WhatsApp or Telegram ordering and support bots? Deploy them from Agents.
+                    </p>
+                    <a
+                        href="/agents?tab=deploy"
+                        className="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-bold hover:opacity-90 transition-opacity"
+                    >
+                        Open Agents
+                    </a>
+                </div>
+            )}
             {/* Search and Filters */}
             <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-4 sm:p-6 mb-6 transition-colors duration-300">
                 <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
@@ -302,7 +323,7 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onWorkflowCreated
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-slate-500 w-4 h-4" />
                             <input
                                 type="text"
-                                placeholder="Search templates..."
+                                placeholder={agentTemplatesOnly ? 'Search agent templates...' : 'Search templates...'}
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-500/40 focus:border-transparent bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 outline-none transition-colors"

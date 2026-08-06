@@ -36,7 +36,7 @@ import {
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useSubscription } from '../hooks/useSubscription';
 import { useWebSocket } from '../hooks/useWebSocket';
 import toast from '../lib/notify';
@@ -57,6 +57,7 @@ const Workflows: React.FC = () => {
   const { user } = useAuth();
   const { canUseFeature, tier } = useSubscription();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { confirm } = useConfirm();
   const [workflows, setWorkflows] = useState<WorkflowType[]>([]);
   const [executions, setExecutions] = useState<WorkflowExecution[]>([]);
@@ -146,6 +147,20 @@ const Workflows: React.FC = () => {
     loadExecutions();
   }, []);
 
+  // Deep-link from Agents "Edit automation" → /workflows?id=<uuid>
+  useEffect(() => {
+    const workflowId = searchParams.get('id');
+    if (!workflowId || loading || workflows.length === 0) return;
+    const match = workflows.find((w) => String(w.id) === String(workflowId));
+    if (!match) return;
+    setEditingWorkflow(match);
+    setShowEnhancedCreator(true);
+    setActiveTab('workflows');
+    const next = new URLSearchParams(searchParams);
+    next.delete('id');
+    setSearchParams(next, { replace: true });
+  }, [workflows, loading, searchParams, setSearchParams]);
+
   useEffect(() => {
     // Calculate stats when workflows or executions change
     const total = workflows.length;
@@ -232,7 +247,7 @@ const Workflows: React.FC = () => {
     }
   };
 
-  const handleDeleteWorkflow = async (workflowId: number) => {
+  const handleDeleteWorkflow = async (workflowId: string | number) => {
     const ok = await confirm({
       title: 'Delete this workflow?',
       description: 'This removes the workflow and its configuration. Past executions may remain in history.',
@@ -829,10 +844,10 @@ const Workflows: React.FC = () => {
                   <span className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Workspace Management</span>
                 </div>
                 <h1 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mb-2 tracking-tight workflows-header-tut">
-                  Welcome back, <span className="bg-gradient-to-r from-primary-500 to-secondary-900 dark:from-primary-400 dark:to-primary-300 bg-clip-text text-transparent">{user?.name?.split(' ')[0] || 'Builder'}</span>!
+                  Automations
                 </h1>
                 <p className="text-gray-500 dark:text-slate-400 max-w-md font-medium">
-                  Supercharge your productivity with intelligent automated workflows.
+                  Build, run, and monitor the workflows behind your agents and business processes.
                 </p>
               </div>
               <div className="flex items-center space-x-3 w-full sm:w-auto justify-center sm:justify-end workflows-builders-tut">
