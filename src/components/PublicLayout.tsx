@@ -21,8 +21,9 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
     const [nlStatus, setNlStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
     const [nlMsg, setNlMsg] = useState('');
 
-    // Theme state
+    // Theme state — follow global preference; only write on explicit toggle
     const [isDark, setIsDark] = useState(() => {
+        if (typeof document !== 'undefined' && document.documentElement.classList.contains('dark')) return true;
         if (typeof window !== 'undefined') {
             const saved = localStorage.getItem('theme');
             if (saved) return saved === 'dark';
@@ -35,17 +36,21 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
     const navigate = useNavigate();
     const { user } = useAuth();
 
-    // Handle theme initialization and changes
     useEffect(() => {
-        const root = window.document.documentElement;
-        if (isDark) {
-            root.classList.add('dark');
-            localStorage.setItem('theme', 'dark');
-        } else {
-            root.classList.remove('dark');
-            localStorage.setItem('theme', 'light');
-        }
-    }, [isDark]);
+        const sync = () => setIsDark(document.documentElement.classList.contains('dark'));
+        const observer = new MutationObserver(sync);
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+        return () => observer.disconnect();
+    }, []);
+
+    const toggleTheme = () => {
+        setIsDark((prev) => {
+            const next = !prev;
+            localStorage.setItem('theme', next ? 'dark' : 'light');
+            document.documentElement.classList.toggle('dark', next);
+            return next;
+        });
+    };
 
     // Close mobile menu on route change
     useEffect(() => {
@@ -207,7 +212,7 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
                         {/* Auth Buttons & Theme Toggle */}
                         <div className="hidden md:flex items-center gap-3 flex-shrink-0">
                             <button
-                                onClick={() => setIsDark(!isDark)}
+                                onClick={toggleTheme}
                                 className="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors flex items-center justify-center hover:rotate-12 transform"
                                 aria-label="Toggle Dark Mode"
                             >
@@ -241,7 +246,7 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
                         {/* Mobile Menu Button & Theme Toggle */}
                         <div className="md:hidden flex items-center gap-2">
                             <button
-                                onClick={() => setIsDark(!isDark)}
+                                onClick={toggleTheme}
                                 className="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-xl transition-colors"
                             >
                                 {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}

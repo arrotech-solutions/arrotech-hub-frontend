@@ -600,7 +600,7 @@ const DefaultGlobalCommands: React.FC = () => {
   useCommand({ id: 'nav-calendar', name: 'Unified Calendar', section: 'Navigation', icon: <Calendar className="w-4 h-4" />, shortcut: ['g', 'c'], action: () => navigate('/unified/calendar') });
 
   // Apps & Tools
-  useCommand({ id: 'nav-workflows', name: 'Workflows', section: 'Apps', icon: <GitBranch className="w-4 h-4" />, shortcut: ['g', 'w'], action: () => navigate('/workflows') });
+  useCommand({ id: 'nav-workflows', name: 'Automations', section: 'Apps', icon: <GitBranch className="w-4 h-4" />, shortcut: ['g', 'w'], action: () => navigate('/workflows') });
   useCommand({ id: 'nav-agents', name: 'AI Agents', section: 'Apps', icon: <Bot className="w-4 h-4" />, shortcut: ['g', 'a'], action: () => navigate('/agents') });
   useCommand({ id: 'nav-coding-agent', name: 'Coding Agent', section: 'Apps', icon: <Bot className="w-4 h-4" />, shortcut: ['g', 'e'], action: () => navigate('/coding-agent') });
   useCommand({ id: 'nav-whatsapp', name: 'WhatsApp', section: 'Social', icon: <MessageCircle className="w-4 h-4" />, action: () => navigate('/whatsapp') });

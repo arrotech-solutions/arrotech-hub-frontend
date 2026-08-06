@@ -59,7 +59,7 @@ const fieldClass =
   'w-full px-4 py-3 rounded-xl border border-white/15 bg-white/5 text-white text-sm outline-none transition-colors placeholder:text-secondary-500 focus:border-primary-500/60 focus:ring-2 focus:ring-primary-500/25';
 
 const OnboardingWizard: React.FC = () => {
-  const navigate = useNavigate();
+    const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user, refreshUser, refreshOrganizations, switchOrg, activeOrg } = useAuth();
 
@@ -258,14 +258,14 @@ const OnboardingWizard: React.FC = () => {
         <div className="rounded-3xl border border-white/10 bg-white/5 p-5 sm:p-6 flex items-start gap-4">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary-500 to-accent-400 flex items-center justify-center shrink-0">
             <Sparkles className="w-6 h-6 text-white" />
-          </div>
+                    </div>
           <div>
             <p className="font-semibold text-white">Personalized from the start</p>
             <p className="text-sm text-secondary-400 mt-1 leading-relaxed">
               Tell us your goal, connect a couple of apps, and land where you’ll get value first.
               You can change this anytime.
-            </p>
-          </div>
+                    </p>
+                </div>
         </div>
       </OnboardingShell>
     );
@@ -379,7 +379,7 @@ const OnboardingWizard: React.FC = () => {
             onSelect={() => setWorkspaceType('team')}
             accent="from-accent-400 to-primary-500"
           />
-        </div>
+                        </div>
         {activeOrg && workspaceType === 'team' && (
           <p className="mt-4 text-sm text-secondary-400 flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-400" />
@@ -453,7 +453,7 @@ const OnboardingWizard: React.FC = () => {
                 </option>
               ))}
             </select>
-          </div>
+                        </div>
           <div>
             <label className="block text-secondary-300 text-sm font-medium mb-1.5 flex items-center gap-2">
               <Mail className="w-4 h-4" />
@@ -465,8 +465,8 @@ const OnboardingWizard: React.FC = () => {
               onChange={(e) => setInviteEmails(e.target.value)}
               placeholder="alex@company.com, sam@company.com"
             />
-          </div>
-        </div>
+                        </div>
+                    </div>
       </OnboardingShell>
     );
   }
@@ -507,7 +507,7 @@ const OnboardingWizard: React.FC = () => {
               onConnect={() => handleConnect(app.id)}
             />
           ))}
-        </div>
+                </div>
       </OnboardingShell>
     );
   }
@@ -546,9 +546,9 @@ const OnboardingWizard: React.FC = () => {
         </div>
         <h1 className="text-2xl font-bold text-white">You’re all set</h1>
         <p className="text-secondary-400 mt-2 text-sm">Taking you to your workspace…</p>
-      </div>
-    </div>
-  );
+            </div>
+        </div>
+    );
 };
 
 export default OnboardingWizard;
