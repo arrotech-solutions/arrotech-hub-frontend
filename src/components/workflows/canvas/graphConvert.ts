@@ -40,8 +40,7 @@ function makeStepNode(
 ): Node {
   const isCondition =
     step.tool_name === CONDITION_TOOL ||
-    step.tool_name === 'condition' ||
-    !!step.condition?.branches;
+    step.tool_name === 'condition';
 
   return {
     id: `step-${step.id}`,
@@ -276,7 +275,9 @@ export function nodesToSteps(nodes: Node[], edges: Edge[]): WorkflowStep[] {
       const data = node.data as unknown as WorkflowNodeData;
       const stepId = id.replace(/^step-/, '');
 
-      let condition = data.condition;
+      let condition = data.isCondition || data.toolName === CONDITION_TOOL
+        ? data.condition
+        : undefined;
       if (data.isCondition || data.toolName === CONDITION_TOOL) {
         const outs = adjacency.get(id) || [];
         // Persist branch targets as step_number (stable across server UUID reassignment)

@@ -93,6 +93,16 @@ function mapInitialSteps(initialData: any): WorkflowStep[] {
     .sort((a: WorkflowStep, b: WorkflowStep) => a.step_number - b.step_number);
 }
 
+/** Normalize legacy `trigger` key to canonical `event_type` (Form Builder uses event_type). */
+function normalizeTriggerConfig(cfg: Record<string, any> | null | undefined): Record<string, any> {
+  if (!cfg || typeof cfg !== 'object') return {};
+  const normalized = { ...cfg };
+  if (!normalized.event_type && normalized.trigger) {
+    normalized.event_type = normalized.trigger;
+  }
+  return normalized;
+}
+
 function mergePendingIntoNodes(nodes: Node[], pending: NodeConfigPendingUpdate): Node[] {
   return nodes.map((n) => {
     if (n.id !== pending.nodeId) return n;
@@ -223,7 +233,7 @@ function WorkflowCanvasInner({
       setWorkflowName(initialCanvasState.workflowName);
       setWorkflowDescription(initialCanvasState.description);
       setTriggerType((initialCanvasState.triggerType as TriggerType) || 'manual');
-      setTriggerConfig(initialCanvasState.triggerConfig || {});
+      setTriggerConfig(normalizeTriggerConfig(initialCanvasState.triggerConfig));
       setCategory(initialCanvasState.category);
       setTags(initialCanvasState.tags);
       setVariables(initialCanvasState.variables || {});
@@ -237,7 +247,7 @@ function WorkflowCanvasInner({
       setWorkflowName(initialData.name || '');
       setWorkflowDescription(initialData.description || '');
       setTriggerType((initialData.trigger_type?.toLowerCase() as TriggerType) || 'manual');
-      setTriggerConfig(initialData.trigger_config || {});
+      setTriggerConfig(normalizeTriggerConfig(initialData.trigger_config));
       setCategory(initialData.workflow_metadata?.category || '');
       setTags(initialData.workflow_metadata?.tags?.join(', ') || '');
       setVariables(initialData.variables || {});
@@ -460,8 +470,10 @@ function WorkflowCanvasInner({
       setTriggerType('event');
       setTriggerConfig({
         platform,
-        event_type: platform === 'whatsapp' ? 'whatsapp_message_received' : undefined,
-        trigger: platform === 'telegram' ? 'telegram_message_received' : undefined,
+        event_type:
+          platform === 'whatsapp'
+            ? 'whatsapp_message_received'
+            : 'telegram_message_received',
       });
       if (!workflowName.trim()) {
         setWorkflowName(platform === 'whatsapp' ? 'WhatsApp Ordering' : 'Telegram Ordering');
@@ -618,6 +630,7 @@ function WorkflowCanvasInner({
         nds.map((n) => {
           if (n.id !== nodeId) return n;
           const data = n.data as WorkflowNodeData;
+          if (!data.isCondition && data.toolName !== CONDITION_TOOL) return n;
           return {
             ...n,
             data: {
@@ -664,7 +677,7 @@ function WorkflowCanvasInner({
     if (triggerType === 'scheduled' && !triggerConfig.cron_expression) {
       issues.push('Scheduled trigger needs a cron expression');
     }
-    if (triggerType === 'event' && !triggerConfig.event_type && !triggerConfig.trigger) {
+    if (triggerType === 'event' && !triggerConfig.event_type) {
       issues.push('Event trigger needs an event type');
     }
     nodes
@@ -1140,7 +1153,7 @@ function WorkflowCanvasInner({
                         <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-500">Platform *</label>
                         <select
                           value={triggerConfig.platform || ''}
-                          onChange={(e) => setTriggerConfig({ ...triggerConfig, platform: e.target.value, trigger: '', event_type: '' })}
+                          onChange={(e) => setTriggerConfig({ ...triggerConfig, platform: e.target.value, event_type: '' })}
                           className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-secondary-900 dark:text-white"
                         >
                           <option value="">Select Platform</option>
@@ -1166,8 +1179,8 @@ function WorkflowCanvasInner({
                       )}
                       {triggerConfig.platform && triggerConfig.platform !== 'whatsapp' && (
                         <select
-                          value={triggerConfig.trigger || ''}
-                          onChange={(e) => updateTriggerConfig('trigger', e.target.value)}
+                          value={triggerConfig.event_type || ''}
+                          onChange={(e) => updateTriggerConfig('event_type', e.target.value)}
                           className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-secondary-900 dark:text-white"
                         >
                           <option value="">Select Event</option>

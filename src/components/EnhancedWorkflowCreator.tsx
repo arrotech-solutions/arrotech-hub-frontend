@@ -20,7 +20,7 @@ import {
     X,
     Zap,
 } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import toast from '../lib/notify';
 import apiService from '../services/api';
 import { MCPTool, ToolInfo } from '../types';
@@ -188,6 +188,19 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
     // Workflow Variables
     const [workflowVariablesSchema, setWorkflowVariablesSchema] = useState<Record<string, any>>({});
     const [workflowVariableValues, setWorkflowVariableValues] = useState<Record<string, any>>({});
+
+    const updateWorkflowVariable = useCallback((key: string, value: any) => {
+        setWorkflowVariableValues((prev) => {
+            const next = { ...prev, [key]: value };
+            if (key === 'storage_spreadsheet_id' && value) {
+                next.storage_provider = 'google_sheets';
+            }
+            if (key === 'storage_airtable_base_id' && value) {
+                next.storage_provider = 'airtable';
+            }
+            return next;
+        });
+    }, []);
 
     // UI state
     const [loading, setLoading] = useState(false);
@@ -1017,7 +1030,7 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                                                         <div className="relative">
                                                             <select
                                                                 value={workflowVariableValues[key] || ''}
-                                                                onChange={(e) => setWorkflowVariableValues({ ...workflowVariableValues, [key]: e.target.value })}
+                                                                onChange={(e) => updateWorkflowVariable(key, e.target.value)}
                                                                 className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm appearance-none"
                                                                 disabled={loadingDynamic[fieldKey]}
                                                                 required={isRequired}
@@ -1060,7 +1073,7 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                                                         </label>
                                                         <button
                                                             type="button"
-                                                            onClick={() => setWorkflowVariableValues({ ...workflowVariableValues, [key]: !checked })}
+                                                            onClick={() => updateWorkflowVariable(key, !checked)}
                                                             className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ${checked ? 'bg-purple-600' : 'bg-gray-200 dark:bg-slate-700'}`}
                                                         >
                                                             <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition duration-200 ${checked ? 'translate-x-5' : 'translate-x-0'}`} />
@@ -1093,7 +1106,7 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                                                                             const next = active
                                                                                 ? selected.filter((v) => v !== opt)
                                                                                 : [...selected, opt];
-                                                                            setWorkflowVariableValues({ ...workflowVariableValues, [key]: next });
+                                                                            updateWorkflowVariable(key, next);
                                                                         }}
                                                                         className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${active ? 'bg-purple-600 text-white border-purple-600' : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-300 border-gray-200 dark:border-slate-600'}`}
                                                                     >
@@ -1118,7 +1131,7 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                                                     {hasOptions ? (
                                                         <select
                                                             value={workflowVariableValues[key] || ''}
-                                                            onChange={(e) => setWorkflowVariableValues({ ...workflowVariableValues, [key]: e.target.value })}
+                                                            onChange={(e) => updateWorkflowVariable(key, e.target.value)}
                                                             className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
                                                             required={isRequired}
                                                         >
@@ -1133,7 +1146,7 @@ const EnhancedWorkflowCreator: React.FC<EnhancedWorkflowCreatorProps> = ({
                                                             value={Array.isArray(workflowVariableValues[key])
                                                                 ? workflowVariableValues[key].join(', ')
                                                                 : (workflowVariableValues[key] ?? '')}
-                                                            onChange={(e) => setWorkflowVariableValues({ ...workflowVariableValues, [key]: e.target.value })}
+                                                            onChange={(e) => updateWorkflowVariable(key, e.target.value)}
                                                             className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
                                                             placeholder={`Enter ${key.replace(/_/g, ' ')}`}
                                                             required={isRequired}
