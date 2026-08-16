@@ -9,6 +9,17 @@ import { apiService } from '../../services/api';
 import { isAgentTool, isMessagingSendTool, CONDITION_TOOL } from './shared/toolCategories';
 import toast from '../../lib/notify';
 
+/** Per-tool HTTP timeouts for canvas "Test this node" (ms). */
+const TOOL_TEST_TIMEOUT_MS: Record<string, number> = {
+    rag_ingest_source: 600000,
+    rag_ingest_content: 600000,
+    conversational_agent: 180000,
+};
+
+function getToolTestTimeoutMs(toolName: string): number {
+    return TOOL_TEST_TIMEOUT_MS[toolName] ?? 45000;
+}
+
 export interface NodeConfigPanelHandle {
     /** Apply dirty local edits into the graph; returns merged node patch for sync save. */
     flush: () => NodeConfigPendingUpdate | null;
@@ -121,17 +132,26 @@ const NodeConfigPanel = forwardRef<NodeConfigPanelHandle, NodeConfigPanelProps>(
     const handleTestNode = async () => {
         setTesting(true);
         setTestResult(null);
+        const timeoutMs = getToolTestTimeoutMs(toolName);
         try {
-            const response = await apiService.executeTool(toolName, { ...localParams }) as any;
+            const response = await apiService.executeTool(
+                toolName,
+                { ...localParams },
+                { timeout: timeoutMs },
+            ) as any;
             const ok = response?.success !== false && !response?.error;
             setTestResult(ok ? 'Test succeeded' : (response?.error || response?.message || 'Test failed'));
             onTestComplete?.(nodeId, ok);
             if (ok) toast.success('Node test succeeded');
             else toast.error('Node test failed');
         } catch (err: any) {
-            setTestResult(err?.message || 'Test failed');
+            const isTimeout = err?.code === 'ECONNABORTED' || /timeout/i.test(err?.message || '');
+            const message = isTimeout
+                ? `Test timed out after ${Math.round(timeoutMs / 1000)}s. Long-running tools (e.g. RAG ingest) may take several minutes.`
+                : (err?.message || 'Test failed');
+            setTestResult(message);
             onTestComplete?.(nodeId, false);
-            toast.error(err?.message || 'Node test failed');
+            toast.error(message);
         } finally {
             setTesting(false);
         }
