@@ -37,9 +37,11 @@
             ]
         }
     ],
+    "cleanUrls": true,
+    "trailingSlash": false,
     "rewrites": [
         {
-            "source": "/((?!assets|api|favicon|manifest|sw|workbox).*)",
+            "source": "/(.*)",
             "destination": "/index.html"
         }
     ]

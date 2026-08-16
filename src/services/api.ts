@@ -1519,8 +1519,12 @@ class ApiService {
     await this.api.delete(`/workflows/${workflowId}`);
   }
 
-  async executeWorkflow(workflowId: number, data: WorkflowExecuteRequest): Promise<ApiResponse<any>> {
-    const response = await this.api.post(`/workflows/${workflowId}/execute`, data);
+  async executeWorkflow(workflowId: string | number, data: WorkflowExecuteRequest): Promise<ApiResponse<any>> {
+    // Async dispatch returns 202 quickly; no long HTTP hold for RAG/long steps.
+    const response = await this.api.post(`/workflows/${workflowId}/execute`, data, {
+      timeout: 15000,
+      validateStatus: (s) => s >= 200 && s < 300,
+    });
     return response.data;
   }
 
@@ -1545,7 +1549,7 @@ class ApiService {
     return response.data;
   }
 
-  async getWorkflowExecution(executionId: number): Promise<ApiResponse<any>> {
+  async getWorkflowExecution(executionId: string | number): Promise<ApiResponse<any>> {
     const response = await this.api.get(`/workflows/executions/${executionId}`);
     return response.data;
   }
@@ -3015,10 +3019,16 @@ class ApiService {
   }
 
   // Generic MCP Tool Execution
-  async executeTool(name: string, args: Record<string, any>): Promise<ApiResponse<any>> {
+  async executeTool(
+    name: string,
+    args: Record<string, any>,
+    options?: { timeout?: number },
+  ): Promise<ApiResponse<any>> {
     const response = await this.api.post('/mcp/call', {
       name,
       arguments: args
+    }, {
+      timeout: options?.timeout ?? 45000,
     });
     return response.data;
   }
