@@ -147,6 +147,19 @@ const Workflows: React.FC = () => {
     loadExecutions();
   }, []);
 
+  // Poll executions while any are still running (fallback if WebSocket missed)
+  useEffect(() => {
+    const hasRunning = executions.some(
+      (e) => e.status === 'running' || e.status === 'pending'
+    );
+    if (!hasRunning) return;
+
+    const interval = setInterval(() => {
+      loadExecutions();
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [executions]);
+
   // Deep-link from Agents "Edit automation" → /workflows?id=<uuid> (opens canvas)
   useEffect(() => {
     const workflowId = searchParams.get('id');
@@ -1230,16 +1243,41 @@ const Workflows: React.FC = () => {
                   workflow_id: executingWorkflow.id,
                   input_data: inputData
                 });
-                if (response.success) {
-                  toast.success('Workflow executed successfully');
+                if (response.success && response.data) {
+                  const isAsync = response.data.async === true;
+                  toast.success(
+                    isAsync
+                      ? 'Workflow started — track progress in Executions'
+                      : 'Workflow executed successfully'
+                  );
                   setShowExecuteModal(false);
                   setExecutingWorkflow(null);
+                  setActiveTab('executions');
                   loadWorkflows();
                   loadExecutions();
+                  if (response.data.id) {
+                    setExecutions((prev) => {
+                      if (prev.some((e) => String(e.id) === String(response.data.id))) {
+                        return prev;
+                      }
+                      return [
+                        {
+                          id: response.data.id,
+                          workflow_id: executingWorkflow.id,
+                          status: response.data.status || 'running',
+                          trigger_type: executingWorkflow.trigger_type || 'manual',
+                          created_at: response.data.created_at || new Date().toISOString(),
+                          started_at: response.data.started_at || new Date().toISOString(),
+                          user_id: user?.id || 0,
+                        } as WorkflowExecution,
+                        ...prev,
+                      ];
+                    });
+                  }
                 }
               } catch (error) {
                 console.error('Error executing workflow:', error);
-                toast.error('Failed to execute workflow');
+                toast.error('Failed to start workflow execution');
               }
             }}
           />

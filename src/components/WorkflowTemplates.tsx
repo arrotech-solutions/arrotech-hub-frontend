@@ -57,6 +57,19 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onWorkflowCreated
 
     // Form state
     const [configValues, setConfigValues] = useState<Record<string, any>>({});
+
+    const updateConfigValue = useCallback((key: string, value: any) => {
+        setConfigValues((prev) => {
+            const next = { ...prev, [key]: value };
+            if (key === 'storage_spreadsheet_id' && value) {
+                next.storage_provider = 'google_sheets';
+            }
+            if (key === 'storage_airtable_base_id' && value) {
+                next.storage_provider = 'airtable';
+            }
+            return next;
+        });
+    }, []);
     const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
     const [driveSpreadsheets, setDriveSpreadsheets] = useState<any[]>([]);
     const [loadingSpreadsheets, setLoadingSpreadsheets] = useState(false);
@@ -659,7 +672,7 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onWorkflowCreated
                                                                 <div className="relative">
                                                                     <select
                                                                         value={configValues[key] || ''}
-                                                                        onChange={(e) => setConfigValues({ ...configValues, [key]: e.target.value })}
+                                                                        onChange={(e) => updateConfigValue(key, e.target.value)}
                                                                         className={`${inputClasses} appearance-none pr-10`}
                                                                         disabled={loadingDynamic[fieldKey]}
                                                                     >
@@ -699,7 +712,7 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onWorkflowCreated
                                                                 <div className="relative">
                                                                     <select
                                                                         value={configValues[key] ?? varSchema.default ?? ''}
-                                                                        onChange={(e) => setConfigValues({ ...configValues, [key]: e.target.value })}
+                                                                        onChange={(e) => updateConfigValue(key, e.target.value)}
                                                                         className={`${inputClasses} appearance-none pr-10`}
                                                                     >
                                                                         <option value="">Select...</option>
@@ -730,7 +743,7 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onWorkflowCreated
                                                                 </label>
                                                                 <button
                                                                     type="button"
-                                                                    onClick={() => setConfigValues({ ...configValues, [key]: !checked })}
+                                                                    onClick={() => updateConfigValue(key, !checked)}
                                                                     className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ${checked ? 'bg-purple-600' : 'bg-gray-200 dark:bg-slate-700'}`}
                                                                 >
                                                                     <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition duration-200 ${checked ? 'translate-x-5' : 'translate-x-0'}`} />
@@ -767,7 +780,7 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onWorkflowCreated
                                                                                     const next = active
                                                                                         ? selected.filter((v) => v !== opt)
                                                                                         : [...selected, opt];
-                                                                                    setConfigValues({ ...configValues, [key]: next });
+                                                                                    updateConfigValue(key, next);
                                                                                 }}
                                                                                 className={`px-3 py-1.5 rounded-lg text-[10px] font-bold border transition-colors ${active ? 'bg-purple-600 text-white border-purple-600' : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-300 border-gray-200 dark:border-slate-600'}`}
                                                                             >
@@ -794,7 +807,7 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onWorkflowCreated
                                                                 <input
                                                                     type="number"
                                                                     value={configValues[key] ?? varSchema.default ?? ''}
-                                                                    onChange={(e) => setConfigValues({ ...configValues, [key]: e.target.value === '' ? '' : Number(e.target.value) })}
+                                                                    onChange={(e) => updateConfigValue(key, e.target.value === '' ? '' : Number(e.target.value))}
                                                                     className={inputClasses}
                                                                     placeholder={`Enter ${varSchema.label || key.replace(/_/g, ' ')}`}
                                                                 />
@@ -815,7 +828,7 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onWorkflowCreated
                                                             <input
                                                                 type="text"
                                                                 value={configValues[key] ?? varSchema.default ?? ''}
-                                                                onChange={(e) => setConfigValues({ ...configValues, [key]: e.target.value })}
+                                                                onChange={(e) => updateConfigValue(key, e.target.value)}
                                                                 className={inputClasses}
                                                                 placeholder={varSchema.placeholder || `Enter ${varSchema.label || key.replace(/_/g, ' ')}`}
                                                             />

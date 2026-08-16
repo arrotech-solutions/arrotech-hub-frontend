@@ -53,8 +53,11 @@ const SEO: React.FC<SEOProps> = ({
         "url": "https://arrotechsolutions.com",
         "logo": `${BASE_URL}/favicon.png`,
         "sameAs": [
-          "https://twitter.com/arrotech",
-          "https://linkedin.com/company/arrotech-solutions"
+          "https://twitter.com/ArrotechAI",
+          "https://instagram.com/arrotech",
+          "https://tiktok.com/@arrotech_ai",
+          "https://www.facebook.com/gachanjaharun",
+          "https://youtube.com/@arrotech_ai"
         ],
         "contactPoint": {
           "@type": "ContactPoint",
