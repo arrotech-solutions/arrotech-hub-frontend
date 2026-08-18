@@ -26,6 +26,8 @@ export interface User {
   preferred_apps?: string[];
   activation_event?: string | null;
   onboarding_step?: number | null;
+  checklist_dismissed?: boolean;
+  checklist_done_ids?: string[];
   created_at: string;
   updated_at: string;
 }
@@ -48,6 +50,8 @@ export interface OnboardingUpdatePayload {
   onboarding_step?: number;
   complete?: boolean;
   onboarding_version?: number;
+  checklist_dismissed?: boolean;
+  checklist_done_ids?: string[];
 }
 
 // Chat Types
