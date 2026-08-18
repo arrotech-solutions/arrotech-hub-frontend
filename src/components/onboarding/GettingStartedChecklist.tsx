@@ -1,20 +1,26 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CheckCircle2, Circle, ListChecks, X } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import apiService from '../../services/api';
 import {
   CHECKLIST_BY_GOAL,
   ONBOARDING_GOALS,
 } from './onboardingConfig';
 import type { OnboardingPrimaryGoal } from '../../types';
 
-const STORAGE_KEY = 'hub_getting_started_dismissed';
-const DONE_KEY = 'hub_getting_started_done';
-
 const GettingStartedChecklist: React.FC = () => {
-  const { user } = useAuth();
-  const [dismissed, setDismissed] = useState(false);
-  const [doneIds, setDoneIds] = useState<string[]>([]);
+  const { user, refreshUser } = useAuth();
+
+  // Initialise from backend-persisted user fields
+  const [dismissed, setDismissed] = useState(!!user?.checklist_dismissed);
+  const [doneIds, setDoneIds] = useState<string[]>(user?.checklist_done_ids || []);
+
+  // Sync state when user object updates (e.g. after refreshUser)
+  useEffect(() => {
+    if (user?.checklist_dismissed) setDismissed(true);
+    if (user?.checklist_done_ids?.length) setDoneIds(user.checklist_done_ids);
+  }, [user?.checklist_dismissed, user?.checklist_done_ids]);
 
   const primary = (user?.primary_goal || 'exploring') as OnboardingPrimaryGoal;
   const secondary = (user?.secondary_goals || []) as OnboardingPrimaryGoal[];
@@ -30,44 +36,48 @@ const GettingStartedChecklist: React.FC = () => {
     return Array.from(map.values()).slice(0, 6);
   }, [primary, secondary]);
 
-  useEffect(() => {
-    try {
-      setDismissed(localStorage.getItem(STORAGE_KEY) === '1');
-      const raw = localStorage.getItem(DONE_KEY);
-      if (raw) setDoneIds(JSON.parse(raw));
-    } catch {
-      /* ignore */
-    }
-  }, []);
+  const persistChecklist = useCallback(
+    async (payload: { checklist_dismissed?: boolean; checklist_done_ids?: string[] }) => {
+      try {
+        await apiService.updateOnboarding(payload);
+        await refreshUser();
+      } catch {
+        /* non-blocking — local state is already updated optimistically */
+      }
+    },
+    [refreshUser]
+  );
 
   if (!user?.onboarding_completed_at || dismissed || items.length === 0) {
     return null;
   }
 
-  const goalTitle =
-    ONBOARDING_GOALS.find((g) => g.id === primary)?.title || 'Getting started';
   const completedCount = items.filter((i) => doneIds.includes(i.id)).length;
 
   const toggleDone = (id: string) => {
     setDoneIds((prev) => {
       const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id];
-      try {
-        localStorage.setItem(DONE_KEY, JSON.stringify(next));
-      } catch {
-        /* ignore */
+
+      // Auto-dismiss when all items are completed
+      const allDone = items.every((item) => next.includes(item.id));
+      if (allDone) {
+        setDismissed(true);
+        void persistChecklist({ checklist_done_ids: next, checklist_dismissed: true });
+      } else {
+        void persistChecklist({ checklist_done_ids: next });
       }
+
       return next;
     });
   };
 
   const dismiss = () => {
     setDismissed(true);
-    try {
-      localStorage.setItem(STORAGE_KEY, '1');
-    } catch {
-      /* ignore */
-    }
+    void persistChecklist({ checklist_dismissed: true });
   };
+
+  const goalTitle =
+    ONBOARDING_GOALS.find((g) => g.id === primary)?.title || 'Getting started';
 
   return (
     <div className="mx-4 sm:mx-6 lg:mx-8 mt-4 mb-2 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm overflow-hidden">
