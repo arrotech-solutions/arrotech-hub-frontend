@@ -63,8 +63,6 @@ const AUTH_STORAGE_KEYS = [
 
 const USER_SCOPED_STORAGE_KEYS = [
   'wa_inbox_segments',
-  'hub_getting_started_dismissed',
-  'hub_getting_started_done',
   'hub_skip_auto_tutorial',
   'hub_onboarding_resume_step',
   'arrotech_assistant_messages',
