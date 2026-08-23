@@ -192,7 +192,7 @@ const FloatingActionMenu: React.FC = () => {
   return (
     <>
       {/* Floating Action Button */}
-      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[60]" ref={menuRef}>
+      <div className="fixed bottom-24 right-4 sm:bottom-20 sm:right-6 z-[60]" ref={menuRef}>
         {/* Backdrop when open */}
         {isOpen && (
           <div

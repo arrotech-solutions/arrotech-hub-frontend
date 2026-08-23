@@ -55,8 +55,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 /** Auth + user-scoped client storage keys wiped on logout / account deletion. */
 const AUTH_STORAGE_KEYS = [
-  'auth_token',
-  'refresh_token',
   'remember_me_token',
   'active_org_id',
 ] as const;
@@ -120,10 +118,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const _handleAuthResponse = (responseData: any) => {
-    localStorage.setItem('auth_token', responseData.token);
-    if (responseData.refresh_token) {
-      localStorage.setItem('refresh_token', responseData.refresh_token);
-    }
     setUser(responseData.user);
 
     // Set organizations from auth response
@@ -139,38 +133,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
-    const token = localStorage.getItem('auth_token');
-    const rememberMeToken = localStorage.getItem('remember_me_token');
-
-    if (token) {
-      apiService.getCurrentUser()
-        .then((response) => {
-          setUser(response.data);
-          // Also fetch orgs on initial load
-          return organizationService.list();
-        })
-        .then((orgResponse) => {
-          const orgs = orgResponse?.data || [];
-          setOrganizations(orgs);
-          const lastOrgId = localStorage.getItem('active_org_id');
-          if (lastOrgId) {
-            const org = orgs.find((o: OrgSummary) => o.id === Number(lastOrgId));
-            if (org) setActiveOrg(org);
-          }
-        })
-        .catch(() => {
-          localStorage.removeItem('auth_token');
-          localStorage.removeItem('remember_me_token');
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    } else if (rememberMeToken) {
-      localStorage.removeItem('remember_me_token');
-      setLoading(false);
-    } else {
-      setLoading(false);
-    }
+    // Always attempt to fetch the current user using the HttpOnly cookie
+    apiService.getCurrentUser()
+      .then((response) => {
+        setUser(response.data);
+        // Also fetch orgs on initial load
+        return organizationService.list();
+      })
+      .then((orgResponse) => {
+        const orgs = orgResponse?.data || [];
+        setOrganizations(orgs);
+        const lastOrgId = localStorage.getItem('active_org_id');
+        if (lastOrgId) {
+          const org = orgs.find((o: OrgSummary) => o.id === Number(lastOrgId));
+          if (org) setActiveOrg(org);
+        }
+      })
+      .catch(() => {
+        // Not logged in (no valid cookie)
+        setUser(null);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
   const login = async (email: string, password: string, rememberMe: boolean = false) => {
@@ -369,11 +354,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const switchOrg = async (orgId: number | null) => {
     try {
-      const response = await organizationService.switchOrg(orgId);
-      localStorage.setItem('auth_token', response.data.token);
-      if (response.data.refresh_token) {
-        localStorage.setItem('refresh_token', response.data.refresh_token);
-      }
+      await organizationService.switchOrg(orgId);
       if (orgId !== null) {
         localStorage.setItem('active_org_id', String(orgId));
         const org = organizations.find(o => o.id === orgId) || null;

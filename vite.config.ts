@@ -27,7 +27,7 @@ export default defineConfig(({ mode }) => {
             // PWA: offline caching + installable app
             VitePWA({
                 registerType: 'autoUpdate',
-                includeAssets: ['favicon.png'],
+                includeAssets: ['favicon.ico', 'favicon.svg', 'favicon.png'],
                 manifest: {
                     name: 'Arrotech Hub',
                     short_name: 'Hub',
