@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 420">
+  <g transform="translate(70,10) scale(2.0)">
+    <path d="M 16 88 L 48 12 L 67 47 C 90 47 90 15 65 15 C 42 15 42 40 67 42 L 88 88" fill="none" stroke="#241E5C" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="170" y="390" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="52" font-weight="700" letter-spacing="0" fill="#12141C">ARROTECH</text>
+</svg>

@@ -73,6 +73,13 @@ const VerifyEmail = lazy(() => import('./pages/VerifyEmail'));
 const CodingAgent = lazy(() => import('./pages/CodingAgent'));
 const StatesShowcase = lazy(() => import('./pages/dev/StatesShowcase'));
 
+// New Marketing Pages
+const Changelog = lazy(() => import('./pages/Changelog'));
+const Documentation = lazy(() => import('./pages/Documentation'));
+const About = lazy(() => import('./pages/About'));
+const Careers = lazy(() => import('./pages/Careers'));
+const Security = lazy(() => import('./pages/Security'));
+const CookiePolicy = lazy(() => import('./pages/CookiePolicy'));
 
 
 // Protected Route Component
@@ -209,6 +216,15 @@ const AppRoutes: React.FC = () => {
           <Terms />
         </PublicLayout>
       } />
+      
+      {/* New Marketing Pages */}
+      <Route path="/changelog" element={<PublicLayout><Changelog /></PublicLayout>} />
+      <Route path="/docs" element={<PublicLayout><Documentation /></PublicLayout>} />
+      <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
+      <Route path="/careers" element={<PublicLayout><Careers /></PublicLayout>} />
+      <Route path="/security" element={<PublicLayout><Security /></PublicLayout>} />
+      <Route path="/cookies" element={<PublicLayout><CookiePolicy /></PublicLayout>} />
+      <Route path="/contact" element={<PublicLayout><HelpSupport /></PublicLayout>} />
       <Route path="/reset-password" element={<PublicRoute><ResetPassword /></PublicRoute>} />
 
       {/* SEO Growth Pages - Wrapped in PublicLayout */}

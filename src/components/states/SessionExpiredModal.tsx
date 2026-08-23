@@ -19,12 +19,6 @@ export function SessionExpiredModal() {
   if (!open) return null;
 
   const goToLogin = () => {
-    try {
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('refresh_token');
-    } catch {
-      /* ignore */
-    }
     window.location.href = '/login';
   };
 
