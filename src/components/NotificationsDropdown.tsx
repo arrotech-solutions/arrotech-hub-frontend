@@ -79,7 +79,6 @@ const NotificationsDropdown: React.FC = () => {
   }, [lastEvent]);
 
   const fetchUnreadCount = async () => {
-    if (!localStorage.getItem('auth_token')) return;
 
     try {
       const response = await apiService.getUnreadNotificationCount();

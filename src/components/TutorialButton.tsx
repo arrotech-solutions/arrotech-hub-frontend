@@ -83,7 +83,7 @@ const TutorialButton: React.FC = () => {
   const hasCompletedCurrentPage = pageHasTutorial && hasCompletedPage(currentPage);
 
   return (
-    <div className="fixed bottom-6 right-6 z-40" ref={menuRef}>
+    <div className="fixed bottom-44 right-4 sm:bottom-40 sm:right-6 z-40" ref={menuRef}>
       {/* Menu */}
       {isMenuOpen && (
         <div className="absolute bottom-16 right-0 w-72 bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-gray-200 dark:border-slate-700 overflow-hidden animate-in slide-in-from-bottom-2 duration-200">

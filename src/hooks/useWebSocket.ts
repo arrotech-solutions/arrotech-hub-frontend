@@ -51,8 +51,7 @@ function scheduleReconnect() {
 }
 
 function openSharedConnection() {
-    const token = localStorage.getItem('auth_token');
-    if (!token || !shouldStayConnected) return;
+    if (!shouldStayConnected) return;
 
     if (
         sharedSocket &&
@@ -62,7 +61,8 @@ function openSharedConnection() {
         return;
     }
 
-    const wsUrl = `${resolveWsBaseUrl()}/ws/realtime?token=${encodeURIComponent(token)}`;
+    // Auth is handled by the HttpOnly cookie sent automatically on the WS upgrade request
+    const wsUrl = `${resolveWsBaseUrl()}/ws/realtime`;
     const ws = new WebSocket(wsUrl);
     sharedSocket = ws;
 
