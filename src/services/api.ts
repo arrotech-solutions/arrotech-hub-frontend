@@ -64,31 +64,28 @@ class ApiService {
       // Sane default so a hung request can't spin forever. Individual calls
       // (uploads, long jobs) can override per-request.
       timeout: 45000,
+      withCredentials: true,
       headers: {
         'Content-Type': 'application/json',
       },
     });
 
-    // Add request interceptor for auth token + timing (slow-network signal)
+    // Add request interceptor for timing (slow-network signal)
     this.api.interceptors.request.use((config) => {
-      const token = localStorage.getItem('auth_token');
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
       (config as any).metadata = { startTime: Date.now() };
       return config;
     });
 
     // ─── Silent Token Refresh Interceptor ────────────────────────────────
     let isRefreshing = false;
-    let failedQueue: Array<{ resolve: (value: any) => void; reject: (reason?: any) => void }> = [];
+    let failedQueue: Array<{ resolve: (value?: any) => void; reject: (reason?: any) => void }> = [];
 
-    const processQueue = (error: any, token: string | null = null) => {
+    const processQueue = (error: any) => {
       failedQueue.forEach((prom) => {
-        if (token) {
-          prom.resolve(token);
-        } else {
+        if (error) {
           prom.reject(error);
+        } else {
+          prom.resolve();
         }
       });
       failedQueue = [];
@@ -122,12 +119,14 @@ class ApiService {
 
         // If 401 and we haven't already retried this request
         if (error.response?.status === 401 && !originalRequest._retry) {
-          const refreshToken = localStorage.getItem('refresh_token');
+          // Don't attempt a token refresh for auth endpoints themselves –
+          // /auth/me returning 401 simply means the user isn't logged in,
+          // and /auth/refresh failing is already terminal.
+          const url: string = originalRequest.url || '';
+          const skipRefreshPaths = ['/auth/me', '/auth/login', '/auth/register', '/auth/refresh'];
+          const shouldSkipRefresh = skipRefreshPaths.some((p) => url.endsWith(p));
 
-          // No refresh token → session is gone. Prompt via modal instead of a
-          // silent hard redirect.
-          if (!refreshToken) {
-            window.dispatchEvent(new CustomEvent('auth:session-expired'));
+          if (shouldSkipRefresh) {
             return Promise.reject(error);
           }
 
@@ -136,8 +135,7 @@ class ApiService {
             return new Promise((resolve, reject) => {
               failedQueue.push({ resolve, reject });
             })
-              .then((token) => {
-                originalRequest.headers.Authorization = `Bearer ${token}`;
+              .then(() => {
                 return this.api(originalRequest);
               })
               .catch((err) => Promise.reject(err));
@@ -147,17 +145,15 @@ class ApiService {
           isRefreshing = true;
 
           try {
-            const { data } = await axios.post(
+            await axios.post(
               `${this.api.defaults.baseURL}/auth/refresh`,
-              { refresh_token: refreshToken }
+              {},
+              { withCredentials: true }
             );
-            const newToken = data.data.token;
-            localStorage.setItem('auth_token', newToken);
-            originalRequest.headers.Authorization = `Bearer ${newToken}`;
-            processQueue(null, newToken);
+            processQueue(null);
             return this.api(originalRequest);
           } catch (refreshError) {
-            processQueue(refreshError, null);
+            processQueue(refreshError);
             // Refresh failed → session expired. Surface the modal (which clears
             // tokens and routes to /login on user action) instead of an abrupt
             // navigation.
@@ -2028,9 +2024,9 @@ class ApiService {
   ): Promise<void> {
     const response = await fetch(`${this.api.defaults.baseURL}/chat/conversations/${conversationId}/messages/stream`, {
       method: 'POST',
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
       },
       body: JSON.stringify(data),
       signal,
@@ -2201,9 +2197,9 @@ class ApiService {
     try {
       const response = await fetch(`${this.api.defaults.baseURL}/mcp/call/stream`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
         },
         body: JSON.stringify({
           name: toolName,

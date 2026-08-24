@@ -192,7 +192,6 @@ const Workflows: React.FC = () => {
     try {
       setLoading(true);
       console.log('Loading workflows...');
-      console.log('Auth token:', localStorage.getItem('auth_token') ? 'Present' : 'Missing');
       const response = await apiService.getWorkflows();
       console.log('Workflows response:', response);
 

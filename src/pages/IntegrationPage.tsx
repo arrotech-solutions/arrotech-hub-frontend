@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { ArrowRight, CheckCircle2, Activity } from 'lucide-react';
 import SEO from '../components/SEO';
 
-import arrotechIcon from '../assets/Logo/icononly_transparent.png';
+import arrotechIcon from '../assets/Logo/icon-indigo.svg';
 import gmailLogo from '../assets/apps/gmail.png';
 import slackLogo from '../assets/apps/slack.jpg';
 import mpesaLogo from '../assets/apps/mpesa.png';

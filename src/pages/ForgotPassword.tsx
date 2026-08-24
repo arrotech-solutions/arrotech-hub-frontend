@@ -12,8 +12,8 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import SEO from '../components/SEO';
 import { ThemeToggle } from '../components/ThemeToggle';
-import logo from '../assets/Logo/fulllogo_transparent.png';
-import logoIcon from '../assets/Logo/icononly_transparent_nobuffer.png';
+import logo from '../assets/Logo/lockup-horizontal-dark.svg';
+import logoIcon from '../assets/Logo/icon-indigo.svg';
 import { forgotPasswordSchema, type ForgotPasswordValues } from '../lib/schemas';
 
 const ForgotPassword: React.FC = () => {
