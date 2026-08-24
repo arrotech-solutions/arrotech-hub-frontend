@@ -3,7 +3,7 @@
   "name": "Arrotech Hub — Unified Workspace Platform",
   "icons": [
     {
-      "src": "favicon.png",
+      "src": "favicon.png?v=2",
       "sizes": "512x512",
       "type": "image/png"
     }

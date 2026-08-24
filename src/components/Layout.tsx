@@ -37,7 +37,7 @@ import {
   X,
   Zap
 } from 'lucide-react';
-import logo from '../assets/Logo/icon-indigo.svg';
+import logo from '../assets/Logo/icon-orange.svg';
 import React from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
