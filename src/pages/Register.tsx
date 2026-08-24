@@ -15,7 +15,7 @@ import { useAuth } from '../hooks/useAuth';
 import SEO from '../components/SEO';
 import { ThemeToggle } from '../components/ThemeToggle';
 import logo from '../assets/Logo/lockup-horizontal-dark.svg';
-import logoIcon from '../assets/Logo/icon-indigo.svg';
+import logoIcon from '../assets/Logo/icon-orange.svg';
 import { FieldError } from '../components/ui';
 import { registerSchema, type RegisterValues } from '../lib/schemas';
 
