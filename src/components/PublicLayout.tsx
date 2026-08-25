@@ -114,7 +114,7 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
                         {/* Logo */}
                         <div className="flex-shrink-0">
                             <Link to="/" className="relative flex items-center gap-2 group py-1">
-                                <img src={logoIcon} alt="Arrotech Hub" className="h-[32px] w-auto object-contain transition-all duration-300 group-hover:scale-[1.03] group-hover:opacity-90 dark:brightness-0 dark:invert" />
+                                <img src={logoIcon} alt="Arrotech Hub" className="h-[32px] w-auto object-contain transition-all duration-300 group-hover:scale-[1.03] group-hover:opacity-90" />
                                 <span className="text-[16px] sm:text-[18px] font-black bg-gradient-to-r from-secondary-900 to-primary-500 dark:from-white dark:to-primary-400 bg-clip-text text-transparent tracking-tighter">ARROTECH</span>
                             </Link>
                         </div>
@@ -333,7 +333,7 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
                         {/* Brand & Newsletter */}
                         <div className="col-span-2 md:col-span-4 flex flex-col items-start">
                             <Link to="/" className="flex items-center gap-2 mb-5 group">
-                                <img src={logoIcon} alt="Arrotech Hub" className="h-[36px] sm:h-[40px] w-auto object-contain opacity-80 group-hover:opacity-100 transition-all dark:brightness-0 dark:invert" />
+                                <img src={logoIcon} alt="Arrotech Hub" className="h-[36px] sm:h-[40px] w-auto object-contain opacity-80 group-hover:opacity-100 transition-all" />
                                 <span className="text-[18px] sm:text-[24px] font-black bg-gradient-to-r from-secondary-900 to-primary-500 dark:from-white dark:to-primary-400 bg-clip-text text-transparent tracking-tighter">ARROTECH</span>
                             </Link>
                             <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-8 max-w-xs transition-colors">
