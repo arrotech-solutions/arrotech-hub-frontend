@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, ChevronDown, LayoutDashboard, ArrowRight, Sun, Moon, BookOpen, LifeBuoy, Plug, FileText } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import logo from '../assets/Logo/lockup-horizontal-dark.svg';
-import logoIcon from '../assets/Logo/icon-indigo.svg';
+import logoIcon from '../assets/Logo/icon-orange.svg';
 import { OfflineBanner } from './states/OfflineBanner';
 import { SlowNetworkBanner } from './states/SlowNetworkBanner';
 

@@ -14,7 +14,7 @@ import { useAuth } from '../hooks/useAuth';
 import SEO from '../components/SEO';
 import { ThemeToggle } from '../components/ThemeToggle';
 import logo from '../assets/Logo/lockup-horizontal-dark.svg';
-import logoIcon from '../assets/Logo/icon-indigo.svg';
+import logoIcon from '../assets/Logo/icon-orange.svg';
 import { Spinner } from '../components/ui';
 import { resetPasswordSchema, type ResetPasswordValues } from '../lib/schemas';
 
