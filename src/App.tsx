@@ -343,6 +343,9 @@ const AppRoutes: React.FC = () => {
       />
       {/* Redirect old /dashboard to /unified */}
       <Route path="/dashboard" element={<Navigate to="/unified" replace />} />
+      <Route path="/inbox" element={<Navigate to="/unified/inbox" replace />} />
+      <Route path="/wallet" element={<Navigate to="/payments" replace />} />
+      <Route path="/workflows/:id" element={<Navigate to="/workflows" replace />} />
 
       <Route
         path="/connections"

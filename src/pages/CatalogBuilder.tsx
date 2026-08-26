@@ -40,6 +40,11 @@ interface ProductDraft {
     sku: string;
     brand: string;
     availability: '' | 'Available' | 'Out of Stock';
+    quantity: string;
+    unit: string;
+    costPrice: string;
+    condition: string;
+    attributes: Record<string, string>;
     images: ProductImage[];
     primaryImageIndex: number;
     status: 'pending' | 'extracting' | 'extracted' | 'error';
@@ -73,6 +78,11 @@ const emptyProduct = (): ProductDraft => ({
     sku: '',
     brand: '',
     availability: '',
+    quantity: '',
+    unit: '',
+    costPrice: '',
+    condition: '',
+    attributes: {},
     images: [],
     primaryImageIndex: 0,
     status: 'pending',
@@ -293,8 +303,15 @@ const CatalogBuilder: React.FC = () => {
                 if (res.success && res.data) {
                     const d = res.data;
                     const mergedDescription = mergeExtractedDescription(d.description || '', d.specs || '');
-                    setProducts((prev) =>
-                        prev.map((p) =>
+                    setProducts((prev) => {
+                        const existingSkus = new Set(prev.map((pr) => pr.sku).filter(Boolean));
+                        let newSku = d.suggested_sku || prev.find(pr => pr.id === productId)?.sku;
+                        if (!newSku || existingSkus.has(newSku)) {
+                            const catPrefix = (d.category || prev.find(pr => pr.id === productId)?.category || 'PROD').substring(0, 3).toUpperCase();
+                            newSku = `${catPrefix}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+                        }
+                        
+                        return prev.map((p) =>
                             p.id === productId
                                 ? {
                                       ...p,
@@ -302,18 +319,21 @@ const CatalogBuilder: React.FC = () => {
                                       description: mergedDescription || p.description,
                                       category: d.category || p.category,
                                       brand: d.brand || p.brand,
-                                      sku: d.suggested_sku || p.sku,
+                                      sku: newSku,
                                       price:
                                           d.price_estimate != null
                                               ? String(d.price_estimate)
                                               : p.price,
                                       priceIsEstimate: d.price_estimate != null,
+                                      unit: d.unit_of_measure || p.unit,
+                                      condition: d.condition || p.condition,
+                                      attributes: { ...p.attributes, ...(d.attributes || {}) },
                                       confidence: d.confidence ?? null,
                                       status: 'extracted',
                                   }
                                 : p
                         )
-                    );
+                    });
                 } else {
                     throw new Error((res as any).message || 'Extraction failed');
                 }
@@ -453,11 +473,16 @@ const CatalogBuilder: React.FC = () => {
             return {
                 name: p.name.trim(),
                 price: p.price,
+                cost_price: p.costPrice,
                 description: p.description,
                 category: p.category,
                 sku: p.sku,
                 brand: p.brand,
                 availability: p.availability,
+                quantity: p.quantity,
+                unit: p.unit,
+                condition: p.condition,
+                attributes: p.attributes,
                 image_index: imageIndex,
             };
         });
@@ -1086,6 +1111,101 @@ const CatalogBuilder: React.FC = () => {
                                                         placeholder="Short sales description"
                                                         className="w-full mt-1 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500"
                                                     />
+                                                </div>
+                                                <div>
+                                                    <label className="text-xs font-semibold text-gray-500 dark:text-slate-400">Quantity</label>
+                                                    <input
+                                                        value={p.quantity}
+                                                        onChange={(e) => updateProduct(p.id, { quantity: e.target.value })}
+                                                        placeholder="e.g. 50"
+                                                        type="number"
+                                                        className="w-full mt-1 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="text-xs font-semibold text-gray-500 dark:text-slate-400">Unit of Measure</label>
+                                                    <input
+                                                        value={p.unit}
+                                                        onChange={(e) => updateProduct(p.id, { unit: e.target.value })}
+                                                        placeholder="e.g. kg, pieces, liters"
+                                                        className="w-full mt-1 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="text-xs font-semibold text-gray-500 dark:text-slate-400">Cost Price ({currency})</label>
+                                                    <input
+                                                        value={p.costPrice}
+                                                        onChange={(e) => updateProduct(p.id, { costPrice: e.target.value })}
+                                                        placeholder="0"
+                                                        inputMode="decimal"
+                                                        className="w-full mt-1 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="text-xs font-semibold text-gray-500 dark:text-slate-400">Condition</label>
+                                                    <input
+                                                        value={p.condition}
+                                                        onChange={(e) => updateProduct(p.id, { condition: e.target.value })}
+                                                        placeholder="e.g. New, Used, Refurbished"
+                                                        className="w-full mt-1 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500"
+                                                    />
+                                                </div>
+                                                <div className="sm:col-span-2 pt-2 border-t border-gray-100 dark:border-slate-700">
+                                                    <div className="flex items-center justify-between mb-2">
+                                                        <label className="text-xs font-semibold text-gray-500 dark:text-slate-400">
+                                                            Custom Attributes
+                                                        </label>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                const newAttr = `Custom ${Object.keys(p.attributes).length + 1}`;
+                                                                updateProduct(p.id, { attributes: { ...p.attributes, [newAttr]: '' } });
+                                                            }}
+                                                            className="flex items-center gap-1 text-[11px] text-purple-600 dark:text-purple-400 font-semibold"
+                                                        >
+                                                            <Plus className="w-3 h-3" /> Add attribute
+                                                        </button>
+                                                    </div>
+                                                    {Object.entries(p.attributes).map(([key, value], idx) => (
+                                                        <div key={idx} className="flex gap-2 mb-2 items-center">
+                                                            <input
+                                                                value={key}
+                                                                onChange={(e) => {
+                                                                    const newKey = e.target.value;
+                                                                    const newAttrs = { ...p.attributes };
+                                                                    delete newAttrs[key];
+                                                                    newAttrs[newKey] = value;
+                                                                    updateProduct(p.id, { attributes: newAttrs });
+                                                                }}
+                                                                placeholder="Name (e.g. Color)"
+                                                                className="flex-1 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg px-2 py-1.5 text-sm focus:ring-2 focus:ring-purple-500"
+                                                            />
+                                                            <input
+                                                                value={value}
+                                                                onChange={(e) => {
+                                                                    updateProduct(p.id, { attributes: { ...p.attributes, [key]: e.target.value } });
+                                                                }}
+                                                                placeholder="Value (e.g. Red)"
+                                                                className="flex-1 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg px-2 py-1.5 text-sm focus:ring-2 focus:ring-purple-500"
+                                                            />
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    const newAttrs = { ...p.attributes };
+                                                                    delete newAttrs[key];
+                                                                    updateProduct(p.id, { attributes: newAttrs });
+                                                                }}
+                                                                className="text-gray-400 hover:text-red-500 p-1"
+                                                            >
+                                                                <Trash2 className="w-4 h-4" />
+                                                            </button>
+                                                        </div>
+                                                    ))}
+                                                    {Object.keys(p.attributes).length === 0 && (
+                                                        <div className="text-xs text-gray-400 dark:text-slate-500 italic">
+                                                            No custom attributes yet. Add fields like Color, Size, Weight, etc.
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
 
