@@ -588,6 +588,12 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onWorkflowCreated
                                 {/* Sidebar Info */}
                                 <div className="space-y-8">
                                     {/* Required Connections — with live status */}
+                                    {selectedTemplate.id === 'whatsapp_ordering_agent' && (
+                                        <p className="text-sm text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
+                                            WhatsApp is the only required connection. Orders save to Arrotech by default.
+                                            A knowledge base and Google Sheets are optional.
+                                        </p>
+                                    )}
                                     {selectedTemplate.required_connections.length > 0 && (
                                         <section className="bg-blue-50/50 dark:bg-blue-500/10 p-5 rounded-2xl border border-blue-100 dark:border-blue-500/20">
                                             <h3 className="text-xs font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-4">Required Services</h3>
