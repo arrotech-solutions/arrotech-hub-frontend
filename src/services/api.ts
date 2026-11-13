@@ -3572,6 +3572,35 @@ class ApiService {
     return response.data;
   }
 
+  // ── Commerce orders (Hub ops) ────────────────────────────────────────
+  async listCommerceOrders(): Promise<ApiResponse<{ orders: any[] }>> {
+    const response = await this.api.get('/api/commerce/orders');
+    return response.data;
+  }
+
+  async getCommerceOrder(externalOrderId: string): Promise<ApiResponse<any>> {
+    const response = await this.api.get(
+      `/api/commerce/orders/${encodeURIComponent(externalOrderId)}`
+    );
+    return response.data;
+  }
+
+  async updateCommerceOrderStatus(
+    externalOrderId: string,
+    status: string
+  ): Promise<ApiResponse<any>> {
+    const response = await this.api.patch(
+      `/api/commerce/orders/${encodeURIComponent(externalOrderId)}`,
+      { status }
+    );
+    return response.data;
+  }
+
+  async listCommerceReservations(): Promise<ApiResponse<{ reservations: any[] }>> {
+    const response = await this.api.get('/api/commerce/reservations');
+    return response.data;
+  }
+
 }
 
 export const apiService = new ApiService();
