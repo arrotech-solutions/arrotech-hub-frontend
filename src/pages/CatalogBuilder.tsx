@@ -62,6 +62,7 @@ interface ExportResult {
     rows_written?: number;
     created?: number;
     updated?: number;
+    errors?: { row?: number; error?: string }[];
     csv_available?: boolean;
     csv_base64?: string;
 }
@@ -516,10 +517,22 @@ const CatalogBuilder: React.FC = () => {
                 files
             );
             if (res.success && res.data) {
-                setExportResult(res.data);
                 const written =
                     res.data.rows_written ??
                     (res.data.created || 0) + (res.data.updated || 0);
+                const errors = res.data.errors || [];
+                if (!written) {
+                    toast.error('No products were saved');
+                    return;
+                }
+                if (errors.length) {
+                    const first = errors[0]?.error || 'some products failed';
+                    toast.error(
+                        `${written} saved, ${errors.length} failed: ${first}`
+                    );
+                    return;
+                }
+                setExportResult(res.data);
                 toast.success(
                     destination === 'arrotech_db'
                         ? `Saved ${written} product(s) to Arrotech`
@@ -530,8 +543,21 @@ const CatalogBuilder: React.FC = () => {
                 throw new Error((res as any).message || 'Export failed');
             }
         } catch (e: any) {
-            const msg = e?.response?.data?.detail || e?.message || 'Export failed';
-            toast.error(msg);
+            const data = e?.response?.data;
+            const detail = data?.detail;
+            const payload = typeof detail === 'object' && detail ? detail : data;
+            const errors = payload?.data?.errors || payload?.errors || [];
+            const msg =
+                payload?.message ||
+                (typeof detail === 'string' ? detail : undefined) ||
+                e?.message ||
+                'Export failed';
+            if (errors.length) {
+                const first = errors[0]?.error || msg;
+                toast.error(`${errors.length} failed: ${first}`);
+            } else {
+                toast.error(msg);
+            }
         } finally {
             setExporting(false);
             setExportProgress('');
