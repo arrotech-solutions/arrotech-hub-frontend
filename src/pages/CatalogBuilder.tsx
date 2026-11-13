@@ -157,6 +157,13 @@ const CatalogBuilder: React.FC = () => {
     const cameraInputRef = useRef<HTMLInputElement>(null);
     const angleFileInputRef = useRef<HTMLInputElement>(null);
     const angleCameraInputRef = useRef<HTMLInputElement>(null);
+    const csvInputRef = useRef<HTMLInputElement>(null);
+    const [importingCsv, setImportingCsv] = useState(false);
+    const [csvImportResult, setCsvImportResult] = useState<{
+        created: number;
+        updated: number;
+        errors: { row?: number; error?: string }[];
+    } | null>(null);
     const uploadTargetRef = useRef<string | null>(null);
     const [isDragging, setIsDragging] = useState(false);
     const [activeProductId, setActiveProductId] = useState<string | null>(null);
@@ -446,6 +453,68 @@ const CatalogBuilder: React.FC = () => {
 
     const validProducts = products.filter((p) => p.name.trim());
     const productsWithoutAvailability = validProducts.filter((p) => !p.availability);
+    const namedPricedProducts = products.filter(
+        (p) => p.name.trim() && String(p.price ?? '').trim()
+    );
+
+    const handleCsvImport = async (file: File) => {
+        if (!file.name.toLowerCase().endsWith('.csv')) {
+            toast.error('Please choose a CSV file');
+            return;
+        }
+        setImportingCsv(true);
+        try {
+            const res = await apiService.importCatalogProducts(file);
+            const data = res.data || {};
+            const created = data.created || 0;
+            const updated = data.updated || 0;
+            const errors = data.errors || [];
+            setCsvImportResult({ created, updated, errors });
+            const written = created + updated;
+            if (!res.success || (!written && errors.length)) {
+                const first = errors[0]?.error || (res as any).message || 'CSV import failed';
+                toast.error(
+                    errors.length ? `${errors.length} failed: ${first}` : first
+                );
+                return;
+            }
+            if (!written) {
+                toast.error('No products were imported');
+                return;
+            }
+            if (errors.length) {
+                toast.error(
+                    `Created ${created}, updated ${updated}, ${errors.length} failed: ${
+                        errors[0]?.error || 'some rows failed'
+                    }`
+                );
+            } else {
+                toast.success(`Created ${created}, updated ${updated}`);
+            }
+        } catch (e: any) {
+            const data = e?.response?.data;
+            const detail = data?.detail;
+            const payload = typeof detail === 'object' && detail ? detail : data;
+            const errors = payload?.data?.errors || payload?.errors || [];
+            const msg =
+                payload?.message ||
+                (typeof detail === 'string' ? detail : undefined) ||
+                e?.message ||
+                'CSV import failed';
+            setCsvImportResult({
+                created: 0,
+                updated: 0,
+                errors: errors.length ? errors : [{ error: msg }],
+            });
+            if (errors.length) {
+                toast.error(`${errors.length} failed: ${errors[0]?.error || msg}`);
+            } else {
+                toast.error(msg);
+            }
+        } finally {
+            setImportingCsv(false);
+        }
+    };
 
     const handleExport = async () => {
         if (destination === 'google_sheets' && !googleConnected) {
@@ -576,22 +645,33 @@ const CatalogBuilder: React.FC = () => {
         products.forEach((p) => p.images.forEach((img) => URL.revokeObjectURL(img.previewUrl)));
         setProducts([]);
         setExportResult(null);
+        setCsvImportResult(null);
         setStep(1);
     };
 
     const productsWithPhotos = products.filter((p) => p.images.length > 0);
 
     const canProceedFromStep = (): boolean => {
-        if (step === 0) return visionReady;
-        if (step === 1) return productsWithPhotos.length > 0;
-        if (step === 2) return validProducts.length > 0;
+        if (step === 0) return true;
+        if (step === 1) {
+            return (
+                productsWithPhotos.length > 0 ||
+                namedPricedProducts.length > 0 ||
+                products.length === 0
+            );
+        }
+        if (step === 2) return validProducts.length > 0 || products.length === 0;
         return true;
     };
 
     const goToNextStep = async () => {
         if (step === 1) {
-            if (!productsWithPhotos.length) {
-                toast.error('Add at least one product photo');
+            if (
+                !productsWithPhotos.length &&
+                !namedPricedProducts.length &&
+                products.length > 0
+            ) {
+                toast.error('Add a photo, or type a name and price');
                 return;
             }
             const pending = productsWithPhotos.filter(
@@ -605,7 +685,9 @@ const CatalogBuilder: React.FC = () => {
                     setAdvancing(false);
                 }
             }
-            setProducts((prev) => prev.filter((p) => p.images.length > 0));
+            setProducts((prev) =>
+                prev.filter((p) => p.images.length > 0 || p.name.trim())
+            );
         }
         setStep((s) => (s + 1) as WizardStep);
     };
@@ -623,7 +705,7 @@ const CatalogBuilder: React.FC = () => {
                     <div>
                         <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white">Catalog Builder</h1>
                         <p className="text-sm text-gray-500 dark:text-slate-400">
-                            Turn product photos into a sellable Arrotech catalog. Google Sheets is optional.
+                            Photos, typed rows, or a CSV — Google Sheets is optional.
                         </p>
                     </div>
                 </div>
@@ -666,8 +748,8 @@ const CatalogBuilder: React.FC = () => {
                         <div>
                             <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-1">Before you start</h2>
                             <p className="text-sm text-gray-500 dark:text-slate-400 mb-5">
-                                Photos are saved to your Arrotech catalog so the ordering agent can sell from them.
-                                Google Workspace is optional if you also want a spreadsheet copy.
+                                Photos are the fastest way to build a catalog. You can also type name and price, or
+                                upload a CSV on Save. Google Workspace is optional if you also want a spreadsheet copy.
                             </p>
 
                             {statusLoading ? (
@@ -740,7 +822,8 @@ const CatalogBuilder: React.FC = () => {
                                 <div>
                                     <h2 className="text-lg font-bold text-gray-900 dark:text-white">Capture your products</h2>
                                     <p className="text-sm text-gray-500 dark:text-slate-400">
-                                        Add several angles per product — AI combines details from every photo.
+                                        Photos are recommended. You can also type a name and price, then continue.
+                                        CSV upload is on Save.
                                     </p>
                                 </div>
                                 <div className="flex items-center gap-2">
@@ -807,7 +890,7 @@ const CatalogBuilder: React.FC = () => {
                                         onClick={startNewProduct}
                                         className="flex items-center gap-2 px-4 py-2 rounded-lg border border-purple-300 dark:border-purple-500/40 text-purple-700 dark:text-purple-300 font-semibold text-sm"
                                     >
-                                        <Plus className="w-4 h-4" /> New product
+                                        <Plus className="w-4 h-4" /> Add product
                                     </button>
                                 </div>
                                 <input
@@ -931,6 +1014,39 @@ const CatalogBuilder: React.FC = () => {
                                                     )}
                                                 </div>
 
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3">
+                                                    <div>
+                                                        <label className="text-[10px] font-semibold text-gray-500 dark:text-slate-400">
+                                                            Name
+                                                        </label>
+                                                        <input
+                                                            value={p.name}
+                                                            onChange={(e) =>
+                                                                updateProduct(p.id, { name: e.target.value })
+                                                            }
+                                                            placeholder="e.g. Chicken stew"
+                                                            className="w-full mt-0.5 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg px-2.5 py-1.5 text-sm focus:ring-2 focus:ring-purple-500"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="text-[10px] font-semibold text-gray-500 dark:text-slate-400">
+                                                            Price ({currency})
+                                                        </label>
+                                                        <input
+                                                            value={p.price}
+                                                            onChange={(e) =>
+                                                                updateProduct(p.id, {
+                                                                    price: e.target.value,
+                                                                    priceIsEstimate: false,
+                                                                })
+                                                            }
+                                                            placeholder="0"
+                                                            inputMode="decimal"
+                                                            className="w-full mt-0.5 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg px-2.5 py-1.5 text-sm focus:ring-2 focus:ring-purple-500"
+                                                        />
+                                                    </div>
+                                                </div>
+
                                                 <div className="flex flex-wrap items-center gap-2 mt-3">
                                                     <button
                                                         type="button"
@@ -988,7 +1104,8 @@ const CatalogBuilder: React.FC = () => {
                                 </div>
                             ) : (
                                 <p className="text-center text-sm text-gray-500 dark:text-slate-400 mt-4">
-                                    Upload photos above to start your first product, or tap <strong>New product</strong>.
+                                    Upload photos, tap <strong>Add product</strong> to type a name and price, or
+                                    continue to Save to upload a CSV.
                                 </p>
                             )}
                         </div>
@@ -1282,7 +1399,8 @@ const CatalogBuilder: React.FC = () => {
 
                                 {products.length === 0 && (
                                     <div className="text-center py-10 text-gray-500 dark:text-slate-400">
-                                        No products yet. Go back to add photos.
+                                        No products yet. Go back to add photos or typed rows, or continue to Save
+                                        to upload a CSV.
                                     </div>
                                 )}
                             </div>
@@ -1294,8 +1412,70 @@ const CatalogBuilder: React.FC = () => {
                         <div>
                             <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-1">Save your catalog</h2>
                             <p className="text-sm text-gray-500 dark:text-slate-400 mb-5">
-                                {validProducts.length} product(s) ready. Save to Arrotech by default; Google Sheets is optional.
+                                {validProducts.length} product(s) ready. Save to Arrotech by default, or upload a CSV.
+                                Google Sheets is optional.
                             </p>
+
+                            <div className="mb-5 p-4 rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50/70 dark:bg-slate-800/50">
+                                <p className="font-semibold text-gray-900 dark:text-white text-sm flex items-center gap-1.5">
+                                    <Upload className="w-4 h-4" /> Upload CSV
+                                </p>
+                                <p className="text-xs text-gray-500 dark:text-slate-400 mt-1 mb-3">
+                                    Upserts named and priced rows. Photos stay the recommended default; a typed
+                                    price list can go live without them.
+                                </p>
+                                <input
+                                    ref={csvInputRef}
+                                    type="file"
+                                    accept=".csv,text/csv"
+                                    className="hidden"
+                                    onChange={(e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) handleCsvImport(file);
+                                        e.target.value = '';
+                                    }}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => csvInputRef.current?.click()}
+                                    disabled={importingCsv}
+                                    className="flex items-center gap-2 px-4 py-2 rounded-lg border border-purple-300 dark:border-purple-500/40 text-purple-700 dark:text-purple-300 font-semibold text-sm disabled:opacity-50"
+                                >
+                                    {importingCsv ? (
+                                        <>
+                                            <Loader2 className="w-4 h-4 animate-spin" /> Importing…
+                                        </>
+                                    ) : (
+                                        <>
+                                            <FileSpreadsheet className="w-4 h-4" /> Choose CSV
+                                        </>
+                                    )}
+                                </button>
+                                {csvImportResult && (
+                                    <div className="mt-3 text-sm text-gray-700 dark:text-slate-300">
+                                        <p>
+                                            Created {csvImportResult.created}, updated {csvImportResult.updated}
+                                            {csvImportResult.errors.length
+                                                ? `, ${csvImportResult.errors.length} error(s)`
+                                                : ''}
+                                            .
+                                        </p>
+                                        {csvImportResult.errors.length > 0 && (
+                                            <ul className="mt-1 text-xs text-red-600 dark:text-red-400 space-y-0.5">
+                                                {csvImportResult.errors.slice(0, 8).map((err, idx) => (
+                                                    <li key={`${err.row ?? 'x'}-${idx}`}>
+                                                        {err.row != null ? `Row ${err.row + 1}: ` : ''}
+                                                        {err.error || 'Import failed'}
+                                                    </li>
+                                                ))}
+                                                {csvImportResult.errors.length > 8 && (
+                                                    <li>+{csvImportResult.errors.length - 8} more</li>
+                                                )}
+                                            </ul>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
 
                             <div className="grid grid-cols-2 gap-3 mb-5">
                                 <button
@@ -1561,7 +1741,8 @@ const CatalogBuilder: React.FC = () => {
                                 onClick={handleExport}
                                 disabled={
                                     exporting ||
-                                    !canProceedFromStep() ||
+                                    importingCsv ||
+                                    !validProducts.length ||
                                     (destination === 'google_sheets' && !googleConnected)
                                 }
                                 className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-secondary-800 to-primary-500 text-white font-semibold text-sm disabled:opacity-40"

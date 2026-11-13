@@ -3572,6 +3572,19 @@ class ApiService {
     return response.data;
   }
 
+  async importCatalogProducts(file: File): Promise<ApiResponse<{
+    created: number;
+    updated: number;
+    errors: { row?: number; error?: string }[];
+  }>> {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await this.api.post('/api/catalog/products/import', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  }
+
   // ── Commerce orders (Hub ops) ────────────────────────────────────────
   async listCommerceOrders(): Promise<ApiResponse<{ orders: any[] }>> {
     const response = await this.api.get('/api/commerce/orders');
