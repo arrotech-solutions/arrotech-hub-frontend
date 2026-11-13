@@ -3548,6 +3548,7 @@ class ApiService {
   async exportCatalog(
     payload: {
       products: any[];
+      destination?: 'arrotech_db' | 'google_sheets';
       mode: 'new' | 'append';
       title?: string;
       spreadsheet_id?: string;
@@ -3558,6 +3559,7 @@ class ApiService {
   ): Promise<ApiResponse<any>> {
     const formData = new FormData();
     formData.append('products', JSON.stringify(payload.products));
+    formData.append('destination', payload.destination || 'arrotech_db');
     formData.append('mode', payload.mode);
     if (payload.title) formData.append('title', payload.title);
     if (payload.spreadsheet_id) formData.append('spreadsheet_id', payload.spreadsheet_id);
