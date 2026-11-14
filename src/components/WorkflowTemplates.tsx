@@ -608,6 +608,7 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onWorkflowCreated
                                             </p>
                                         )}
                                         {selectedTemplate.required_connections.length > 0 && (
+                                            <>
                                             <div className="space-y-2.5">
                                                 {selectedTemplate.required_connections.map((conn) => {
                                                     const connected = isConnected(conn);
@@ -653,7 +654,8 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onWorkflowCreated
                                                     Connect missing services before deploying this workflow.
                                                 </p>
                                             )}
-                                    )}
+                                            </>
+                                        )}
                                     </section>
 
                                     {/* Configuration — interactive form matching EnhancedWorkflowCreator logic */}
