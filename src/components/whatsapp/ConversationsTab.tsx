@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useLayoutEffect, useRef, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
+import { Link } from 'react-router-dom';
 import {
     Search, Phone, MoreVertical, Send, User, Shield, Info, Image as ImageIcon,
     Paperclip, CheckCheck, Check, Clock, Plus, Bot, Tag, Filter, UserCircle, Star, ArrowLeft, Loader2,
@@ -15,6 +16,7 @@ import WhatsAppMessageMedia from './WhatsAppMessageMedia';
 import { useWebSocket } from '../../hooks/useWebSocket';
 import { useWhatsAppInboxShortcuts } from '../../hooks/useWhatsAppInboxShortcuts';
 import { useAuth } from '../../hooks/useAuth';
+import { contactsInHandoffQueue } from './handoffQueue';
 
 const SAVED_SEGMENTS_KEY = 'wa_inbox_segments';
 const FLOATING_MENU_WIDTH = 256;
@@ -188,6 +190,7 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
     );
     const [showQuickReplies, setShowQuickReplies] = useState(false);
     const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+    const [handoffOnly, setHandoffOnly] = useState(false);
     const [showFilterMenu, setShowFilterMenu] = useState(false);
     const [filterAgent, setFilterAgent] = useState<string>('');
     const [filterStarred, setFilterStarred] = useState(false);
@@ -249,11 +252,11 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
         try {
             const response = await apiService.getWhatsAppContacts({
                 search: searchQuery || undefined,
-                status: statusFilter !== 'all' ? statusFilter : undefined,
+                status: handoffOnly || statusFilter === 'all' ? undefined : statusFilter,
                 assigned_to: filterAgent || undefined,
                 is_starred: filterStarred || undefined,
                 has_unread: filterUnread || undefined,
-                tag: filterTag || undefined,
+                tag: handoffOnly ? 'human_handoff' : (filterTag || undefined),
                 sla_breached: filterSlaBreached || undefined,
                 include_snoozed: filterSlaBreached ? undefined : false,
             });
@@ -261,7 +264,7 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
         } catch {
             /* ignore */
         }
-    }, [searchQuery, statusFilter, filterAgent, filterStarred, filterUnread, filterTag, filterSlaBreached, setContacts]);
+    }, [searchQuery, statusFilter, handoffOnly, filterAgent, filterStarred, filterUnread, filterTag, filterSlaBreached, setContacts]);
 
     // Close filter/segment menus when clicking outside
     useEffect(() => {
@@ -481,6 +484,7 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
     useEffect(() => {
         const hasInboxFilters =
             statusFilter !== 'all' ||
+            handoffOnly ||
             !!filterAgent ||
             filterStarred ||
             filterUnread ||
@@ -495,7 +499,7 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
 
         const debounce = setTimeout(() => loadContactsFromServer(), 300);
         return () => clearTimeout(debounce);
-    }, [searchQuery, statusFilter, filterAgent, filterStarred, filterUnread, filterTag, filterSlaBreached, loadContactsFromServer]);
+    }, [searchQuery, statusFilter, handoffOnly, filterAgent, filterStarred, filterUnread, filterTag, filterSlaBreached, loadContactsFromServer]);
 
     useEffect(() => {
         if (!showTeamQueue) return;
@@ -506,11 +510,14 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
 
     const inboxContactList = useMemo(
         () =>
-            contacts.filter((c) => {
-                const searchTarget = `${c.name || ''} ${c.profile_name || ''} ${c.phone_number || ''}`.toLowerCase();
-                return searchTarget.includes(searchQuery.toLowerCase());
-            }),
-        [contacts, searchQuery]
+            contactsInHandoffQueue(
+                contacts.filter((c) => {
+                    const searchTarget = `${c.name || ''} ${c.profile_name || ''} ${c.phone_number || ''}`.toLowerCase();
+                    return searchTarget.includes(searchQuery.toLowerCase());
+                }),
+                handoffOnly,
+            ),
+        [contacts, searchQuery, handoffOnly]
     );
 
     useWhatsAppInboxShortcuts({
@@ -982,6 +989,7 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
     };
 
     const applySegment = (segment: SavedSegment) => {
+        setHandoffOnly(false);
         if (segment.status) setStatusFilter(segment.status);
         else setStatusFilter('all');
         setFilterAgent(segment.filterAgent || '');
@@ -997,6 +1005,7 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
     };
 
     const clearSegmentFilters = () => {
+        setHandoffOnly(false);
         setFilterAgent('');
         setFilterStarred(false);
         setFilterUnread(false);
@@ -1192,6 +1201,17 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
         resolved: contacts.filter(c => c.status === 'resolved').length,
         closed: contacts.filter(c => c.status === 'closed').length,
     };
+    const handoffCount = contacts.filter((c) => c.tags?.includes('human_handoff')).length;
+    const showCommerceSnapshot = Boolean(
+        commerceContext && (
+            commerceContext.has_cart ||
+            commerceContext.order_id ||
+            commerceContext.payment_status ||
+            commerceContext.commerce_phase ||
+            commerceContext.return_ids?.length ||
+            commerceContext.complaint_ids?.length
+        )
+    );
 
     const contactStatus = (selectedContact?.status || 'open');
     const currentStatusConfig = STATUS_CONFIG[contactStatus] || STATUS_CONFIG.open;
@@ -1294,18 +1314,37 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
                         {(['all', 'open', 'pending', 'resolved', 'closed'] as StatusFilter[]).map((s) => (
                             <button
                                 key={s}
-                                onClick={() => setStatusFilter(s)}
-                                className={`px-3 py-1.5 text-xs font-medium rounded-lg whitespace-nowrap transition-all ${statusFilter === s
+                                onClick={() => {
+                                    setHandoffOnly(false);
+                                    setStatusFilter(s);
+                                }}
+                                className={`px-3 py-1.5 text-xs font-medium rounded-lg whitespace-nowrap transition-all ${!handoffOnly && statusFilter === s
                                     ? 'bg-green-600 text-white shadow-sm'
                                     : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                                 }`}
                             >
                                 {s === 'all' ? 'All' : STATUS_CONFIG[s].label}
-                                <span className={`ml-1 ${statusFilter === s ? 'text-green-100' : 'text-slate-400 dark:text-slate-500'}`}>
+                                <span className={`ml-1 ${!handoffOnly && statusFilter === s ? 'text-green-100' : 'text-slate-400 dark:text-slate-500'}`}>
                                     {statusCounts[s]}
                                 </span>
                             </button>
                         ))}
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setHandoffOnly(true);
+                                setStatusFilter('all');
+                            }}
+                            className={`px-3 py-1.5 text-xs font-medium rounded-lg whitespace-nowrap transition-all ${handoffOnly
+                                ? 'bg-amber-600 text-white shadow-sm'
+                                : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                            }`}
+                        >
+                            Handoff
+                            <span className={`ml-1 ${handoffOnly ? 'text-amber-100' : 'text-slate-400 dark:text-slate-500'}`}>
+                                {handoffCount}
+                            </span>
+                        </button>
                     </div>
 
                     {/* Search */}
@@ -1820,18 +1859,55 @@ export const ConversationsTab: React.FC<ConversationsTabProps> = ({
                             </select>
                         </div>
 
-                        {/* Order & payment context */}
-                        {commerceContext && (commerceContext.has_cart || commerceContext.order_id || commerceContext.payment_status) && (
+                        {/* Commerce handoff snapshot */}
+                        {showCommerceSnapshot && (
                             <div>
                                 <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1">
-                                    <ShoppingCart className="w-3.5 h-3.5" /> Order context
+                                    <ShoppingCart className="w-3.5 h-3.5" /> Commerce
                                 </h4>
                                 <div className="rounded-xl bg-slate-50 dark:bg-slate-800 border dark:border-slate-700 p-3 text-sm space-y-2">
+                                    {commerceContext.commerce_phase && (
+                                        <p className="text-slate-500">
+                                            Phase: <span className="font-medium capitalize text-slate-800 dark:text-slate-200">{String(commerceContext.commerce_phase).replace(/_/g, ' ')}</span>
+                                        </p>
+                                    )}
+                                    {commerceContext.policy_sell_modes?.length > 0 && (
+                                        <p className="text-slate-500">
+                                            Sell modes: <span className="text-slate-800 dark:text-slate-200">{commerceContext.policy_sell_modes.join(', ')}</span>
+                                        </p>
+                                    )}
                                     {commerceContext.cart_summary && (
                                         <p className="text-slate-600 dark:text-slate-300 whitespace-pre-wrap text-xs">{commerceContext.cart_summary}</p>
                                     )}
                                     {commerceContext.order_id && (
                                         <p className="text-slate-500">Order: <span className="font-mono text-slate-800 dark:text-slate-200">{commerceContext.order_id}</span></p>
+                                    )}
+                                    {commerceContext.return_ids?.length > 0 && (
+                                        <div className="text-slate-500">
+                                            <p className="text-[10px] font-bold uppercase text-slate-400">Returns</p>
+                                            <ul className="space-y-1">
+                                                {commerceContext.return_ids.map((id: string) => (
+                                                    <li key={id}>
+                                                        <Link
+                                                            to="/commerce/returns"
+                                                            className="font-mono text-xs text-green-700 dark:text-green-400 hover:underline break-all"
+                                                        >
+                                                            {id}
+                                                        </Link>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+                                    {commerceContext.complaint_ids?.length > 0 && (
+                                        <div className="text-slate-500">
+                                            <p className="text-[10px] font-bold uppercase text-slate-400">Complaints</p>
+                                            <ul className="space-y-1">
+                                                {commerceContext.complaint_ids.map((id: string) => (
+                                                    <li key={id} className="font-mono text-xs text-slate-800 dark:text-slate-200 break-all">{id}</li>
+                                                ))}
+                                            </ul>
+                                        </div>
                                     )}
                                     {commerceContext.payment_status && (
                                         <p className="flex items-center gap-1 text-slate-500">
