@@ -7,6 +7,7 @@ import {
   CheckSquare,
   ChevronDown,
   ChevronRight,
+  ClipboardList,
   Code,
   CreditCard,
   Crown,
@@ -197,6 +198,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           href: '/catalog-builder',
           icon: Sparkles,
           description: 'Turn product photos into a sellable catalog',
+          badge: 'New'
+        },
+        {
+          name: 'Orders',
+          href: '/orders',
+          icon: ClipboardList,
+          description: 'Manage commerce orders and reservations',
           badge: 'New'
         }
       ]

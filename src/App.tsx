@@ -48,6 +48,7 @@ const Settings = lazy(() => import('./pages/Settings'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const Workflows = lazy(() => import('./pages/Workflows'));
 const CatalogBuilder = lazy(() => import('./pages/CatalogBuilder'));
+const CommerceOrders = lazy(() => import('./pages/CommerceOrders'));
 const Pricing = lazy(() => import('./pages/Pricing'));
 const DeveloperPortal = lazy(() => import('./pages/DeveloperPortal'));
 
@@ -451,6 +452,19 @@ const AppRoutes: React.FC = () => {
             <RequireVerifiedEmail>
               <Layout>
                 <CatalogBuilder />
+              </Layout>
+            </RequireVerifiedEmail>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/orders"
+        element={
+          <ProtectedRoute>
+            <RequireVerifiedEmail>
+              <Layout>
+                <CommerceOrders />
               </Layout>
             </RequireVerifiedEmail>
           </ProtectedRoute>
