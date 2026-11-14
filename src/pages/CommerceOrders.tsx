@@ -1,10 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
     ClipboardList,
     ExternalLink,
     Loader2,
     MessageCircle,
     RefreshCw,
+    RotateCcw,
     Users,
 } from 'lucide-react';
 import toast from '../lib/notify';
@@ -117,6 +119,8 @@ function statusTone(value?: string): string {
 }
 
 const CommerceOrders: React.FC = () => {
+    const [searchParams] = useSearchParams();
+    const requestedOrder = searchParams.get('order') || '';
     const [tab, setTab] = useState<OpsTab>('orders');
     const [orders, setOrders] = useState<CommerceOrder[]>([]);
     const [reservations, setReservations] = useState<CommerceReservation[]>([]);
@@ -143,10 +147,16 @@ const CommerceOrders: React.FC = () => {
             setOrders(nextOrders);
             setReservations(nextReservations);
             setSelectedId((current) => {
+                if (requestedOrder && nextOrders.some((order) => orderId(order) === requestedOrder)) {
+                    return requestedOrder;
+                }
                 if (current && nextOrders.some((order) => orderId(order) === current)) {
                     return current;
                 }
-                return nextOrders[0] ? orderId(nextOrders[0]) : '';
+                const wide = typeof window !== 'undefined'
+                    && window.matchMedia('(min-width: 1024px)').matches;
+                if (wide && nextOrders[0]) return orderId(nextOrders[0]);
+                return '';
             });
         } catch (error) {
             toast.error(mapApiError(error, 'Could not load orders'));
@@ -154,7 +164,7 @@ const CommerceOrders: React.FC = () => {
             setLoading(false);
             setRefreshing(false);
         }
-    }, []);
+    }, [requestedOrder]);
 
     useEffect(() => {
         void load();
@@ -252,7 +262,12 @@ const CommerceOrders: React.FC = () => {
                     </div>
                 ) : tab === 'orders' ? (
                     <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-                        <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 overflow-hidden">
+                        <div className={`lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 overflow-hidden ${selectedId ? 'hidden lg:block' : 'block'}`}>
+                            <div className="hidden lg:grid grid-cols-3 gap-2 px-4 py-2 text-[11px] font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-500 border-b border-gray-100 dark:border-slate-800">
+                                <span>Customer</span>
+                                <span>Status</span>
+                                <span className="text-right">Total</span>
+                            </div>
                             {orders.length === 0 ? (
                                 <div className="p-8 text-sm text-gray-500 dark:text-slate-400">
                                     No orders yet. WhatsApp commerce orders will appear here.
@@ -267,7 +282,7 @@ const CommerceOrders: React.FC = () => {
                                                 <button
                                                     type="button"
                                                     onClick={() => setSelectedId(id)}
-                                                    className={`w-full text-left px-4 py-4 ${
+                                                    className={`w-full text-left px-4 py-4 lg:py-2.5 ${
                                                         active
                                                             ? 'bg-blue-50/80 dark:bg-blue-500/10'
                                                             : 'hover:bg-gray-50 dark:hover:bg-slate-800/70'
@@ -302,7 +317,16 @@ const CommerceOrders: React.FC = () => {
                             )}
                         </div>
 
-                        <div className="lg:col-span-3 bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 p-5 sm:p-6">
+                        <div className={`lg:col-span-3 bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 p-5 sm:p-6 ${selectedId ? 'block' : 'hidden lg:block'}`}>
+                            {selectedId && (
+                                <button
+                                    type="button"
+                                    onClick={() => setSelectedId('')}
+                                    className="lg:hidden mb-4 text-sm font-semibold text-gray-600 dark:text-slate-300"
+                                >
+                                    ← Back to orders
+                                </button>
+                            )}
                             {!selected ? (
                                 <p className="text-sm text-gray-500 dark:text-slate-400">
                                     Select an order to see line items, customer contact, and status actions.
@@ -318,18 +342,27 @@ const CommerceOrders: React.FC = () => {
                                                 {orderId(selected)} · {money(selected.total, selected.currency)}
                                             </p>
                                         </div>
-                                        {waMeLink(selected.customer_phone, selected.whatsapp_url) && (
-                                            <a
-                                                href={waMeLink(selected.customer_phone, selected.whatsapp_url)}
-                                                target="_blank"
-                                                rel="noreferrer"
-                                                className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 text-white px-3 py-2 text-sm font-semibold hover:bg-emerald-700"
+                                        <div className="flex flex-wrap gap-2">
+                                            <Link
+                                                to={`/commerce/returns?order=${encodeURIComponent(orderId(selected))}`}
+                                                className="inline-flex items-center gap-2 rounded-xl border border-gray-200 dark:border-slate-700 px-3 py-2 text-sm font-semibold text-gray-800 dark:text-slate-100"
                                             >
-                                                <MessageCircle className="w-4 h-4" />
-                                                WhatsApp
-                                                <ExternalLink className="w-3.5 h-3.5" />
-                                            </a>
-                                        )}
+                                                <RotateCcw className="w-4 h-4" />
+                                                Returns for this order
+                                            </Link>
+                                            {waMeLink(selected.customer_phone, selected.whatsapp_url) && (
+                                                <a
+                                                    href={waMeLink(selected.customer_phone, selected.whatsapp_url)}
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                    className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 text-white px-3 py-2 text-sm font-semibold hover:bg-emerald-700"
+                                                >
+                                                    <MessageCircle className="w-4 h-4" />
+                                                    WhatsApp
+                                                    <ExternalLink className="w-3.5 h-3.5" />
+                                                </a>
+                                            )}
+                                        </div>
                                     </div>
 
                                     <div className="flex flex-wrap gap-2">

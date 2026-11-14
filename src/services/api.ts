@@ -3614,6 +3614,52 @@ class ApiService {
     return response.data;
   }
 
+  // ── Commerce policy + returns (Hub ops) ─────────────────────────────
+  async getCommercePolicy(): Promise<ApiResponse<any>> {
+    const response = await this.api.get('/api/commerce/policy');
+    return response.data;
+  }
+
+  async updateCommercePolicy(data: Record<string, any>): Promise<ApiResponse<any>> {
+    const response = await this.api.put('/api/commerce/policy', data);
+    return response.data;
+  }
+
+  async listCommerceReturns(): Promise<ApiResponse<{ returns: any[] }>> {
+    const response = await this.api.get('/api/commerce/returns');
+    return response.data;
+  }
+
+  async getCommerceReturn(returnId: string): Promise<ApiResponse<any>> {
+    const response = await this.api.get(
+      `/api/commerce/returns/${encodeURIComponent(returnId)}`
+    );
+    return response.data;
+  }
+
+  async approveCommerceReturn(returnId: string): Promise<ApiResponse<any>> {
+    const response = await this.api.post(
+      `/api/commerce/returns/${encodeURIComponent(returnId)}/approve`
+    );
+    return response.data;
+  }
+
+  async denyCommerceReturn(returnId: string, reason?: string): Promise<ApiResponse<any>> {
+    const response = await this.api.post(
+      `/api/commerce/returns/${encodeURIComponent(returnId)}/deny`,
+      { reason }
+    );
+    return response.data;
+  }
+
+  async settleCommerceReturnOffline(returnId: string, note?: string): Promise<ApiResponse<any>> {
+    const response = await this.api.post(
+      `/api/commerce/returns/${encodeURIComponent(returnId)}/settle-offline`,
+      { note }
+    );
+    return response.data;
+  }
+
 }
 
 export const apiService = new ApiService();
