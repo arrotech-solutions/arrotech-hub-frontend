@@ -3548,6 +3548,7 @@ class ApiService {
   async exportCatalog(
     payload: {
       products: any[];
+      destination?: 'arrotech_db' | 'google_sheets';
       mode: 'new' | 'append';
       title?: string;
       spreadsheet_id?: string;
@@ -3558,6 +3559,7 @@ class ApiService {
   ): Promise<ApiResponse<any>> {
     const formData = new FormData();
     formData.append('products', JSON.stringify(payload.products));
+    formData.append('destination', payload.destination || 'arrotech_db');
     formData.append('mode', payload.mode);
     if (payload.title) formData.append('title', payload.title);
     if (payload.spreadsheet_id) formData.append('spreadsheet_id', payload.spreadsheet_id);
@@ -3567,6 +3569,48 @@ class ApiService {
     const response = await this.api.post('/api/catalog-builder/export', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
+    return response.data;
+  }
+
+  async importCatalogProducts(file: File): Promise<ApiResponse<{
+    created: number;
+    updated: number;
+    errors: { row?: number; error?: string }[];
+  }>> {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await this.api.post('/api/catalog/products/import', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  }
+
+  // ── Commerce orders (Hub ops) ────────────────────────────────────────
+  async listCommerceOrders(): Promise<ApiResponse<{ orders: any[] }>> {
+    const response = await this.api.get('/api/commerce/orders');
+    return response.data;
+  }
+
+  async getCommerceOrder(externalOrderId: string): Promise<ApiResponse<any>> {
+    const response = await this.api.get(
+      `/api/commerce/orders/${encodeURIComponent(externalOrderId)}`
+    );
+    return response.data;
+  }
+
+  async updateCommerceOrderStatus(
+    externalOrderId: string,
+    status: string
+  ): Promise<ApiResponse<any>> {
+    const response = await this.api.patch(
+      `/api/commerce/orders/${encodeURIComponent(externalOrderId)}`,
+      { status }
+    );
+    return response.data;
+  }
+
+  async listCommerceReservations(): Promise<ApiResponse<{ reservations: any[] }>> {
+    const response = await this.api.get('/api/commerce/reservations');
     return response.data;
   }
 
