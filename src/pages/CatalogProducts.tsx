@@ -383,7 +383,7 @@ const CatalogProducts: React.FC = () => {
               className={`${hubSection} ml-auto flex h-full w-full max-w-md flex-col shadow-2xl`}
               onSubmit={(event) => {
                 event.preventDefault();
-                void saveProduct();
+                return saveProduct();
               }}
             >
               <div className="flex items-center justify-between gap-3 border-b border-gray-100 dark:border-slate-800 px-5 py-4">
@@ -444,7 +444,7 @@ const CatalogProducts: React.FC = () => {
                   <label className={hubFieldLabel} htmlFor="product-photo">
                     Photo
                   </label>
-                  <input id="product-photo" type="file" accept="image/*" onChange={(event) => void onPhoto(event)} className={`${fieldClass} font-normal`} />
+                  <input id="product-photo" type="file" accept="image/*" onChange={(event) => onPhoto(event)} className={`${fieldClass} font-normal`} />
                   {previewUrl && (
                     <img src={previewUrl} alt="Photo preview" className="mt-3 h-24 w-24 rounded-xl object-cover bg-gray-100 dark:bg-slate-800" />
                   )}
@@ -547,7 +547,7 @@ const CatalogProducts: React.FC = () => {
                           <ProductActions
                             product={product}
                             onEdit={openEdit}
-                            onUnavailable={(row) => void markUnavailable(row)}
+                            onUnavailable={(row) => markUnavailable(row)}
                             onDelete={setPendingDelete}
                           />
                         </td>
@@ -573,7 +573,7 @@ const CatalogProducts: React.FC = () => {
                             <ProductActions
                               product={product}
                               onEdit={openEdit}
-                              onUnavailable={(row) => void markUnavailable(row)}
+                              onUnavailable={(row) => markUnavailable(row)}
                               onDelete={setPendingDelete}
                             />
                           </div>
@@ -605,7 +605,7 @@ const CatalogProducts: React.FC = () => {
               >
                 Cancel
               </button>
-              <button type="button" onClick={() => void confirmDelete()} disabled={deleting} className={hubDangerBtn}>
+              <button type="button" onClick={() => confirmDelete()} disabled={deleting} className={hubDangerBtn}>
                 Delete product
               </button>
             </div>

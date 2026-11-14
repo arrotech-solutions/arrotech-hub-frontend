@@ -2,7 +2,7 @@
  * Products desk: list, search, stock filters, and product writes.
  */
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 
@@ -50,8 +50,47 @@ const renderPage = () =>
     </MemoryRouter>
   );
 
+const setupUser = () =>
+  userEvent.setup({
+    advanceTimers: jest.advanceTimersByTime,
+    delay: null,
+  });
+
+/** Run the 250ms catalog debounce and the fetch it starts, inside act. */
+async function flushCatalog() {
+  await act(async () => {
+    jest.advanceTimersByTime(250);
+    await Promise.resolve();
+  });
+}
+
+/** Let a click or keystroke promise finish. Writes that reload the list settle on the next act, after React commits the debounce. */
+async function settleAction(action: () => Promise<unknown>, reload = false) {
+  await act(async () => {
+    await action();
+    await Promise.resolve();
+  });
+  if (reload) {
+    await flushCatalog();
+  }
+}
+
+/** FileReader in jsdom completes on Node's setImmediate, which stays real under fake timers. */
+async function flushFileReader(action: () => Promise<unknown>) {
+  const { setImmediate: scheduleImmediate } = require('timers') as {
+    setImmediate: (callback: () => void) => void;
+  };
+  await act(async () => {
+    await action();
+    await new Promise<void>((resolve) => scheduleImmediate(resolve));
+    await new Promise<void>((resolve) => scheduleImmediate(resolve));
+    await Promise.resolve();
+  });
+}
+
 describe('CatalogProducts page', () => {
   beforeEach(() => {
+    jest.useFakeTimers({ doNotFake: ['setImmediate', 'nextTick', 'queueMicrotask'] });
     jest.clearAllMocks();
     (apiService.listCatalogProducts as jest.Mock).mockResolvedValue({
       success: true,
@@ -59,11 +98,17 @@ describe('CatalogProducts page', () => {
     });
   });
 
+  afterEach(() => {
+    cleanup();
+    jest.useRealTimers();
+  });
+
   it('loads the catalog through listCatalogProducts', async () => {
     renderPage();
+    await flushCatalog();
 
-    expect(await screen.findByRole('heading', { name: 'Products' })).toBeInTheDocument();
-    expect((await screen.findAllByText('Maize flour')).length).toBeGreaterThan(0);
+    expect(screen.getByRole('heading', { name: 'Products' })).toBeInTheDocument();
+    expect(screen.getAllByText('Maize flour').length).toBeGreaterThan(0);
     expect(screen.getAllByText(/180\.00/).length).toBeGreaterThan(0);
     expect(screen.getAllByText('24').length).toBeGreaterThan(0);
     expect(screen.getAllByText(/in stock/i).length).toBeGreaterThan(0);
@@ -77,33 +122,32 @@ describe('CatalogProducts page', () => {
       data: { products: [] },
     });
     renderPage();
+    await flushCatalog();
 
-    expect(await screen.findByText(/no products yet/i)).toBeInTheDocument();
+    expect(screen.getByText(/no products yet/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /^add$/i })).toBeInTheDocument();
   });
 
   it('calls listCatalogProducts with the typed search query', async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     renderPage();
-    await screen.findAllByText('Maize flour');
+    await flushCatalog();
 
-    await user.type(screen.getByRole('searchbox', { name: /search/i }), 'flour');
+    await settleAction(() => user.type(screen.getByRole('searchbox', { name: /search/i }), 'flour'), true);
 
-    await waitFor(() => {
-      expect(apiService.listCatalogProducts).toHaveBeenCalledWith({ q: 'flour' });
-    });
+    expect(apiService.listCatalogProducts).toHaveBeenCalledWith({ q: 'flour' });
   });
 
   it('filters availability on the client', async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     (apiService.listCatalogProducts as jest.Mock).mockResolvedValue({
       success: true,
       data: { products: [maize, oil] },
     });
     renderPage();
-    await screen.findAllByText('Maize flour');
+    await flushCatalog();
 
-    await user.click(screen.getByRole('button', { name: /^out of stock$/i }));
+    await settleAction(() => user.click(screen.getByRole('button', { name: /^out of stock$/i })));
 
     expect(screen.queryAllByText('Maize flour')).toHaveLength(0);
     expect(screen.getAllByText('Cooking oil').length).toBeGreaterThan(0);
@@ -112,29 +156,29 @@ describe('CatalogProducts page', () => {
   it('toasts a mapped error when the catalog fails to load', async () => {
     (apiService.listCatalogProducts as jest.Mock).mockRejectedValue(new Error('catalog down'));
     renderPage();
+    await flushCatalog();
 
-    await waitFor(() => {
-      expect(toast.error).toHaveBeenCalledWith('catalog down');
-    });
+    expect(toast.error).toHaveBeenCalledWith('catalog down');
   });
 
   it('shows an error state instead of an empty catalog when the list fails', async () => {
     (apiService.listCatalogProducts as jest.Mock).mockRejectedValue(new Error('catalog down'));
     renderPage();
+    await flushCatalog();
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(/catalog down/i);
+    expect(screen.getByRole('alert')).toHaveTextContent(/catalog down/i);
     expect(screen.queryByText(/no products yet/i)).not.toBeInTheDocument();
   });
 
   it('drops the previous rows when a search fails', async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     renderPage();
-    await screen.findAllByText('Maize flour');
+    await flushCatalog();
 
     (apiService.listCatalogProducts as jest.Mock).mockRejectedValue(new Error('search failed'));
-    await user.type(screen.getByRole('searchbox', { name: /search/i }), 'flour');
+    await settleAction(() => user.type(screen.getByRole('searchbox', { name: /search/i }), 'flour'), true);
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(/search failed/i);
+    expect(screen.getByRole('alert')).toHaveTextContent(/search failed/i);
     expect(screen.queryAllByText('Maize flour')).toHaveLength(0);
     expect(screen.queryByText(/no products yet/i)).not.toBeInTheDocument();
   });
@@ -146,68 +190,64 @@ describe('CatalogProducts page', () => {
   });
 
   it('creates a product from the add panel', async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     (apiService.createCatalogProduct as jest.Mock).mockResolvedValue({
       success: true,
       data: { id: 'prod-new', name: 'Sugar', price: '120.00', availability: 'in_stock' },
     });
     renderPage();
-    await screen.findAllByText('Maize flour');
+    await flushCatalog();
 
-    await user.click(screen.getByRole('button', { name: /^add$/i }));
-    await user.type(screen.getByRole('textbox', { name: /^name$/i }), 'Sugar');
-    await user.type(screen.getByRole('textbox', { name: /^price$/i }), '120');
-    await user.type(screen.getByRole('textbox', { name: /^description$/i }), 'White sugar');
-    await user.type(screen.getByRole('textbox', { name: /^category$/i }), 'Staples');
-    await user.type(screen.getByRole('textbox', { name: /^brand$/i }), 'Mumias');
-    await user.type(screen.getByRole('textbox', { name: /^sku$/i }), 'SUG-1');
-    await user.type(screen.getByRole('textbox', { name: /^quantity$/i }), '5');
-    await user.selectOptions(screen.getByRole('combobox', { name: /^availability$/i }), 'in_stock');
-    await user.click(screen.getByRole('button', { name: /^save$/i }));
+    await settleAction(() => user.click(screen.getByRole('button', { name: /^add$/i })));
+    await settleAction(() => user.type(screen.getByRole('textbox', { name: /^name$/i }), 'Sugar'));
+    await settleAction(() => user.type(screen.getByRole('textbox', { name: /^price$/i }), '120'));
+    await settleAction(() => user.type(screen.getByRole('textbox', { name: /^description$/i }), 'White sugar'));
+    await settleAction(() => user.type(screen.getByRole('textbox', { name: /^category$/i }), 'Staples'));
+    await settleAction(() => user.type(screen.getByRole('textbox', { name: /^brand$/i }), 'Mumias'));
+    await settleAction(() => user.type(screen.getByRole('textbox', { name: /^sku$/i }), 'SUG-1'));
+    await settleAction(() => user.type(screen.getByRole('textbox', { name: /^quantity$/i }), '5'));
+    await settleAction(() => user.selectOptions(screen.getByRole('combobox', { name: /^availability$/i }), 'in_stock'));
+    await settleAction(() => user.click(screen.getByRole('button', { name: /^save$/i })), true);
 
-    await waitFor(() => {
-      expect(apiService.createCatalogProduct).toHaveBeenCalledWith({
-        name: 'Sugar',
-        price: '120',
-        description: 'White sugar',
-        category: 'Staples',
-        brand: 'Mumias',
-        sku: 'SUG-1',
-        quantity: '5',
-        availability: 'in_stock',
-      });
+    expect(apiService.createCatalogProduct).toHaveBeenCalledWith({
+      name: 'Sugar',
+      price: '120',
+      description: 'White sugar',
+      category: 'Staples',
+      brand: 'Mumias',
+      sku: 'SUG-1',
+      quantity: '5',
+      availability: 'in_stock',
     });
   });
 
   it('saves an edited product through updateCatalogProduct', async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     (apiService.updateCatalogProduct as jest.Mock).mockResolvedValue({
       success: true,
       data: { ...maize, price: '200' },
     });
     renderPage();
-    await screen.findAllByText('Maize flour');
+    await flushCatalog();
 
-    await user.click(screen.getAllByRole('button', { name: /edit maize flour/i })[0]);
+    await settleAction(() => user.click(screen.getAllByRole('button', { name: /edit maize flour/i })[0]));
     const price = screen.getByRole('textbox', { name: /^price$/i });
-    await user.clear(price);
-    await user.type(price, '200');
-    await user.click(screen.getByRole('button', { name: /^save$/i }));
+    await settleAction(() => user.clear(price));
+    await settleAction(() => user.type(price, '200'));
+    await settleAction(() => user.click(screen.getByRole('button', { name: /^save$/i })), true);
 
-    await waitFor(() => {
-      expect(apiService.updateCatalogProduct).toHaveBeenCalledWith(
-        'prod-1',
-        expect.objectContaining({
-          name: 'Maize flour',
-          price: '200',
-          availability: 'in_stock',
-        })
-      );
-    });
+    expect(apiService.updateCatalogProduct).toHaveBeenCalledWith(
+      'prod-1',
+      expect.objectContaining({
+        name: 'Maize flour',
+        price: '200',
+        availability: 'in_stock',
+      })
+    );
   });
 
   it('previews a chosen photo locally and sends base64 on save', async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     const file = new File([Uint8Array.from([1, 2, 3, 4])], 'sugar.png', { type: 'image/png' });
     (apiService.createCatalogProduct as jest.Mock).mockResolvedValue({
       success: true,
@@ -221,18 +261,18 @@ describe('CatalogProducts page', () => {
       },
     });
     renderPage();
-    await screen.findAllByText('Maize flour');
+    await flushCatalog();
 
-    await user.click(screen.getByRole('button', { name: /^add$/i }));
-    await user.upload(screen.getByLabelText(/^photo$/i), file);
+    await settleAction(() => user.click(screen.getByRole('button', { name: /^add$/i })));
+    await flushFileReader(() => user.upload(screen.getByLabelText(/^photo$/i), file));
 
-    expect(await screen.findByRole('img', { name: /photo preview/i })).toHaveAttribute(
+    expect(screen.getByRole('img', { name: /photo preview/i })).toHaveAttribute(
       'src',
       'data:image/png;base64,AQIDBA=='
     );
 
-    await user.type(screen.getByRole('textbox', { name: /^name$/i }), 'Sugar');
-    await user.type(screen.getByRole('textbox', { name: /^price$/i }), '90');
+    await settleAction(() => user.type(screen.getByRole('textbox', { name: /^name$/i }), 'Sugar'));
+    await settleAction(() => user.type(screen.getByRole('textbox', { name: /^price$/i }), '90'));
     (apiService.listCatalogProducts as jest.Mock).mockResolvedValue({
       success: true,
       data: {
@@ -248,67 +288,61 @@ describe('CatalogProducts page', () => {
         ],
       },
     });
-    await user.click(screen.getByRole('button', { name: /^save$/i }));
+    await settleAction(() => user.click(screen.getByRole('button', { name: /^save$/i })), true);
 
-    await waitFor(() => {
-      expect(apiService.createCatalogProduct).toHaveBeenCalledWith(
-        expect.objectContaining({
-          name: 'Sugar',
-          price: '90',
-          image_base64: 'AQIDBA==',
-          image_filename: 'sugar.png',
-          image_content_type: 'image/png',
-        })
-      );
-    });
-    const saved = await screen.findAllByRole('img', { name: 'Sugar' });
+    expect(apiService.createCatalogProduct).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'Sugar',
+        price: '90',
+        image_base64: 'AQIDBA==',
+        image_filename: 'sugar.png',
+        image_content_type: 'image/png',
+      })
+    );
+    const saved = screen.getAllByRole('img', { name: 'Sugar' });
     expect(saved[0]).toHaveAttribute('src', 'https://cdn.example/sugar.jpg');
     expect(screen.queryByRole('img', { name: /photo preview/i })).not.toBeInTheDocument();
   });
 
   it('marks a product unavailable without deleting it', async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     (apiService.updateCatalogProduct as jest.Mock).mockResolvedValue({
       success: true,
       data: { ...maize, availability: 'out_of_stock' },
     });
     renderPage();
-    await screen.findAllByText('Maize flour');
+    await flushCatalog();
 
-    await user.click(screen.getAllByRole('button', { name: /mark maize flour unavailable/i })[0]);
+    await settleAction(() => user.click(screen.getAllByRole('button', { name: /mark maize flour unavailable/i })[0]));
 
-    await waitFor(() => {
-      expect(apiService.updateCatalogProduct).toHaveBeenCalledWith('prod-1', {
-        availability: 'out_of_stock',
-      });
+    expect(apiService.updateCatalogProduct).toHaveBeenCalledWith('prod-1', {
+      availability: 'out_of_stock',
     });
     expect(apiService.deleteCatalogProduct).not.toHaveBeenCalled();
   });
 
   it('deletes a product after confirmation', async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     (apiService.deleteCatalogProduct as jest.Mock).mockResolvedValue({
       success: true,
       data: { id: 'prod-1' },
     });
     renderPage();
-    await screen.findAllByText('Maize flour');
+    await flushCatalog();
 
-    await user.click(screen.getAllByRole('button', { name: /delete maize flour/i })[0]);
-    await user.click(screen.getByRole('button', { name: /delete product/i }));
+    await settleAction(() => user.click(screen.getAllByRole('button', { name: /delete maize flour/i })[0]));
+    await settleAction(() => user.click(screen.getByRole('button', { name: /delete product/i })), true);
 
-    await waitFor(() => {
-      expect(apiService.deleteCatalogProduct).toHaveBeenCalledWith('prod-1');
-    });
+    expect(apiService.deleteCatalogProduct).toHaveBeenCalledWith('prod-1');
   });
 
   it('keeps the product when delete is cancelled', async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     renderPage();
-    await screen.findAllByText('Maize flour');
+    await flushCatalog();
 
-    await user.click(screen.getAllByRole('button', { name: /delete maize flour/i })[0]);
-    await user.click(screen.getByRole('button', { name: /^cancel$/i }));
+    await settleAction(() => user.click(screen.getAllByRole('button', { name: /delete maize flour/i })[0]));
+    await settleAction(() => user.click(screen.getByRole('button', { name: /^cancel$/i })));
 
     expect(apiService.deleteCatalogProduct).not.toHaveBeenCalled();
     expect(screen.getAllByText('Maize flour').length).toBeGreaterThan(0);
