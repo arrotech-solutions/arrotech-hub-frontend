@@ -24,9 +24,11 @@ import {
   MessageCircle,
   Phone,
   Plug,
+  RotateCcw,
   Search,
   Settings,
   Share2,
+  Shield,
   ShoppingBag,
   Sparkles,
   Star,
@@ -205,6 +207,20 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           href: '/orders',
           icon: ClipboardList,
           description: 'Manage commerce orders and reservations',
+          badge: 'New'
+        },
+        {
+          name: 'Returns',
+          href: '/commerce/returns',
+          icon: RotateCcw,
+          description: 'Approve, deny, and settle return refunds',
+          badge: 'New'
+        },
+        {
+          name: 'Policy',
+          href: '/commerce/policy',
+          icon: Shield,
+          description: 'Sell modes, hours, and return rules',
           badge: 'New'
         }
       ]
