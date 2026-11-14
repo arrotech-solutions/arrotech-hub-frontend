@@ -4,12 +4,15 @@ import toast from '../lib/notify';
 import { mapApiError } from '../lib/mapApiError';
 import {
   hubDangerBtn,
+  hubFieldControlLabeled,
   hubFieldLabel,
   hubModalBackdrop,
   hubModalFrame,
   hubPrimaryBtn,
+  hubQuietBtn,
   hubSection,
   hubSectionHeader,
+  hubSectionPadding,
 } from '../lib/hubPolish';
 import apiService from '../services/api';
 
@@ -61,9 +64,6 @@ const EMPTY_DRAFT: ProductDraft = {
   quantity: '',
   availability: 'in_stock',
 };
-
-const fieldClass =
-  'mt-1 block w-full rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm font-medium';
 
 function draftFromProduct(product: CatalogProductRow): ProductDraft {
   return {
@@ -364,7 +364,7 @@ const CatalogProducts: React.FC = () => {
               type="button"
               onClick={reload}
               disabled={refreshing}
-              className="inline-flex items-center gap-2 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm font-medium text-gray-700 dark:text-slate-200 disabled:opacity-60"
+              className={hubQuietBtn}
             >
               <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
               Refresh
@@ -397,31 +397,31 @@ const CatalogProducts: React.FC = () => {
               <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
                 <label className={hubFieldLabel} htmlFor="product-name">
                   Name
-                  <input id="product-name" value={draft.name} onChange={(event) => setField('name', event.target.value)} className={fieldClass} />
+                  <input id="product-name" value={draft.name} onChange={(event) => setField('name', event.target.value)} className={hubFieldControlLabeled} />
                 </label>
                 <label className={hubFieldLabel} htmlFor="product-price">
                   Price
-                  <input id="product-price" inputMode="decimal" value={draft.price} onChange={(event) => setField('price', event.target.value)} className={fieldClass} />
+                  <input id="product-price" inputMode="decimal" value={draft.price} onChange={(event) => setField('price', event.target.value)} className={hubFieldControlLabeled} />
                 </label>
                 <label className={hubFieldLabel} htmlFor="product-description">
                   Description
-                  <textarea id="product-description" rows={3} value={draft.description} onChange={(event) => setField('description', event.target.value)} className={fieldClass} />
+                  <textarea id="product-description" rows={3} value={draft.description} onChange={(event) => setField('description', event.target.value)} className={hubFieldControlLabeled} />
                 </label>
                 <label className={hubFieldLabel} htmlFor="product-category">
                   Category
-                  <input id="product-category" value={draft.category} onChange={(event) => setField('category', event.target.value)} className={fieldClass} />
+                  <input id="product-category" value={draft.category} onChange={(event) => setField('category', event.target.value)} className={hubFieldControlLabeled} />
                 </label>
                 <label className={hubFieldLabel} htmlFor="product-brand">
                   Brand
-                  <input id="product-brand" value={draft.brand} onChange={(event) => setField('brand', event.target.value)} className={fieldClass} />
+                  <input id="product-brand" value={draft.brand} onChange={(event) => setField('brand', event.target.value)} className={hubFieldControlLabeled} />
                 </label>
                 <label className={hubFieldLabel} htmlFor="product-sku">
                   SKU
-                  <input id="product-sku" value={draft.sku} onChange={(event) => setField('sku', event.target.value)} className={fieldClass} />
+                  <input id="product-sku" value={draft.sku} onChange={(event) => setField('sku', event.target.value)} className={hubFieldControlLabeled} />
                 </label>
                 <label className={hubFieldLabel} htmlFor="product-quantity">
                   Quantity
-                  <input id="product-quantity" inputMode="decimal" value={draft.quantity} onChange={(event) => setField('quantity', event.target.value)} className={fieldClass} />
+                  <input id="product-quantity" inputMode="decimal" value={draft.quantity} onChange={(event) => setField('quantity', event.target.value)} className={hubFieldControlLabeled} />
                 </label>
                 <label className={hubFieldLabel} htmlFor="product-availability">
                   Availability
@@ -434,7 +434,7 @@ const CatalogProducts: React.FC = () => {
                         event.target.value === 'out_of_stock' ? 'out_of_stock' : 'in_stock'
                       )
                     }
-                    className={fieldClass}
+                    className={hubFieldControlLabeled}
                   >
                     <option value="in_stock">In stock</option>
                     <option value="out_of_stock">Out of stock</option>
@@ -444,7 +444,7 @@ const CatalogProducts: React.FC = () => {
                   <label className={hubFieldLabel} htmlFor="product-photo">
                     Photo
                   </label>
-                  <input id="product-photo" type="file" accept="image/*" onChange={(event) => onPhoto(event)} className={`${fieldClass} font-normal`} />
+                  <input id="product-photo" type="file" accept="image/*" onChange={(event) => onPhoto(event)} className={`${hubFieldControlLabeled} font-normal`} />
                   {previewUrl && (
                     <img src={previewUrl} alt="Photo preview" className="mt-3 h-24 w-24 rounded-xl object-cover bg-gray-100 dark:bg-slate-800" />
                   )}
@@ -463,7 +463,7 @@ const CatalogProducts: React.FC = () => {
         )}
 
         <div className="flex flex-col gap-3 mb-4">
-          <label className="text-sm font-semibold text-gray-700 dark:text-slate-200" htmlFor="catalog-search">
+          <label className={hubFieldLabel} htmlFor="catalog-search">
             Search
             <input
               id="catalog-search"
@@ -471,7 +471,7 @@ const CatalogProducts: React.FC = () => {
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Name, SKU, or brand"
-              className="mt-1 block w-full rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm font-medium"
+              className={hubFieldControlLabeled}
             />
           </label>
           <div className="flex flex-wrap gap-2" role="group" aria-label="Availability">
@@ -502,20 +502,20 @@ const CatalogProducts: React.FC = () => {
             Loading…
           </div>
         ) : loadError ? (
-          <div className={`${hubSection} p-8`} role="alert">
+          <div className={`${hubSection} ${hubSectionPadding} shadow-sm`} role="alert">
             <p className="text-sm font-semibold text-rose-700 dark:text-rose-300">{loadError}</p>
             <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">
               The catalog could not be loaded. Try the search again or refresh.
             </p>
           </div>
         ) : (
-          <div className={`${hubSection} overflow-hidden`}>
+          <div className={`${hubSection} overflow-hidden shadow-sm`}>
             {products.length === 0 ? (
-              <div className="p-8 text-sm text-gray-500 dark:text-slate-400">
+              <div className={`${hubSectionPadding} text-sm text-gray-500 dark:text-slate-400`}>
                 <p>No products yet</p>
               </div>
             ) : visible.length === 0 ? (
-              <div className="p-8 text-sm text-gray-500 dark:text-slate-400">No products in this view.</div>
+              <div className={`${hubSectionPadding} text-sm text-gray-500 dark:text-slate-400`}>No products in this view.</div>
             ) : (
               <>
                 <table className="hidden lg:table w-full text-sm">
@@ -590,7 +590,7 @@ const CatalogProducts: React.FC = () => {
 
       {pendingDelete && (
         <div className={hubModalBackdrop} role="alertdialog" aria-modal="true" aria-labelledby="delete-product-title">
-          <div className={`${hubModalFrame} max-w-md p-5`}>
+          <div className={`${hubModalFrame} max-w-md ${hubSectionPadding}`}>
             <h2 id="delete-product-title" className={hubSectionHeader}>
               Delete this product?
             </h2>

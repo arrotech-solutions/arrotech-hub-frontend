@@ -3,20 +3,17 @@ import { AlertCircle, Bot, Check, Clock, Loader2, Phone, Users, Zap } from 'luci
 import { Connection } from '../../types';
 import {
   hubDangerBtn,
+  hubFieldControlLabeled,
   hubFieldLabel,
   hubPrimaryBtn,
+  hubQuietBtn,
   hubSection,
   hubSectionHeader,
+  hubSectionPadding,
 } from '../../lib/hubPolish';
 import { TeamMember } from './ConversationsTab';
 
 const WEEKDAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const;
-
-const fieldClass =
-  'mt-1.5 w-full px-4 py-3 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 outline-none focus:ring-2 focus:ring-secondary-500 focus:border-transparent transition-all';
-
-const quietBtn =
-  'inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm font-semibold text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 disabled:opacity-60 transition-colors';
 
 export interface DayHours {
   open: string;
@@ -107,7 +104,7 @@ const WhatsAppSettingsPanel: React.FC<WhatsAppSettingsPanelProps> = ({
   return (
     <div className="w-full max-w-2xl mx-auto space-y-4 sm:space-y-6">
       {connection ? (
-        <section className={`${hubSection} p-6 sm:p-8 shadow-sm`}>
+        <section className={`${hubSection} ${hubSectionPadding} shadow-sm`}>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div className="flex items-center gap-3 min-w-0">
               <div className="p-2.5 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-100 dark:border-green-800/30 shrink-0">
@@ -192,7 +189,7 @@ const WhatsAppSettingsPanel: React.FC<WhatsAppSettingsPanelProps> = ({
       )}
 
       {connection && (
-        <section className={`${hubSection} p-6 sm:p-8 shadow-sm`}>
+        <section className={`${hubSection} ${hubSectionPadding} shadow-sm`}>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
             <div className="flex items-center gap-3 min-w-0">
               <div className="p-2.5 bg-purple-50 dark:bg-purple-900/20 rounded-xl border border-purple-100 dark:border-purple-800/30 shrink-0">
@@ -201,7 +198,7 @@ const WhatsAppSettingsPanel: React.FC<WhatsAppSettingsPanelProps> = ({
               <h3 className={hubSectionHeader}>Phone Numbers</h3>
             </div>
             <div className="flex flex-wrap gap-2">
-              <button type="button" onClick={onSyncNumbers} disabled={isSyncingNumbers} className={quietBtn}>
+              <button type="button" onClick={onSyncNumbers} disabled={isSyncingNumbers} className={hubQuietBtn}>
                 {isSyncingNumbers ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
                 Sync
               </button>
@@ -236,7 +233,7 @@ const WhatsAppSettingsPanel: React.FC<WhatsAppSettingsPanelProps> = ({
         </section>
       )}
 
-      <section className={`${hubSection} p-6 sm:p-8 shadow-sm`}>
+      <section className={`${hubSection} ${hubSectionPadding} shadow-sm`}>
         <div className="flex items-center gap-3 mb-1">
           <div className="p-2.5 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800/30 shrink-0">
             <Bot className="w-5 h-5 text-blue-600 dark:text-blue-400" />
@@ -258,7 +255,7 @@ const WhatsAppSettingsPanel: React.FC<WhatsAppSettingsPanelProps> = ({
               value={businessProfile.business_name || ''}
               onChange={(e) => setBusinessProfile({ ...businessProfile, business_name: e.target.value })}
               placeholder="Your Business Name"
-              className={fieldClass}
+              className={hubFieldControlLabeled}
             />
           </div>
 
@@ -272,7 +269,7 @@ const WhatsAppSettingsPanel: React.FC<WhatsAppSettingsPanelProps> = ({
               value={businessProfile.description || ''}
               onChange={(e) => setBusinessProfile({ ...businessProfile, description: e.target.value })}
               placeholder="What does your business do?"
-              className={fieldClass}
+              className={hubFieldControlLabeled}
             />
           </div>
 
@@ -284,7 +281,7 @@ const WhatsAppSettingsPanel: React.FC<WhatsAppSettingsPanelProps> = ({
               id="wa-business-industry"
               value={businessProfile.industry || ''}
               onChange={(e) => setBusinessProfile({ ...businessProfile, industry: e.target.value })}
-              className={fieldClass}
+              className={hubFieldControlLabeled}
             >
               <option value="">Select industry</option>
               <option value="retail">Retail & E-commerce</option>
@@ -303,7 +300,7 @@ const WhatsAppSettingsPanel: React.FC<WhatsAppSettingsPanelProps> = ({
         </div>
       </section>
 
-      <section className={`${hubSection} p-6 sm:p-8 shadow-sm`}>
+      <section className={`${hubSection} ${hubSectionPadding} shadow-sm`}>
         <div className="flex items-center gap-3 mb-4">
           <div className="p-2 bg-orange-50 dark:bg-orange-900/20 rounded-lg shrink-0">
             <Clock className="w-5 h-5 text-orange-600 dark:text-orange-400" />
@@ -322,7 +319,7 @@ const WhatsAppSettingsPanel: React.FC<WhatsAppSettingsPanelProps> = ({
             id="wa-timezone"
             value={businessProfile.timezone}
             onChange={(e) => setBusinessProfile({ ...businessProfile, timezone: e.target.value })}
-            className={fieldClass}
+            className={hubFieldControlLabeled}
           >
             <option value="Africa/Nairobi">Africa/Nairobi (EAT)</option>
             <option value="Africa/Lagos">Africa/Lagos (WAT)</option>
@@ -341,7 +338,7 @@ const WhatsAppSettingsPanel: React.FC<WhatsAppSettingsPanelProps> = ({
             value={businessProfile.away_message}
             onChange={(e) => setBusinessProfile({ ...businessProfile, away_message: e.target.value })}
             placeholder="Thanks for reaching out! We're currently closed and will reply during business hours."
-            className={fieldClass}
+            className={hubFieldControlLabeled}
           />
         </div>
 
@@ -408,7 +405,7 @@ const WhatsAppSettingsPanel: React.FC<WhatsAppSettingsPanelProps> = ({
         </button>
       </section>
 
-      <section className={`${hubSection} p-6 sm:p-8 shadow-sm`}>
+      <section className={`${hubSection} ${hubSectionPadding} shadow-sm`}>
         <div className="flex items-center gap-3 mb-4">
           <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg shrink-0">
             <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" />
@@ -456,7 +453,7 @@ const WhatsAppSettingsPanel: React.FC<WhatsAppSettingsPanelProps> = ({
           max={120}
           value={inboxSettings.sla_first_response_minutes}
           onChange={(e) => setInboxSettings({ ...inboxSettings, sla_first_response_minutes: Number(e.target.value) })}
-          className={`${fieldClass} max-w-xs mb-4`}
+          className={`${hubFieldControlLabeled} max-w-xs mb-4`}
         />
         <p className="text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2">Notification preferences</p>
         <div className="space-y-2 mb-4">

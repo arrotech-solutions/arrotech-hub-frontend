@@ -20,12 +20,14 @@ import {
 } from 'lucide-react';
 import toast from '../lib/notify';
 import {
+    hubFieldControl,
     hubFieldLabel,
     hubModalBackdrop,
     hubModalFrame,
     hubPrimaryBtn,
     hubSection,
     hubSectionHeader,
+    hubSectionPadding,
 } from '../lib/hubPolish';
 import apiService from '../services/api';
 import { GalleryTemplate, TemplateCategory, Connection } from '../types';
@@ -565,7 +567,7 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onWorkflowCreated
                         </div>
 
                         <div className="flex-1 overflow-y-auto px-5 py-5 sm:px-6 space-y-5 bg-slate-50 dark:bg-slate-950">
-                                    <section className={`${hubSection} p-5`}>
+                                    <section className={`${hubSection} ${hubSectionPadding}`}>
                                         <h3 className={hubSectionHeader}>Overview</h3>
                                         <p className="mt-2 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">{selectedTemplate.description}</p>
                                         <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -599,7 +601,7 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onWorkflowCreated
                                         </div>
                                     </section>
 
-                                    <section className={`${hubSection} p-5`}>
+                                    <section className={`${hubSection} ${hubSectionPadding}`}>
                                         <h3 className={`${hubSectionHeader} mb-4`}>Connections</h3>
                                         {selectedTemplate.id === 'whatsapp_ordering_agent' && (
                                             <p className="text-sm text-slate-600 dark:text-slate-300 font-medium leading-relaxed mb-4">
@@ -660,7 +662,7 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onWorkflowCreated
 
                                     {/* Configuration — interactive form matching EnhancedWorkflowCreator logic */}
                                     {Object.keys(selectedTemplate.variables).length > 0 && (
-                                        <section className={`${hubSection} p-5`}>
+                                        <section className={`${hubSection} ${hubSectionPadding}`}>
                                             <h3 className={`${hubSectionHeader} mb-4`}>Configuration</h3>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                 {Object.entries(selectedTemplate.variables).map(([key, varSchema]) => {
@@ -674,8 +676,6 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onWorkflowCreated
                                                     const isRequired = varSchema.required;
                                                     const hasEnum = varSchema.enum && Array.isArray(varSchema.enum);
                                                     const dynamicSource = varSchema['x-dynamic-ui'] || varSchema['x-dynamic-options'];
-                                                    const inputClasses = "w-full px-3 py-2 text-sm rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-600/30 focus:border-emerald-700 outline-none transition-all";
-
                                                     // x-dynamic-ui: fetch and render a dynamic dropdown
                                                     if (dynamicSource) {
                                                         const fieldKey = `tmpl_${key}`;
@@ -692,7 +692,7 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onWorkflowCreated
                                                                     <select
                                                                         value={configValues[key] || ''}
                                                                         onChange={(e) => updateConfigValue(key, e.target.value)}
-                                                                        className={`${inputClasses} appearance-none pr-10`}
+                                                                        className={`${hubFieldControl} appearance-none pr-10`}
                                                                         disabled={loadingDynamic[fieldKey]}
                                                                     >
                                                                         <option value="">{loadingDynamic[fieldKey] ? 'Loading...' : `Select ${varSchema.label || key.replace(/_/g, ' ')}...`}</option>
@@ -732,7 +732,7 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onWorkflowCreated
                                                                     <select
                                                                         value={configValues[key] ?? varSchema.default ?? ''}
                                                                         onChange={(e) => updateConfigValue(key, e.target.value)}
-                                                                        className={`${inputClasses} appearance-none pr-10`}
+                                                                        className={`${hubFieldControl} appearance-none pr-10`}
                                                                     >
                                                                         <option value="">Select...</option>
                                                                         {varSchema.enum.map((opt: string) => (
@@ -827,7 +827,7 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onWorkflowCreated
                                                                     type="number"
                                                                     value={configValues[key] ?? varSchema.default ?? ''}
                                                                     onChange={(e) => updateConfigValue(key, e.target.value === '' ? '' : Number(e.target.value))}
-                                                                    className={inputClasses}
+                                                                    className={hubFieldControl}
                                                                     placeholder={`Enter ${varSchema.label || key.replace(/_/g, ' ')}`}
                                                                 />
                                                                 {varSchema.description && (
@@ -848,7 +848,7 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onWorkflowCreated
                                                                 type="text"
                                                                 value={configValues[key] ?? varSchema.default ?? ''}
                                                                 onChange={(e) => updateConfigValue(key, e.target.value)}
-                                                                className={inputClasses}
+                                                                className={hubFieldControl}
                                                                 placeholder={varSchema.placeholder || `Enter ${varSchema.label || key.replace(/_/g, ' ')}`}
                                                             />
                                                             {varSchema.description && (
@@ -867,7 +867,7 @@ const WorkflowTemplates: React.FC<WorkflowTemplatesProps> = ({ onWorkflowCreated
                                     )}
 
                                     {/* Tags */}
-                                    <section className={`${hubSection} p-5`}>
+                                    <section className={`${hubSection} ${hubSectionPadding}`}>
                                         <h3 className={`${hubSectionHeader} mb-4`}>Tags</h3>
                                         <div className="flex flex-wrap gap-2">
                                             {selectedTemplate.tags.map((tag) => (
