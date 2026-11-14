@@ -71,6 +71,7 @@ const CatalogProducts: React.FC = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [adding, setAdding] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
+  const [loadError, setLoadError] = useState('');
 
   const visible = useMemo(
     () => products.filter((product) => stockFilter === 'all' || product.availability === stockFilter),
@@ -87,8 +88,13 @@ const CatalogProducts: React.FC = () => {
           const response = await apiService.listCatalogProducts(trimmed ? { q: trimmed } : undefined);
           if (cancelled) return;
           setProducts((response?.data?.products || []) as CatalogProductRow[]);
+          setLoadError('');
         } catch (error) {
-          if (!cancelled) toast.error(mapApiError(error, 'Could not load products'));
+          if (cancelled) return;
+          const message = mapApiError(error, 'Could not load products');
+          setProducts([]);
+          setLoadError(message);
+          toast.error(message);
         } finally {
           if (!cancelled) {
             setLoading(false);
@@ -188,6 +194,13 @@ const CatalogProducts: React.FC = () => {
           <div className="flex items-center justify-center py-24 text-gray-500 dark:text-slate-400">
             <Loader2 className="w-6 h-6 animate-spin mr-2" />
             Loading…
+          </div>
+        ) : loadError ? (
+          <div className={`${hubSection} p-8`} role="alert">
+            <p className="text-sm font-semibold text-rose-700 dark:text-rose-300">{loadError}</p>
+            <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">
+              The catalog could not be loaded. Try the search again or refresh.
+            </p>
           </div>
         ) : (
           <div className={`${hubSection} overflow-hidden`}>

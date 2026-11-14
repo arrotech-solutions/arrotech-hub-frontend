@@ -116,6 +116,27 @@ describe('CatalogProducts page', () => {
     });
   });
 
+  it('shows an error state instead of an empty catalog when the list fails', async () => {
+    (apiService.listCatalogProducts as jest.Mock).mockRejectedValue(new Error('catalog down'));
+    renderPage();
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(/catalog down/i);
+    expect(screen.queryByText(/no products yet/i)).not.toBeInTheDocument();
+  });
+
+  it('drops the previous rows when a search fails', async () => {
+    const user = userEvent.setup();
+    renderPage();
+    await screen.findAllByText('Maize flour');
+
+    (apiService.listCatalogProducts as jest.Mock).mockRejectedValue(new Error('search failed'));
+    await user.type(screen.getByRole('searchbox', { name: /search/i }), 'flour');
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(/search failed/i);
+    expect(screen.queryAllByText('Maize flour')).toHaveLength(0);
+    expect(screen.queryByText(/no products yet/i)).not.toBeInTheDocument();
+  });
+
   it('shows a loading state while the catalog request is in flight', () => {
     (apiService.listCatalogProducts as jest.Mock).mockReturnValue(new Promise(() => undefined));
     renderPage();
