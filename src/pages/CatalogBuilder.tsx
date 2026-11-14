@@ -19,6 +19,7 @@ import {
     PartyPopper,
     Download,
     Star,
+    Database,
 } from 'lucide-react';
 import toast from '../lib/notify';
 import apiService from '../services/api';
@@ -52,15 +53,21 @@ interface ProductDraft {
     confidence?: number | null;
 }
 
+type ExportDestination = 'arrotech_db' | 'google_sheets';
+
 interface ExportResult {
-    spreadsheet_id: string;
-    spreadsheet_url: string;
-    rows_written: number;
+    destination?: ExportDestination;
+    spreadsheet_id?: string;
+    spreadsheet_url?: string;
+    rows_written?: number;
+    created?: number;
+    updated?: number;
+    errors?: { row?: number; error?: string }[];
     csv_available?: boolean;
     csv_base64?: string;
 }
 
-const STEPS = ['Prerequisites', 'Capture', 'Review & Edit', 'Export'];
+const STEPS = ['Prerequisites', 'Capture', 'Review & Edit', 'Save'];
 const CURRENCIES = ['KES', 'USD', 'NGN', 'UGX', 'TZS', 'GHS', 'ZAR', 'EUR', 'GBP'];
 const AVAILABILITY_OPTIONS: Array<'' | 'Available' | 'Out of Stock'> = ['', 'Available', 'Out of Stock'];
 const MAX_IMAGES_PER_PRODUCT = 6;
@@ -134,6 +141,7 @@ const CatalogBuilder: React.FC = () => {
     const [currency, setCurrency] = useState('KES');
 
     // Export
+    const [destination, setDestination] = useState<ExportDestination>('arrotech_db');
     const [exportMode, setExportMode] = useState<'new' | 'append'>('new');
     const [sheetTitle, setSheetTitle] = useState('Product Catalog');
     const [existingSheets, setExistingSheets] = useState<{ id: string; name: string }[]>([]);
@@ -149,6 +157,13 @@ const CatalogBuilder: React.FC = () => {
     const cameraInputRef = useRef<HTMLInputElement>(null);
     const angleFileInputRef = useRef<HTMLInputElement>(null);
     const angleCameraInputRef = useRef<HTMLInputElement>(null);
+    const csvInputRef = useRef<HTMLInputElement>(null);
+    const [importingCsv, setImportingCsv] = useState(false);
+    const [csvImportResult, setCsvImportResult] = useState<{
+        created: number;
+        updated: number;
+        errors: { row?: number; error?: string }[];
+    } | null>(null);
     const uploadTargetRef = useRef<string | null>(null);
     const [isDragging, setIsDragging] = useState(false);
     const [activeProductId, setActiveProductId] = useState<string | null>(null);
@@ -438,9 +453,71 @@ const CatalogBuilder: React.FC = () => {
 
     const validProducts = products.filter((p) => p.name.trim());
     const productsWithoutAvailability = validProducts.filter((p) => !p.availability);
+    const namedPricedProducts = products.filter(
+        (p) => p.name.trim() && String(p.price ?? '').trim()
+    );
+
+    const handleCsvImport = async (file: File) => {
+        if (!file.name.toLowerCase().endsWith('.csv')) {
+            toast.error('Please choose a CSV file');
+            return;
+        }
+        setImportingCsv(true);
+        try {
+            const res = await apiService.importCatalogProducts(file);
+            const data = res.data || {};
+            const created = data.created || 0;
+            const updated = data.updated || 0;
+            const errors = data.errors || [];
+            setCsvImportResult({ created, updated, errors });
+            const written = created + updated;
+            if (!res.success || (!written && errors.length)) {
+                const first = errors[0]?.error || (res as any).message || 'CSV import failed';
+                toast.error(
+                    errors.length ? `${errors.length} failed: ${first}` : first
+                );
+                return;
+            }
+            if (!written) {
+                toast.error('No products were imported');
+                return;
+            }
+            if (errors.length) {
+                toast.error(
+                    `Created ${created}, updated ${updated}, ${errors.length} failed: ${
+                        errors[0]?.error || 'some rows failed'
+                    }`
+                );
+            } else {
+                toast.success(`Created ${created}, updated ${updated}`);
+            }
+        } catch (e: any) {
+            const data = e?.response?.data;
+            const detail = data?.detail;
+            const payload = typeof detail === 'object' && detail ? detail : data;
+            const errors = payload?.data?.errors || payload?.errors || [];
+            const msg =
+                payload?.message ||
+                (typeof detail === 'string' ? detail : undefined) ||
+                e?.message ||
+                'CSV import failed';
+            setCsvImportResult({
+                created: 0,
+                updated: 0,
+                errors: errors.length ? errors : [{ error: msg }],
+            });
+            if (errors.length) {
+                toast.error(`${errors.length} failed: ${errors[0]?.error || msg}`);
+            } else {
+                toast.error(msg);
+            }
+        } finally {
+            setImportingCsv(false);
+        }
+    };
 
     const handleExport = async () => {
-        if (!googleConnected) {
+        if (destination === 'google_sheets' && !googleConnected) {
             toast.error('Connect Google Workspace first');
             return;
         }
@@ -452,13 +529,17 @@ const CatalogBuilder: React.FC = () => {
             toast.error(`Set availability for ${productsWithoutAvailability.length} product(s) before exporting`);
             return;
         }
-        if (exportMode === 'append' && !selectedSheetId) {
+        if (destination === 'google_sheets' && exportMode === 'append' && !selectedSheetId) {
             toast.error('Select a spreadsheet to append to');
             return;
         }
 
         setExporting(true);
-        setExportProgress('Uploading photos and writing rows…');
+        setExportProgress(
+            destination === 'arrotech_db'
+                ? 'Saving products to Arrotech…'
+                : 'Uploading photos and writing rows…'
+        );
 
         // Build files list + map each product to its primary catalog photo.
         const files: File[] = [];
@@ -491,24 +572,61 @@ const CatalogBuilder: React.FC = () => {
             const res = await apiService.exportCatalog(
                 {
                     products: payloadProducts,
+                    destination,
                     mode: exportMode,
                     title: sheetTitle,
-                    spreadsheet_id: exportMode === 'append' ? selectedSheetId : undefined,
-                    folder_id: selectedFolderId || undefined,
-                    want_csv: wantCsv,
+                    spreadsheet_id:
+                        destination === 'google_sheets' && exportMode === 'append'
+                            ? selectedSheetId
+                            : undefined,
+                    folder_id:
+                        destination === 'google_sheets' ? selectedFolderId || undefined : undefined,
+                    want_csv: destination === 'google_sheets' ? wantCsv : false,
                 },
                 files
             );
             if (res.success && res.data) {
+                const written =
+                    res.data.rows_written ??
+                    (res.data.created || 0) + (res.data.updated || 0);
+                const errors = res.data.errors || [];
+                if (!written) {
+                    toast.error('No products were saved');
+                    return;
+                }
+                if (errors.length) {
+                    const first = errors[0]?.error || 'some products failed';
+                    toast.error(
+                        `${written} saved, ${errors.length} failed: ${first}`
+                    );
+                    return;
+                }
                 setExportResult(res.data);
-                toast.success(`Exported ${res.data.rows_written} product(s)`);
+                toast.success(
+                    destination === 'arrotech_db'
+                        ? `Saved ${written} product(s) to Arrotech`
+                        : `Exported ${written} product(s)`
+                );
                 localStorage.removeItem(DRAFT_STORAGE_KEY);
             } else {
                 throw new Error((res as any).message || 'Export failed');
             }
         } catch (e: any) {
-            const msg = e?.response?.data?.detail || e?.message || 'Export failed';
-            toast.error(msg);
+            const data = e?.response?.data;
+            const detail = data?.detail;
+            const payload = typeof detail === 'object' && detail ? detail : data;
+            const errors = payload?.data?.errors || payload?.errors || [];
+            const msg =
+                payload?.message ||
+                (typeof detail === 'string' ? detail : undefined) ||
+                e?.message ||
+                'Export failed';
+            if (errors.length) {
+                const first = errors[0]?.error || msg;
+                toast.error(`${errors.length} failed: ${first}`);
+            } else {
+                toast.error(msg);
+            }
         } finally {
             setExporting(false);
             setExportProgress('');
@@ -527,22 +645,33 @@ const CatalogBuilder: React.FC = () => {
         products.forEach((p) => p.images.forEach((img) => URL.revokeObjectURL(img.previewUrl)));
         setProducts([]);
         setExportResult(null);
+        setCsvImportResult(null);
         setStep(1);
     };
 
     const productsWithPhotos = products.filter((p) => p.images.length > 0);
 
     const canProceedFromStep = (): boolean => {
-        if (step === 0) return googleConnected && visionReady;
-        if (step === 1) return productsWithPhotos.length > 0;
-        if (step === 2) return validProducts.length > 0;
+        if (step === 0) return true;
+        if (step === 1) {
+            return (
+                productsWithPhotos.length > 0 ||
+                namedPricedProducts.length > 0 ||
+                products.length === 0
+            );
+        }
+        if (step === 2) return validProducts.length > 0 || products.length === 0;
         return true;
     };
 
     const goToNextStep = async () => {
         if (step === 1) {
-            if (!productsWithPhotos.length) {
-                toast.error('Add at least one product photo');
+            if (
+                !productsWithPhotos.length &&
+                !namedPricedProducts.length &&
+                products.length > 0
+            ) {
+                toast.error('Add a photo, or type a name and price');
                 return;
             }
             const pending = productsWithPhotos.filter(
@@ -556,7 +685,9 @@ const CatalogBuilder: React.FC = () => {
                     setAdvancing(false);
                 }
             }
-            setProducts((prev) => prev.filter((p) => p.images.length > 0));
+            setProducts((prev) =>
+                prev.filter((p) => p.images.length > 0 || p.name.trim())
+            );
         }
         setStep((s) => (s + 1) as WizardStep);
     };
@@ -574,7 +705,7 @@ const CatalogBuilder: React.FC = () => {
                     <div>
                         <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white">Catalog Builder</h1>
                         <p className="text-sm text-gray-500 dark:text-slate-400">
-                            Turn product photos into a sellable Google Sheet for your ordering agent
+                            Photos, typed rows, or a CSV — Google Sheets is optional.
                         </p>
                     </div>
                 </div>
@@ -617,8 +748,8 @@ const CatalogBuilder: React.FC = () => {
                         <div>
                             <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-1">Before you start</h2>
                             <p className="text-sm text-gray-500 dark:text-slate-400 mb-5">
-                                We host your product photos on your Google Drive and write rows to a Google Sheet, so a
-                                Google Workspace connection is required.
+                                Photos are the fastest way to build a catalog. You can also type name and price, or
+                                upload a CSV on Save. Google Workspace is optional if you also want a spreadsheet copy.
                             </p>
 
                             {statusLoading ? (
@@ -634,7 +765,7 @@ const CatalogBuilder: React.FC = () => {
                                             <div className="min-w-0">
                                                 <p className="font-semibold text-gray-900 dark:text-white">Google Workspace</p>
                                                 <p className="text-xs text-gray-500 dark:text-slate-400 truncate">
-                                                    Drive (photo hosting) + Sheets (catalog)
+                                                    Optional — Drive + Sheets if you want a spreadsheet copy
                                                 </p>
                                             </div>
                                         </div>
@@ -674,9 +805,9 @@ const CatalogBuilder: React.FC = () => {
                                     )}
 
                                     {!googleConnected && (
-                                        <div className="flex items-start gap-2 text-sm text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 rounded-xl p-3 mt-2">
+                                        <div className="flex items-start gap-2 text-sm text-gray-600 dark:text-slate-400 bg-gray-50 dark:bg-slate-800/60 rounded-xl p-3 mt-2">
                                             <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                                            <span>Connect Google Workspace to continue. After connecting, return here — we'll detect it automatically.</span>
+                                            <span>You can save to Arrotech without Google. Connect Workspace later if you want a Sheet too.</span>
                                         </div>
                                     )}
                                 </div>
@@ -691,7 +822,8 @@ const CatalogBuilder: React.FC = () => {
                                 <div>
                                     <h2 className="text-lg font-bold text-gray-900 dark:text-white">Capture your products</h2>
                                     <p className="text-sm text-gray-500 dark:text-slate-400">
-                                        Add several angles per product — AI combines details from every photo.
+                                        Photos are recommended. You can also type a name and price, then continue.
+                                        CSV upload is on Save.
                                     </p>
                                 </div>
                                 <div className="flex items-center gap-2">
@@ -758,7 +890,7 @@ const CatalogBuilder: React.FC = () => {
                                         onClick={startNewProduct}
                                         className="flex items-center gap-2 px-4 py-2 rounded-lg border border-purple-300 dark:border-purple-500/40 text-purple-700 dark:text-purple-300 font-semibold text-sm"
                                     >
-                                        <Plus className="w-4 h-4" /> New product
+                                        <Plus className="w-4 h-4" /> Add product
                                     </button>
                                 </div>
                                 <input
@@ -882,6 +1014,39 @@ const CatalogBuilder: React.FC = () => {
                                                     )}
                                                 </div>
 
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3">
+                                                    <div>
+                                                        <label className="text-[10px] font-semibold text-gray-500 dark:text-slate-400">
+                                                            Name
+                                                        </label>
+                                                        <input
+                                                            value={p.name}
+                                                            onChange={(e) =>
+                                                                updateProduct(p.id, { name: e.target.value })
+                                                            }
+                                                            placeholder="e.g. Chicken stew"
+                                                            className="w-full mt-0.5 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg px-2.5 py-1.5 text-sm focus:ring-2 focus:ring-purple-500"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="text-[10px] font-semibold text-gray-500 dark:text-slate-400">
+                                                            Price ({currency})
+                                                        </label>
+                                                        <input
+                                                            value={p.price}
+                                                            onChange={(e) =>
+                                                                updateProduct(p.id, {
+                                                                    price: e.target.value,
+                                                                    priceIsEstimate: false,
+                                                                })
+                                                            }
+                                                            placeholder="0"
+                                                            inputMode="decimal"
+                                                            className="w-full mt-0.5 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg px-2.5 py-1.5 text-sm focus:ring-2 focus:ring-purple-500"
+                                                        />
+                                                    </div>
+                                                </div>
+
                                                 <div className="flex flex-wrap items-center gap-2 mt-3">
                                                     <button
                                                         type="button"
@@ -939,7 +1104,8 @@ const CatalogBuilder: React.FC = () => {
                                 </div>
                             ) : (
                                 <p className="text-center text-sm text-gray-500 dark:text-slate-400 mt-4">
-                                    Upload photos above to start your first product, or tap <strong>New product</strong>.
+                                    Upload photos, tap <strong>Add product</strong> to type a name and price, or
+                                    continue to Save to upload a CSV.
                                 </p>
                             )}
                         </div>
@@ -1233,22 +1399,116 @@ const CatalogBuilder: React.FC = () => {
 
                                 {products.length === 0 && (
                                     <div className="text-center py-10 text-gray-500 dark:text-slate-400">
-                                        No products yet. Go back to add photos.
+                                        No products yet. Go back to add photos or typed rows, or continue to Save
+                                        to upload a CSV.
                                     </div>
                                 )}
                             </div>
                         </div>
                     )}
 
-                    {/* STEP 3 — Export */}
+                    {/* STEP 3 — Save */}
                     {step === 3 && !exportResult && (
                         <div>
-                            <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-1">Export to Google Sheets</h2>
+                            <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-1">Save your catalog</h2>
                             <p className="text-sm text-gray-500 dark:text-slate-400 mb-5">
-                                {validProducts.length} product(s) ready. Photos are hosted on your Drive and linked in the sheet.
+                                {validProducts.length} product(s) ready. Save to Arrotech by default, or upload a CSV.
+                                Google Sheets is optional.
                             </p>
 
-                            {/* Connection chip */}
+                            <div className="mb-5 p-4 rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50/70 dark:bg-slate-800/50">
+                                <p className="font-semibold text-gray-900 dark:text-white text-sm flex items-center gap-1.5">
+                                    <Upload className="w-4 h-4" /> Upload CSV
+                                </p>
+                                <p className="text-xs text-gray-500 dark:text-slate-400 mt-1 mb-3">
+                                    Upserts named and priced rows. Photos stay the recommended default; a typed
+                                    price list can go live without them.
+                                </p>
+                                <input
+                                    ref={csvInputRef}
+                                    type="file"
+                                    accept=".csv,text/csv"
+                                    className="hidden"
+                                    onChange={(e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) handleCsvImport(file);
+                                        e.target.value = '';
+                                    }}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => csvInputRef.current?.click()}
+                                    disabled={importingCsv}
+                                    className="flex items-center gap-2 px-4 py-2 rounded-lg border border-purple-300 dark:border-purple-500/40 text-purple-700 dark:text-purple-300 font-semibold text-sm disabled:opacity-50"
+                                >
+                                    {importingCsv ? (
+                                        <>
+                                            <Loader2 className="w-4 h-4 animate-spin" /> Importing…
+                                        </>
+                                    ) : (
+                                        <>
+                                            <FileSpreadsheet className="w-4 h-4" /> Choose CSV
+                                        </>
+                                    )}
+                                </button>
+                                {csvImportResult && (
+                                    <div className="mt-3 text-sm text-gray-700 dark:text-slate-300">
+                                        <p>
+                                            Created {csvImportResult.created}, updated {csvImportResult.updated}
+                                            {csvImportResult.errors.length
+                                                ? `, ${csvImportResult.errors.length} error(s)`
+                                                : ''}
+                                            .
+                                        </p>
+                                        {csvImportResult.errors.length > 0 && (
+                                            <ul className="mt-1 text-xs text-red-600 dark:text-red-400 space-y-0.5">
+                                                {csvImportResult.errors.slice(0, 8).map((err, idx) => (
+                                                    <li key={`${err.row ?? 'x'}-${idx}`}>
+                                                        {err.row != null ? `Row ${err.row + 1}: ` : ''}
+                                                        {err.error || 'Import failed'}
+                                                    </li>
+                                                ))}
+                                                {csvImportResult.errors.length > 8 && (
+                                                    <li>+{csvImportResult.errors.length - 8} more</li>
+                                                )}
+                                            </ul>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3 mb-5">
+                                <button
+                                    type="button"
+                                    onClick={() => setDestination('arrotech_db')}
+                                    className={`p-4 rounded-xl border text-left transition-all ${
+                                        destination === 'arrotech_db'
+                                            ? 'border-purple-500 bg-purple-50 dark:bg-purple-500/10'
+                                            : 'border-gray-200 dark:border-slate-700'
+                                    }`}
+                                >
+                                    <p className="font-semibold text-gray-900 dark:text-white text-sm flex items-center gap-1.5">
+                                        <Database className="w-4 h-4" /> Save to Arrotech
+                                    </p>
+                                    <p className="text-xs text-gray-500 dark:text-slate-400">Catalog the ordering agent uses</p>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setDestination('google_sheets')}
+                                    className={`p-4 rounded-xl border text-left transition-all ${
+                                        destination === 'google_sheets'
+                                            ? 'border-purple-500 bg-purple-50 dark:bg-purple-500/10'
+                                            : 'border-gray-200 dark:border-slate-700'
+                                    }`}
+                                >
+                                    <p className="font-semibold text-gray-900 dark:text-white text-sm flex items-center gap-1.5">
+                                        <FileSpreadsheet className="w-4 h-4" /> Google Sheets
+                                    </p>
+                                    <p className="text-xs text-gray-500 dark:text-slate-400">Optional spreadsheet copy</p>
+                                </button>
+                            </div>
+
+                            {destination === 'google_sheets' && (
                             <div className="mb-5">
                                 {googleConnected ? (
                                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400">
@@ -1263,7 +1523,10 @@ const CatalogBuilder: React.FC = () => {
                                     </Link>
                                 )}
                             </div>
+                            )}
 
+                            {destination === 'google_sheets' && (
+                            <>
                             {/* Mode toggle */}
                             <div className="grid grid-cols-2 gap-3 mb-5">
                                 <button
@@ -1371,6 +1634,8 @@ const CatalogBuilder: React.FC = () => {
                                 />
                                 Also download a CSV copy
                             </label>
+                            </>
+                            )}
 
                             {exporting && (
                                 <div className="mt-5 flex items-center gap-2 text-purple-600 dark:text-purple-400 text-sm">
@@ -1386,19 +1651,44 @@ const CatalogBuilder: React.FC = () => {
                             <div className="w-16 h-16 mx-auto rounded-full bg-green-100 dark:bg-green-500/20 flex items-center justify-center mb-4">
                                 <PartyPopper className="w-8 h-8 text-green-600 dark:text-green-400" />
                             </div>
-                            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1">Catalog created!</h2>
+                            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
+                                {exportResult.destination === 'google_sheets' && exportResult.spreadsheet_url
+                                    ? 'Catalog created!'
+                                    : 'Saved to Arrotech'}
+                            </h2>
                             <p className="text-sm text-gray-500 dark:text-slate-400 mb-6">
-                                {exportResult.rows_written} product(s) written to your Google Sheet.
+                                {exportResult.destination === 'google_sheets' && exportResult.spreadsheet_url
+                                    ? `${exportResult.rows_written || 0} product(s) written to your Google Sheet.`
+                                    : `${exportResult.rows_written ?? (exportResult.created || 0) + (exportResult.updated || 0)} product(s) saved to your Arrotech catalog.`}
                             </p>
                             <div className="flex items-center justify-center gap-3 flex-wrap">
-                                <a
-                                    href={exportResult.spreadsheet_url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-secondary-800 to-primary-500 text-white font-semibold text-sm"
-                                >
-                                    <FileSpreadsheet className="w-4 h-4" /> Open Google Sheet
-                                </a>
+                                {(exportResult.destination !== 'google_sheets' || !exportResult.spreadsheet_url) && (
+                                    <span className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-secondary-800 to-primary-500 text-white font-semibold text-sm">
+                                        <Database className="w-4 h-4" /> Saved to Arrotech
+                                    </span>
+                                )}
+                                {exportResult.spreadsheet_url && (
+                                    <a
+                                        href={exportResult.spreadsheet_url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-sm ${
+                                            exportResult.destination === 'google_sheets'
+                                                ? 'bg-gradient-to-r from-secondary-800 to-primary-500 text-white'
+                                                : 'border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-200'
+                                        }`}
+                                    >
+                                        <FileSpreadsheet className="w-4 h-4" /> Open Google Sheet
+                                    </a>
+                                )}
+                                {!exportResult.spreadsheet_url && (
+                                    <Link
+                                        to="/connections"
+                                        className="flex items-center gap-2 px-5 py-2.5 rounded-lg border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-200 font-semibold text-sm"
+                                    >
+                                        <FileSpreadsheet className="w-4 h-4" /> Google Sheets (optional)
+                                    </Link>
+                                )}
                                 {exportResult.csv_available && (
                                     <button
                                         onClick={downloadCsv}
@@ -1413,20 +1703,6 @@ const CatalogBuilder: React.FC = () => {
                                 >
                                     <Plus className="w-4 h-4" /> Build another
                                 </button>
-                            </div>
-
-                            {/* Next step: ingestion is a separate workflow */}
-                            <div className="mt-8 max-w-md mx-auto rounded-xl border border-blue-200 dark:border-blue-500/30 bg-blue-50 dark:bg-blue-500/10 p-4 text-left">
-                                <p className="text-sm font-semibold text-gray-900 dark:text-white mb-1">Next step</p>
-                                <p className="text-xs text-gray-600 dark:text-slate-400 mb-3">
-                                    Ingest this sheet into your knowledge base so the WhatsApp ordering agent can sell from it.
-                                </p>
-                                <Link
-                                    to="/workflows"
-                                    className="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-700 dark:text-blue-400"
-                                >
-                                    Go to Workflows <ArrowRight className="w-4 h-4" />
-                                </Link>
                             </div>
                         </div>
                     )}
@@ -1463,16 +1739,25 @@ const CatalogBuilder: React.FC = () => {
                         ) : (
                             <button
                                 onClick={handleExport}
-                                disabled={exporting || !canProceedFromStep() || !googleConnected}
+                                disabled={
+                                    exporting ||
+                                    importingCsv ||
+                                    !validProducts.length ||
+                                    (destination === 'google_sheets' && !googleConnected)
+                                }
                                 className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-secondary-800 to-primary-500 text-white font-semibold text-sm disabled:opacity-40"
                             >
                                 {exporting ? (
                                     <>
-                                        <Loader2 className="w-4 h-4 animate-spin" /> Exporting…
+                                        <Loader2 className="w-4 h-4 animate-spin" /> Saving…
+                                    </>
+                                ) : destination === 'google_sheets' ? (
+                                    <>
+                                        <FileSpreadsheet className="w-4 h-4" /> Export catalog
                                     </>
                                 ) : (
                                     <>
-                                        <FileSpreadsheet className="w-4 h-4" /> Export catalog
+                                        <Database className="w-4 h-4" /> Save to Arrotech
                                     </>
                                 )}
                             </button>
