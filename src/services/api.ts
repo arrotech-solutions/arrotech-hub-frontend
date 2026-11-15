@@ -3585,6 +3585,38 @@ class ApiService {
     return response.data;
   }
 
+  async listCatalogProducts(params?: {
+    q?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<ApiResponse<{ products: any[] }>> {
+    const response = await this.api.get('/api/catalog/products', { params });
+    return response.data;
+  }
+
+  async createCatalogProduct(data: Record<string, unknown>): Promise<ApiResponse<any>> {
+    const response = await this.api.post('/api/catalog/products', data);
+    return response.data;
+  }
+
+  async updateCatalogProduct(
+    productId: string,
+    data: Record<string, unknown>
+  ): Promise<ApiResponse<any>> {
+    const response = await this.api.patch(
+      `/api/catalog/products/${encodeURIComponent(productId)}`,
+      data
+    );
+    return response.data;
+  }
+
+  async deleteCatalogProduct(productId: string): Promise<ApiResponse<{ id: string }>> {
+    const response = await this.api.delete(
+      `/api/catalog/products/${encodeURIComponent(productId)}`
+    );
+    return response.data;
+  }
+
   // ── Commerce orders (Hub ops) ────────────────────────────────────────
   async listCommerceOrders(): Promise<ApiResponse<{ orders: any[] }>> {
     const response = await this.api.get('/api/commerce/orders');

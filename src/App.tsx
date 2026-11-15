@@ -48,6 +48,7 @@ const Settings = lazy(() => import('./pages/Settings'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const Workflows = lazy(() => import('./pages/Workflows'));
 const CatalogBuilder = lazy(() => import('./pages/CatalogBuilder'));
+const CatalogProducts = lazy(() => import('./pages/CatalogProducts'));
 const CommerceOrders = lazy(() => import('./pages/CommerceOrders'));
 const CommercePolicy = lazy(() => import('./pages/CommercePolicy'));
 const CommerceReturns = lazy(() => import('./pages/CommerceReturns'));
@@ -441,6 +442,19 @@ const AppRoutes: React.FC = () => {
             <RequireVerifiedEmail>
               <Layout>
                 <TikTokDashboard />
+              </Layout>
+            </RequireVerifiedEmail>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/catalog"
+        element={
+          <ProtectedRoute>
+            <RequireVerifiedEmail>
+              <Layout>
+                <CatalogProducts />
               </Layout>
             </RequireVerifiedEmail>
           </ProtectedRoute>
