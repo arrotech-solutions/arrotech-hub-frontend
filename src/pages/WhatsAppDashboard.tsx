@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
     MessageCircle, Users, Search, Plus, Settings, Send,
-    Phone, Clock, MoreVertical, Bot, Zap,
+    Clock, MoreVertical, Bot, Zap,
     CheckCheck, Check, X, Loader2, ArrowLeft,
     Megaphone, Calendar, Play, Pause, Trash2, Key, AlertCircle,
     Sparkles, ArrowRight, Pencil, BarChart3
@@ -17,12 +17,15 @@ import CreateBroadcastModal from '../components/whatsapp/CreateBroadcastModal';
 import BroadcastDetailModal from '../components/whatsapp/BroadcastDetailModal';
 import AutoReplyRuleModal, { AutoReplyRule, AutoReplyRuleDraft } from '../components/whatsapp/AutoReplyRuleModal';
 import WhatsAppAnalyticsTab from '../components/whatsapp/WhatsAppAnalyticsTab';
+import WhatsAppSettingsPanel, {
+    type DayHours,
+    type WhatsAppBusinessProfileForm,
+    type WhatsAppInboxSettingsForm,
+} from '../components/whatsapp/WhatsAppSettingsPanel';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useTutorial } from '../hooks/useTutorial';
 
 const WEEKDAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const;
-
-type DayHours = { open: string; close: string; is_open: boolean };
 
 const createDefaultBusinessHours = (): Record<string, DayHours> => ({
     monday: { open: '08:00', close: '18:00', is_open: true },
@@ -59,8 +62,6 @@ const businessHoursToApi = (hours: Record<string, DayHours>) => {
     });
     return out;
 };
-
-const formatDayLabel = (day: string) => day.charAt(0).toUpperCase() + day.slice(1);
 
 const REAL_ESTATE_TEMPLATES: AutoReplyRuleDraft[] = [
     {
@@ -186,7 +187,7 @@ const WhatsAppDashboard: React.FC = () => {
     const [waConnection, setWaConnection] = useState<Connection | null>(null);
     const [phoneNumbers, setPhoneNumbers] = useState<any[]>([]);
     const [isSyncingNumbers, setIsSyncingNumbers] = useState(false);
-    const [businessProfile, setBusinessProfile] = useState({
+    const [businessProfile, setBusinessProfile] = useState<WhatsAppBusinessProfileForm>({
         business_name: '',
         description: '',
         industry: '',
@@ -194,7 +195,7 @@ const WhatsAppDashboard: React.FC = () => {
         timezone: 'Africa/Nairobi',
         business_hours_ui: createDefaultBusinessHours(),
     });
-    const [inboxSettings, setInboxSettings] = useState({
+    const [inboxSettings, setInboxSettings] = useState<WhatsAppInboxSettingsForm>({
         round_robin_enabled: false,
         round_robin_agent_ids: [] as string[],
         sla_first_response_minutes: 5,
@@ -372,6 +373,67 @@ const WhatsAppDashboard: React.FC = () => {
                 toast.error("Setup cancelled or incomplete.");
             }
         }, loginOptions);
+    };
+
+    const syncPhoneNumbers = async () => {
+        setIsSyncingNumbers(true);
+        try {
+            const res = await apiService.syncWhatsAppPhoneNumbers();
+            if (res.success) setPhoneNumbers(res.data);
+            toast.success("Synced numbers");
+        } catch (e) {
+            toast.error("Sync failed");
+        }
+        setIsSyncingNumbers(false);
+    };
+
+    const saveBusinessProfile = async () => {
+        setIsSavingProfile(true);
+        try {
+            const resp = await apiService.updateWhatsAppBusinessProfile({
+                business_name: businessProfile.business_name,
+                description: businessProfile.description,
+                industry: businessProfile.industry,
+            });
+            if (resp.success) {
+                toast.success('Profile saved successfully!');
+            } else {
+                toast.error(resp.message || 'Failed to save profile');
+            }
+        } catch (e: any) {
+            toast.error(e?.response?.data?.detail || 'Failed to save profile');
+        } finally {
+            setIsSavingProfile(false);
+        }
+    };
+
+    const saveInboxSettings = async () => {
+        try {
+            const res = await apiService.updateWhatsAppInboxSettings(inboxSettings);
+            if (res.success) toast.success('Inbox settings saved');
+        } catch {
+            toast.error('Failed to save inbox settings');
+        }
+    };
+
+    const saveBusinessHours = async () => {
+        setIsSavingHours(true);
+        try {
+            const resp = await apiService.updateWhatsAppBusinessProfile({
+                business_hours: businessHoursToApi(businessProfile.business_hours_ui),
+                away_message: businessProfile.away_message,
+                timezone: businessProfile.timezone,
+            });
+            if (resp.success) {
+                toast.success('Business hours saved!');
+            } else {
+                toast.error(resp.message || 'Failed to save hours');
+            }
+        } catch (e: any) {
+            toast.error(e?.response?.data?.detail || 'Failed to save hours');
+        } finally {
+            setIsSavingHours(false);
+        }
     };
 
     // Fetch contacts
@@ -1189,460 +1251,25 @@ const WhatsAppDashboard: React.FC = () => {
                 )}
 
                 {activeTab === 'settings' && (
-                    <div className="w-full max-w-2xl mx-auto space-y-4 sm:space-y-6">
-
-                        {/* Connected Account Details */}
-                        {waConnection ? (
-                            <div className="bg-white dark:bg-slate-900 rounded-2xl border dark:border-slate-800 p-6 sm:p-8 transition-colors shadow-sm">
-                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2.5 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-100 dark:border-green-800/30">
-                                            <Phone className="w-6 h-6 text-green-600 dark:text-green-400" />
-                                        </div>
-                                        <div>
-                                            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Connected Account</h3>
-                                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Your active WhatsApp Business connection</p>
-                                        </div>
-                                    </div>
-                                    {waConnection.config?.phone_status === 'PENDING' ? (
-                                        <div className="flex flex-col sm:flex-row items-center gap-3">
-                                            <span className="px-3 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 text-xs font-semibold rounded-full flex items-center gap-1.5 self-start sm:self-auto border border-yellow-200 dark:border-yellow-800/50">
-                                                <AlertCircle className="w-3.5 h-3.5" /> Pending Registration
-                                            </span>
-                                            <button
-                                                onClick={() => setShowRegistrationModal(true)}
-                                                className="px-4 py-1.5 bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-semibold rounded-lg transition-colors shadow-sm"
-                                            >
-                                                Complete Registration
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <div className="flex flex-col sm:flex-row items-center gap-3">
-                                            <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-semibold rounded-full flex items-center gap-1.5 self-start sm:self-auto border border-green-200 dark:border-green-800/50">
-                                                <Check className="w-3.5 h-3.5" /> Active
-                                            </span>
-                                            <button
-                                                onClick={() => setShowDeregisterModal(true)}
-                                                className="px-4 py-1.5 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 text-red-600 dark:text-red-400 text-sm font-semibold rounded-lg transition-colors border border-red-200 dark:border-red-800/50"
-                                            >
-                                                Deregister Phone
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div className="space-y-1">
-                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-3 border-b border-slate-100 dark:border-slate-800">
-                                        <span className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1 sm:mb-0">Connection Name</span>
-                                        <span className="text-sm font-semibold text-slate-900 dark:text-white">{waConnection.name}</span>
-                                    </div>
-                                    {waConnection.config?.phone_number && (
-                                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-3 border-b border-slate-100 dark:border-slate-800">
-                                            <span className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1 sm:mb-0">Phone Number</span>
-                                            <span className="text-sm font-semibold text-slate-900 dark:text-white">+{waConnection.config.phone_number}</span>
-                                        </div>
-                                    )}
-                                    {waConnection.config?.business_name && (
-                                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-3 border-b border-slate-100 dark:border-slate-800">
-                                            <span className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1 sm:mb-0">Business Display Name</span>
-                                            <span className="text-sm font-semibold text-slate-900 dark:text-white">{waConnection.config.business_name}</span>
-                                        </div>
-                                    )}
-                                    {waConnection.config?.waba_id && (
-                                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-3 border-b border-slate-100 dark:border-slate-800">
-                                            <span className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1 sm:mb-0">WABA ID</span>
-                                            <span className="text-sm font-mono text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/50 px-2 py-0.5 rounded">{waConnection.config.waba_id}</span>
-                                        </div>
-                                    )}
-                                    {waConnection.config?.phone_number_id && (
-                                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-3 border-b border-slate-100 dark:border-slate-800">
-                                            <span className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1 sm:mb-0">Phone Number ID</span>
-                                            <span className="text-sm font-mono text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/50 px-2 py-0.5 rounded">{waConnection.config.phone_number_id}</span>
-                                        </div>
-                                    )}
-                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-3">
-                                        <span className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1 sm:mb-0">Connected Since</span>
-                                        <span className="text-sm font-semibold text-slate-900 dark:text-white">
-                                            {new Date(waConnection.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="bg-orange-50 dark:bg-orange-900/10 rounded-2xl border border-orange-200 dark:border-orange-800/30 p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 transition-colors">
-                                <div className="p-2 bg-orange-100 dark:bg-orange-800/30 rounded-full shrink-0">
-                                    <Bot className="w-5 h-5 text-orange-600 dark:text-orange-400" />
-                                </div>
-                                <div className="flex-1">
-                                    <h3 className="text-sm font-bold text-orange-900 dark:text-orange-300">No Account Connected</h3>
-                                    <p className="text-sm text-orange-700 dark:text-orange-400/80 mt-1">Please connect your WhatsApp Business account in the Connections tab to access full features.</p>
-                                </div>
-                                <button
-                                    onClick={launchWhatsAppSignup}
-                                    className="shrink-0 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors mt-2 sm:mt-0 whitespace-nowrap"
-                                >
-                                    Connect Using Meta
-                                </button>
-                            </div>
-                        )}
-
-                        {/* Phone Numbers Management */}
-                        {waConnection && (
-                            <div className="bg-white dark:bg-slate-900 rounded-2xl border dark:border-slate-800 p-6 sm:p-8 transition-colors shadow-sm">
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2.5 bg-purple-50 dark:bg-purple-900/20 rounded-xl border border-purple-100 dark:border-purple-800/30">
-                                            <Phone className="w-6 h-6 text-purple-600 dark:text-purple-400" />
-                                        </div>
-                                        <h3 className="text-lg font-bold text-slate-900 dark:text-white">Phone Numbers</h3>
-                                    </div>
-                                    <div className="flex gap-2">
-                                        <button
-                                            onClick={async () => {
-                                                setIsSyncingNumbers(true);
-                                                try {
-                                                    const res = await apiService.syncWhatsAppPhoneNumbers();
-                                                    if (res.success) setPhoneNumbers(res.data);
-                                                    toast.success("Synced numbers");
-                                                } catch (e) {
-                                                    toast.error("Sync failed");
-                                                }
-                                                setIsSyncingNumbers(false);
-                                            }}
-                                            disabled={isSyncingNumbers}
-                                            className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm font-semibold rounded-lg transition-colors flex items-center gap-2"
-                                        >
-                                            {isSyncingNumbers ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
-                                            Sync
-                                        </button>
-                                        <button
-                                            onClick={launchWhatsAppSignup}
-                                            className="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors"
-                                        >
-                                            Add Number
-                                        </button>
-                                    </div>
-                                </div>
-                                <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
-                                    Manage your connected sending numbers via Meta Embedded Signup. The quality rating determines your daily messaging limits.
-                                </p>
-
-                                {phoneNumbers && phoneNumbers.length > 0 ? (
-                                    <div className="space-y-3">
-                                        {phoneNumbers.map((pn, i) => (
-                                            <div key={i} className="flex justify-between items-center py-3 border-b border-slate-100 dark:border-slate-800">
-                                                <div>
-                                                    <span className="text-sm font-semibold text-slate-900 dark:text-white inline-block">+{String(pn.display_phone_number || pn.phone_number || pn.id).replace(/^\+/, '')}</span>
-                                                    <span className="block text-xs text-slate-500 dark:text-slate-400 mt-0.5">{pn.name_status || 'PENDING_REVIEW'} | Quality: {pn.quality_rating || 'UNKNOWN'}</span>
-                                                </div>
-                                                <span className={`px-2 py-1 text-[10px] font-bold uppercase tracking-wider rounded ${pn.status === 'CONNECTED' || pn.status?.toUpperCase() === 'CONNECTED' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400'}`}>
-                                                    {pn.status || 'PENDING'}
-                                                </span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div className="text-center py-6 text-sm text-slate-500 dark:text-slate-400 border border-dashed border-slate-200 dark:border-slate-700 rounded-xl">
-                                        No numbers fetched yet. Click "Add Number" to setup or "Sync" to refresh.
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
-                        <div className="bg-white dark:bg-slate-900 rounded-2xl border dark:border-slate-800 p-6 sm:p-8 transition-colors shadow-sm">
-                            <div className="flex items-center gap-3 mb-1">
-                                <div className="p-2.5 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800/30">
-                                    <Bot className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                                </div>
-                                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Business Profile</h3>
-                            </div>
-                            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 border-b border-transparent">
-                                This information helps AI generate better responses for your customers.
-                            </p>
-
-                            <div className="space-y-5">
-                                <div>
-                                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                                        Business Name
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={businessProfile.business_name || ''}
-                                        onChange={(e) => setBusinessProfile({ ...businessProfile, business_name: e.target.value })}
-                                        placeholder="Your Business Name"
-                                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all dark:text-white dark:placeholder:text-slate-500 shadow-sm"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                                        Description
-                                    </label>
-                                    <textarea
-                                        rows={3}
-                                        value={businessProfile.description || ''}
-                                        onChange={(e) => setBusinessProfile({ ...businessProfile, description: e.target.value })}
-                                        placeholder="What does your business do?"
-                                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all dark:text-white dark:placeholder:text-slate-500 shadow-sm"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                                        Industry
-                                    </label>
-                                    <select
-                                        value={businessProfile.industry || ''}
-                                        onChange={(e) => setBusinessProfile({ ...businessProfile, industry: e.target.value })}
-                                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all dark:text-white shadow-sm"
-                                    >
-                                        <option value="">Select industry</option>
-                                        <option value="retail">Retail & E-commerce</option>
-                                        <option value="food">Food & Beverage</option>
-                                        <option value="services">Professional Services</option>
-                                        <option value="health">Health & Beauty</option>
-                                        <option value="tech">Technology</option>
-                                        <option value="other">Other</option>
-                                    </select>
-                                </div>
-
-                                <button
-                                    onClick={async () => {
-                                        setIsSavingProfile(true);
-                                        try {
-                                            const resp = await apiService.updateWhatsAppBusinessProfile({
-                                                business_name: businessProfile.business_name,
-                                                description: businessProfile.description,
-                                                industry: businessProfile.industry,
-                                            });
-                                            if (resp.success) {
-                                                toast.success('Profile saved successfully!');
-                                            } else {
-                                                toast.error(resp.message || 'Failed to save profile');
-                                            }
-                                        } catch (e: any) {
-                                            toast.error(e?.response?.data?.detail || 'Failed to save profile');
-                                        } finally {
-                                            setIsSavingProfile(false);
-                                        }
-                                    }}
-                                    disabled={isSavingProfile}
-                                    className="px-6 py-2.5 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 shadow-lg shadow-green-500/20 active:scale-95 transition-all disabled:opacity-50 flex items-center gap-2"
-                                >
-                                    {isSavingProfile && <Loader2 className="w-4 h-4 animate-spin" />}
-                                    Save Profile
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className="bg-white dark:bg-slate-900 rounded-2xl border dark:border-slate-800 p-6 sm:p-8 transition-colors shadow-sm">
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                                    <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                                </div>
-                                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Team inbox</h3>
-                            </div>
-                            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
-                                Round-robin assignment and SLA targets for open conversations.
-                            </p>
-                            <label className="flex items-center gap-2 mb-4 cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    checked={inboxSettings.round_robin_enabled}
-                                    onChange={(e) => setInboxSettings({ ...inboxSettings, round_robin_enabled: e.target.checked })}
-                                    className="rounded border-slate-300 text-green-600"
-                                />
-                                <span className="text-sm text-slate-700 dark:text-slate-300">Auto-assign new conversations (round-robin)</span>
-                            </label>
-                            {inboxSettings.round_robin_enabled && (
-                                <div className="mb-4 max-h-40 overflow-y-auto border dark:border-slate-700 rounded-xl p-3 space-y-2">
-                                    {teamMembers.map((m) => (
-                                        <label key={m.id} className="flex items-center gap-2 text-sm cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                checked={inboxSettings.round_robin_agent_ids.includes(m.id)}
-                                                onChange={(e) => {
-                                                    const ids = e.target.checked
-                                                        ? [...inboxSettings.round_robin_agent_ids, m.id]
-                                                        : inboxSettings.round_robin_agent_ids.filter((id) => id !== m.id);
-                                                    setInboxSettings({ ...inboxSettings, round_robin_agent_ids: ids });
-                                                }}
-                                            />
-                                            {m.name}
-                                        </label>
-                                    ))}
-                                </div>
-                            )}
-                            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                                First response SLA (minutes)
-                            </label>
-                            <input
-                                type="number"
-                                min={1}
-                                max={120}
-                                value={inboxSettings.sla_first_response_minutes}
-                                onChange={(e) => setInboxSettings({ ...inboxSettings, sla_first_response_minutes: Number(e.target.value) })}
-                                className="w-full max-w-xs px-4 py-2.5 rounded-xl border dark:border-slate-700 bg-white dark:bg-slate-800 mb-4"
-                            />
-                            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Notification preferences</p>
-                            <div className="space-y-2 mb-4">
-                                {([
-                                    ['notify_new_message_browser', 'Browser notifications for new messages'],
-                                    ['notify_new_message_sound', 'Sound alert for new messages'],
-                                    ['notify_new_message_email', 'Email when SLA is breached (coming soon)'],
-                                    ['notify_sla_breach', 'Highlight SLA breaches in inbox'],
-                                    ['csat_enabled', 'Send CSAT survey when marking resolved'],
-                                ] as const).map(([key, label]) => (
-                                    <label key={key} className="flex items-center gap-2 text-sm cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={Boolean((inboxSettings as Record<string, unknown>)[key])}
-                                            onChange={(e) => setInboxSettings({ ...inboxSettings, [key]: e.target.checked })}
-                                            className="rounded border-slate-300 text-green-600"
-                                        />
-                                        <span className="text-slate-700 dark:text-slate-300">{label}</span>
-                                    </label>
-                                ))}
-                            </div>
-                            <button
-                                type="button"
-                                onClick={async () => {
-                                    try {
-                                        const res = await apiService.updateWhatsAppInboxSettings(inboxSettings);
-                                        if (res.success) toast.success('Inbox settings saved');
-                                    } catch {
-                                        toast.error('Failed to save inbox settings');
-                                    }
-                                }}
-                                className="px-5 py-2.5 bg-green-600 text-white rounded-xl font-medium hover:bg-green-700"
-                            >
-                                Save inbox settings
-                            </button>
-                        </div>
-
-                        <div className="bg-white dark:bg-slate-900 rounded-2xl border dark:border-slate-800 p-6 sm:p-8 transition-colors shadow-sm">
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="p-2 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
-                                    <Clock className="w-5 h-5 text-orange-600 dark:text-orange-400" />
-                                </div>
-                                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Business Hours</h3>
-                            </div>
-                            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
-                                Set your operating hours and away message. Used by &quot;Outside Business Hours&quot; auto-reply rules.
-                            </p>
-
-                            <div className="mb-5">
-                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                                    Timezone
-                                </label>
-                                <select
-                                    value={businessProfile.timezone}
-                                    onChange={(e) => setBusinessProfile({ ...businessProfile, timezone: e.target.value })}
-                                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all dark:text-white shadow-sm"
-                                >
-                                    <option value="Africa/Nairobi">Africa/Nairobi (EAT)</option>
-                                    <option value="Africa/Lagos">Africa/Lagos (WAT)</option>
-                                    <option value="Africa/Johannesburg">Africa/Johannesburg (SAST)</option>
-                                    <option value="UTC">UTC</option>
-                                </select>
-                            </div>
-
-                            <div className="mb-6">
-                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                                    Away Message
-                                </label>
-                                <textarea
-                                    rows={2}
-                                    value={businessProfile.away_message}
-                                    onChange={(e) => setBusinessProfile({ ...businessProfile, away_message: e.target.value })}
-                                    placeholder="Thanks for reaching out! We're currently closed and will reply during business hours."
-                                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all dark:text-white dark:placeholder:text-slate-500 shadow-sm"
-                                />
-                            </div>
-
-                            <div className="space-y-4">
-                                {WEEKDAYS.map((day) => {
-                                    const dayHours = businessProfile.business_hours_ui[day];
-                                    return (
-                                    <div key={day} className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 group">
-                                        <div className="w-28 font-semibold text-slate-700 dark:text-slate-300">{formatDayLabel(day)}</div>
-                                        <div className="flex items-center gap-2 flex-1">
-                                            <input
-                                                type="time"
-                                                value={dayHours.open}
-                                                disabled={!dayHours.is_open}
-                                                onChange={(e) => setBusinessProfile({
-                                                    ...businessProfile,
-                                                    business_hours_ui: {
-                                                        ...businessProfile.business_hours_ui,
-                                                        [day]: { ...dayHours, open: e.target.value },
-                                                    },
-                                                })}
-                                                className="px-3 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm dark:text-white outline-none focus:ring-2 focus:ring-green-500 transition-all disabled:opacity-40"
-                                            />
-                                            <span className="text-slate-400">to</span>
-                                            <input
-                                                type="time"
-                                                value={dayHours.close}
-                                                disabled={!dayHours.is_open}
-                                                onChange={(e) => setBusinessProfile({
-                                                    ...businessProfile,
-                                                    business_hours_ui: {
-                                                        ...businessProfile.business_hours_ui,
-                                                        [day]: { ...dayHours, close: e.target.value },
-                                                    },
-                                                })}
-                                                className="px-3 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm dark:text-white outline-none focus:ring-2 focus:ring-green-500 transition-all disabled:opacity-40"
-                                            />
-                                        </div>
-                                        <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                checked={dayHours.is_open}
-                                                onChange={(e) => setBusinessProfile({
-                                                    ...businessProfile,
-                                                    business_hours_ui: {
-                                                        ...businessProfile.business_hours_ui,
-                                                        [day]: { ...dayHours, is_open: e.target.checked },
-                                                    },
-                                                })}
-                                                className="rounded border-slate-300 dark:border-slate-700 text-green-600 focus:ring-green-500 dark:bg-slate-800"
-                                            />
-                                            <span className="font-medium">Open</span>
-                                        </label>
-                                    </div>
-                                    );
-                                })}
-                            </div>
-
-                            <button
-                                onClick={async () => {
-                                    setIsSavingHours(true);
-                                    try {
-                                        const resp = await apiService.updateWhatsAppBusinessProfile({
-                                            business_hours: businessHoursToApi(businessProfile.business_hours_ui),
-                                            away_message: businessProfile.away_message,
-                                            timezone: businessProfile.timezone,
-                                        });
-                                        if (resp.success) {
-                                            toast.success('Business hours saved!');
-                                        } else {
-                                            toast.error(resp.message || 'Failed to save hours');
-                                        }
-                                    } catch (e: any) {
-                                        toast.error(e?.response?.data?.detail || 'Failed to save hours');
-                                    } finally {
-                                        setIsSavingHours(false);
-                                    }
-                                }}
-                                disabled={isSavingHours}
-                                className="mt-8 px-6 py-2.5 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 shadow-lg shadow-green-500/20 active:scale-95 transition-all disabled:opacity-50 flex items-center gap-2"
-                            >
-                                {isSavingHours && <Loader2 className="w-4 h-4 animate-spin" />}
-                                Save Hours
-                            </button>
-                        </div>
-                    </div>
+                    <WhatsAppSettingsPanel
+                        connection={waConnection}
+                        phoneNumbers={phoneNumbers}
+                        businessProfile={businessProfile}
+                        setBusinessProfile={setBusinessProfile}
+                        inboxSettings={inboxSettings}
+                        setInboxSettings={setInboxSettings}
+                        teamMembers={teamMembers}
+                        onConnectMeta={launchWhatsAppSignup}
+                        onSyncNumbers={syncPhoneNumbers}
+                        onSaveProfile={saveBusinessProfile}
+                        onSaveHours={saveBusinessHours}
+                        onSaveInbox={saveInboxSettings}
+                        onOpenRegister={() => setShowRegistrationModal(true)}
+                        onOpenDeregister={() => setShowDeregisterModal(true)}
+                        isSavingProfile={isSavingProfile}
+                        isSavingHours={isSavingHours}
+                        isSyncingNumbers={isSyncingNumbers}
+                    />
                 )}
             </div>
 
