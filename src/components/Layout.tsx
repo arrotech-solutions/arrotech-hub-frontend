@@ -22,6 +22,7 @@ import {
   LogOut,
   Menu,
   MessageCircle,
+  Package,
   Phone,
   Plug,
   RotateCcw,
@@ -195,6 +196,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       description: 'Sell and manage products',
       badge: 'New',
       children: [
+        {
+          name: 'Products',
+          href: '/catalog',
+          icon: Package,
+          description: 'Search and stock the live catalog',
+          badge: 'New'
+        },
         {
           name: 'Catalog Builder',
           href: '/catalog-builder',
