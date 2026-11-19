@@ -89,7 +89,38 @@ export default function MpesaSettingsTab() {
       
       if (config.daraja_shortcode) payload.daraja_shortcode = config.daraja_shortcode;
       if (config.daraja_environment) payload.daraja_environment = config.daraja_environment;
-      if (config.callback_url_override) payload.callback_url_override = config.callback_url_override;
+      // Always send override (including "") so clearing the field persists.
+      // Value must be empty or an API origin only — never a full callback path.
+      {
+        const override = (config.callback_url_override || '').trim();
+        if (override) {
+          const lowered = override.toLowerCase();
+          if (
+            lowered.includes('/payments/') ||
+            lowered.includes('/mpesa/callback') ||
+            lowered.includes('/api/agents/daraja')
+          ) {
+            toast.error(
+              'Override must be an API origin only (e.g. https://prod.api.arrotechsolutions.com). Leave empty for default.'
+            );
+            setSaving(false);
+            return;
+          }
+          try {
+            const parsed = new URL(override);
+            if ((parsed.pathname && parsed.pathname !== '/') || parsed.search || parsed.hash) {
+              toast.error('Override must not include a path. Hub appends the Daraja callback path.');
+              setSaving(false);
+              return;
+            }
+          } catch {
+            toast.error('Override must be a valid https:// URL origin.');
+            setSaving(false);
+            return;
+          }
+        }
+        payload.callback_url_override = override;
+      }
 
       // Manual payment fallback fields (always sent so they can be cleared)
       payload.manual_payment_enabled = config.manual_payment_enabled;
@@ -392,8 +423,10 @@ function onEdit(e) {
                 />
               </div>
               <p className="mt-2 text-xs text-gray-500 dark:text-slate-400">
-                Optional: If you are testing locally using Ngrok or a similar tunnel, paste the tunnel base URL here.
-                Leave empty to use the default system URL.
+                Optional: tunnel or API <strong>origin only</strong> (e.g. https://prod.api.arrotechsolutions.com).
+                Do not paste a full /payments or /callback path — Hub appends
+                /api/agents/daraja/callback/… itself. Leave empty for the default.
+                Clearing this field and saving will remove a stored override.
               </p>
             </div>
 
